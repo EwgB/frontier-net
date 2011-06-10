@@ -18,10 +18,20 @@
 #include "vbo.h"
 
 #define STAR_TILE   3
+#define DISC        8
+
+struct skyvert
+{
+  GLvector      pos;
+  GLrgba        color;
+  int           env_color;
+};
 
 static VBO        starcube;
 static unsigned   texture_stars;
-static float      stars;
+static skyvert    sky[DISC];
+static skyvert    tip;
+static float      star_fade;
 
 /*-----------------------------------------------------------------------------
 
@@ -91,18 +101,43 @@ static void build_sky ()
 void SkyInit ()
 {
 
+  float   angle;
+
   build_sky ();
+  tip.env_color = ENV_COLOR_TOP;
+  tip.pos = glVector (0.0f, 0.0f, 0.15f);
+  for (int i = 0; i < DISC; i++) {
+    angle = 22.5f + (((float)i / DISC) * 360.0f) * DEGREES_TO_RADIANS; 
+    sky[i].pos.x = sin (angle);
+    sky[i].pos.y = -cos (angle);
+    sky[i].pos.z = -0.1f;
+    if (abs (sky[i].pos.y) > abs (sky[i].pos.x)) { //North or south
+      if (sky[i].pos.y < 0.0f) 
+        sky[i].env_color = ENV_COLOR_NORTH;
+      else
+        sky[i].env_color = ENV_COLOR_SOUTH;
+    } else { //east or west
+      if (sky[i].pos.x < 0.0f) 
+        sky[i].env_color = ENV_COLOR_WEST;
+      else
+        sky[i].env_color = ENV_COLOR_EAST;
+    }
+  }
+
 
 }
 
 void SkyUpdate ()
 {
 
-  float   elapsed;
+  Env*    e;
 
-  elapsed = SdlElapsedSeconds () * ENV_TRANSITION;
-  stars = MathInterpolate (stars, EnvStars (), elapsed);
-
+  e = EnvGet ();
+  for (int i = 0; i < DISC; i++) {
+    sky[i].color = e->color[sky[i].env_color];  
+  }
+  tip.color = e->color[ENV_COLOR_TOP];
+  star_fade = e->star_fade;
 
 }
 
@@ -111,7 +146,6 @@ void SkyRender ()
 {
 
   GLvector angle;
-
 
   angle = CameraAngle ();
   glPushMatrix ();
@@ -122,10 +156,33 @@ void SkyRender ()
   glRotatef (angle.z, 0.0f, 0.0f, 1.0f);
   glDepthMask (false);
   glDisable (GL_LIGHTING);
+  glDisable (GL_BLEND);
+  glDisable (GL_TEXTURE_2D);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  //glBegin (GL_TRIANGLE_FAN);
+  glBegin (GL_TRIANGLE_FAN);
+  glColor3fv (&tip.color.red);
+  glVertex3fv (&tip.pos.x);
+  for (int i = 0; i <= DISC; i++) {
+    glColor3fv (&sky[i % DISC].color.red);
+    glVertex3fv (&sky[i % DISC].pos.x);
+  }
+  glEnd ();
+  /*
+  glBegin (GL_QUAD_STRIP);
+  for (int i = 0; i <= DISC; i++) {
+    glColor3fv (&sky[i % DISC][1].color.red);
+    glVertex3fv (&sky[i % DISC][1].pos.x);
+    glColor3fv (&sky[i % DISC][0].color.red);
+    glVertex3fv (&sky[i % DISC][0].pos.x);
+  }
+  glEnd ();
+  */
   glEnable (GL_BLEND);
+  glEnable (GL_TEXTURE_2D);
   glBlendFunc (GL_ONE, GL_ONE);
   glBindTexture (GL_TEXTURE_2D, texture_stars);
-  glColor3f (1,1,1);
+  glColor3f (star_fade,star_fade,star_fade);
 
   starcube.Render ();
 

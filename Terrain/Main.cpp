@@ -83,6 +83,7 @@ static void run ()
     SdlUpdate ();
     CameraUpdate ();
     EnvUpdate ();
+    SkyUpdate ();
     SceneUpdate (stop);
     WorldUpdate (stop);
     RenderUpdate ();

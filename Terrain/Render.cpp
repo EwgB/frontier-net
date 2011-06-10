@@ -19,7 +19,7 @@
 #include "env.h"
 #include "log.h"
 #include "input.h"
-#include "math.h"
+//#include "math.h"
 #include "render.h"
 #include "region.h"
 #include "scene.h"
@@ -289,16 +289,15 @@ void RenderUpdate (void)
 //  Region      r;
 //  GLrgba      desired_diffuse, desired_ambient, desired_fog;
   GLvector2   fog_desired;
+  Env*        e;
 
-
-  elapsed = SdlElapsedSeconds () * ENV_TRANSITION;
-  spin += elapsed * 30.0f;
-  current_diffuse = glRgbaInterpolate (current_diffuse, EnvColor (ENV_COLOR_LIGHT), elapsed);
-  current_ambient = glRgbaInterpolate (current_ambient, EnvColor (ENV_COLOR_AMBIENT), elapsed);
-  current_fog = glRgbaInterpolate (current_fog, EnvColor (ENV_COLOR_FOG), elapsed);
-  fog_desired = EnvFog ();
-  fog_min = MathInterpolate (fog_min, fog_desired.x, elapsed);
-  fog_max = MathInterpolate (fog_max, fog_desired.y, elapsed);
+  e = EnvGet ();
+  //spin += elapsed * 30.0f;
+  current_diffuse = e->color[ENV_COLOR_LIGHT];
+  current_ambient = e->color[ENV_COLOR_AMBIENT];
+  current_fog = e->color[ENV_COLOR_FOG];
+  fog_min = e->fog_min;
+  fog_max = e->fog_max;
   if (InputKeyPressed (SDLK_F3)) {
     terrain_debug++;
     terrain_debug %= DEBUG_RENDER_TYPES;
@@ -321,48 +320,49 @@ void Render (void)
 
   GLvector        pos;
   GLvector        angle;
-  GLrgba          cfog;
+  Env*            e;
 
   pos = CameraPosition ();
+  e = EnvGet ();
   if (pos.z >= 0) {
     //cfog = (current_diffuse + glRgba (0.0f, 0.0f, 1.0f)) / 2;
-    cfog = current_fog;
     glFogf(GL_FOG_START, RENDER_DISTANCE / 2);				// Fog Start Depth
     glFogf(GL_FOG_END, RENDER_DISTANCE);				// Fog End Depth
-    glFogf(GL_FOG_START, fog_min);				// Fog Start Depth
-    glFogf(GL_FOG_END, fog_max);				// Fog End Depth
+    glFogf(GL_FOG_START, e->fog_min);				// Fog Start Depth
+    glFogf(GL_FOG_END, e->fog_max);				// Fog End Depth
   } else {
-    cfog = glRgba (0.0f, 0.5f, 0.8f);
+    //cfog = glRgba (0.0f, 0.5f, 0.8f);
     glFogf(GL_FOG_START, 1);				// Fog Start Depth
     glFogf(GL_FOG_END, 32);				// Fog End Depth
   }
   glEnable (GL_FOG);
   glFogi (GL_FOG_MODE, GL_LINEAR);
-  glFogfv (GL_FOG_COLOR, &cfog.red);
-  glClearColor (cfog.red, cfog.green, cfog.blue, 1.0f);
-  glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+  glFogfv (GL_FOG_COLOR, &e->color[ENV_COLOR_FOG].red);
+  //glClearColor (cfog.red, cfog.green, cfog.blue, 1.0f);
+  glClearColor (1, 0, 0, 1.0f);
+  //glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear (GL_DEPTH_BUFFER_BIT);
   {
     //float LightAmbient[]= { current_ambient.red, fog.green, fog.blue, 1.0f }; 				// Ambient Light Values ( NEW )
     //float LightDiffuse[]= { diffuse.red, diffuse.green, diffuse.blue, 1.0f };
-    float LightPosition[]= { 1.0f, 0.0f, 0.0f, 0.0f };				 // Light Position ( NEW )
+    float light[4];			
 
-    LightPosition[0] = sin (spin * DEGREES_TO_RADIANS) * 0.6f;
-    LightPosition[1] = cos (spin * DEGREES_TO_RADIANS) * 0.6f;
-    LightPosition[2] = 0.6f;
-    LightPosition[3] = 0;
+    light[0] = -e->light.x;
+    light[1] = -e->light.y;
+    light[2] = -e->light.z;
+    light[3] = 0.0f;
+
     glEnable(GL_LIGHT1);							// Enable Light One
     glEnable(GL_LIGHTING);		// Enable Lighting
-    //glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);				// Setup The Ambient Light
-    glLightfv (GL_LIGHT1, GL_AMBIENT, &current_ambient.red);				// Setup The Ambient Light
-    //glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);				// Setup The Diffuse Light
-    glLightfv (GL_LIGHT1, GL_DIFFUSE, &current_diffuse.red);				// Setup The Diffuse Light
-    glLightfv (GL_LIGHT1, GL_POSITION,LightPosition);			// Position The Light
+    current_ambient = glRgba (0.0f);
+    glLightfv (GL_LIGHT1, GL_AMBIENT, &current_ambient.red);				
+    glLightfv (GL_LIGHT1, GL_DIFFUSE, &e->color[ENV_COLOR_LIGHT].red);	
+    glLightfv (GL_LIGHT1, GL_POSITION,light);			// Position The Light
 
   }
   //glDisable(GL_LIGHTING);		// Enable Lighting
-  glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_GREATER,0.0f);
+  glEnable (GL_ALPHA_TEST);
+  glAlphaFunc (GL_GREATER, 0.0f);
   glViewport (0, 0, view_width, view_height);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
   glShadeModel(GL_SMOOTH);
@@ -377,7 +377,6 @@ void Render (void)
   glLoadIdentity();
 	glMatrixMode (GL_MODELVIEW);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
   glLoadIdentity();
   glLineWidth (3.0f);
   pos = CameraPosition ();

@@ -103,7 +103,6 @@
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="Sdl.cpp" />
-    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="VBO.cpp" />
     <ClCompile Include="World.cpp" />
@@ -130,7 +129,6 @@
     <ClInclude Include="Sdl.h" />
     <ClInclude Include="Sky.h" />
     <ClInclude Include="StdAfx.h" />
-    <ClInclude Include="Terrain.h" />
     <ClInclude Include="Text.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="VBO.h" />
