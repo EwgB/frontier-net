@@ -10,7 +10,7 @@
 #define TERRAIN_HALF      (TERRAIN_SIZE / 2)
 #define TERRAIN_EDGE      (TERRAIN_SIZE + 1)
 #define TERRAIN_PATCH     (TERRAIN_SIZE / _patch_steps)
-#define RENDER_DISTANCE   12
+
 
 enum
 {

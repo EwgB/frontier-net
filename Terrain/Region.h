@@ -3,8 +3,8 @@
 #define REGION_GRID       128
 #define REGION_CENTER     (REGION_GRID / 2)
 
-#define REGION_FLAG_MESAS       0x0001
-//#define REGION_FLAG_SWAMP       0x0002
+#define REGION_FLAG_TEST        0x0001
+#define REGION_FLAG_MESAS       0x0002
 #define REGION_FLAG_CRATER      0x0004
 #define REGION_FLAG_BEACH       0x0008
 #define REGION_FLAG_BEACH_CLIFF 0x0010
@@ -14,7 +14,6 @@
 #define REGION_FLAG_CANYON_NS   0x0100
 #define REGION_FLAG_NOBLEND     0x0200
 
-#define REGION_FLAG_TEST        0x8000
 
 #define FLOWERS                 3
 

@@ -41,7 +41,7 @@ static void do_time (float delta)
   bool      day;
 
   r = (Region*)CameraRegion ();
-  day = (hours >= 6 && hours < 22);
+  day = (hours >= 6 && hours < 21);
   if (day) {
     switch (hours) {
     case 6:
@@ -94,7 +94,7 @@ static void do_time (float delta)
       desired.light = glVector (-0.5f, 0.0f, -0.5f);
       desired.star_fade = 0.0f;
       desired.fog_max = MAX_DISTANCE;
-      desired.fog_min = MAX_DISTANCE * 0.7f * r->moisture;
+      desired.fog_min = MAX_DISTANCE -  MAX_DISTANCE * r->moisture;
       if (r->has_flowers) {
         desired.color[ENV_COLOR_NORTH] = glRgba (1.0f, 1.0f, 0.8f);
         desired.color[ENV_COLOR_SOUTH] = glRgba (1.0f, 1.0f, 0.8f);
@@ -106,6 +106,34 @@ static void do_time (float delta)
         desired.color[ENV_COLOR_AMBIENT] = glRgba (0.0f, 0.0f, 1.0f);
         desired.fog_min = 1;
       }
+      break;
+    case 19:
+      desired.color[ENV_COLOR_NORTH] = glRgba (0.1f, 0.5f, 0.5f);
+      desired.color[ENV_COLOR_SOUTH] = glRgba (0.1f, 0.5f, 0.5f);
+      desired.color[ENV_COLOR_EAST] = glRgba (0.1f, 0.2f, 0.5f);
+      desired.color[ENV_COLOR_WEST] = glRgba (0.8f, 0.7f, 0.4f);
+      desired.color[ENV_COLOR_TOP] = glRgba (0.4f, 0.4f, 0.0f);
+      desired.color[ENV_COLOR_FOG] = glRgba (0.5f, 0.9f, 1.0f);
+      desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 1.0f, 0.0f);
+      desired.color[ENV_COLOR_AMBIENT] = glRgba (0.3f, 0.3f, 1.0f);
+      desired.light = glVector (-0.5f, 0.0f, -0.5f);
+      desired.star_fade = 0.0f;
+      desired.fog_max = MAX_DISTANCE;
+      desired.fog_min = MAX_DISTANCE -  MAX_DISTANCE * r->moisture;
+      break;
+    case 20:
+      desired.color[ENV_COLOR_NORTH] = glRgba (0.0f, 0.0f, 0.5f);
+      desired.color[ENV_COLOR_SOUTH] = glRgba (0.0f, 0.0f, 0.5f);
+      desired.color[ENV_COLOR_EAST] = glRgba (0.0f, 0.0f, 0.2f);
+      desired.color[ENV_COLOR_WEST] = glRgba (0.8f, 0.5f, 0.2f);
+      desired.color[ENV_COLOR_TOP] = glRgba (0.5, 0.5f, 0.0f);
+      desired.color[ENV_COLOR_FOG] = glRgba (0.5f, 0.5f, 0.0f);
+      desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 1.0f, 0.0f);
+      desired.color[ENV_COLOR_AMBIENT] = glRgba (0.3f, 0.3f, 1.0f);
+      desired.light = glVector (-0.5f, 0.0f, -0.5f);
+      desired.star_fade = 0.0f;
+      desired.fog_max = MAX_DISTANCE;
+      desired.fog_min = MAX_DISTANCE * 0.7f * r->moisture;
       break;
     default:
       desired.color[ENV_COLOR_NORTH] = glRgba (0.5f, 0.7f, 1.0f);
@@ -150,7 +178,7 @@ static void do_time (float delta)
 void    EnvInit ()
 {
 
-  hours = 5;
+  hours = 10;
   do_time (1);
   current = desired;
 
@@ -159,7 +187,7 @@ void    EnvInit ()
 void    EnvUpdate ()
 {
 
-  seconds += SdlElapsed ();
+  //seconds += SdlElapsed ();
   if (InputKeyPressed (SDLK_RIGHTBRACKET))
     hours++;
   if (InputKeyPressed (SDLK_LEFTBRACKET)) {

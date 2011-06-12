@@ -200,7 +200,6 @@ void TextRender ()
   glPopMatrix ();
   glMatrixMode (GL_MODELVIEW);
   buffer[0] = 0;
-
   
 }
 
@@ -227,88 +226,3 @@ void TextPrint (const char *fmt, ...)
 
 }
 
-
-
-#if 0
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
-static void text_begin ()
-{
-
-  int     view[4];
-
-  glGetIntegerv (GL_VIEWPORT, &view[0]);
-  view_width = view[2];
-  view_height = view[3];
-  //Now change projection modes so we can render full-screen effects
-  glMatrixMode (GL_PROJECTION);
-  glPushMatrix ();
-  glLoadIdentity ();
-  glOrtho (0, view_width, view_height, 0, 0.1f, 2048);
-	glMatrixMode (GL_MODELVIEW);
-  glPushMatrix ();
-  glLoadIdentity();
-  glTranslatef(0, 0, -1.0f);				
-/*
-  glDisable (GL_CULL_FACE);
-  glDisable (GL_FOG);
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-*/
-}
-
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
-static void text_end ()
-{
-
-
-  glPopMatrix ();
-  glMatrixMode (GL_PROJECTION);
-  glPopMatrix ();
-  glMatrixMode (GL_MODELVIEW);
- 
-}
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
-void glTextOut (GLfont font, int x, int y, const char *fmt, ...)				
-{
-
-  char		  text[2048];	
-  va_list		ap;		
-  float     raster_pos[4];
-  //int       x, y;
-  //unsigned  i;
-  
-  text[0] = 0;
-  if (fmt == NULL)			
-		  return;						
-  va_start(ap, fmt);		
-  vsprintf(text, fmt, ap);				
-  va_end(ap);	
-  text_begin ();
-  glRasterPos2i (x, y);
-  glGetFloatv (GL_CURRENT_RASTER_POSITION, &raster_pos[0]);
-  glEnable (GL_BLEND);
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  x = (int)raster_pos[0];
-  y = view_height - (int)raster_pos[1];
-  //x = y = 70;
-  /*
-  for (i = 0; i < strlen (text); i++) {
-    x += font.GlyphDraw (text[i]);
-    x+=2;
-    glRasterPos2i (x, y);
-  }
-  */
-  text_end ();
-}
-
-#endif

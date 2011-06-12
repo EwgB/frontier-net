@@ -273,13 +273,16 @@ void    RegionInit ()
     }
   }
   //Create a line of noise to be used to shape the coast
+  /*
   ocean_buffer[0] = OCEAN_BUFFER / 2;
   for (x = 1; x < REGION_GRID; x++) {
     ocean_buffer[x] = (RandomVal () % OCEAN_BUFFER);
     ocean_buffer[x] = clamp (ocean_buffer[x], 0, OCEAN_BUFFER);
   }
+  
   for (x = 0; x < REGION_GRID; x++) 
     ocean_buffer[x] += 3;
+    */
   //Set some defaults
   for (x = 0; x < REGION_GRID; x++) {
     for (y = 0; y < REGION_GRID; y++) {
@@ -294,8 +297,10 @@ void    RegionInit ()
       if (fdist > 1.0f)
         fdist = 1.0f + (fdist - 1.0f) * 5;
       fdist = 1.0f - fdist;
+      if (fdist > 1.0f)
+        fdist = 1.0f + (fdist - 1.0f) * 5;
       //fdist *= fdist;
-      fdist += (Entropy (x * 3 + 31, y * 3 + 1) - 0.5f);
+      fdist += (Entropy ((x + 47) * 3, (y + 22) * 3) - 0.5f);
       r.elevation = min (fdist, 1);
       //depth = min ((fdist - 1.0f) * 3.0f, 1.0f);
       r.topography_bias = REGION_SIZE * r.elevation;
@@ -403,7 +408,7 @@ void    RegionInit ()
   int     step;
   float   height;
 
-  for (x = 0; x < 5; x++) {
+  for (x = 0; x < 0; x++) {
     mtn_size = 3;
     if (!find_plot (mtn_size, &plot))
       continue;
@@ -461,7 +466,7 @@ void    RegionInit ()
     moist = 1.0f;
     for (x = 0; x < REGION_GRID; x++) {
       r = continent[x][y];
-      moist -= 1.0f / REGION_GRID;
+      moist -= 1.0f / REGION_CENTER;
       //Mountains block rainfall
       if (r.climate == CLIMATE_MOUNTAIN) {
         moist -= 0.1f * r.mountain_height;
@@ -658,9 +663,9 @@ void    RegionInit ()
         dry_grass.red = 0.7f + RandomFloat () * 0.3f;
         dry_grass.green = 0.5f + RandomFloat () * 0.5f;
         dry_grass.blue = 0.0f + RandomFloat () * 0.3f;
-        r.color_grass = dry_grass;
         //Final color
         r.color_grass = glRgbaInterpolate (dry_grass, wet_grass, r.moisture);
+
       }
 
 
@@ -688,7 +693,8 @@ void    RegionInit ()
         warm_dirt = glRgbaInterpolate (dry_dirt, wet_dirt, r.moisture);
         fade = MathScalar (r.temperature, FREEZING, 1.0f);
         //Final color is a fade from warm to cold
-        r.color_dirt = glRgbaInterpolate (cold_dirt, warm_dirt, fade);
+        //r.color_dirt = glRgbaInterpolate (cold_dirt, warm_dirt, fade);
+        r.color_dirt = warm_dirt;///////////////////////////////
       }
 
       //Devise a rock color
@@ -749,7 +755,13 @@ void    RegionInit ()
         r.color_map = glRgba (0.0f, 0.0f, 1.0f);
 
         */
-
+      /*
+      if (r.climate != CLIMATE_OCEAN) {
+        r.color_map = glRgba (r.temperature, 1.0f - r.temperature * 2, 1.0f - r.temperature);
+        r.color_map.Clamp ();
+      } else
+        r.color_map = glRgba (0.0f, 0.0f, 1.0f);
+*/
       continent[x][y] = r;
     }
   }

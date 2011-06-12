@@ -11,7 +11,7 @@
 
 #include "stdafx.h"
 
-#define RENDER_DISTANCE     512
+#define RENDER_DISTANCE     1024
 #define FOV                 90
 
 #include <math.h>
@@ -105,14 +105,15 @@ void WaterRender (bool underwater)
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glColor4f (1.0f, 1.0f, 1.0f, 0.5f);
-  draw_water (1);
+  //draw_water (1);
   //return;
   if (!underwater) {
-    t = TextureFromName ("water3.bmp", MASK_LUMINANCE);
+    t = TextureFromName ("water1.bmp", MASK_LUMINANCE);
+    t = TextureFromName ("water.bmp");
     glBindTexture (GL_TEXTURE_2D, t->id);
   	//glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
     glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
-    glBlendFunc (GL_ZERO, GL_SRC_COLOR);
+    //glBlendFunc (GL_ZERO, GL_SRC_COLOR);
     //glBlendFunc (GL_ONE, GL_ONE);
     glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
     draw_water (256);
@@ -338,10 +339,10 @@ void Render (void)
   glEnable (GL_FOG);
   glFogi (GL_FOG_MODE, GL_LINEAR);
   glFogfv (GL_FOG_COLOR, &e->color[ENV_COLOR_FOG].red);
-  //glClearColor (cfog.red, cfog.green, cfog.blue, 1.0f);
-  glClearColor (1, 0, 0, 1.0f);
-  //glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glClear (GL_DEPTH_BUFFER_BIT);
+  glClearColor (e->color[ENV_COLOR_FOG].red, e->color[ENV_COLOR_FOG].green, e->color[ENV_COLOR_FOG].blue, 1.0f);
+  //glClearColor (0, 0, 0, 1.0f);
+  glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  //glClear (GL_DEPTH_BUFFER_BIT);
   {
     //float LightAmbient[]= { current_ambient.red, fog.green, fog.blue, 1.0f }; 				// Ambient Light Values ( NEW )
     //float LightDiffuse[]= { diffuse.red, diffuse.green, diffuse.blue, 1.0f };
@@ -378,7 +379,7 @@ void Render (void)
 	glMatrixMode (GL_MODELVIEW);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glLoadIdentity();
-  glLineWidth (3.0f);
+  glLineWidth (7.0f);
   pos = CameraPosition ();
   //Move into our unique coordanate system
   glScalef (1, -1, 1);

@@ -24,6 +24,7 @@
 
 #define GRASS_GRID      5
 #define GRASS_HALF      (GRASS_GRID / 2)
+#define RENDER_DISTANCE 13
 
 static CTerrain*         terrain[WORLD_GRID][WORLD_GRID];
 static CGrass           grass[GRASS_GRID][GRASS_GRID];
@@ -228,7 +229,7 @@ void SceneRender ()
   glBindTexture (GL_TEXTURE_2D, t->id);
   for (x = 0; x < GRASS_GRID; x++) {
     for (y = 0; y < GRASS_GRID; y++) {
-      grass[x][y].Render ();
+      //grass[x][y].Render ();
     }
   }
   return;
@@ -276,7 +277,7 @@ void SceneRenderDebug (int style)
         r = RegionGet (pos.x, pos.y);
         switch (style) {
         case DEBUG_RENDER_UNIQUE:
-          col = glRgbaUnique (x + y * 33); break;
+          col = glRgbaUnique (1 + x + y * 34); break;
         case DEBUG_RENDER_MOIST:
           col = glRgba (1.0f - r.moisture, r.moisture, 0.0f); break;
         case DEBUG_RENDER_TEMP:

@@ -17,7 +17,7 @@
 #include "Texture.h"
 #include "World.h"
 
-#define TOLERANCE         0.2f
+#define TOLERANCE         0.3f
 
 static struct LayerAttributes
 {

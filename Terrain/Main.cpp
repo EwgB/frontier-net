@@ -79,7 +79,7 @@ static void run ()
   long    remaining;
 
   while (!quit) {
-    stop = SdlTick () + 10;
+    stop = SdlTick () + 15;
     SdlUpdate ();
     CameraUpdate ();
     EnvUpdate ();

@@ -19,6 +19,11 @@
 
 #define STAR_TILE   3
 #define DISC        8
+#define SKY_GRID    8
+#define SKY_EDGE    (SKY_GRID + 1)
+#define SKY_HALF    (SKY_GRID / 2)
+#define SKY_DOME    1.5f
+#define SKY_TILE    3
 
 struct skyvert
 {
@@ -27,7 +32,9 @@ struct skyvert
   int           env_color;
 };
 
-static VBO        starcube;
+
+
+static VBO        skydome;
 static unsigned   texture_stars;
 static skyvert    sky[DISC];
 static skyvert    tip;
@@ -47,6 +54,7 @@ static void build_sky ()
   vector<unsigned>    index;
 
   texture_stars = TextureIdFromName ("stars2.bmp");
+  /*
   //0 NW corner
   vert.push_back (glVector (-1.0f, -1.0f, -0.2f));
   normal.push_back (glVector (0.0f, 0.0f, 1.0f));
@@ -88,8 +96,46 @@ static void build_sky ()
   index.push_back (1);  index.push_back (5);  index.push_back (2);
   //south Triangle
   index.push_back (2);  index.push_back (5);  index.push_back (3);
-
   starcube.Create (GL_TRIANGLES, index.size (), vert.size (), &index[0], &vert[0], &normal[0], NULL, &uv[0]);
+  */
+
+  int     x, y;
+  int     offset;
+  float   dist;
+
+  for (y = 0; y < SKY_EDGE; y++) {
+    for (x = 0; x < SKY_EDGE; x++) {
+      offset = max (abs (x - SKY_HALF), abs (y - SKY_HALF));
+      dist = 1.0f - ((float)offset / (SKY_HALF));
+      vert.push_back (glVector ((float)x - SKY_HALF, (float)y - SKY_HALF, dist * SKY_DOME) - SKY_DOME / 8);
+      normal.push_back (glVector (0.0f, 0.0f, 1.0f));
+      uv.push_back (glVector (((float)x / SKY_GRID) * SKY_TILE, ((float)y / SKY_GRID) * SKY_TILE));
+
+    }
+  }
+  for (y = 0; y < SKY_GRID; y++) {
+    for (x = 0; x < SKY_GRID; x++) {
+      if ((x + y) % 2) {
+        index.push_back (x + y * SKY_EDGE);  
+        index.push_back ((x + 1) + y * SKY_EDGE);  
+        index.push_back (x + (y + 1) * SKY_EDGE);  
+
+        index.push_back ((x + 1) + y * SKY_EDGE);  
+        index.push_back ((x + 1) + (y + 1) * SKY_EDGE);  
+        index.push_back (x + (y + 1) * SKY_EDGE);  
+      } else {
+        index.push_back (x + y * SKY_EDGE);  
+        index.push_back ((x + 1) + y * SKY_EDGE);  
+        index.push_back ((x + 1) + (y + 1) * SKY_EDGE);  
+
+        index.push_back (x + y * SKY_EDGE);  
+        index.push_back ((x + 1) + (y + 1) * SKY_EDGE);  
+        index.push_back (x + (y + 1) * SKY_EDGE);  
+      }
+
+    }
+  }
+  skydome.Create (GL_TRIANGLES, index.size (), vert.size (), &index[0], &vert[0], &normal[0], NULL, &uv[0]);
 
 
 }
@@ -104,6 +150,7 @@ void SkyInit ()
   float   angle;
 
   build_sky ();
+  
   tip.env_color = ENV_COLOR_TOP;
   tip.pos = glVector (0.0f, 0.0f, 0.15f);
   for (int i = 0; i < DISC; i++) {
@@ -124,7 +171,7 @@ void SkyInit ()
     }
   }
 
-
+  
 }
 
 void SkyUpdate ()
@@ -147,6 +194,7 @@ void SkyRender ()
 
   GLvector angle;
 
+  return;
   angle = CameraAngle ();
   glPushMatrix ();
   glLoadIdentity ();
@@ -184,7 +232,19 @@ void SkyRender ()
   glBindTexture (GL_TEXTURE_2D, texture_stars);
   glColor3f (star_fade,star_fade,star_fade);
 
-  starcube.Render ();
+  //starcube.Render ();
+  skydome.Render ();
+
+
+
+
+  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("clouds2.bmp"));
+  glColor3f (0.3f,0.3f,0.3f);
+  skydome.Render ();
+  //starcube.Render ();
+
+
+
 
   glEnable (GL_LIGHTING);
   glDepthMask (true);
