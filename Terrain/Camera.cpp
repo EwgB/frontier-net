@@ -244,7 +244,8 @@ void CameraUpdate (void)
   else if (angle.z < 337.5f)
     direction = "Northeast";
   TextPrint ("%1.2f Y:%1.2f Z:%1.2f - %s", position.x, position.y, position.z, direction);
-  TextPrint ("%s\nTemp:%1.1f%c \nMoisture:%1.0f%%\nElevation Bias: %1.1f\nTopography Detail:%1.1f\nTopography Large:%1.1f\nElevation:%1.1f", region.title, region.temperature * 100.0f, 186, region.moisture * 100.0f, region.topography_bias, region.topography_small, region.topography_large, region.elevation);
+  TextPrint ("%s\nTemp:%1.1f%c \nMoisture:%1.0f%%\nElevation: %1.1f Elevation Bias: %1.1f Topography Detail:%1.1f Topography Large:%1.1f", 
+    region.title, region.temperature * 100.0f, 186, region.moisture * 100.0f, region.elevation * 100.0f, region.topography_bias, region.topography_small, region.topography_large);
 
 }
 

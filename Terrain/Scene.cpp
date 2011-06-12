@@ -229,7 +229,7 @@ void SceneRender ()
   glBindTexture (GL_TEXTURE_2D, t->id);
   for (x = 0; x < GRASS_GRID; x++) {
     for (y = 0; y < GRASS_GRID; y++) {
-      //grass[x][y].Render ();
+      grass[x][y].Render ();
     }
   }
   return;

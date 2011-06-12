@@ -45,6 +45,10 @@ struct GLcoord
   void        operator-= (const int& c) { x -= c; y -= c; };
   void        operator-= (const GLcoord& c) { x -= c.x; y -= c.y; };
 
+  GLcoord     operator*  (const int& c);
+  GLcoord     operator*  (const GLcoord& c);
+  void        operator*= (const int& c) { x -= c; y -= c; };
+  void        operator*= (const GLcoord& c) { x -= c.x; y -= c.y; };
 
 };
 

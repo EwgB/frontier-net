@@ -18,18 +18,34 @@
 #define WHITE         {1.0f, 1.0f, 1.0f, 1.0f}
 
 #define LARGE_SCALE       9
-#define SMALL_STRENGTH    20
-#define LARGE_STRENGTH    170
+#define SMALL_STRENGTH    (REGION_SIZE / 2)
+#define LARGE_STRENGTH    (REGION_SIZE * 2)
 #define BLEND_DISTANCE    (REGION_SIZE / 4)
-#define DITHER_SIZE       (REGION_SIZE * 1)
-#define OCEAN_BUFFER      6 //The number of regions around the edge which must be ocean
+//#define BLEND_DISTANCE    1
+#define DITHER_SIZE       (REGION_SIZE / 2)
+#define OCEAN_BUFFER      20 //The number of regions around the edge which must be ocean
 #define COAST_DEPTH       2 // how many blocks inward do we find sand
 #define FLOWER_PALETTE    (sizeof (flower_palette) / sizeof (GLrgba))
 
-#define NORTH             "Northern"
-#define SOUTH             "Southern"
-#define EAST              "Eastern"
-#define WEST              "Western"
+#define NNORTH             "Northern"
+#define NSOUTH             "Southern"
+#define NEAST              "Eastern"
+#define NWEST              "Western"
+
+enum
+{
+  NORTH,
+  SOUTH,
+  EAST,
+  WEST
+};
+
+static GLcoord      direction[] = {
+  0, -1, // North
+  0, 1,  // South
+  1, 0,  // East
+ -1, 0   // West
+};
 
 static GLrgba       flower_palette[] = {
   {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, //white
@@ -43,9 +59,14 @@ static GLrgba       flower_palette[] = {
 
 static Region       ocean = {"EDGE",    0,  -20.0f,   -20.0f,   0,     0,  REGION_FLAG_NOBLEND,  CLIMATE_OCEAN, 0.5f, 1.0f};
 
+
 static Region       continent[REGION_GRID][REGION_GRID];
 static GLcoord      dithermap[DITHER_SIZE][DITHER_SIZE];
 static unsigned     map_id;
+
+/*-----------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------*/
 
 static Region region (int x, int y)
 {
@@ -74,7 +95,7 @@ static bool is_free (int x, int y, int radius)
 }
 
 //In general, what part of the map is this coordinate in?
-static char* find_direction (int x, int y)
+static char* find_direction_name (int x, int y)
 {
 
   GLcoord   from_center;
@@ -83,15 +104,37 @@ static char* find_direction (int x, int y)
   from_center.y = abs (y - REGION_CENTER);
   if (from_center.x < from_center.y) {
     if (y < REGION_CENTER)
-      return NORTH;
+      return NNORTH;
     else
-      return SOUTH;
+      return NSOUTH;
   } 
   if (x < REGION_CENTER)
-    return WEST;
-  return EAST;
+    return NWEST;
+  return NEAST;
 
 }
+
+
+//In general, what part of the map is this coordinate in?
+static GLcoord find_direction (int x, int y)
+{
+
+  GLcoord   from_center;
+
+  from_center.x = abs (x - REGION_CENTER);
+  from_center.y = abs (y - REGION_CENTER);
+  if (from_center.x < from_center.y) {
+    if (y < REGION_CENTER)
+      return direction[NORTH];
+    else
+      return direction[SOUTH];
+  } 
+  if (x < REGION_CENTER)
+    return direction[WEST];
+  return direction[EAST];
+
+}
+
 
 static bool climate_present (int x, int y, int radius, Climate c) 
 {
@@ -111,6 +154,162 @@ static bool climate_present (int x, int y, int radius, Climate c)
   }
   return false;
 
+}
+
+static void do_rivers ()
+{
+
+  Region      r;
+  Region*     neighbor;
+  int         x, y;
+  int         i, length;
+  int         d;
+  GLcoord     selected;
+  GLcoord     last_move;
+  GLcoord     to_coast;
+  float       lowest;
+  float       depth;
+
+  //return;
+  for (i = 0; i < 29; i++) {
+    x = REGION_CENTER + (RandomVal () % 30) - 15;
+    y = REGION_CENTER + (RandomVal () % 30) - 15;
+    length = 0;
+    depth = 0.5f;
+    last_move.Clear ();
+    while (1) {
+      r = continent[x][y];
+      //If we run into the ocean, then we're done.
+      if (r.climate == CLIMATE_OCEAN) 
+        break;
+      //If we run into a river, we've become a tributary.
+      if (r.climate == CLIMATE_RIVER) 
+        break;
+      r.river_width = depth;
+      r.climate = CLIMATE_RIVER;
+      sprintf (r.title, "River%d-%d", i, length);
+      //r.flags_shape |= REGION_FLAG_NOBLEND; 
+      lowest = r.topography_bias;
+      to_coast = find_direction (x, y);
+      //lowest = 999.9f;
+      selected.Clear ();
+      for (d = 0; d < 4; d++) {
+        neighbor = &continent[x + direction[d].x][y + direction[d].y];
+        //Don't reverse course into ourselves
+        if (last_move == (direction[d] * -1))
+          continue;
+        //Don't head directly AWAY from the coast
+        if (direction[d] == to_coast * -1)
+          continue;
+        if (neighbor->topography_bias <= lowest) {
+          selected = direction[d];
+          lowest = neighbor->topography_bias;
+        }
+      }
+      //If everthing around us is above us, we can't flow downhill
+      if (!selected.x && !selected.y) //Let's just head for the edge of the map
+        selected = to_coast;
+      //selected.x = 0;
+      //selected.y = -1;
+      neighbor = &continent[x + selected.x][y + selected.y];
+      if (selected.y == -1) {//we're moving north
+        neighbor->flags_shape |= REGION_FLAG_RIVERS;
+        r.flags_shape |= REGION_FLAG_RIVERN;
+      }
+      if (selected.y == 1) {//we're moving south
+        neighbor->flags_shape |= REGION_FLAG_RIVERN;
+        r.flags_shape |= REGION_FLAG_RIVERS;
+      }
+      if (selected.x == -1) {//we're moving west
+        neighbor->flags_shape |= REGION_FLAG_RIVERE;
+        r.flags_shape |= REGION_FLAG_RIVERW;
+      }
+      if (selected.x == 1) {//we're moving east
+        neighbor->flags_shape |= REGION_FLAG_RIVERW;
+        r.flags_shape |= REGION_FLAG_RIVERE;
+      }
+      continent[x][y] = r;
+      //If we didn't find any lower neighbors, then this is a dead end.
+      if (!selected.x && !selected.y)
+        break;
+      last_move = selected;
+      x += selected.x;
+      y += selected.y;
+      depth = min (depth + 0.5f, 45);
+      length++;
+    }
+
+  }
+
+}
+
+static void do_blur ()
+{
+
+  int   x, y, xx, yy, count;
+  int   radius;
+  float (*temp)[REGION_GRID];
+  float (*moist)[REGION_GRID];
+  float (*elev)[REGION_GRID];
+  float (*sm)[REGION_GRID];
+  float (*lg)[REGION_GRID];
+
+  temp = new float[REGION_GRID][REGION_GRID];
+  moist = new float[REGION_GRID][REGION_GRID];
+  elev = new float[REGION_GRID][REGION_GRID];
+  sm = new float[REGION_GRID][REGION_GRID];
+  lg = new float[REGION_GRID][REGION_GRID];
+
+  //Blur some of the attributes
+  for (int passes = 0; passes < 14; passes++) {
+
+    radius = 3;
+    for (x = radius; x < REGION_GRID - radius; x++) {
+      for (y = radius; y < REGION_GRID - radius; y++) {
+        temp[x][y] = 0;
+        moist[x][y] = 0;
+        elev[x][y] = 0;
+        sm[x][y] = 0;
+        lg[x][y] = 0;
+        count = 0;
+        for (xx = -radius; xx <= radius; xx++) {
+          for (yy = -radius; yy <= radius; yy++) {
+            temp[x][y] += continent[x + xx][y + yy].temperature;
+            moist[x][y] += continent[x + xx][y + yy].moisture;
+            elev[x][y] += continent[x + xx][y + yy].topography_bias;
+            sm[x][y] += continent[x + xx][y + yy].topography_small;
+            lg[x][y] += continent[x + xx][y + yy].topography_large;
+            count++;
+          }
+        }
+        temp[x][y] /= (float)count;
+        moist[x][y] /= (float)count;
+        elev[x][y] /= (float)count;
+        sm[x][y] /= (float)count;
+        lg[x][y] /= (float)count;
+      }
+    }
+    //Put the blurred values back into our table
+    for (x = radius; x < REGION_GRID - radius; x++) {
+      for (y = radius; y < REGION_GRID - radius; y++) {
+        continent[x][y].temperature = temp[x][y];
+        //No matter how arid it is, the OCEANS STAY WET!
+        if (continent[x][y].climate != CLIMATE_OCEAN) 
+          continent[x][y].moisture = moist[x][y];
+        if (!(continent[x][y].flags_shape & REGION_FLAG_NOBLEND)) {
+          //continent[x][y].topography_bias = elev[x][y];
+          continent[x][y].topography_small = sm[x][y];
+          continent[x][y].topography_large = lg[x][y];
+        }
+      }
+    }
+  }
+  delete []temp;
+  delete []moist;
+  delete []elev;
+  delete []sm;
+  delete []lg;
+  
 }
 
 static bool climate_exclusive (int x, int y, int radius, Climate c) 
@@ -156,6 +355,45 @@ static bool find_plot (int radius, GLcoord* result)
 
 }
 
+static float do_height_noblend (float val, Region r, GLvector2 offset, float bias)
+{
+
+  //return val;
+  if (r.flags_shape & REGION_FLAG_RIVER_ANY) {
+    GLvector2   cen;
+    float       strength;
+
+    cen.x = abs ((offset.x - 0.5f) * 2.0f);
+    cen.y = abs ((offset.y - 0.5f) * 2.0f);
+    strength = glVectorLength (cen);
+    if (r.flags_shape & REGION_FLAG_RIVERN && offset.y < 0.5f)
+      strength = min (strength, cen.x);
+    if (r.flags_shape & REGION_FLAG_RIVERS && offset.y >= 0.5f)
+      strength = min (strength, cen.x);
+    if (r.flags_shape & REGION_FLAG_RIVERW && offset.x < 0.5f) 
+      strength = min (strength, cen.y);
+    if (r.flags_shape & REGION_FLAG_RIVERE && offset.x >= 0.5f) 
+      strength = min (strength, cen.y);
+    if (strength < 0.5f) {
+      strength *= 2.0f;
+      if (strength < 0.25f) { //Curve off the bottom of the river.
+        strength *= 4.0f;
+        strength *= strength;
+        strength /= 4.0f;
+      }
+      //strength = 1.0f - strength;
+      //strength *= strength;
+      //strength *= strength;
+      //strength = 1.0f - strength;
+      val -= (r.river_width * r.topography_small) * (1.0f - strength);
+    }
+  }
+  return val;
+
+
+}
+
+
 static float do_height (Region r, GLvector2 offset, float bias, float esmall, float elarge)
 {
 
@@ -186,6 +424,92 @@ static float do_height (Region r, GLvector2 offset, float bias, float esmall, fl
   }
   val = esmall * SMALL_STRENGTH + elarge * LARGE_STRENGTH;
   val += bias;
+
+  /*
+  if (r.flags_shape & REGION_FLAG_RIVERN) {
+    float cen;
+    cen = abs ((offset.x - 0.5f) * 2.0f);
+    if (cen < 0.5f) {
+      cen *= 2.0f;
+      //cen *= 1.3f;
+      //cen += 0.3f;
+      if (cen < 0.5f) { //Curve off the bottom of the river.
+        cen *= 2.0f;
+        cen *= cen;
+        cen /= 2.0f;
+      }
+      val -= r.river_width * (1.0f - cen);
+    }
+  }
+  */
+/*
+  if (r.flags_shape & REGION_FLAG_RIVER_ANY) {
+    GLvector2   cen;
+    float       strength;
+
+    cen.x = abs ((offset.x - 0.5f) * 2.0f);
+    cen.y = abs ((offset.y - 0.5f) * 2.0f);
+    //if (r.flags_shape & REGION_FLAG_RIVERS && offset.y > 0.5f)
+      //strength = cen.x;
+    strength = glVectorLength (cen);
+    if (r.flags_shape & REGION_FLAG_RIVERN && offset.y < 0.5f)
+      strength = min (strength, cen.x);
+    if (r.flags_shape & REGION_FLAG_RIVERS && offset.y >= 0.5f)
+      strength = min (strength, cen.x);
+    if (r.flags_shape & REGION_FLAG_RIVERW && offset.x < 0.5f) 
+      strength = min (strength, cen.y);
+    if (r.flags_shape & REGION_FLAG_RIVERE && offset.x >= 0.5f) 
+      strength = min (strength, cen.y);
+      //strength = glVectorLength (cen);
+    //} else
+    if (strength < 0.5f) {
+      strength *= 2.0f;
+      if (strength < 0.5f) { //Curve off the bottom of the river.
+        strength *= 2.0f;
+        strength *= strength;
+        strength /= 2.0f;
+      }
+      val -= r.river_width * (1.0f - strength);
+    }
+  }
+
+  */
+  /*
+
+  if (r.flags_shape & REGION_FLAG_RIVERN && offset.y < 0.75f) {
+    float cen;
+    cen = abs ((offset.x - 0.5f) * 2.0f);
+    if (cen < 0.5f) {
+      cen *= 2.0f;
+      //cen *= 1.3f;
+      //cen += 0.3f;
+      if (cen < 0.5f) { //Curve off the bottom of the river.
+        cen *= 2.0f;
+        cen *= cen;
+        cen /= 2.0f;
+      }
+      val -= r.river_width * (1.0f - cen);
+    }
+  }
+  if (r.flags_shape & REGION_FLAG_RIVERE && offset.x > 0.5f) {
+    float cen;
+    cen = abs ((offset.y - 0.5f) * 2.0f);
+    if (cen < 0.5f) {
+      cen *= 2.0f;
+      //cen *= 1.3f;
+      //cen += 0.3f;
+      if (cen < 0.5f) { //Curve off the bottom of the river.
+        cen *= 2.0f;
+        cen *= cen;
+        cen /= 2.0f;
+      }
+      val -= r.river_width * (1.0f - cen);
+    }
+  }
+  */
+
+
+
   if (r.flags_shape & REGION_FLAG_MESAS) {
     float    x = abs (offset.x - 0.5f) / 5;
     float    y = abs (offset.y - 0.5f) / 5;
@@ -259,30 +583,19 @@ void    RegionInit ()
   int         x, y;
   Region      r;
   bool        is_ocean;
-  int         ocean_buffer[REGION_GRID];
+  ///int         ocean_buffer[REGION_GRID];
   GLcoord     from_center;
   GLcoord     plot;
   float       fdist;
   float       depth;
 
-  //
+  //Fill in the dither table - a table of random offsets
   for (x = 0; x < DITHER_SIZE; x++) {
     for (y = 0; y < DITHER_SIZE; y++) {
-      dithermap[x][y].x = RandomVal () % DITHER_SIZE;
-      dithermap[x][y].y = RandomVal () % DITHER_SIZE;
+      dithermap[x][y].x = RandomVal () % DITHER_SIZE + RandomVal () % DITHER_SIZE;
+      dithermap[x][y].y = RandomVal () % DITHER_SIZE + RandomVal () % DITHER_SIZE;
     }
   }
-  //Create a line of noise to be used to shape the coast
-  /*
-  ocean_buffer[0] = OCEAN_BUFFER / 2;
-  for (x = 1; x < REGION_GRID; x++) {
-    ocean_buffer[x] = (RandomVal () % OCEAN_BUFFER);
-    ocean_buffer[x] = clamp (ocean_buffer[x], 0, OCEAN_BUFFER);
-  }
-  
-  for (x = 0; x < REGION_GRID; x++) 
-    ocean_buffer[x] += 3;
-    */
   //Set some defaults
   for (x = 0; x < REGION_GRID; x++) {
     for (y = 0; y < REGION_GRID; y++) {
@@ -294,24 +607,24 @@ void    RegionInit ()
       from_center.y = abs (y - REGION_CENTER);
       fdist = glVectorLength (glVector ((float)from_center.x, (float)from_center.y));
       fdist /= (REGION_CENTER - OCEAN_BUFFER);
+      //Create a steep drop around the edge of the world
       if (fdist > 1.0f)
         fdist = 1.0f + (fdist - 1.0f) * 5;
       fdist = 1.0f - fdist;
+      /*
       if (fdist > 1.0f)
         fdist = 1.0f + (fdist - 1.0f) * 5;
+        */
       //fdist *= fdist;
-      fdist += (Entropy ((x + 47) * 3, (y + 22) * 3) - 0.5f);
-      r.elevation = min (fdist, 1);
+      fdist += (Entropy ((x + 47) * 3, (y + 22) * 3) - 0.2f) * 3;
+      //r.elevation = min (fdist, 0);
+      r.elevation = fdist / 2;
       //depth = min ((fdist - 1.0f) * 3.0f, 1.0f);
-      r.topography_bias = REGION_SIZE * r.elevation;
+      r.topography_bias = 1.0f + r.elevation * 5;
       r.topography_large = 0.3f + Entropy (x, y) * 0.7f;
-      r.topography_large *= r.elevation;
-      r.topography_small = 0.3f + RandomFloat () * 0.2f;
-      r.topography_bias = max (r.topography_bias, 1);
-
+      r.topography_large = 0.0f;
+      r.topography_small = 0.1f + r.elevation;
       r.color_map = glRgba (0.0f);
-      //r.temperature = (float)y / REGION_GRID;
-      //r.moisture = 0.75f -(float)x / REGION_GRID;
       r.climate = CLIMATE_INVALID;
       continent[x][y] = r;
     }
@@ -341,7 +654,7 @@ void    RegionInit ()
         r.topography_bias = -5.0f;
         r.flags_shape = REGION_FLAG_NOBLEND;
         r.climate = CLIMATE_OCEAN;
-        sprintf (r.title, "%s Ocean", find_direction (x, y));
+        sprintf (r.title, "%s Ocean", find_direction_name (x, y));
         //Ocean rock is always white (Earthtones look bad)
         r.color_rock = glRgba (1.0f);
         continent[x][y] = r;
@@ -360,17 +673,17 @@ void    RegionInit ()
       if (r.climate == CLIMATE_OCEAN)
         continue;
       if (climate_present (x, y, 2, CLIMATE_OCEAN)) {
-        sprintf (r.title, "%s Coast", find_direction (x, y));
+        sprintf (r.title, "%s Coast", find_direction_name (x, y));
         r.topography_large = 0.0f;
         r.topography_small = 0.4f + RandomFloat () * 0.2f;
-        r.topography_bias = 0.0f;
+        r.topography_bias = -2.0f;
         r.moisture = 1.0f;
         r.flags_shape = REGION_FLAG_NOBLEND;
         if ((x / 4 + y / 4) % 2) {
           r.flags_shape |= REGION_FLAG_BEACH;
         } else {
           r.topography_small += 0.2f;
-          r.topography_bias += 1.0f + RandomFloat () * 2.0f;
+          //r.topography_bias += 1.0f + RandomFloat () * 2.0f;
           r.flags_shape |= REGION_FLAG_BEACH_CLIFF;
         }
         r.beach_threshold = 3.0f + RandomFloat () * 5.0f;
@@ -457,7 +770,8 @@ void    RegionInit ()
     }
   }
 
-
+  
+  do_rivers ();
 
   //pass over the map, calculate the temp & moisture
   float moist, temp;
@@ -473,6 +787,8 @@ void    RegionInit ()
       }       
       moist = max (moist, 0);
       r.moisture = moist;
+      if (r.climate == CLIMATE_RIVER) 
+        r.moisture = max (r.moisture, 0.25f);
       //The north 25% is max cold.  The south 25% is all tropical
       temp = ((float)y - (REGION_GRID / 4)) / REGION_CENTER;
       //oceans have a moderating effect
@@ -489,8 +805,6 @@ void    RegionInit ()
       continent[x][y] = r;
     }
   }
-
-
 
 
   int       rand;
@@ -512,7 +826,7 @@ void    RegionInit ()
       sprintf (r.title, "???");
       //Have them trend more hilly in dry areas
       r.topography_small += (1.0f - r.moisture) * RandomFloat () * 0.5f;
-      r.topography_bias += RandomFloat () * 6;
+      //r.topography_bias += RandomFloat () * 6;
       rand = RandomVal () % 25;
       if (r.moisture > 0.3f && r.temperature > 0.5f) {
         GLrgba    c;
@@ -561,61 +875,9 @@ void    RegionInit ()
       continent[x][y] = r;
     }
   }
+  
+  do_blur ();
 
-
-
-
-  //Blur some of the attributes
-  for (int passes = 0; passes < 3; passes++) {
-    float temp[REGION_GRID][REGION_GRID];
-    float moist[REGION_GRID][REGION_GRID];
-    float elev[REGION_GRID][REGION_GRID];
-    float sm[REGION_GRID][REGION_GRID];
-    float lg[REGION_GRID][REGION_GRID];
-    int   radius;
-    int   count;
-
-    radius = 3;
-    for (x = radius; x < REGION_GRID - radius; x++) {
-      for (y = radius; y < REGION_GRID - radius; y++) {
-        temp[x][y] = 0;
-        moist[x][y] = 0;
-        elev[x][y] = 0;
-        sm[x][y] = 0;
-        lg[x][y] = 0;
-        count = 0;
-        for (xx = -radius; xx <= radius; xx++) {
-          for (yy = -radius; yy <= radius; yy++) {
-            temp[x][y] += continent[x + xx][y + yy].temperature;
-            moist[x][y] += continent[x + xx][y + yy].moisture;
-            elev[x][y] += continent[x + xx][y + yy].topography_bias;
-            sm[x][y] += continent[x + xx][y + yy].topography_small;
-            lg[x][y] += continent[x + xx][y + yy].topography_large;
-            count++;
-          }
-        }
-        temp[x][y] /= (float)count;
-        moist[x][y] /= (float)count;
-        elev[x][y] /= (float)count;
-        sm[x][y] /= (float)count;
-        lg[x][y] /= (float)count;
-      }
-    }
-    //Put the blurred values back into our table
-    for (x = radius; x < REGION_GRID - radius; x++) {
-      for (y = radius; y < REGION_GRID - radius; y++) {
-        continent[x][y].temperature = temp[x][y];
-        //No matter how arid it is, the OCEANS STAY WET!
-        if (continent[x][y].climate != CLIMATE_OCEAN) 
-          continent[x][y].moisture = moist[x][y];
-        if (!(continent[x][y].flags_shape & REGION_FLAG_NOBLEND)) {
-          continent[x][y].topography_bias = elev[x][y];
-          continent[x][y].topography_small = sm[x][y];
-          continent[x][y].topography_large = lg[x][y];
-        }
-      }
-    }
-  }
 
 
   //Final pass
@@ -624,27 +886,8 @@ void    RegionInit ()
   for (x = 0; x < REGION_GRID; x++) {
     for (y = 0; y < REGION_GRID; y++) {
       r = continent[x][y];
-      /*
-      //Devise a random but plausible grass color
-      if (r.moisture < 0.5f)  //less green likely in dry climates
-        r.color_grass.green = 0.5f + RandomFloat () * 0.6f;
-      else //More vibrant
-        r.color_grass.green = 0.7f + RandomFloat () * 0.3f;
-      shade1 = RandomFloat () * r.color_grass.green;
-      shade2 = RandomFloat () * r.color_grass.green;
-      //In dry areas, grass should trend twords red / yellow
-      if (r.moisture < 0.25f) {
-        r.color_grass.red = max (shade1, shade2);
-        r.color_grass.blue = min (shade1, shade2);
-      } else { //In damp areas, colors trend towards blue / green.
-        r.color_grass.blue = max (shade1, shade2);
-        r.color_grass.red = min (shade1, shade2);
-      }
-      */
-
       //Devise a grass color
       {
-
         GLrgba    warm_grass, cold_grass, wet_grass, dry_grass;
 
         //cold grass is pale and a little blue
@@ -665,7 +908,6 @@ void    RegionInit ()
         dry_grass.blue = 0.0f + RandomFloat () * 0.3f;
         //Final color
         r.color_grass = glRgbaInterpolate (dry_grass, wet_grass, r.moisture);
-
       }
 
 
@@ -720,48 +962,25 @@ void    RegionInit ()
         r.color_map = glRgba (0.9f, 0.7f, 0.4f);break;
       case CLIMATE_OCEAN:
         break;//We set this when we made the ocean
+      case CLIMATE_RIVER:
+        r.color_map = glRgba (0.0f, 1.0f, 1.0f);
+        break;
       default:
         r.color_map = r.color_grass;break;
       }
       r.color_atmosphere = (glRgba (0.0f, 1.0f, 1.0f) * 1 + r.color_grass) / 2;
       r.color_atmosphere = glRgba (r.moisture / 2, r.moisture, 1.0f);
-      //r.color_atmosphere = glRgba (1, 1, 1);
-      //coast always has white rock
-      /*
-      if ((r.climate == CLIMATE_OCEAN) || (r.climate == CLIMATE_COAST)) {
-        r.color_rock = glRgba (1.0f);
-        if (x % 2)
-          r.flags_shape |= REGION_FLAG_BEACH;
-        else
-          r.flags_shape |= REGION_FLAG_BEACH_CLIFF;
-        r.threshold = 1.0f + RandomFloat () * 5.0f;
-      }
-      */
-      //r.color_map = r.color_dirt;
-      //r.flags = 0;
-      //r.topography_large = 0;
-      //r.topography_small = 1;
-      //Temp & Moisture map
-      /*
-      if (r.climate != CLIMATE_OCEAN)
-        r.color_map = glRgba (MathScalar (r.temperature, MIN_TEMP, MAX_TEMP), r.moisture, 0.0f);
-      else
-        r.color_map = glRgba (MathScalar (r.temperature, MIN_TEMP, MAX_TEMP), r.moisture, 1.0f);
-        */
-      /*
-      if (r.climate != CLIMATE_OCEAN)
-        r.color_map = r.color_rock;
-      else
-        r.color_map = glRgba (0.0f, 0.0f, 1.0f);
-
-        */
-      /*
+    
+      
       if (r.climate != CLIMATE_OCEAN) {
-        r.color_map = glRgba (r.temperature, 1.0f - r.temperature * 2, 1.0f - r.temperature);
+        //r.color_map = glRgba (r.temperature, 1.0f - r.temperature * 2, 1.0f - r.temperature);
+        r.color_map = glRgba (r.elevation);
         r.color_map.Clamp ();
-      } else
-        r.color_map = glRgba (0.0f, 0.0f, 1.0f);
-*/
+        if (r.climate == CLIMATE_RIVER) 
+          r.color_map = glRgba (0.0f, 0.5f, 1.0f);
+      }
+
+
       continent[x][y] = r;
     }
   }
@@ -815,7 +1034,7 @@ GLrgba RegionColorGet (int world_x, int world_y, SurfaceColor c)
   r1 = region (origin.x + 1, origin.y);
   r2 = region (origin.x, origin.y + 1);
   r3 = region (origin.x + 1, origin.y + 1);
-   
+  //return r0.color_grass;////////////////////////////////////////////////////   
   switch (c) {
   case SURFACE_COLOR_GRASS:
     c0 = r0.color_grass;
@@ -906,6 +1125,7 @@ float RegionElevation (int world_x, int world_y)
   GLcoord   ul, br; //Upper left and bottom-right corners
   GLvector2 blend;
   bool      left;
+  float     result;
 
   esmall = Entropy (world_x, world_y);
   elarge = Entropy ((float)world_x / LARGE_SCALE, (float)world_y / LARGE_SCALE);
@@ -926,8 +1146,11 @@ float RegionElevation (int world_x, int world_y)
   br.x = (world_x + BLEND_DISTANCE) / REGION_SIZE;
   br.y = (world_y + BLEND_DISTANCE) / REGION_SIZE;
 
-  if (ul == br) 
-    return do_height (region (ul.x, ul.y), offset, bias, esmall, elarge);
+  if (ul == br) {
+    rul = region (ul.x, ul.y);
+    result = do_height (rul, offset, bias, esmall, elarge);
+    return do_height_noblend (result, rul, offset, bias);
+  }
   rul = region (ul.x, ul.y);
   rur = region (br.x, ul.y);
   rbl = region (ul.x, br.y);
@@ -937,6 +1160,7 @@ float RegionElevation (int world_x, int world_y)
   eur = do_height (rur, offset, bias, esmall, elarge);
   ebl = do_height (rbl, offset, bias, esmall, elarge);
   ebr = do_height (rbr, offset, bias, esmall, elarge);
-  return MathInterpolateQuad (eul, eur, ebl,ebr, blend, left);
+  result = MathInterpolateQuad (eul, eur, ebl,ebr, blend, left);
+  return do_height_noblend (result, rul, offset, bias);
 
 }

@@ -36,6 +36,23 @@ GLcoord GLcoord::operator- (const int& c)
   return result;
 }
 
+
+GLcoord GLcoord::operator* (const GLcoord& c)
+{
+  GLcoord result;
+  result.x = x * c.x;
+  result.y = y * c.y;
+  return result;
+}
+
+GLcoord GLcoord::operator* (const int& c)
+{
+  GLcoord result;
+  result.x = x * c;
+  result.y = y * c;
+  return result;
+}
+
 GLcoord GLcoord::operator+ (const GLcoord& c)
 {
   GLcoord result;

@@ -101,12 +101,14 @@ void WaterRender (bool underwater)
 
   glBindTexture (GL_TEXTURE_2D, RegionMap ());
   glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
+  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
   glEnable (GL_TEXTURE_2D);
-  glEnable (GL_BLEND);
+  glDisable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glColor4f (1.0f, 1.0f, 1.0f, 0.5f);
-  //draw_water (1);
-  //return;
+  glColor3f (1.0f, 1.0f, 1.0f);
+  draw_water (1);
+  return;
   if (!underwater) {
     t = TextureFromName ("water1.bmp", MASK_LUMINANCE);
     t = TextureFromName ("water.bmp");
@@ -114,7 +116,7 @@ void WaterRender (bool underwater)
   	//glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
     glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
     //glBlendFunc (GL_ZERO, GL_SRC_COLOR);
-    //glBlendFunc (GL_ONE, GL_ONE);
+    glBlendFunc (GL_ONE, GL_ONE);
     glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
     draw_water (256);
   }
@@ -389,6 +391,11 @@ void Render (void)
   glRotatef (angle.z, 0.0f, 0.0f, 1.0f);
   glTranslatef (-pos.x, -pos.y, -pos.z);
   SkyRender ();
+  if (world_debug) {
+    glDisable (GL_FOG);
+    glFogf(GL_FOG_START, 2047);				// Fog Start Depth
+    glFogf(GL_FOG_END, 2048);				// Fog End Depth
+  }
   SceneRender ();
   if (terrain_debug)
     SceneRenderDebug (terrain_debug);

@@ -1,4 +1,4 @@
-#define REGION_SIZE       48
+#define REGION_SIZE       64
 #define REGION_HALF       (REGION_SIZE / 2)
 #define REGION_GRID       128
 #define REGION_CENTER     (REGION_GRID / 2)
@@ -13,7 +13,12 @@
 #define REGION_FLAG_TIERED      0x0080
 #define REGION_FLAG_CANYON_NS   0x0100
 #define REGION_FLAG_NOBLEND     0x0200
+#define REGION_FLAG_RIVERN      0x1000
+#define REGION_FLAG_RIVERE      0x2000
+#define REGION_FLAG_RIVERS      0x4000
+#define REGION_FLAG_RIVERW      0x8000
 
+#define REGION_FLAG_RIVER_ANY   0xf000
 
 #define FLOWERS                 3
 
@@ -23,6 +28,7 @@ enum Climate
   CLIMATE_OCEAN,
   CLIMATE_COAST,
   CLIMATE_MOUNTAIN,
+  CLIMATE_RIVER,
 };
 //#define REGION_FLAG_DESERT      0x4000
 
@@ -39,6 +45,7 @@ struct Region
   float     temperature;
   float     moisture;
   float     threshold;
+  float     river_width;
   float     beach_threshold;
   GLrgba    color_map;
   GLrgba    color_rock;
