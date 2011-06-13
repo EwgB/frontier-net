@@ -23,8 +23,8 @@
 #define BLEND_DISTANCE    (REGION_SIZE / 4)
 //#define BLEND_DISTANCE    1
 #define DITHER_SIZE       (REGION_SIZE / 2)
-#define OCEAN_BUFFER      2 //The number of regions around the edge which must be ocean
-#define COAST_DEPTH       2 // how many blocks inward do we find sand
+#define OCEAN_BUFFER      20 //The number of regions around the edge which must be ocean
+#define COAST_DEPTH       4 // how many blocks inward do we find sand
 #define FLOWER_PALETTE    (sizeof (flower_palette) / sizeof (GLrgba))
 
 #define NNORTH             "Northern"
@@ -57,7 +57,7 @@ static GLrgba       flower_palette[] = {
   {1.0f, 0.0f, 0.5f, 1.0f}, //Maroon
 };
 
-static Region       ocean = {"EDGE",    0,  -20.0f,   -20.0f,   0,     0,  REGION_FLAG_NOBLEND,  CLIMATE_OCEAN, 0.5f, 1.0f};
+//static Region       ocean = {"EDGE",    0,  -20.0f,   -20.0f,   0,     0,  REGION_FLAG_NOBLEND,  CLIMATE_OCEAN, 0.5f, 1.0f};
 
 
 static Region       continent[REGION_GRID][REGION_GRID];
@@ -71,7 +71,7 @@ static unsigned     map_id;
 static Region region (int x, int y)
 {
   if (x < 0 || y < 0 || x >= REGION_GRID || y >= REGION_GRID)
-    return ocean;
+    return continent[0][0];
   return continent[x][y];
 
 }
@@ -156,88 +156,125 @@ static bool climate_present (int x, int y, int radius, Climate c)
 
 }
 
+static bool try_river (int start_x, int start_y, int id)
+{
+
+  Region            r;
+  Region*           neighbor;
+  vector<GLcoord>   path;
+  GLcoord           selected;
+  GLcoord           last_move;
+  GLcoord           to_coast;
+  int               x, y;
+  unsigned          d;
+  float             lowest;
+
+  x = start_x;
+  y = start_y;
+  while (1) {
+    r = continent[x][y];
+    //If we run into the ocean, then we're done.
+    if (r.climate == CLIMATE_OCEAN) 
+      break;
+    if (r.climate == CLIMATE_MOUNTAIN) 
+      return false;
+    //If we run into a river, we've become a tributary.
+    if (r.climate == CLIMATE_RIVER) {
+      //don't become a tributary at the start of a river. Looks odd.
+      if (r.river_segment < 7)
+        return false;
+      break;
+    }
+    lowest = r.topography_bias;
+    to_coast = find_direction (x, y);
+    //lowest = 999.9f;
+    selected.Clear ();
+    for (d = 0; d < 4; d++) {
+      neighbor = &continent[x + direction[d].x][y + direction[d].y];
+      //Don't reverse course into ourselves
+      if (last_move == (direction[d] * -1))
+        continue;
+      //Don't head directly AWAY from the coast
+      if (direction[d] == to_coast * -1)
+        continue;
+      if (neighbor->topography_bias <= lowest) {
+        selected = direction[d];
+        lowest = neighbor->topography_bias;
+      }
+    }
+    //If everthing around us is above us, we can't flow downhill
+    if (!selected.x && !selected.y) //Let's just head for the edge of the map
+      selected = to_coast;
+    last_move = selected;
+    x += selected.x;
+    y += selected.y;
+    path.push_back (selected);
+  }
+  //If the river is too short, ditch it.
+  if (path.size () < (REGION_GRID / 4))
+    return false;
+  //The river is good. Place it.
+  x = start_x;
+  y = start_y;
+  for (d = 0; d < path.size (); d++) {
+    r = continent[x][y];
+    if (!d)
+      sprintf (r.title, "River%d-Start", id);
+    else if (d == path.size () - 1) 
+      sprintf (r.title, "River%d-End", id);
+    else
+      sprintf (r.title, "River%d-%d", id, d);
+    r.flags_shape |= REGION_FLAG_NOBLEND;
+    r.topography_small *= 0.6f;
+    r.river_id = id;
+    r.river_segment = d;
+    r.river_width = min ((float)d * 0.05f, 1.0f);
+    r.climate = CLIMATE_RIVER;
+    selected = path[d];
+    neighbor = &continent[x + selected.x][y + selected.y];
+    if (selected.y == -1) {//we're moving north
+      neighbor->flags_shape |= REGION_FLAG_RIVERS;
+      r.flags_shape |= REGION_FLAG_RIVERN;
+    }
+    if (selected.y == 1) {//we're moving south
+      neighbor->flags_shape |= REGION_FLAG_RIVERN;
+      r.flags_shape |= REGION_FLAG_RIVERS;
+    }
+    if (selected.x == -1) {//we're moving west
+      neighbor->flags_shape |= REGION_FLAG_RIVERE;
+      r.flags_shape |= REGION_FLAG_RIVERW;
+    }
+    if (selected.x == 1) {//we're moving east
+      neighbor->flags_shape |= REGION_FLAG_RIVERW;
+      r.flags_shape |= REGION_FLAG_RIVERE;
+    }
+    continent[x][y] = r;
+    x += selected.x;
+    y += selected.y;
+  }
+  return true;
+
+
+
+}
+
 static void do_rivers ()
 {
 
-  Region      r;
-  Region*     neighbor;
+  int         rivers;
+  int         cycles;
   int         x, y;
-  int         i, length;
-  int         d;
-  GLcoord     selected;
-  GLcoord     last_move;
-  GLcoord     to_coast;
-  float       lowest;
-  float       depth;
 
-  //return;
-  for (i = 0; i < 29; i++) {
+  rivers = 0;
+  cycles = 0;
+  while (rivers < 5 && cycles < 100) {
     x = REGION_CENTER + (RandomVal () % 30) - 15;
     y = REGION_CENTER + (RandomVal () % 30) - 15;
-    length = 0;
-    depth = 0.5f;
-    last_move.Clear ();
-    while (1) {
-      r = continent[x][y];
-      //If we run into the ocean, then we're done.
-      if (r.climate == CLIMATE_OCEAN) 
-        break;
-      //If we run into a river, we've become a tributary.
-      if (r.climate == CLIMATE_RIVER) 
-        break;
-      r.river_width = depth;
-      r.climate = CLIMATE_RIVER;
-      sprintf (r.title, "River%d-%d", i, length);
-      //r.flags_shape |= REGION_FLAG_NOBLEND; 
-      lowest = r.topography_bias;
-      to_coast = find_direction (x, y);
-      //lowest = 999.9f;
-      selected.Clear ();
-      for (d = 0; d < 4; d++) {
-        neighbor = &continent[x + direction[d].x][y + direction[d].y];
-        //Don't reverse course into ourselves
-        if (last_move == (direction[d] * -1))
-          continue;
-        //Don't head directly AWAY from the coast
-        if (direction[d] == to_coast * -1)
-          continue;
-        if (neighbor->topography_bias <= lowest) {
-          selected = direction[d];
-          lowest = neighbor->topography_bias;
-        }
-      }
-      //If everthing around us is above us, we can't flow downhill
-      if (!selected.x && !selected.y) //Let's just head for the edge of the map
-        selected = to_coast;
-      neighbor = &continent[x + selected.x][y + selected.y];
-      if (selected.y == -1) {//we're moving north
-        neighbor->flags_shape |= REGION_FLAG_RIVERS;
-        r.flags_shape |= REGION_FLAG_RIVERN;
-      }
-      if (selected.y == 1) {//we're moving south
-        neighbor->flags_shape |= REGION_FLAG_RIVERN;
-        r.flags_shape |= REGION_FLAG_RIVERS;
-      }
-      if (selected.x == -1) {//we're moving west
-        neighbor->flags_shape |= REGION_FLAG_RIVERE;
-        r.flags_shape |= REGION_FLAG_RIVERW;
-      }
-      if (selected.x == 1) {//we're moving east
-        neighbor->flags_shape |= REGION_FLAG_RIVERW;
-        r.flags_shape |= REGION_FLAG_RIVERE;
-      }
-      continent[x][y] = r;
-      //If we didn't find any lower neighbors, then this is a dead end.
-      if (!selected.x && !selected.y)
-        break;
-      last_move = selected;
-      x += selected.x;
-      y += selected.y;
-      depth = min (depth + 0.5f, 45);
-      length++;
-    }
-
+    if (try_river (x, y, rivers)) 
+      rivers++;
+    cycles++;
   }
+  cycles = 0;
 
 }
 
@@ -361,10 +398,11 @@ static float do_height_noblend (float val, Region r, GLvector2 offset, float bia
     GLvector2   cen;
     float       strength;
     float       delta;
+    //float       threshold;
 
     cen.x = abs ((offset.x - 0.5f) * 2.0f);
     cen.y = abs ((offset.y - 0.5f) * 2.0f);
-    strength = glVectorLength (cen) - 0.1f;
+    strength = glVectorLength (cen) - 0.0f;
     if (r.flags_shape & REGION_FLAG_RIVERN && offset.y < 0.5f)
       strength = min (strength, cen.x);
     if (r.flags_shape & REGION_FLAG_RIVERS && offset.y >= 0.5f)
@@ -373,20 +411,22 @@ static float do_height_noblend (float val, Region r, GLvector2 offset, float bia
       strength = min (strength, cen.y);
     if (r.flags_shape & REGION_FLAG_RIVERE && offset.x >= 0.5f) 
       strength = min (strength, cen.y);
-    if (strength < 0.9f) {
-      //strength *= 2.0f;
+    if (strength < 0.5f) {
+      strength *= 2.0f;
       //strength *=  1.0f / 0.75f;
       //strength +=  0.1f;
-      if (strength < 0.25f) { //Curve off the bottom of the river.
-        strength *= 4.0f;
+      //threshold = 0.5f;
+      /*
+      if (strength < threshold) { //Curve off the bottom of the river.
+        strength *= 1.0f / threshold;
         strength *= strength;
-        strength /= 4.0f;
-      }
+        strength /= 1.0f / threshold;
+      }*/
       strength = 1.0f - strength;
-      strength *= strength;
-      strength *= strength;
+      //strength *= strength;
+      //strength *= strength;
       strength = 1.0f - strength;
-      delta = (val - bias) + 3.0f;
+      delta = (val - bias) + 2.0f * r.river_width;
       val -= (delta) * (1.0f - strength);
     }
   }
@@ -403,6 +443,7 @@ static float do_height (Region r, GLvector2 offset, float bias, float esmall, fl
 
   esmall *= r.topography_small;
   elarge *= r.topography_large;
+  //Modify the detail values before they are applied
   if (r.flags_shape & REGION_FLAG_CRATER) {
     if (esmall > 0.3f)
       esmall = 0.6f - esmall * 2;
@@ -434,102 +475,13 @@ static float do_height (Region r, GLvector2 offset, float bias, float esmall, fl
     strength = max (strength, 0.2f);
     esmall *= strength;
   }
-
-
-
-
+  //Apply the values!
   val = esmall * SMALL_STRENGTH + elarge * LARGE_STRENGTH;
   val += bias;
-
-  /*
-  if (r.flags_shape & REGION_FLAG_RIVERN) {
-    float cen;
-    cen = abs ((offset.x - 0.5f) * 2.0f);
-    if (cen < 0.5f) {
-      cen *= 2.0f;
-      //cen *= 1.3f;
-      //cen += 0.3f;
-      if (cen < 0.5f) { //Curve off the bottom of the river.
-        cen *= 2.0f;
-        cen *= cen;
-        cen /= 2.0f;
-      }
-      val -= r.river_width * (1.0f - cen);
-    }
-  }
-  */
-/*
-  if (r.flags_shape & REGION_FLAG_RIVER_ANY) {
-    GLvector2   cen;
-    float       strength;
-
-    cen.x = abs ((offset.x - 0.5f) * 2.0f);
-    cen.y = abs ((offset.y - 0.5f) * 2.0f);
-    //if (r.flags_shape & REGION_FLAG_RIVERS && offset.y > 0.5f)
-      //strength = cen.x;
-    strength = glVectorLength (cen);
-    if (r.flags_shape & REGION_FLAG_RIVERN && offset.y < 0.5f)
-      strength = min (strength, cen.x);
-    if (r.flags_shape & REGION_FLAG_RIVERS && offset.y >= 0.5f)
-      strength = min (strength, cen.x);
-    if (r.flags_shape & REGION_FLAG_RIVERW && offset.x < 0.5f) 
-      strength = min (strength, cen.y);
-    if (r.flags_shape & REGION_FLAG_RIVERE && offset.x >= 0.5f) 
-      strength = min (strength, cen.y);
-      //strength = glVectorLength (cen);
-    //} else
-    if (strength < 0.5f) {
-      strength *= 2.0f;
-      if (strength < 0.5f) { //Curve off the bottom of the river.
-        strength *= 2.0f;
-        strength *= strength;
-        strength /= 2.0f;
-      }
-      val -= r.river_width * (1.0f - strength);
-    }
-  }
-
-  */
-  /*
-
-  if (r.flags_shape & REGION_FLAG_RIVERN && offset.y < 0.75f) {
-    float cen;
-    cen = abs ((offset.x - 0.5f) * 2.0f);
-    if (cen < 0.5f) {
-      cen *= 2.0f;
-      //cen *= 1.3f;
-      //cen += 0.3f;
-      if (cen < 0.5f) { //Curve off the bottom of the river.
-        cen *= 2.0f;
-        cen *= cen;
-        cen /= 2.0f;
-      }
-      val -= r.river_width * (1.0f - cen);
-    }
-  }
-  if (r.flags_shape & REGION_FLAG_RIVERE && offset.x > 0.5f) {
-    float cen;
-    cen = abs ((offset.y - 0.5f) * 2.0f);
-    if (cen < 0.5f) {
-      cen *= 2.0f;
-      //cen *= 1.3f;
-      //cen += 0.3f;
-      if (cen < 0.5f) { //Curve off the bottom of the river.
-        cen *= 2.0f;
-        cen *= cen;
-        cen /= 2.0f;
-      }
-      val -= r.river_width * (1.0f - cen);
-    }
-  }
-  */
-
-
-
+  //Modify the final value.
   if (r.flags_shape & REGION_FLAG_MESAS) {
     float    x = abs (offset.x - 0.5f) / 5;
     float    y = abs (offset.y - 0.5f) / 5;
-    //float    y = abs (offset.y - 0.5f);
     if ((esmall + 0.01f) < (x + y)) {
       val += 5;
     }
@@ -571,7 +523,7 @@ Region RegionGet (float x, float y)
   x /= REGION_SIZE;
   y /= REGION_SIZE;
   if (x < 0 || y < 0 || x >= REGION_GRID || y >= REGION_GRID)
-    return ocean;
+    return continent[0][0];
   return continent[(int)x][(int)y];
 
 }
@@ -587,23 +539,16 @@ Region RegionGet (int x, int y)
   x /= REGION_SIZE;
   y /= REGION_SIZE;
   if (x < 0 || y < 0 || x >= REGION_GRID || y >= REGION_GRID)
-    return ocean;
+    return continent[0][0];
   return continent[x][y];
 
 }
-
 
 void    RegionInit ()
 {
 
   int         x, y;
   Region      r;
-  bool        is_ocean;
-  ///int         ocean_buffer[REGION_GRID];
-  GLcoord     from_center;
-  GLcoord     plot;
-  float       fdist;
-  float       depth;
 
   //Fill in the dither table - a table of random offsets
   for (x = 0; x < DITHER_SIZE; x++) {
@@ -612,6 +557,28 @@ void    RegionInit ()
       dithermap[x][y].y = RandomVal () % DITHER_SIZE + RandomVal () % DITHER_SIZE;
     }
   }
+  //Set some defaults
+  for (x = 0; x < REGION_GRID; x++) {
+    for (y = 0; y < REGION_GRID; y++) {
+      memset (&r, 0, sizeof (Region));
+      continent[x][y] = r;
+    }
+  }
+
+}
+  
+void    RegionGenerate ()
+{
+
+  int         xx, yy;
+  int         x, y;
+  Region      r;
+  bool        is_ocean;
+  GLcoord     from_center;
+  GLcoord     plot;
+  float       fdist;
+  float       depth;
+
   //Set some defaults
   for (x = 0; x < REGION_GRID; x++) {
     for (y = 0; y < REGION_GRID; y++) {
@@ -627,15 +594,8 @@ void    RegionInit ()
       if (fdist > 1.0f)
         fdist = 1.0f + (fdist - 1.0f) * 5;
       fdist = 1.0f - fdist;
-      /*
-      if (fdist > 1.0f)
-        fdist = 1.0f + (fdist - 1.0f) * 5;
-        */
-      //fdist *= fdist;
       fdist += (Entropy ((x + 47) * 3, (y + 22) * 3) - 0.2f) * 3;
-      //r.elevation = min (fdist, 0);
       r.elevation = fdist / 2;
-      //depth = min ((fdist - 1.0f) * 3.0f, 1.0f);
       r.topography_bias = 1.0f + r.elevation * 5;
       r.topography_large = 0.3f + Entropy (x, y) * 0.7f;
       r.topography_large = 0.0f;
@@ -645,8 +605,6 @@ void    RegionInit ()
       continent[x][y] = r;
     }
   }
-
-
   //define the deep oceans at the edge of the world
   for (x = 0; x < REGION_GRID; x++) {
     for (y = 0; y < REGION_GRID; y++) {
@@ -677,10 +635,6 @@ void    RegionInit ()
       }        
     }
   }
-
-
-  int     xx, yy;
-
   //now define the coast 
   for (x = 1; x < REGION_GRID - 1; x++) {
     for (y = 1; y < REGION_GRID - 1; y++) {
@@ -708,8 +662,6 @@ void    RegionInit ()
       }
     }
   }
-
-
   //now define the deep oceans 
   for (x = 0; x < REGION_GRID - 1; x++) {
     for (y = 0; y < REGION_GRID - 1; y++) {
@@ -737,7 +689,7 @@ void    RegionInit ()
   int     step;
   float   height;
 
-  for (x = 0; x < 0; x++) {
+  for (x = 0; x < 2; x++) {
     mtn_size = 3;
     if (!find_plot (mtn_size, &plot))
       continue;
@@ -803,20 +755,23 @@ void    RegionInit ()
       }       
       moist = max (moist, 0);
       r.moisture = moist;
+      //Rivers always give some moisture
       if (r.climate == CLIMATE_RIVER) 
         r.moisture = max (r.moisture, 0.25f);
       //The north 25% is max cold.  The south 25% is all tropical
       temp = ((float)y - (REGION_GRID / 4)) / REGION_CENTER;
-      //oceans have a moderating effect
-      if (r.climate == CLIMATE_OCEAN) {
-        temp = (temp + 0.5f) / 2.0f;
-        r.moisture = 1.0f;
-        moist = 1.0f;
-      }
       if (r.mountain_height) {
         temp -= (float)r.mountain_height * 0.2f;
       }
       temp = clamp (temp, MIN_TEMP, MAX_TEMP);
+      //oceans have a moderating effect
+      if (r.climate == CLIMATE_OCEAN) {
+        if (temp > 0.99f)
+          temp = temp;
+        temp = (temp + 0.5f) / 2.0f;
+        r.moisture = 1.0f;
+        moist = 1.0f;
+      }
       r.temperature = temp;
       continent[x][y] = r;
     }
@@ -994,8 +949,9 @@ void    RegionInit ()
       }
       //r.color_atmosphere = (glRgba (0.0f, 1.0f, 1.0f) * 1 + r.color_grass) / 2;
       //r.color_atmosphere = glRgba (r.moisture / 2, r.moisture, 1.0f);
-    /*
-      
+      r.color_map = glRgba (r.temperature, 1.0f - r.temperature * 2, 1.0f - r.temperature);
+      r.color_map.Clamp ();
+      /*
       if (r.climate != CLIMATE_OCEAN) {
         //r.color_map = glRgba (r.temperature, 1.0f - r.temperature * 2, 1.0f - r.temperature);
         r.color_map = glRgba (r.elevation);

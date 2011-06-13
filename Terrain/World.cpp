@@ -150,7 +150,6 @@ float WorldElevation (float x, float y)
 
 }
 
-
 bool WorldPointAvailable (int x, int y)
 {
 
@@ -186,6 +185,22 @@ GLvector WorldPosition (int x, int y)
 
 }
 
+
+void WorldPurge ()
+{
+
+  int     x, y;
+
+  for (y = 0; y < PAGE_GRID; y++) {
+    for (x = 0; x < PAGE_GRID; x++) {
+      if (page[x][y])
+        delete page[x][y];
+      page[x][y] = NULL;
+    }
+  }
+
+}
+
 void WorldRenderDebug ()
 {
 
@@ -213,9 +228,7 @@ void WorldUpdate (long stop)
     walk.Walk (PAGE_GRID);
   }  
 
-
 }
-
 
 /*-----------------------------------------------------------------------------
   Request an update to a specific zone.  This can be called by Terrains, 

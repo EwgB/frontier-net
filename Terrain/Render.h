@@ -5,3 +5,4 @@ void RenderCreate (int width, int height, int bits, bool fullscreen);
 int  RenderMaxDimension ();
 void RenderCanvasBegin (int left, int right, int bottom, int top, int size);
 void RenderCanvasEnd ();
+void RenderClick (int x, int y);

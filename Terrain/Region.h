@@ -1,6 +1,6 @@
-#define REGION_SIZE       16
+#define REGION_SIZE       64
 #define REGION_HALF       (REGION_SIZE / 2)
-#define REGION_GRID       64
+#define REGION_GRID       128
 #define REGION_GRID_EDGE  (REGION_GRID + 1)
 #define REGION_CENTER     (REGION_GRID / 2)
 
@@ -35,8 +35,11 @@ enum Climate
 
 struct Region
 {
-  char      title[30];
+  char      title[50];
   int       mountain_height;
+  int       river_id;
+  int       river_segment;
+  float     river_width;
   float     elevation;
   float     topography_bias;
   float     topography_small;
@@ -46,7 +49,6 @@ struct Region
   float     temperature;
   float     moisture;
   float     threshold;
-  float     river_width;
   float     beach_threshold;
   GLrgba    color_map;
   GLrgba    color_rock;
@@ -66,3 +68,4 @@ float     RegionElevation (int world_x, int world_y);
 void      RegionInit ();
 unsigned  RegionMap ();
 float     RegionWaterLevel (int world_x, int world_y);
+void      RegionGenerate ();

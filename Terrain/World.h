@@ -7,3 +7,4 @@ void        WorldRenderDebug ();
 bool        WorldPointAvailable (int x, int y);
 GLrgba      WorldSurfaceColor (int x, int y, SurfaceColor sc);
 void        WorldUpdateZone (int world_x, int world_y, long stop);
+void        WorldPurge ();

@@ -17,7 +17,10 @@
 #include "Texture.h"
 #include "World.h"
 
+//Lower values make the terrain more precise at the expense of more polygons
 #define TOLERANCE         0.3f
+//Nower numbers make the normals more extreme, exaggerate the lighting
+#define NORMAL_SCALING    0.6f
 
 static struct LayerAttributes
 {
@@ -47,47 +50,16 @@ static struct LayerAttributes
   {"grass3.bmp",   0.0f,  0.3f,   2.3f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
   {"grass3.bmp",   0.0f,  0.5f,   2.2f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
   {"grass3.bmp",   0.0f,  0.5f,   2.1f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
-
   {"grass2.bmp",   0.0f,  0.3f,   1.5f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
   {"grass2.bmp",   0.0f,  0.5f,   1.3f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
-  
-
-
+  {"grass2.bmp",   1.0f,  1.0f,   1.2f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
   {"grass3.bmp",   1.0f,  1.0f,   2.0f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
 
-  //{"grass2.bmp",   0.4f,  1.0f,   1.3f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
-  //{"grass2.bmp",   0.6f,  1.0f,   1.2f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
-  //{"grass2.bmp",   0.8f,  1.0f,   1.1f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
-  {"grass2.bmp",   1.0f,  1.0f,   1.2f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
-
   {"snow1.bmp",    0.0f,  0.3f,   1.9f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW},
-  //{"snow1.bmp",    0.0f,  0.5f,   1.8f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW},
-  
-  {"snow1.bmp",    0.6f,  0.8f,   1.6f,  SURFACE_SNOW,       SURFACE_COLOR_SNOW},
-  //{"snow1.bmp",    0.6f,  0.8f,   1.6f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW},
+  {"snow1.bmp",    0.6f,  0.8f,   1.6f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW},
   {"snow1.bmp",    0.8f,  0.8f,   1.55f,  SURFACE_SNOW,       SURFACE_COLOR_SNOW},
   {"snow1.bmp",    1.0f,  1.0f,   1.5f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW},
-  
-  //{"grass2.bmp",     0.0f, 0.0f, 0.0f, 0.3f,    1.3f,   SURFACE_GRASS},
-  //{"grass2.bmp",     0.0f, 0.0f, 0.0f, 0.3f,    1.2f,   SURFACE_GRASS},
 
-  /*
-  {"grass3.bmp",     0.1f, 0.5f, 0.1f, 1.0f,    1.1f,   SURFACE_GRASS_EDGE},
-  {"grass3.bmp",     0.2f, 0.6f, 0.1f, 1.0f,    1.0f,   SURFACE_GRASS_EDGE},
-  {"grass3.bmp",     0.3f, 0.7f, 0.3f, 1.0f,    0.9f,   SURFACE_GRASS_EDGE},
- 
-  {"grass2.bmp",     0.1f, 0.5f, 0.1f, 1.0f,    1.1f,   SURFACE_GRASS},
-  {"grass2.bmp",     0.2f, 0.6f, 0.1f, 1.0f,    1.0f,   SURFACE_GRASS},
-  {"grass2.bmp",     0.3f, 0.7f, 0.3f, 1.0f,    0.9f,   SURFACE_GRASS},
-  */
-
-  /*
-  {"clump.bmp",      0.0f, 0.0f, 0.0f, 0.3f,    1.4f,   SURFACE_DEEPGRASS},
-  {"clump.bmp",      0.0f, 0.0f, 0.0f, 0.3f,    1.3f,   SURFACE_DEEPGRASS},
-  {"clump.bmp",      0.2f, 0.5f, 0.2f, 1.0f,    1.2f,   SURFACE_DEEPGRASS},
-  {"clump.bmp",      0.3f, 0.6f, 0.3f, 1.0f,    1.1f,   SURFACE_DEEPGRASS},
-  {"clump.bmp",      0.4f, 0.7f, 0.3f, 1.0f,    1.0f,   SURFACE_DEEPGRASS},
-  */
 
 };
 
@@ -307,6 +279,8 @@ void CTerrain::DoNormals ()
   else
     normal_y = _pos[_walk.x][_walk.y - 1] - _pos[_walk.x][_walk.y + 1];
   _normal[_walk.x][_walk.y] = glVectorCrossProduct (normal_x, normal_y);
+  _normal[_walk.x][_walk.y].z *= NORMAL_SCALING;
+  _normal[_walk.x][_walk.y] = glVectorNormalize (_normal[_walk.x][_walk.y]);
   if (_walk.y <= 1 || _walk.y >= TERRAIN_SIZE) 
     _normal[_walk.x][_walk.y].y = 0;
   _normal[_walk.x][_walk.y] = glVectorNormalize (_normal[_walk.x][_walk.y]);

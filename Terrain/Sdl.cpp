@@ -110,6 +110,8 @@ void SdlUpdate ()
         SDL_ShowCursor (false);
         SDL_WM_GrabInput (SDL_GRAB_ON);
       }
+      if (event.button.button == SDL_BUTTON_LEFT && !InputMouselook ())
+        RenderClick (event.motion.x, event.motion.y);        
       break;
       /*
     case SDL_MOUSEBUTTONDOWN:

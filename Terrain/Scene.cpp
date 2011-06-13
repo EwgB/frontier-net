@@ -15,6 +15,7 @@
 #include "camera.h"
 #include "cgrass.h"
 #include "cterrain.h"
+#include "input.h"
 #include "math.h"
 #include "region.h"
 #include "scene.h"
@@ -22,6 +23,7 @@
 #include "text.h"
 #include "texture.h"
 #include "water.h"
+#include "world.h"
 
 #define GRASS_GRID      5
 #define GRASS_HALF      (GRASS_GRID / 2)
@@ -58,7 +60,6 @@ static void terrain_update (int x, int y, int dist, long stop)
   if (x < 0 || x >= WORLD_GRID || y < 0 || y >= WORLD_GRID)
     return;
   res = resolution (dist);
-  //terrain[walk.x][walk.y]->TextureSize (resolution (offset));
   if (terrain[x][y] == NULL) {
     terrain[x][y] = new CTerrain;
     terrain[x][y]->Set (x, y, res);
@@ -70,6 +71,34 @@ static void terrain_update (int x, int y, int dist, long stop)
 }
 
 /* Module Functions *************************************************************/
+
+void SceneClear ()
+{
+  
+  int           x, y;
+
+  WorldPurge ();
+  for (x = 0; x < WORLD_GRID; x++) {
+    for (y = 0; y < WORLD_GRID; y++) {
+      if (terrain[x][y]) 
+        delete terrain[x][y];
+      terrain[x][y] = NULL;
+
+    }
+  }
+
+
+}
+
+void SceneGenerate ()
+{
+
+  SceneClear ();
+  RegionGenerate ();
+  WaterBuild ();
+
+}
+
 
 void SceneTexturePurge ()
 {
@@ -95,8 +124,6 @@ CTerrain* SceneTerrainGet (int x, int y)
 
 }
 
-static GLvector   water[REGION_GRID][REGION_GRID];
-
 void SceneInit ()
 {
 
@@ -118,13 +145,7 @@ void SceneInit ()
       grass[x][y].Set (current.x + x - GRASS_HALF, current.y + y - GRASS_HALF);
     }
   }
-  WaterBuild ();
-  for (y = 0; y < REGION_GRID; y++) {
-    for (x = 0; x < REGION_GRID; x++) {
-      water[x][y] = glVector (x * REGION_SIZE, y * REGION_SIZE, RegionWaterLevel (x * REGION_SIZE, y * REGION_SIZE));
-    }
-  }
-  
+  SceneGenerate ();
 
 }
 
@@ -138,6 +159,10 @@ void SceneUpdate (long stop)
   GLvector      camera;
   int           offset;
   int           size;
+
+  if (InputKeyPressed (SDLK_F12))
+    SceneGenerate ();
+
 
   TextPrint ("%d Terrains cached: %s\nTexture memory: %s\n%d Terrain triangles", cached, TextBytes (cached * sizeof (CTerrain)), TextBytes (texture_bytes), polygons);
   camera = CameraPosition ();
@@ -245,7 +270,7 @@ void SceneRender ()
 
 
   WaterRender ();
-
+  /*
   return;
   
   glColor3f (0.4f, 0.7f, 1.0f);
@@ -283,7 +308,7 @@ void SceneRender ()
   }
   glPolygonMode(GL_FRONT, GL_FILL);
 
-
+  */
 
 
 }

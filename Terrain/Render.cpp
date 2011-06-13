@@ -47,12 +47,13 @@ static float          fog_max;
 
 
 /*** static Functions *******************************************************/
-
+/*
 static void draw_water (float tile)
 {
 
   int     edge;
 
+  return;
   edge = REGION_SIZE * REGION_GRID;
   glDisable (GL_CULL_FACE);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -60,21 +61,22 @@ static void draw_water (float tile)
   glNormal3f (0, 0, 1);
 
   glTexCoord2f (0, 0);
-  glVertex3i (0, 0, 0);
-
-  glTexCoord2f (0, -tile);
   glVertex3i (0, edge, 0);
 
+  glTexCoord2f (0, -tile);
+  glVertex3i (0, 0, 0);
+
   glTexCoord2f (tile, -tile);
-  glVertex3i (edge, edge, 0);
+  glVertex3i (edge, 0, 0);
 
   glTexCoord2f (tile, 0);
-  glVertex3i (edge, 0, 0);
+  glVertex3i (edge, edge, 0);
   glEnd ();
 
 
 }
-
+*/
+/*
 void  water_map (bool underwater)
 {
 
@@ -104,10 +106,28 @@ void  water_map (bool underwater)
     draw_water (256);
   }
 
-}
+}*/
 
 
 /*** Module Functions *******************************************************/
+
+
+void RenderClick (int x, int y)
+{
+
+  GLvector    p;
+
+  y -= view_height - REGION_GRID;
+  if (!show_map)
+    return;
+  if (y < 0 || x > REGION_GRID)
+    return;
+  p.x = (float)x * REGION_SIZE;
+  p.y = (float)y * REGION_SIZE;
+  p.z = REGION_SIZE;
+  CameraPositionSet (p);
+
+}
 
 void RenderCanvasBegin (int left, int right, int bottom, int top, int size)
 {
@@ -233,23 +253,24 @@ void RenderTexture (unsigned id)
   glColor3f (1, 1, 1);
 
   glBindTexture (GL_TEXTURE_2D, id);
+  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
   glEnable (GL_TEXTURE_2D);
   glDisable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
   glBegin (GL_QUADS);
 
-  glTexCoord2f (0, 1);
-  glVertex3f (0, 0, 0);
-
   glTexCoord2f (0, 0);
-  glVertex3f (0, 512, 0);
+  glVertex3f (0, (float)view_height, 0);
 
-  glTexCoord2f (1, 0);
-  glVertex3f (512, 512, 0);
+  glTexCoord2f (0, 1);
+  glVertex3f (0, (float)view_height - REGION_GRID, 0);
 
   glTexCoord2f (1, 1);
-  glVertex3f (512, 0, 0);
+  glVertex3f (REGION_GRID, (float)view_height - REGION_GRID, 0);
+
+  glTexCoord2f (1, 0);
+  glVertex3f (REGION_GRID, (float)view_height, 0);
   glEnd ();
 
   glPopMatrix ();
@@ -270,16 +291,9 @@ static float    spin;
 void RenderUpdate (void)		
 {
   
-//  GLvector    pos;
-  float       elapsed;
-//  float       scale;
-//  Region      r;
-//  GLrgba      desired_diffuse, desired_ambient, desired_fog;
-  GLvector2   fog_desired;
   Env*        e;
 
   e = EnvGet ();
-  //spin += elapsed * 30.0f;
   current_diffuse = e->color[ENV_COLOR_LIGHT];
   current_ambient = e->color[ENV_COLOR_AMBIENT];
   current_fog = e->color[ENV_COLOR_FOG];
@@ -334,8 +348,6 @@ void Render (void)
   glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   //glClear (GL_DEPTH_BUFFER_BIT);
   {
-    //float LightAmbient[]= { current_ambient.red, fog.green, fog.blue, 1.0f }; 				// Ambient Light Values ( NEW )
-    //float LightDiffuse[]= { diffuse.red, diffuse.green, diffuse.blue, 1.0f };
     float light[4];			
 
     light[0] = -e->light.x;
@@ -343,35 +355,38 @@ void Render (void)
     light[2] = -e->light.z;
     light[3] = 0.0f;
 
-    glEnable(GL_LIGHT1);							// Enable Light One
-    glEnable(GL_LIGHTING);		// Enable Lighting
+    glEnable(GL_LIGHT1);
+    glEnable(GL_LIGHTING);
     current_ambient = glRgba (0.0f);
-    glLightfv (GL_LIGHT1, GL_AMBIENT, &current_ambient.red);				
-    glLightfv (GL_LIGHT1, GL_DIFFUSE, &e->color[ENV_COLOR_LIGHT].red);	
-    glLightfv (GL_LIGHT1, GL_POSITION,light);			// Position The Light
+    glLightfv (GL_LIGHT1, GL_AMBIENT, &e->color[ENV_COLOR_AMBIENT].red);			
+    GLrgba  c = e->color[ENV_COLOR_LIGHT];
+    //c *= 20.0f;
+    glLightfv (GL_LIGHT1, GL_DIFFUSE, &c.red);	
+    glLightfv (GL_LIGHT1, GL_POSITION,light);
 
   }
-  //glDisable(GL_LIGHTING);		// Enable Lighting
-  glEnable (GL_ALPHA_TEST);
-  glAlphaFunc (GL_GREATER, 0.0f);
   glViewport (0, 0, view_width, view_height);
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-  glShadeModel(GL_SMOOTH);
-  //glShadeModel (GL_FLAT);
-	glDepthFunc (GL_LEQUAL);
+  glDepthFunc (GL_LEQUAL);
   glEnable(GL_DEPTH_TEST);
+
+  //Culling and shading
+  glShadeModel(GL_SMOOTH);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glEnable (GL_CULL_FACE);
   glCullFace (GL_BACK);
+  //Alpha blending  
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glMatrixMode (GL_TEXTURE);
-  glLoadIdentity();
-	glMatrixMode (GL_MODELVIEW);
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  glLoadIdentity();
+  glEnable (GL_ALPHA_TEST);
+  glAlphaFunc (GL_GREATER, 0.0f);
+
   glLineWidth (7.0f);
-  pos = CameraPosition ();
+  //
+
+  //glMatrixMode (GL_MODELVIEW);
   //Move into our unique coordanate system
+  glLoadIdentity();
+  pos = CameraPosition ();
   glScalef (1, -1, 1);
   angle = CameraAngle ();
   glRotatef (angle.x, 1.0f, 0.0f, 0.0f);
@@ -379,15 +394,11 @@ void Render (void)
   glRotatef (angle.z, 0.0f, 0.0f, 1.0f);
   glTranslatef (-pos.x, -pos.y, -pos.z);
   SkyRender ();
-  if (world_debug) {
+  if (world_debug) 
     glDisable (GL_FOG);
-    glFogf(GL_FOG_START, 2047);				// Fog Start Depth
-    glFogf(GL_FOG_END, 2048);				// Fog End Depth
-  }
   SceneRender ();
   if (terrain_debug)
     SceneRenderDebug (terrain_debug);
-  //WaterRender (pos.z <= 0.0f);
   if (world_debug)
     WorldRenderDebug ();
   TextRender ();
