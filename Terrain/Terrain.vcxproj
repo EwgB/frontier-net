@@ -105,6 +105,7 @@
     <ClCompile Include="Sdl.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="VBO.cpp" />
+    <ClCompile Include="Water.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -132,6 +133,7 @@
     <ClInclude Include="Text.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="VBO.h" />
+    <ClInclude Include="Water.h" />
     <ClInclude Include="World.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

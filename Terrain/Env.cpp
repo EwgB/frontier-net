@@ -19,7 +19,7 @@
 #include "text.h"
 #include "texture.h"
 
-#define MAX_DISTANCE        400
+#define MAX_DISTANCE        300
 #define ENV_TRANSITION      0.05f
 #define UPDATE_INTERVAL     200 //milliseconds
 
@@ -39,6 +39,8 @@ static void do_time (float delta)
 
   Region*   r;
   bool      day;
+  int       i;
+  GLrgba    average;
 
   r = (Region*)CameraRegion ();
   day = (hours >= 6 && hours < 21);
@@ -86,15 +88,17 @@ static void do_time (float delta)
       desired.color[ENV_COLOR_NORTH] = glRgba (0.5f, 0.9f, 1.0f);
       desired.color[ENV_COLOR_SOUTH] = glRgba (0.5f, 0.9f, 1.0f);
       desired.color[ENV_COLOR_EAST] = glRgba (0.5f, 0.9f, 1.0f);
-      desired.color[ENV_COLOR_WEST] = glRgba (0.5f, 0.7f, 1.0f);
-      desired.color[ENV_COLOR_TOP] = glRgba (0.0f, 0.0f, 1.0f);
       desired.color[ENV_COLOR_FOG] = glRgba (0.5f, 0.9f, 1.0f);
-      desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 1.0f, 0.5f);
+      desired.color[ENV_COLOR_WEST] = glRgba (0.5f, 0.9f, 1.0f);
+      desired.color[ENV_COLOR_TOP] = glRgba (0.0f, 0.0f, 0.6f);
+      desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 1.0f, 1.0f);
       desired.color[ENV_COLOR_AMBIENT] = glRgba (0.3f, 0.3f, 1.0f);
       desired.light = glVector (-0.5f, 0.0f, -0.5f);
       desired.star_fade = 0.0f;
       desired.fog_max = MAX_DISTANCE;
-      desired.fog_min = MAX_DISTANCE -  MAX_DISTANCE * r->moisture;
+      desired.fog_min = MAX_DISTANCE - MAX_DISTANCE * r->moisture;
+      //desired.fog_min = MAX_DISTANCE / 2;
+      /*
       if (r->has_flowers) {
         desired.color[ENV_COLOR_NORTH] = glRgba (1.0f, 1.0f, 0.8f);
         desired.color[ENV_COLOR_SOUTH] = glRgba (1.0f, 1.0f, 0.8f);
@@ -106,6 +110,18 @@ static void do_time (float delta)
         desired.color[ENV_COLOR_AMBIENT] = glRgba (0.0f, 0.0f, 1.0f);
         desired.fog_min = 1;
       }
+      */
+      for (i = 0; i < ENV_COLOR_COUNT; i++) {
+        //if (i == ENV_COLOR_TOP)
+          //continue;
+        //if (i == ENV_COLOR_LIGHT)
+         // continue;
+        average = desired.color[i] + r->color_atmosphere;
+        desired.color[i] = average / 2;
+        //desired.color[i] = r->color_atmosphere;
+      }
+      //desired.color[ENV_COLOR_TOP] = r->color_atmosphere;
+
       break;
     case 19:
       desired.color[ENV_COLOR_NORTH] = glRgba (0.1f, 0.5f, 0.5f);

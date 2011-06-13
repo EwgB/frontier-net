@@ -28,6 +28,7 @@
 #include "texture.h"
 #include "text.h"
 #include "world.h"
+#include "water.h"
 
 static int            view_width;
 static int            view_height;
@@ -74,40 +75,22 @@ static void draw_water (float tile)
 
 }
 
-void WaterRender (bool underwater)
+void  water_map (bool underwater)
 {
-  /*
-  GLtexture*      t;
 
-  t = TextureFromName ("water3.bmp", MASK_LUMINANCE);
-  glBindTexture (GL_TEXTURE_2D, t->id);
-  glEnable (GL_TEXTURE_2D);
-  glEnable (GL_BLEND);
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
-  //draw_water (256);
-  if (!underwater) {
-    glBindTexture (GL_TEXTURE_2D, RegionMap ());
-  	//glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
-    glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
-    glBlendFunc (GL_ONE, GL_SRC_COLOR);
-    //glBlendFunc (GL_ONE, GL_ONE);
-    glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
-    draw_water (1);
-  }
-  */
   GLtexture*      t;
-
 
   glBindTexture (GL_TEXTURE_2D, RegionMap ());
   glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
-  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
+  //glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
   glEnable (GL_TEXTURE_2D);
-  glDisable (GL_BLEND);
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glColor4f (1.0f, 1.0f, 1.0f, 0.5f);
+  glEnable (GL_BLEND);
+//  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glBlendFunc (GL_ONE, GL_ONE);
   glColor3f (1.0f, 1.0f, 1.0f);
+  glDepthMask (false);
   draw_water (1);
+  glDepthMask (true);
   return;
   if (!underwater) {
     t = TextureFromName ("water1.bmp", MASK_LUMINANCE);
@@ -200,7 +183,8 @@ void RenderCreate (int width, int height, int bits, bool fullscreen)
   fovy = FOV;
   if (view_aspect > 1.0f) 
     fovy /= view_aspect; 
-  gluPerspective (fovy, view_aspect, 0.1f, RENDER_DISTANCE);
+  //gluPerspective (fovy, view_aspect, 0.1f, RENDER_DISTANCE);
+  gluPerspective (fovy, view_aspect, 0.1f, 400);
 	glMatrixMode (GL_MODELVIEW);
   size = min (width, height); 
   d = 128;
@@ -324,13 +308,16 @@ void Render (void)
   GLvector        pos;
   GLvector        angle;
   Env*            e;
+  float           water_level;
 
   pos = CameraPosition ();
   e = EnvGet ();
-  if (pos.z >= 0) {
+  water_level = RegionWaterLevel ((int)pos.x, (int)pos.y);
+  water_level = max (water_level, 0);
+  if (pos.z >= water_level) {
     //cfog = (current_diffuse + glRgba (0.0f, 0.0f, 1.0f)) / 2;
-    glFogf(GL_FOG_START, RENDER_DISTANCE / 2);				// Fog Start Depth
-    glFogf(GL_FOG_END, RENDER_DISTANCE);				// Fog End Depth
+    //glFogf(GL_FOG_START, RENDER_DISTANCE / 2);				// Fog Start Depth
+    //glFogf(GL_FOG_END, RENDER_DISTANCE);				// Fog End Depth
     glFogf(GL_FOG_START, e->fog_min);				// Fog Start Depth
     glFogf(GL_FOG_END, e->fog_max);				// Fog End Depth
   } else {
@@ -340,6 +327,7 @@ void Render (void)
   }
   glEnable (GL_FOG);
   glFogi (GL_FOG_MODE, GL_LINEAR);
+  //glFogi (GL_FOG_MODE, GL_EXP);
   glFogfv (GL_FOG_COLOR, &e->color[ENV_COLOR_FOG].red);
   glClearColor (e->color[ENV_COLOR_FOG].red, e->color[ENV_COLOR_FOG].green, e->color[ENV_COLOR_FOG].blue, 1.0f);
   //glClearColor (0, 0, 0, 1.0f);
@@ -399,9 +387,9 @@ void Render (void)
   SceneRender ();
   if (terrain_debug)
     SceneRenderDebug (terrain_debug);
+  //WaterRender (pos.z <= 0.0f);
   if (world_debug)
     WorldRenderDebug ();
-  WaterRender (pos.z <= 0.0f);
   TextRender ();
   if (show_map) 
     RenderTexture (RegionMap ());

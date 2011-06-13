@@ -1,6 +1,7 @@
-#define REGION_SIZE       64
+#define REGION_SIZE       16
 #define REGION_HALF       (REGION_SIZE / 2)
-#define REGION_GRID       128
+#define REGION_GRID       64
+#define REGION_GRID_EDGE  (REGION_GRID + 1)
 #define REGION_CENTER     (REGION_GRID / 2)
 
 #define REGION_FLAG_TEST        0x0001

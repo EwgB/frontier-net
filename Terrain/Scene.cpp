@@ -21,6 +21,7 @@
 #include "sdl.h"
 #include "text.h"
 #include "texture.h"
+#include "water.h"
 
 #define GRASS_GRID      5
 #define GRASS_HALF      (GRASS_GRID / 2)
@@ -117,11 +118,13 @@ void SceneInit ()
       grass[x][y].Set (current.x + x - GRASS_HALF, current.y + y - GRASS_HALF);
     }
   }
+  WaterBuild ();
   for (y = 0; y < REGION_GRID; y++) {
     for (x = 0; x < REGION_GRID; x++) {
       water[x][y] = glVector (x * REGION_SIZE, y * REGION_SIZE, RegionWaterLevel (x * REGION_SIZE, y * REGION_SIZE));
     }
   }
+  
 
 }
 
@@ -241,7 +244,9 @@ void SceneRender ()
   }
 
 
+  WaterRender ();
 
+  return;
   
   glColor3f (0.4f, 0.7f, 1.0f);
   glNormal3f (0, 0, 1);

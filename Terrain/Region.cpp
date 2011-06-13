@@ -23,7 +23,7 @@
 #define BLEND_DISTANCE    (REGION_SIZE / 4)
 //#define BLEND_DISTANCE    1
 #define DITHER_SIZE       (REGION_SIZE / 2)
-#define OCEAN_BUFFER      20 //The number of regions around the edge which must be ocean
+#define OCEAN_BUFFER      2 //The number of regions around the edge which must be ocean
 #define COAST_DEPTH       2 // how many blocks inward do we find sand
 #define FLOWER_PALETTE    (sizeof (flower_palette) / sizeof (GLrgba))
 
@@ -209,8 +209,6 @@ static void do_rivers ()
       //If everthing around us is above us, we can't flow downhill
       if (!selected.x && !selected.y) //Let's just head for the edge of the map
         selected = to_coast;
-      //selected.x = 0;
-      //selected.y = -1;
       neighbor = &continent[x + selected.x][y + selected.y];
       if (selected.y == -1) {//we're moving north
         neighbor->flags_shape |= REGION_FLAG_RIVERS;
@@ -798,7 +796,7 @@ void    RegionInit ()
     moist = 1.0f;
     for (x = 0; x < REGION_GRID; x++) {
       r = continent[x][y];
-      moist -= 1.0f / REGION_CENTER;
+      moist -= 5.0f / REGION_CENTER;
       //Mountains block rainfall
       if (r.climate == CLIMATE_MOUNTAIN) {
         moist -= 0.1f * r.mountain_height;
@@ -928,8 +926,6 @@ void    RegionInit ()
         r.color_grass = glRgbaInterpolate (dry_grass, wet_grass, r.moisture);
       }
 
-
-
       //Devise a random but plausible dirt color
       {
         GLrgba    cold_dirt, warm_dirt, dry_dirt, wet_dirt;
@@ -952,9 +948,19 @@ void    RegionInit ()
         //warm dirt us a fade from wet to dry
         warm_dirt = glRgbaInterpolate (dry_dirt, wet_dirt, r.moisture);
         fade = MathScalar (r.temperature, FREEZING, 1.0f);
-        //Final color is a fade from warm to cold
-        //r.color_dirt = glRgbaInterpolate (cold_dirt, warm_dirt, fade);
-        r.color_dirt = warm_dirt;///////////////////////////////
+        r.color_dirt = glRgbaInterpolate (cold_dirt, warm_dirt, fade);
+      }
+
+      //"atmosphere" is the overall color of the lighting & fog. 
+      {
+
+        GLrgba    humid_air, dry_air, cold_air, warm_air;
+
+        humid_air = glRgba (1.0f, 1.0f, 0.3f);
+        dry_air = glRgba (1.0f, 0.7f, 0.3f);
+        warm_air = glRgbaInterpolate (dry_air, humid_air, r.moisture);
+        cold_air = glRgba (0.3f, 0.7f, 1.0f);
+        r.color_atmosphere = glRgbaInterpolate (cold_air, warm_air, r.temperature);
       }
 
       //Devise a rock color
@@ -981,14 +987,14 @@ void    RegionInit ()
       case CLIMATE_OCEAN:
         break;//We set this when we made the ocean
       case CLIMATE_RIVER:
-        r.color_map = glRgba (0.0f, 1.0f, 1.0f);
+        r.color_map = glRgba (0.0f, 0.0f, 0.6f);
         break;
       default:
         r.color_map = r.color_grass;break;
       }
-      r.color_atmosphere = (glRgba (0.0f, 1.0f, 1.0f) * 1 + r.color_grass) / 2;
-      r.color_atmosphere = glRgba (r.moisture / 2, r.moisture, 1.0f);
-    
+      //r.color_atmosphere = (glRgba (0.0f, 1.0f, 1.0f) * 1 + r.color_grass) / 2;
+      //r.color_atmosphere = glRgba (r.moisture / 2, r.moisture, 1.0f);
+    /*
       
       if (r.climate != CLIMATE_OCEAN) {
         //r.color_map = glRgba (r.temperature, 1.0f - r.temperature * 2, 1.0f - r.temperature);
@@ -997,8 +1003,9 @@ void    RegionInit ()
         if (r.climate == CLIMATE_RIVER) 
           r.color_map = glRgba (0.0f, 0.5f, 1.0f);
       }
+      */
 
-
+      //r.color_map = r.color_atmosphere;
       continent[x][y] = r;
     }
   }

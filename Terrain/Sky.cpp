@@ -13,17 +13,18 @@
 #include "camera.h"
 #include "env.h"
 #include "math.h"
+#include "random.h"
 #include "sdl.h"
 #include "texture.h"
 #include "vbo.h"
 
 #define STAR_TILE   3
 #define DISC        8
-#define SKY_GRID    8
+#define SKY_GRID    12
 #define SKY_EDGE    (SKY_GRID + 1)
 #define SKY_HALF    (SKY_GRID / 2)
-#define SKY_DOME    1.5f
-#define SKY_TILE    3
+#define SKY_DOME    0.5f
+#define SKY_TILE    5
 
 struct skyvert
 {
@@ -99,17 +100,22 @@ static void build_sky ()
   starcube.Create (GL_TRIANGLES, index.size (), vert.size (), &index[0], &vert[0], &normal[0], NULL, &uv[0]);
   */
 
-  int     x, y;
-  int     offset;
-  float   dist;
+  int       x, y;
+  int       offset;
+  float     dist;
+  GLvector2 distance;
 
   for (y = 0; y < SKY_EDGE; y++) {
     for (x = 0; x < SKY_EDGE; x++) {
-      offset = max (abs (x - SKY_HALF), abs (y - SKY_HALF));
-      dist = 1.0f - ((float)offset / (SKY_HALF));
-      vert.push_back (glVector ((float)x - SKY_HALF, (float)y - SKY_HALF, dist * SKY_DOME) - SKY_DOME / 8);
+      distance = glVector ((float)x - SKY_HALF, (float)y - SKY_HALF);
+      //offset = max (abs (x - SKY_HALF), abs (y - SKY_HALF));
+      //dist = 1.0f - ((float)offset / (SKY_HALF));
+      dist = 1.0f - glVectorLength (distance) / (SKY_HALF - 3);
+      //vert.push_back (glVector ((float)x - SKY_HALF, (float)y - SKY_HALF, dist * SKY_DOME) - SKY_DOME / 8);
+      vert.push_back (glVector ((float)x - SKY_HALF, (float)y - SKY_HALF, dist * SKY_DOME));
       normal.push_back (glVector (0.0f, 0.0f, 1.0f));
-      uv.push_back (glVector (((float)x / SKY_GRID) * SKY_TILE, ((float)y / SKY_GRID) * SKY_TILE));
+      //uv.push_back (glVector (((float)x / SKY_GRID) * SKY_TILE, ((float)y / SKY_GRID) * SKY_TILE));
+      uv.push_back (glVector (((float)(x + RandomFloat ()) / SKY_GRID) * SKY_TILE, ((float)(y + RandomFloat ()) / SKY_GRID) * SKY_TILE));
 
     }
   }
@@ -136,6 +142,7 @@ static void build_sky ()
     }
   }
   skydome.Create (GL_TRIANGLES, index.size (), vert.size (), &index[0], &vert[0], &normal[0], NULL, &uv[0]);
+  //skydome.Create (GL_LINE_STRIP, index.size (), vert.size (), &index[0], &vert[0], &normal[0], NULL, &uv[0]);
 
 
 }
@@ -152,7 +159,7 @@ void SkyInit ()
   build_sky ();
   
   tip.env_color = ENV_COLOR_TOP;
-  tip.pos = glVector (0.0f, 0.0f, 0.15f);
+  tip.pos = glVector (0.0f, 0.0f, 0.3f);
   for (int i = 0; i < DISC; i++) {
     angle = 22.5f + (((float)i / DISC) * 360.0f) * DEGREES_TO_RADIANS; 
     sky[i].pos.x = sin (angle);
@@ -194,7 +201,7 @@ void SkyRender ()
 
   GLvector angle;
 
-  return;
+  //return;
   angle = CameraAngle ();
   glPushMatrix ();
   glLoadIdentity ();
@@ -208,6 +215,7 @@ void SkyRender ()
   glDisable (GL_TEXTURE_2D);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   //glBegin (GL_TRIANGLE_FAN);
+  
   glBegin (GL_TRIANGLE_FAN);
   glColor3fv (&tip.color.red);
   glVertex3fv (&tip.pos.x);
@@ -216,6 +224,7 @@ void SkyRender ()
     glVertex3fv (&sky[i % DISC].pos.x);
   }
   glEnd ();
+  
   /*
   glBegin (GL_QUAD_STRIP);
   for (int i = 0; i <= DISC; i++) {
@@ -236,16 +245,43 @@ void SkyRender ()
   skydome.Render ();
 
 
+  GLtexture* t;
 
+  t = TextureFromName ("clouds2.bmp", MASK_LUMINANCE);
 
-  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("clouds2.bmp"));
+  //glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("clouds2.bmp"));
+  glBindTexture (GL_TEXTURE_2D, t->id);
+  //glBindTexture (GL_TEXTURE_2D, 0);
   glColor3f (0.3f,0.3f,0.3f);
-  skydome.Render ();
   //starcube.Render ();
+  glEnable (GL_ALPHA_TEST);
+  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glBlendFunc (GL_ONE, GL_ONE);
+  glColor3f (0.1f,0.1f,0.1f);
+
+  static float    x;
+  float o;
+
+  glMatrixMode (GL_TEXTURE);
+  glLoadIdentity ();
+  x += 0.001f;
+  o = sin (x);
+
+  glAlphaFunc (GL_GREATER, abs (o));
+
+  glTranslatef (x, 0.0f, 5.0f);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINES);
+  //glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glBlendFunc (GL_SRC_COLOR, GL_DST_COLOR);
+  //glBlendFunc (GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
+  glBlendFunc (GL_ONE, GL_ONE);
+  skydome.Render ();
+  glLoadIdentity ();
 
 
+  glMatrixMode (GL_MODELVIEW);
 
-
+  glAlphaFunc (GL_GREATER, 0.0f);
   glEnable (GL_LIGHTING);
   glDepthMask (true);
   glPopMatrix ();
