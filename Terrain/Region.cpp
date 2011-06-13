@@ -362,10 +362,11 @@ static float do_height_noblend (float val, Region r, GLvector2 offset, float bia
   if (r.flags_shape & REGION_FLAG_RIVER_ANY) {
     GLvector2   cen;
     float       strength;
+    float       delta;
 
     cen.x = abs ((offset.x - 0.5f) * 2.0f);
     cen.y = abs ((offset.y - 0.5f) * 2.0f);
-    strength = glVectorLength (cen);
+    strength = glVectorLength (cen) - 0.1f;
     if (r.flags_shape & REGION_FLAG_RIVERN && offset.y < 0.5f)
       strength = min (strength, cen.x);
     if (r.flags_shape & REGION_FLAG_RIVERS && offset.y >= 0.5f)
@@ -374,18 +375,21 @@ static float do_height_noblend (float val, Region r, GLvector2 offset, float bia
       strength = min (strength, cen.y);
     if (r.flags_shape & REGION_FLAG_RIVERE && offset.x >= 0.5f) 
       strength = min (strength, cen.y);
-    if (strength < 0.5f) {
-      strength *= 2.0f;
+    if (strength < 0.9f) {
+      //strength *= 2.0f;
+      //strength *=  1.0f / 0.75f;
+      //strength +=  0.1f;
       if (strength < 0.25f) { //Curve off the bottom of the river.
         strength *= 4.0f;
         strength *= strength;
         strength /= 4.0f;
       }
-      //strength = 1.0f - strength;
-      //strength *= strength;
-      //strength *= strength;
-      //strength = 1.0f - strength;
-      val -= (r.river_width * r.topography_small) * (1.0f - strength);
+      strength = 1.0f - strength;
+      strength *= strength;
+      strength *= strength;
+      strength = 1.0f - strength;
+      delta = (val - bias) + 3.0f;
+      val -= (delta) * (1.0f - strength);
     }
   }
   return val;
@@ -422,6 +426,20 @@ static float do_height (Region r, GLvector2 offset, float bias, float esmall, fl
     if (esmall > max (x, y))
       esmall /= 4.0f;
   }
+  if (r.flags_shape & REGION_FLAG_RIVER_ANY) {
+    GLvector2   cen;
+    float       strength;
+
+    cen.x = abs ((offset.x - 0.5f) * 2.0f);
+    cen.y = abs ((offset.y - 0.5f) * 2.0f);
+    strength = min (cen.x, cen.y);
+    strength = max (strength, 0.2f);
+    esmall *= strength;
+  }
+
+
+
+
   val = esmall * SMALL_STRENGTH + elarge * LARGE_STRENGTH;
   val += bias;
 
@@ -1090,7 +1108,7 @@ GLrgba RegionAtmosphere (int world_x, int world_y)
   
 }
 
-float get_bias (int world_x, int world_y)
+float RegionWaterLevel (int world_x, int world_y)
 {
 
   GLcoord   origin;
@@ -1113,6 +1131,7 @@ float get_bias (int world_x, int world_y)
 
 }
 
+
 float RegionElevation (int world_x, int world_y)
 {
 
@@ -1129,7 +1148,7 @@ float RegionElevation (int world_x, int world_y)
 
   esmall = Entropy (world_x, world_y);
   elarge = Entropy ((float)world_x / LARGE_SCALE, (float)world_y / LARGE_SCALE);
-  bias = get_bias (world_x, world_y);
+  bias = RegionWaterLevel (world_x, world_y);
   origin.x = world_x / REGION_SIZE;
   origin.y = world_y / REGION_SIZE;
   origin.x = clamp (origin.x, 0, REGION_GRID - 1);

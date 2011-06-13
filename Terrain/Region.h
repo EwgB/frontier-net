@@ -64,3 +64,4 @@ GLrgba    RegionAtmosphere (int world_x, int world_y);
 float     RegionElevation (int world_x, int world_y);
 void      RegionInit ();
 unsigned  RegionMap ();
+float     RegionWaterLevel (int world_x, int world_y);

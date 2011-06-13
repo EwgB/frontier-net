@@ -121,7 +121,7 @@ void CPage::DoColor ()
   world_y = (_origin.y * PAGE_SIZE + _walk.y);
   if (_cell[_walk.x][_walk.y].surface == SURFACE_GRASS || _cell[_walk.x][_walk.y].surface == SURFACE_GRASS_EDGE)
     _cell[_walk.x][_walk.y].grass = RegionColorGet (world_x, world_y, SURFACE_COLOR_GRASS);
-  if (_cell[_walk.x][_walk.y].surface == SURFACE_DIRT)
+  if (_cell[_walk.x][_walk.y].surface == SURFACE_DIRT || _cell[_walk.x][_walk.y].surface == SURFACE_DIRT_DARK)
     _cell[_walk.x][_walk.y].dirt = RegionColorGet (world_x, world_y, SURFACE_COLOR_DIRT);
   _cell[_walk.x][_walk.y].rock = RegionColorGet (world_x, world_y, SURFACE_COLOR_ROCK);
   if (_walk.Walk (PAGE_SIZE))
@@ -183,10 +183,12 @@ void CPage::DoSurface ()
     //Sand is only for coastal regions
     if (low <= region.beach_threshold && (region.climate == CLIMATE_COAST))
       _cell[_walk.x][_walk.y].surface = SURFACE_SAND;
+    if (low <= region.topography_bias + region.moisture)
+      _cell[_walk.x][_walk.y].surface = SURFACE_DIRT;
     if (low <= 0 && (region.climate == CLIMATE_RIVER))
-      _cell[_walk.x][_walk.y].surface = SURFACE_DIRT;
+      _cell[_walk.x][_walk.y].surface = SURFACE_DIRT_DARK;
     if (low <= region.topography_bias)
-      _cell[_walk.x][_walk.y].surface = SURFACE_DIRT;
+      _cell[_walk.x][_walk.y].surface = SURFACE_DIRT_DARK;
     if (low <= 2.5f && (region.climate == CLIMATE_OCEAN))
       _cell[_walk.x][_walk.y].surface = SURFACE_SAND;
     //Sand touched by water is dark

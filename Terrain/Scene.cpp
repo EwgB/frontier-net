@@ -94,6 +94,8 @@ CTerrain* SceneTerrainGet (int x, int y)
 
 }
 
+static GLvector   water[REGION_GRID][REGION_GRID];
+
 void SceneInit ()
 {
 
@@ -113,6 +115,11 @@ void SceneInit ()
   for (y = 0; y < GRASS_GRID; y++) {
     for (x = 0; x < GRASS_GRID; x++) {
       grass[x][y].Set (current.x + x - GRASS_HALF, current.y + y - GRASS_HALF);
+    }
+  }
+  for (y = 0; y < REGION_GRID; y++) {
+    for (x = 0; x < REGION_GRID; x++) {
+      water[x][y] = glVector (x * REGION_SIZE, y * REGION_SIZE, RegionWaterLevel (x * REGION_SIZE, y * REGION_SIZE));
     }
   }
 
@@ -232,6 +239,24 @@ void SceneRender ()
       grass[x][y].Render ();
     }
   }
+
+
+
+  
+  glColor3f (0.4f, 0.7f, 1.0f);
+  glNormal3f (0, 0, 1);
+  glDisable (GL_BLEND);
+  glBindTexture (GL_TEXTURE_2D, 0);
+  for (y = 0; y < REGION_GRID - 2; y++) {
+    glBegin (GL_QUAD_STRIP);
+    for (x = 0; x < REGION_GRID - 1; x++) {
+      glVertex3fv (&water[x][y].x);
+      glVertex3fv (&water[x][y + 1].x);
+    }
+    glEnd ();
+  }
+
+
   return;
 
   GLrgba    col;
@@ -252,6 +277,8 @@ void SceneRender ()
     }
   }
   glPolygonMode(GL_FRONT, GL_FILL);
+
+
 
 
 }
