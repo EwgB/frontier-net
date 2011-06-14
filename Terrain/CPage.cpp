@@ -183,11 +183,11 @@ void CPage::DoSurface ()
     //Sand is only for coastal regions
     if (low <= region.beach_threshold && (region.climate == CLIMATE_COAST))
       _cell[_walk.x][_walk.y].surface = SURFACE_SAND;
-    if (low <= region.topography_bias + region.moisture)
+    if (low <= region.geo_bias + region.moisture)
       _cell[_walk.x][_walk.y].surface = SURFACE_DIRT;
     if (low <= 0 && (region.climate == CLIMATE_RIVER))
       _cell[_walk.x][_walk.y].surface = SURFACE_DIRT_DARK;
-    if (low <= region.topography_bias)
+    if (low <= region.geo_bias)
       _cell[_walk.x][_walk.y].surface = SURFACE_DIRT_DARK;
     if (low <= 2.5f && (region.climate == CLIMATE_OCEAN))
       _cell[_walk.x][_walk.y].surface = SURFACE_SAND;

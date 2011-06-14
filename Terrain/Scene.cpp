@@ -93,9 +93,21 @@ void SceneClear ()
 void SceneGenerate ()
 {
 
+  GLvector    camera;
+  GLcoord     current;
+  int         x, y;
+
   SceneClear ();
   RegionGenerate ();
   WaterBuild ();
+  camera = CameraPosition ();
+  current.x = (int)(camera.x) / GRASS_SIZE;
+  current.y = (int)(camera.y) / GRASS_SIZE;
+  for (y = 0; y < GRASS_GRID; y++) {
+    for (x = 0; x < GRASS_GRID; x++) {
+      grass[x][y].Set (current.x + x - GRASS_HALF, current.y + y - GRASS_HALF);
+    }
+  }
 
 }
 
@@ -128,21 +140,11 @@ void SceneInit ()
 {
 
   int         x, y;
-  GLvector    camera;
-  GLcoord     current;
 
-  //Fill in a table to we can quickly look up distances on a grid
+  //Fill in a table so we can quickly look up distances on a grid
   for (y = 0; y <= RENDER_DISTANCE; y++) {
     for (x = 0; x <= RENDER_DISTANCE; x++) {
       dist_table[x][y] = (int)MathDistance (0, 0, (float)x, (float)y);
-    }
-  }
-  camera = CameraPosition ();
-  current.x = (int)(camera.x) / GRASS_SIZE;
-  current.y = (int)(camera.y) / GRASS_SIZE;
-  for (y = 0; y < GRASS_GRID; y++) {
-    for (x = 0; x < GRASS_GRID; x++) {
-      grass[x][y].Set (current.x + x - GRASS_HALF, current.y + y - GRASS_HALF);
     }
   }
   SceneGenerate ();
@@ -160,7 +162,7 @@ void SceneUpdate (long stop)
   int           offset;
   int           size;
 
-  if (InputKeyPressed (SDLK_F12))
+  if (InputKeyPressed (SDLK_F11))
     SceneGenerate ();
 
 

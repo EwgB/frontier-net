@@ -1,4 +1,4 @@
-#define REGION_SIZE       64
+#define REGION_SIZE       32
 #define REGION_HALF       (REGION_SIZE / 2)
 #define REGION_GRID       128
 #define REGION_GRID_EDGE  (REGION_GRID + 1)
@@ -19,6 +19,9 @@
 #define REGION_FLAG_RIVERS      0x4000
 #define REGION_FLAG_RIVERW      0x8000
 
+#define REGION_FLAG_RIVERNS     (REGION_FLAG_RIVERN | REGION_FLAG_RIVERS)
+#define REGION_FLAG_RIVEREW     (REGION_FLAG_RIVERE | REGION_FLAG_RIVERW)
+
 #define REGION_FLAG_RIVER_ANY   0xf000
 
 #define FLOWERS                 3
@@ -36,14 +39,16 @@ enum Climate
 struct Region
 {
   char      title[50];
+  GLcoord   grid_pos;
   int       mountain_height;
   int       river_id;
   int       river_segment;
   float     river_width;
-  float     elevation;
-  float     topography_bias;
-  float     topography_small;
-  float     topography_large;
+  //float     elevation;
+  float     geo_scale; //Number from -1 to 1, lowest to highest elevation
+  float     geo_bias;
+  float     geo_detail;
+  float     geo_large;
   unsigned  flags_shape;
   Climate   climate;
   float     temperature;
@@ -60,11 +65,19 @@ struct Region
   bool      has_flowers;
 };
 
+struct Regionpt
+{
+  float elevation;
+  float water_level;
+  float detail;
+};
+
 Region    RegionGet (int x, int y);
 Region    RegionGet (float x, float y);
 GLrgba    RegionColorGet (int world_x, int world_y, SurfaceColor c);
 GLrgba    RegionAtmosphere (int world_x, int world_y);
 float     RegionElevation (int world_x, int world_y);
+Regionpt  RegionPoint (int world_x, int world_y);
 void      RegionInit ();
 unsigned  RegionMap ();
 float     RegionWaterLevel (int world_x, int world_y);
