@@ -16,6 +16,8 @@ struct pcell
 {
   SurfaceType surface;
   float       elevation;
+  float       water_level;
+  float       detail;
   GLrgba      grass;
   GLrgba      rock;
   GLrgba      dirt;

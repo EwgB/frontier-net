@@ -33,6 +33,7 @@ enum Climate
   CLIMATE_COAST,
   CLIMATE_MOUNTAIN,
   CLIMATE_RIVER,
+  CLIMATE_RIVER_BANK,
 };
 //#define REGION_FLAG_DESERT      0x4000
 
@@ -65,19 +66,12 @@ struct Region
   bool      has_flowers;
 };
 
-struct Regionpt
-{
-  float elevation;
-  float water_level;
-  float detail;
-};
-
 Region    RegionGet (int x, int y);
 Region    RegionGet (float x, float y);
 GLrgba    RegionColorGet (int world_x, int world_y, SurfaceColor c);
 GLrgba    RegionAtmosphere (int world_x, int world_y);
 float     RegionElevation (int world_x, int world_y);
-Regionpt  RegionPoint (int world_x, int world_y);
+Cell      RegionCell (int world_x, int world_y);
 void      RegionInit ();
 unsigned  RegionMap ();
 float     RegionWaterLevel (int world_x, int world_y);

@@ -84,10 +84,22 @@ static float do_height_noblend (float val, Region r, GLvector2 offset, float bia
     }
     //if this river is strictly east / west
     if (r.flags_shape & REGION_FLAG_RIVEREW && !(r.flags_shape & REGION_FLAG_RIVERNS)) {
+      /*
       if (r.grid_pos.x % 2)
         offset.y -= abs (sin (offset.x * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;
       else
         offset.y += abs (sin (offset.x * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;
+        */
+      switch ((r.grid_pos.x + r.grid_pos.y) % 4) {
+      case 0:
+        offset.y -= abs (sin (offset.x * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;break;
+      case 1:
+        offset.y += abs (sin (offset.x * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;break;
+      case 2:
+        offset.y -= abs (sin (offset.x * 180.0f * DEGREES_TO_RADIANS)) * 0.10f;break;
+      case 3:
+        offset.y += abs (sin (offset.x * 180.0f * DEGREES_TO_RADIANS)) * 0.10f;break;
+      }
     }
     
     cen.x = abs ((offset.x - 0.5f) * 2.0f);
@@ -269,6 +281,8 @@ static bool try_river (int start_x, int start_y, int id)
   int               x, y;
   unsigned          d;
   float             lowest;
+  float             water_level;
+  float             water_strength;
 
   x = start_x;
   y = start_y;
@@ -317,20 +331,48 @@ static bool try_river (int start_x, int start_y, int id)
   //The river is good. Place it.
   x = start_x;
   y = start_y;
+  water_strength = 0.01f;
+  water_level = continent[x][y].geo_bias;
   for (d = 0; d < path.size (); d++) {
     r = continent[x][y];
     if (!d)
-      sprintf (r.title, "River%d-Start", id);
+      sprintf (r.title, "River%d-Source", id);
     else if (d == path.size () - 1) 
-      sprintf (r.title, "River%d-End", id);
+      sprintf (r.title, "River%d-Mouth", id);
     else
       sprintf (r.title, "River%d-%d", id, d);
+    //A river in a wet climate should attain full strength after crossing 1/4 of the map
+    water_strength += (1.0f / ((float)REGION_GRID / 4.0f));
     r.flags_shape |= REGION_FLAG_NOBLEND;
     r.river_id = id;
+    r.moisture = 0.5f;
     r.river_segment = d;
-    r.geo_detail = 4.0f;
-    r.river_width = min ((float)d * 0.05f, 1.0f);
+    r.geo_detail = 4.0f + (float)d * 0.5f;
+    r.river_width = min (water_strength, 1);
     r.climate = CLIMATE_RIVER;
+    water_level = min (r.geo_bias, water_level);
+    //We need to flatten out this space, as well as all of its neighbors.
+    r.geo_bias = water_level;
+    {
+
+      int xx, yy;
+
+      water_level = 1;
+      for (xx = x - 2; xx <= x + 2; xx++) {
+        for (yy = y - 2; yy <= y + 2; yy++) {
+          if (continent[xx][yy].climate != CLIMATE_INVALID) 
+            continue;
+          if (!xx && !yy)
+            continue;
+          continent[xx][yy].geo_bias = min (continent[xx][yy].geo_bias, water_level);
+          continent[xx][yy].geo_large = r.geo_large;
+          continent[xx][yy].geo_detail = r.geo_detail;
+          continent[xx][yy].climate = CLIMATE_RIVER_BANK;
+          continent[xx][yy].flags_shape |= REGION_FLAG_NOBLEND;
+          sprintf (continent[xx][yy].title, "River%d-Banks", id);
+        }
+      }
+    }
     selected = path[d];
     neighbor = &continent[x + selected.x][y + selected.y];
     if (selected.y == -1) {//we're moving north
@@ -465,7 +507,7 @@ static void do_blur ()
   lg = new float[REGION_GRID][REGION_GRID];
 
   //Blur some of the attributes
-  for (int passes = 0; passes < 1; passes++) {
+  for (int passes = 0; passes < 5; passes++) {
 
     radius = 3;
     for (x = radius; x < REGION_GRID - radius; x++) {
@@ -573,7 +615,7 @@ static void do_climate ()
     moist = 1.0f;
     for (x = 0; x < REGION_GRID; x++) {
       r = continent[x][y];
-      moist -= 5.0f / REGION_CENTER;
+      moist -= 1.0f / REGION_CENTER;
       //Mountains block rainfall
       if (r.climate == CLIMATE_MOUNTAIN) {
         moist -= 0.1f * r.mountain_height;
@@ -581,8 +623,11 @@ static void do_climate ()
       moist = max (moist, 0);
       r.moisture = moist;
       //Rivers always give some moisture
-      if (r.climate == CLIMATE_RIVER) 
-        r.moisture = max (r.moisture, 0.25f);
+      if (r.climate == CLIMATE_RIVER) {
+        r.moisture = max (r.moisture, 0.75f);
+        moist += 0.2f;
+        moist = min (moist, 1);
+      }
       //The north 25% is max cold.  The south 25% is all tropical
       temp = ((float)y - (REGION_GRID / 4)) / REGION_CENTER;
       if (r.mountain_height) {
@@ -841,7 +886,7 @@ static void do_colors ()
   int       x, y;
   Region    r;
   float     fade;
-  GLrgba    warm_grass, cold_grass, wet_grass, dry_grass;
+  GLrgba    warm_grass, cold_grass, wet_grass, dry_grass, dead_grass;
   GLrgba    cold_dirt, warm_dirt, dry_dirt, wet_dirt;
   GLrgba    humid_air, dry_air, cold_air, warm_air;
   GLrgba    warm_rock, cold_rock;
@@ -851,27 +896,34 @@ static void do_colors ()
       r = continent[x][y];
       //Devise a grass color
 
-      //cold grass is pale and a little blue
-      cold_grass.red = 0.5f + RandomFloat () * 0.2f;
-      cold_grass.green = 0.8f + RandomFloat () * 0.2f;
-      cold_grass.blue = 0.7f + RandomFloat () * 0.2f;
-      //warm grass is deep greens
-      warm_grass.red = RandomFloat () * 0.3f;
-      warm_grass.green = 0.4f + RandomFloat () * 0.6f;
-      warm_grass.blue = RandomFloat () * 0.3f;
-      //Wet grass is a blend of these two
-      fade = 1.0f - MathScalar (r.temperature, 0.0f, 1.0f);
-      fade *= fade;
-      wet_grass = glRgbaInterpolate (warm_grass, cold_grass, fade);
+      //wet grass is deep greens
+      wet_grass.red = RandomFloat () * 0.3f;
+      wet_grass.green = 0.4f + RandomFloat () * 0.6f;
+      wet_grass.blue = RandomFloat () * 0.3f;
       //Dry grass is mostly reds and oranges
       dry_grass.red = 0.7f + RandomFloat () * 0.3f;
       dry_grass.green = 0.5f + RandomFloat () * 0.5f;
       dry_grass.blue = 0.0f + RandomFloat () * 0.3f;
-      //Final color
-      r.color_grass = glRgbaInterpolate (dry_grass, wet_grass, r.moisture);
+      //Dead grass is pale beige
+      dead_grass = glRgba (0.7f, 0.6f, 0.5f);
+      dead_grass *= 0.7f + RandomFloat () * 0.3f;
+      if (r.moisture < 0.5f) {
+        fade = r.moisture * 2.0f;
+        warm_grass = glRgbaInterpolate (dead_grass, dry_grass, fade);
+      } else {
+        fade = (r.moisture - 0.5f) * 2.0f;
+        warm_grass = glRgbaInterpolate (dry_grass, wet_grass, fade);
+      }
+      //cold grass is pale and a little blue
+      cold_grass.red = 0.5f + RandomFloat () * 0.2f;
+      cold_grass.green = 0.8f + RandomFloat () * 0.2f;
+      cold_grass.blue = 0.7f + RandomFloat () * 0.2f;
+      if (r.temperature < FREEZING)
+        r.color_grass = glRgbaInterpolate (cold_grass, warm_grass, r.temperature / FREEZING);
+      else
+        r.color_grass = warm_grass;
 
       //Devise a random but plausible dirt color
-
       //Dry dirts are mostly reds, oranges, and browns
       dry_dirt.red = 0.4f + RandomFloat () * 0.6f;
       dry_dirt.green = 0.4f + RandomFloat () * 0.6f;
@@ -922,20 +974,15 @@ static void do_colors ()
       case CLIMATE_RIVER:
         r.color_map = glRgba (0.0f, 0.0f, 0.6f);
         break;
+      case CLIMATE_RIVER_BANK:
+        r.color_map = glRgba (0.6f, 0.5f, 0.4f);
+        break;
       default:
-        r.color_map = r.color_grass;break;
+        r.color_map = r.color_grass;
+        break;
       }
-      //r.color_map = glRgba (r.temperature, 1.0f - r.temperature * 2, 1.0f - r.temperature);
-      //r.color_map.Clamp ();
-      /*
-      if (r.climate != CLIMATE_OCEAN) {
-        //r.color_map = glRgba (r.temperature, 1.0f - r.temperature * 2, 1.0f - r.temperature);
-        r.color_map = glRgba (r.elevation);
-        r.color_map.Clamp ();
-        if (r.climate == CLIMATE_RIVER) 
-          r.color_map = glRgba (0.0f, 0.5f, 1.0f);
-      }
-      */
+      if (r.geo_scale >= 0.0f)
+        r.color_map *= (r.geo_scale * 0.5f + 0.5f);
       continent[x][y] = r;
     }
   }
@@ -1204,7 +1251,7 @@ float RegionWaterLevel (int world_x, int world_y)
 
 }
 
-
+/*
 float RegionElevation (int world_x, int world_y)
 {
 
@@ -1254,5 +1301,63 @@ float RegionElevation (int world_x, int world_y)
   ebr = do_height (rbr, offset, bias, esmall, elarge);
   result = MathInterpolateQuad (eul, eur, ebl,ebr, blend, left);
   return do_height_noblend (result, rul, offset, bias);
+
+}
+
+*/
+
+Cell RegionCell (int world_x, int world_y)
+{
+
+  float     esmall, elarge;
+  Region    rul, rur, rbl, rbr;//Four corners: upper left, upper right, etc.
+  float     eul, eur, ebl, ebr;
+  float     bias;
+  GLvector2 offset;
+  GLcoord   origin;
+  GLcoord   ul, br; //Upper left and bottom-right corners
+  GLvector2 blend;
+  bool      left;
+  Cell      result;
+
+  esmall = Entropy (world_x, world_y);
+  elarge = Entropy ((float)world_x / LARGE_SCALE, (float)world_y / LARGE_SCALE);
+  bias = RegionWaterLevel (world_x, world_y);
+  origin.x = world_x / REGION_SIZE;
+  origin.y = world_y / REGION_SIZE;
+  origin.x = clamp (origin.x, 0, REGION_GRID - 1);
+  origin.y = clamp (origin.y, 0, REGION_GRID - 1);
+  //Get our offset from the region origin as a pair of scalars.
+  blend.x = (float)(world_x % BLEND_DISTANCE) / BLEND_DISTANCE;
+  blend.y = (float)(world_y % BLEND_DISTANCE) / BLEND_DISTANCE;
+  left = ((origin.x + origin.y) %2) == 0;
+  offset.x = (float)((world_x) % REGION_SIZE) / REGION_SIZE;
+  offset.y = (float)((world_y) % REGION_SIZE) / REGION_SIZE;
+  result.detail = esmall;
+  result.water_level = bias;
+
+  ul.x = origin.x;
+  ul.y = origin.y;
+  br.x = (world_x + BLEND_DISTANCE) / REGION_SIZE;
+  br.y = (world_y + BLEND_DISTANCE) / REGION_SIZE;
+
+  if (ul == br) {
+    rul = region (ul.x, ul.y);
+     result.elevation = do_height (rul, offset, bias, esmall, elarge);
+     result.elevation = do_height_noblend (result.elevation, rul, offset, bias);
+     return result;
+  }
+  rul = region (ul.x, ul.y);
+  rur = region (br.x, ul.y);
+  rbl = region (ul.x, br.y);
+  rbr = region (br.x, br.y);
+
+  eul = do_height (rul, offset, bias, esmall, elarge);
+  eur = do_height (rur, offset, bias, esmall, elarge);
+  ebl = do_height (rbl, offset, bias, esmall, elarge);
+  ebr = do_height (rbr, offset, bias, esmall, elarge);
+  result.elevation = MathInterpolateQuad (eul, eur, ebl,ebr, blend, left);
+  result.elevation = do_height_noblend (result.elevation, rul, offset, bias);
+  return result;
 
 }

@@ -11,9 +11,6 @@
 
 #include "stdafx.h"
 
-#define RENDER_DISTANCE     1024
-#define FOV                 90
-
 #include <math.h>
 #include "camera.h"
 #include "env.h"
@@ -29,6 +26,10 @@
 #include "text.h"
 #include "world.h"
 #include "water.h"
+
+#define RENDER_DISTANCE     1024
+#define FOV                 90
+#define MAP_SIZE            512
 
 static int            view_width;
 static int            view_height;
@@ -117,13 +118,15 @@ void RenderClick (int x, int y)
 
   GLvector    p;
 
-  y -= view_height - REGION_GRID;
   if (!show_map)
     return;
-  if (y < 0 || x > REGION_GRID)
+  y -= view_height - MAP_SIZE;
+  if (y < 0 || x > MAP_SIZE)
     return;
-  p.x = (float)x * REGION_SIZE;
-  p.y = (float)y * REGION_SIZE;
+  p.x = (float) x / MAP_SIZE;
+  p.y = (float) y / MAP_SIZE;
+  p.x *= REGION_GRID * REGION_SIZE;
+  p.y *= REGION_GRID * REGION_SIZE;
   p.z = REGION_SIZE;
   CameraPositionSet (p);
 
@@ -264,13 +267,13 @@ void RenderTexture (unsigned id)
   glVertex3f (0, (float)view_height, 0);
 
   glTexCoord2f (0, 1);
-  glVertex3f (0, (float)view_height - REGION_GRID, 0);
+  glVertex3f (0, (float)view_height - MAP_SIZE, 0);
 
   glTexCoord2f (1, 1);
-  glVertex3f (REGION_GRID, (float)view_height - REGION_GRID, 0);
+  glVertex3f (MAP_SIZE, (float)view_height - MAP_SIZE, 0);
 
   glTexCoord2f (1, 0);
-  glVertex3f (REGION_GRID, (float)view_height, 0);
+  glVertex3f (MAP_SIZE, (float)view_height, 0);
   glEnd ();
 
   glPopMatrix ();

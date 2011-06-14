@@ -25,7 +25,44 @@ static VBO        map;
 
 void WaterBuild ()
 {
+  /*
+  vector<GLvector>  vert;
+  vector<GLvector>  normal;
+  vector<GLvector2> uv;
+  vector<GLvector2> uv_map;
+  vector<unsigned>  index;
+  float             x, y;
+  int               xx, yy;
+  float             elev;
+  int               width, height;
 
+  width = height =0;
+  for (y = 0; y < REGION_GRID_EDGE; y += 0.25f) {
+    width = 0;
+    for (x = 0; x < REGION_GRID_EDGE; x += 0.25f) {
+      elev = RegionWaterLevel ((int)(x * REGION_SIZE), (int)(y * REGION_SIZE));
+      elev = max (elev, 0.0f);
+      uv_map.push_back (glVector ((float)x / REGION_GRID , (float)(REGION_GRID - y) / REGION_GRID));
+      uv.push_back (glVector ((float)x * WATER_TILE , (float)y * WATER_TILE));
+      normal.push_back (glVector (0.0f, 0.0f, 1.0f));
+      vert.push_back (glVector ((float)x * REGION_SIZE, (float)y * REGION_SIZE, elev));
+      width++;
+    }
+    height++;
+  }
+  for (yy = 0; yy < height - 1; yy++) {
+    for (xx = 0; xx < width - 1; xx++) {
+      index.push_back ((xx + 0) + (yy + 0) * width);
+      index.push_back ((xx + 1) + (yy + 0) * width);
+      index.push_back ((xx + 1) + (yy + 1) * width);
+      index.push_back ((xx + 0) + (yy + 1) * width);
+    }
+  }
+
+  water.Create (GL_QUADS, index.size (), vert.size (), &index[0], &vert[0], &normal[0], NULL, &uv[0]);
+  map.Create (GL_QUADS, index.size (), vert.size (), &index[0], &vert[0], &normal[0], NULL, &uv_map[0]);
+
+  */
   vector<GLvector>  vert;
   vector<GLvector>  normal;
   vector<GLvector2> uv;
@@ -55,7 +92,7 @@ void WaterBuild ()
 
   water.Create (GL_QUADS, index.size (), vert.size (), &index[0], &vert[0], &normal[0], NULL, &uv[0]);
   map.Create (GL_QUADS, index.size (), vert.size (), &index[0], &vert[0], &normal[0], NULL, &uv_map[0]);
-
+  
 }
 
 

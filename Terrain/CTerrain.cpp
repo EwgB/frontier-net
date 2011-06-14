@@ -50,9 +50,9 @@ static struct LayerAttributes
   {"grass3.bmp",   0.0f,  0.3f,   2.3f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
   {"grass3.bmp",   0.0f,  0.5f,   2.2f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
   {"grass3.bmp",   0.0f,  0.5f,   2.1f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
-  {"grass2.bmp",   0.0f,  0.3f,   1.5f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
-  {"grass2.bmp",   0.0f,  0.5f,   1.3f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
-  {"grass2.bmp",   1.0f,  1.0f,   1.2f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
+  {"grass1.bmp",   0.0f,  0.3f,   1.5f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
+  {"grass1.bmp",   0.0f,  0.5f,   1.3f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
+  {"grass1.bmp",   1.0f,  1.0f,   1.2f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
   {"grass3.bmp",   1.0f,  1.0f,   2.0f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
 
   {"snow1.bmp",    0.0f,  0.3f,   1.9f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW},

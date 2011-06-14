@@ -41,7 +41,7 @@ static int              polygons_counter;
 
 /* Static Functions *************************************************************/
 
-static int res[]={2048, 1024, 512, 256, 128, 128, 64};
+static int res[]={1024, 1024, 512, 256, 256, 128, 128};
 
 static int resolution (int dist)
 {

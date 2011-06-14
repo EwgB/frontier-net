@@ -56,3 +56,10 @@ enum SurfaceType
   SURFACE_SNOW,
   SURFACE_TYPES
 };
+
+struct Cell
+{
+  float elevation;
+  float water_level;
+  float detail;
+};

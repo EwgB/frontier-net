@@ -102,10 +102,17 @@ void CPage::DoElevation ()
 {
 
   int     world_x, world_y;
+  Cell    c;
 
   world_x = (_origin.x * PAGE_SIZE + _walk.x);
   world_y = (_origin.y * PAGE_SIZE + _walk.y);
-  _cell[_walk.x][_walk.y].elevation = RegionElevation (world_x, world_y);
+  //_cell[_walk.x][_walk.y].elevation = RegionElevation (world_x, world_y);
+  c = RegionCell (world_x, world_y);
+  //c.elevation = c.water_level;
+  _cell[_walk.x][_walk.y].elevation = c.elevation;
+  _cell[_walk.x][_walk.y].detail = c.detail;
+  _cell[_walk.x][_walk.y].water_level = c.water_level;
+  //_cell[_walk.x][_walk.y].elevation = _cell[_walk.x][_walk.y].pt.elevation;
   _bbox.ContainPoint (Position (world_x, world_y));
   if (_walk.Walk (PAGE_SIZE))
     _stage++;
@@ -133,17 +140,20 @@ void CPage::DoSurface ()
 {
 
   float     high, low, here, delta;
+  float     fade;
   int       xx, yy;
   int       neighbor_x, neighbor_y;
   GLcoord   worldpos;
   Region    region;
+  pcell*    c;
 
   worldpos.x = _origin.x * PAGE_SIZE + _walk.x;
   worldpos.y = _origin.y * PAGE_SIZE + _walk.y;
   region = RegionGet (worldpos.x, worldpos.y);
+  c = &_cell[_walk.x][_walk.y];
   if (_stage == PAGE_STAGE_SURFACE1) {
     //Get the elevation of our neighbors
-    here = high= low = _cell[_walk.x][_walk.y].elevation;
+    here = high= low = c->elevation;
     for (xx = -2; xx <= 2; xx++) {
       neighbor_x = _walk.x + xx;
       if (neighbor_x < 0 || neighbor_x >= PAGE_SIZE) 
@@ -160,45 +170,69 @@ void CPage::DoSurface ()
     /*
     if ((Entropy (worldpos.x, worldpos.y) * 0.1f + region.temperature) > 0.25) {
       if (region.moisture > 0.1f)
-        _cell[_walk.x][_walk.y].surface = SURFACE_GRASS;
+        c->surface = SURFACE_GRASS;
       else 
-        _cell[_walk.x][_walk.y].surface = SURFACE_DIRT;
+        c->surface = SURFACE_DIRT;
     } else
-      _cell[_walk.x][_walk.y].surface = SURFACE_ROCK;
+      c->surface = SURFACE_ROCK;
       */
-    _cell[_walk.x][_walk.y].surface = SURFACE_GRASS;
-    if (delta >= region.moisture * 6)
-      _cell[_walk.x][_walk.y].surface = SURFACE_DIRT;
+
+    //Default surface. If the climate can support life, default to grass.
+    if (region.temperature > 0.1f && region.moisture > 0.1f)
+      c->surface = SURFACE_GRASS;
+    else //Too cold or dry
+      c->surface = SURFACE_ROCK;
+    //The colder it is, the more surface becomes snow, beginning at the lowest points.
+    if (region.temperature < FREEZING) {
+      fade = region.temperature / FREEZING;
+      if ((1.0f - c->detail) > fade)
+        c->surface = SURFACE_SNOW;
+    }
+    //Sand is only for coastal regions
+    if (low <= region.beach_threshold && (region.climate == CLIMATE_COAST))
+      c->surface = SURFACE_SAND;
+    //Sand touched by water is dark
+    if (c->surface == SURFACE_SAND && low <= 0)
+      c->surface = SURFACE_SAND_DARK;
+
+
     //if (high > 0 && low < 0 && (region.flags & REGION_FLAG_SWAMP))
-      //_cell[_walk.x][_walk.y].surface = SURFACE_GRASS_EDGE;
+      //c->surface = SURFACE_GRASS_EDGE;
+    /*
     if (region.temperature < FREEZING) {
       float     snow_threshold;
       snow_threshold = FREEZING - region.temperature;
       snow_threshold *= 8;
       if (delta <= (snow_threshold))
-        _cell[_walk.x][_walk.y].surface = SURFACE_SNOW;
-      //if (_cell[_walk.x][_walk.y].surface == SURFACE_GRASS && region.temperature < 0.2f)
-        //_cell[_walk.x][_walk.y].surface = SURFACE_SNOW;
+        c->surface = SURFACE_SNOW;
+      //if (c->surface == SURFACE_GRASS && region.temperature < 0.2f)
+        //c->surface = SURFACE_SNOW;
     }
-    //Sand is only for coastal regions
-    if (low <= region.beach_threshold && (region.climate == CLIMATE_COAST))
-      _cell[_walk.x][_walk.y].surface = SURFACE_SAND;
-    if (low <= region.geo_bias + region.moisture)
-      _cell[_walk.x][_walk.y].surface = SURFACE_DIRT;
-    if (low <= 0 && (region.climate == CLIMATE_RIVER))
-      _cell[_walk.x][_walk.y].surface = SURFACE_DIRT_DARK;
-    if (low <= region.geo_bias)
-      _cell[_walk.x][_walk.y].surface = SURFACE_DIRT_DARK;
+    */
+    //if (delta >= region.moisture * 6)
+      //c->surface = SURFACE_DIRT;
+    //if (low <= region.geo_bias + region.moisture)
+      //c->surface = SURFACE_DIRT;
+    if (low <= c->water_level)
+      c->surface = SURFACE_DIRT_DARK;
+    //if (low <= 0 && (region.climate == CLIMATE_RIVER))
+      //c->surface = SURFACE_DIRT_DARK;
+    //if (low <= region.geo_bias)
+      //c->surface = SURFACE_DIRT_DARK;
     if (low <= 2.5f && (region.climate == CLIMATE_OCEAN))
-      _cell[_walk.x][_walk.y].surface = SURFACE_SAND;
-    //Sand touched by water is dark
-    if (_cell[_walk.x][_walk.y].surface == SURFACE_SAND && low <= 0)
-      _cell[_walk.x][_walk.y].surface = SURFACE_SAND_DARK;
+      c->surface = SURFACE_SAND;
     if (delta > 3.0f)
-      _cell[_walk.x][_walk.y].surface = SURFACE_ROCK;
+      c->surface = SURFACE_ROCK;
+    /*
+    if (c->detail > 0.5f)
+      c->surface = SURFACE_ROCK;
+    else 
+      c->surface = SURFACE_SNOW;
+      */
   } else {
-    if (_cell[_walk.x][_walk.y].surface == SURFACE_GRASS
-      && _walk.x > 0 && _walk.x < PAGE_SIZE - 1 && _walk.y > 0 && _walk.y < PAGE_SIZE - 1) {
+    if (c->surface == SURFACE_GRASS
+      && _walk.x > 0 && _walk.x < PAGE_SIZE - 1 && _walk.y > 0 && _walk.y < PAGE_SIZE - 1 &&
+      region.moisture > 0.5f) {
       bool all_grass = true;
       for (xx = -1; xx <= 1; xx++) {
         if (!all_grass)
@@ -211,7 +245,7 @@ void CPage::DoSurface ()
         }
       }
       if (!all_grass)
-        _cell[_walk.x][_walk.y].surface = SURFACE_GRASS_EDGE;
+        c->surface = SURFACE_GRASS_EDGE;
     }
   }
   if (_walk.Walk (PAGE_SIZE))
