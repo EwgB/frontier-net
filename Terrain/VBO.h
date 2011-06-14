@@ -18,8 +18,8 @@ class VBO
   int       _size_color;
 
 public:
-  VBO::VBO ();
-  VBO::~VBO ();
+  VBO ();
+  ~VBO ();
   //void      Create (int polygon, int index_count, int vert_count, unsigned* index_list, GLvector* vert_list, GLvector* normal_list, GLvector2* uv_list);
   void      Create (int polygon, int index_count, int vert_count, unsigned* index_list, GLvector* vert_list, GLvector* normal_list, GLrgba* color_list, GLvector2* uv_list);
   void      Clear ();

@@ -275,6 +275,28 @@ void RenderTexture (unsigned id)
   glTexCoord2f (1, 0);
   glVertex3f (MAP_SIZE, (float)view_height, 0);
   glEnd ();
+  {
+    static int    r;
+    GLrgba        c;
+    GLvector      pos;
+
+    r++;
+    c = glRgbaUnique (r);
+    glBindTexture (GL_TEXTURE_2D, 0);
+    pos = CameraPosition ();
+    pos /= (REGION_GRID * REGION_SIZE);
+    //pos.y /= (REGION_GRID * REGION_SIZE);
+    pos *= MAP_SIZE;
+    pos.y += view_height - MAP_SIZE;
+    glColor3fv (&c.red);
+    glBegin (GL_QUADS);
+    glVertex3f (pos.x, pos.y, 0);
+    glVertex3f (pos.x + 10, pos.y, 0);
+    glVertex3f (pos.x + 10, pos.y + 10, 0);
+    glVertex3f (pos.x, pos.y + 10, 0);
+    glEnd ();
+  }
+  
 
   glPopMatrix ();
   glMatrixMode (GL_PROJECTION);

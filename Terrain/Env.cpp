@@ -20,7 +20,7 @@
 #include "texture.h"
 
 #define MAX_DISTANCE        300
-#define ENV_TRANSITION      0.05f
+#define ENV_TRANSITION      0.5f
 #define UPDATE_INTERVAL     200 //milliseconds
 
 static Env        desired;
@@ -118,7 +118,7 @@ static void do_time (float delta)
          // continue;
         average = desired.color[i] + r->color_atmosphere;
         desired.color[i] = average / 2;
-        //desired.color[i] = r->color_atmosphere;
+        desired.color[i] = r->color_atmosphere;
       }
       //desired.color[ENV_COLOR_TOP] = r->color_atmosphere;
 

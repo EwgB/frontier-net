@@ -15,6 +15,7 @@
  
 
 #define FREEZING                  0.32f
+#define COLD                      0.45f
 #define MIN_TEMP                  0.0f
 #define MAX_TEMP                  1.0f
 #define DEGREES_TO_RADIANS        .017453292F

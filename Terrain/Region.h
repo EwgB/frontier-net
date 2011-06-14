@@ -1,4 +1,4 @@
-#define REGION_SIZE       32
+#define REGION_SIZE       64
 #define REGION_HALF       (REGION_SIZE / 2)
 #define REGION_GRID       128
 #define REGION_GRID_EDGE  (REGION_GRID + 1)
@@ -34,6 +34,8 @@ enum Climate
   CLIMATE_MOUNTAIN,
   CLIMATE_RIVER,
   CLIMATE_RIVER_BANK,
+  CLIMATE_SWAMP,
+  CLIMATE_TYPES,
 };
 //#define REGION_FLAG_DESERT      0x4000
 
@@ -67,6 +69,7 @@ struct Region
 };
 
 Region    RegionGet (int x, int y);
+void      RegionSet (int x, int y, Region val);
 Region    RegionGet (float x, float y);
 GLrgba    RegionColorGet (int world_x, int world_y, SurfaceColor c);
 GLrgba    RegionAtmosphere (int world_x, int world_y);

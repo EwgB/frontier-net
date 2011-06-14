@@ -93,6 +93,7 @@
     <ClCompile Include="Region.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Sky.cpp" />
+    <ClCompile Include="Terraform.cpp" />
     <ClCompile Include="Text.cpp" />
     <ClCompile Include="glVector2.cpp" />
     <ClCompile Include="glVector3.cpp" />
@@ -130,6 +131,7 @@
     <ClInclude Include="Sdl.h" />
     <ClInclude Include="Sky.h" />
     <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="Terraform.h" />
     <ClInclude Include="Text.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="VBO.h" />

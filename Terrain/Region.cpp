@@ -5,6 +5,12 @@
 
 -------------------------------------------------------------------------------
 
+  This holds the region grid, which is the main table of information from 
+  which ALL OTHER GEOGRAPHICAL DATA is generated or derived.  Note that
+  the resulting data is not STORED here. Regions are sets of rules and 
+  properties. You crank numbers through them, and it creates the world. 
+
+  This output data is stored and managed elsewhere. (See CPage.cpp)
  
 -----------------------------------------------------------------------------*/
 
@@ -77,19 +83,21 @@ static float do_height_noblend (float val, Region r, GLvector2 offset, float bia
 
     //if this river is strictly north / south
     if (r.flags_shape & REGION_FLAG_RIVERNS && !(r.flags_shape & REGION_FLAG_RIVEREW)) {
-      if (r.grid_pos.y % 2)
-        offset.x += abs (sin (offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;
-      else
-        offset.x -= abs (sin (offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;
+      //This makes the river bend side-to-side
+      switch ((r.grid_pos.x + r.grid_pos.y) % 4) {
+      case 0:
+        offset.x += abs (sin (offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;break;
+      case 1:
+        offset.x -= abs (sin (offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;break;
+      case 2:
+        offset.x += abs (sin (offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.1f;break;
+      case 3:
+        offset.x -= abs (sin (offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.1f;break;
+      }
     }
     //if this river is strictly east / west
     if (r.flags_shape & REGION_FLAG_RIVEREW && !(r.flags_shape & REGION_FLAG_RIVERNS)) {
-      /*
-      if (r.grid_pos.x % 2)
-        offset.y -= abs (sin (offset.x * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;
-      else
-        offset.y += abs (sin (offset.x * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;
-        */
+      //This makes the river bend side-to-side
       switch ((r.grid_pos.x + r.grid_pos.y) % 4) {
       case 0:
         offset.y -= abs (sin (offset.x * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;break;
@@ -130,12 +138,10 @@ static float do_height (Region r, GLvector2 offset, float bias, float esmall, fl
 
   float     val;
 
-  esmall *= r.geo_detail;
-  elarge *= r.geo_large;
   //Modify the detail values before they are applied
   if (r.flags_shape & REGION_FLAG_CRATER) {
-    if (esmall > 0.3f)
-      esmall = 0.6f - esmall * 2;
+    if (esmall > 0.5f)
+      esmall = 0.5f;
   }
   if (r.flags_shape & REGION_FLAG_TIERED) {
     if (esmall < 0.2f)
@@ -154,6 +160,7 @@ static float do_height (Region r, GLvector2 offset, float bias, float esmall, fl
     if (esmall > max (x, y))
       esmall /= 4.0f;
   }
+  //Soften up the banks of a river 
   if (r.flags_shape & REGION_FLAG_RIVER_ANY) {
     GLvector2   cen;
     float       strength;
@@ -164,9 +171,14 @@ static float do_height (Region r, GLvector2 offset, float bias, float esmall, fl
     strength = max (strength, 0.2f);
     esmall *= strength;
   }
+  
+  esmall *= r.geo_detail;
+  elarge *= r.geo_large;
   //Apply the values!
   val = esmall * SMALL_STRENGTH + elarge * LARGE_STRENGTH;
   val += bias;
+  if (r.climate == CLIMATE_SWAMP) 
+    val -= r.geo_detail / 2.0f;
   //Modify the final value.
   if (r.flags_shape & REGION_FLAG_MESAS) {
     float    x = abs (offset.x - 0.5f) / 5;
@@ -208,7 +220,6 @@ static Region region (int x, int y)
 /*-----------------------------------------------------------------------------
 The following functions are used when building a new world.
 -----------------------------------------------------------------------------*/
-
 
 //check the regions around the given one, see if they are unused
 static bool is_free (int x, int y, int radius)
@@ -279,6 +290,7 @@ static bool try_river (int start_x, int start_y, int id)
   GLcoord           last_move;
   GLcoord           to_coast;
   int               x, y;
+  int               xx, yy;
   unsigned          d;
   float             lowest;
   float             water_level;
@@ -331,7 +343,7 @@ static bool try_river (int start_x, int start_y, int id)
   //The river is good. Place it.
   x = start_x;
   y = start_y;
-  water_strength = 0.01f;
+  water_strength = 0.03f;
   water_level = continent[x][y].geo_bias;
   for (d = 0; d < path.size (); d++) {
     r = continent[x][y];
@@ -341,36 +353,32 @@ static bool try_river (int start_x, int start_y, int id)
       sprintf (r.title, "River%d-Mouth", id);
     else
       sprintf (r.title, "River%d-%d", id, d);
-    //A river in a wet climate should attain full strength after crossing 1/4 of the map
+    //A river should attain full strength after crossing 1/4 of the map
     water_strength += (1.0f / ((float)REGION_GRID / 4.0f));
+    water_strength = min (water_strength, 1);
     r.flags_shape |= REGION_FLAG_NOBLEND;
     r.river_id = id;
-    r.moisture = 0.5f;
+    r.moisture = max (r.moisture, 0.5f);
     r.river_segment = d;
-    r.geo_detail = 4.0f + (float)d * 0.5f;
+    //r.geo_detail = 8.0f + water_strength * 10.0f;
+    r.geo_detail = 28.0f - water_strength * 10.0f;
     r.river_width = min (water_strength, 1);
     r.climate = CLIMATE_RIVER;
     water_level = min (r.geo_bias, water_level);
     //We need to flatten out this space, as well as all of its neighbors.
     r.geo_bias = water_level;
-    {
-
-      int xx, yy;
-
-      water_level = 1;
-      for (xx = x - 2; xx <= x + 2; xx++) {
-        for (yy = y - 2; yy <= y + 2; yy++) {
-          if (continent[xx][yy].climate != CLIMATE_INVALID) 
-            continue;
-          if (!xx && !yy)
-            continue;
-          continent[xx][yy].geo_bias = min (continent[xx][yy].geo_bias, water_level);
-          continent[xx][yy].geo_large = r.geo_large;
-          continent[xx][yy].geo_detail = r.geo_detail;
-          continent[xx][yy].climate = CLIMATE_RIVER_BANK;
-          continent[xx][yy].flags_shape |= REGION_FLAG_NOBLEND;
-          sprintf (continent[xx][yy].title, "River%d-Banks", id);
-        }
+    for (xx = x - 2; xx <= x + 2; xx++) {
+      for (yy = y - 2; yy <= y + 2; yy++) {
+        if (continent[xx][yy].climate != CLIMATE_INVALID) 
+          continue;
+        if (!xx && !yy)
+          continue;
+        continent[xx][yy].geo_bias = min (continent[xx][yy].geo_bias, water_level);
+        continent[xx][yy].geo_large = r.geo_large;
+        continent[xx][yy].geo_detail = r.geo_detail;
+        continent[xx][yy].climate = CLIMATE_RIVER_BANK;
+        continent[xx][yy].flags_shape |= REGION_FLAG_NOBLEND;
+        sprintf (continent[xx][yy].title, "River%d-Banks", id);
       }
     }
     selected = path[d];
@@ -755,6 +763,7 @@ static void do_landmass ()
 
   int       x, y;
   Region    r;
+  unsigned  rand;
 
   //now define the interior 
   for (x = 1; x < REGION_GRID - 1; x++) {
@@ -766,12 +775,12 @@ static void do_landmass ()
       //noise = Entropy (x, y);
       sprintf (r.title, "???");
       r.geo_bias = r.geo_scale * 10.0f;
-      r.geo_detail = 10.0f;
+      r.geo_detail = 20.0f;
       //Have them trend more hilly in dry areas
       //r.geo_detail += (1.0f - r.moisture) * RandomFloat () * 0.5f;
       //r.geo_bias += RandomFloat () * 6;
-      /*
-      rand = RandomVal () % 25;
+      
+      rand = RandomVal () % 8;
       if (r.moisture > 0.3f && r.temperature > 0.5f) {
         GLrgba    c;
         int       shape;
@@ -791,8 +800,7 @@ static void do_landmass ()
       if (rand == 0) {
         r.flags_shape |= REGION_FLAG_MESAS;
         sprintf (r.title, "Mesas");
-      } 
-      if (rand == 1) {
+      } else if (rand == 1) {
         sprintf (r.title, "Craters");
         r.flags_shape |= REGION_FLAG_CRATER;
       } else if (rand == 2) {
@@ -809,12 +817,20 @@ static void do_landmass ()
         r.flags_shape |= REGION_FLAG_TIERED;
       } else if (rand == 6) {
         sprintf (r.title, "Wasteland");
+      } else if (rand == 7) {
+        sprintf (r.title, "Swamp");
+        r.climate = CLIMATE_SWAMP;
+        r.color_atmosphere = glRgba (0.0f, 0.5f, 0.0f);
+        r.moisture = 1.0f;
+        r.geo_detail = 3.0f;
+        r.has_flowers = false;
+        r.flags_shape |= REGION_FLAG_NOBLEND;
       } else {
         sprintf (r.title, "Grasslands");
         //r.geo_detail /= 3;
         //r.geo_large /= 3;
       }  
-      */
+      
 
       continent[x][y] = r;
     }
@@ -918,11 +934,10 @@ static void do_colors ()
       cold_grass.red = 0.5f + RandomFloat () * 0.2f;
       cold_grass.green = 0.8f + RandomFloat () * 0.2f;
       cold_grass.blue = 0.7f + RandomFloat () * 0.2f;
-      if (r.temperature < FREEZING)
-        r.color_grass = glRgbaInterpolate (cold_grass, warm_grass, r.temperature / FREEZING);
+      if (r.temperature < COLD)
+        r.color_grass = glRgbaInterpolate (cold_grass, warm_grass, r.temperature / COLD);
       else
         r.color_grass = warm_grass;
-
       //Devise a random but plausible dirt color
       //Dry dirts are mostly reds, oranges, and browns
       dry_dirt.red = 0.4f + RandomFloat () * 0.6f;
@@ -975,7 +990,11 @@ static void do_colors ()
         r.color_map = glRgba (0.0f, 0.0f, 0.6f);
         break;
       case CLIMATE_RIVER_BANK:
-        r.color_map = glRgba (0.6f, 0.5f, 0.4f);
+        r.color_map = r.color_dirt;
+        break;
+      case CLIMATE_SWAMP:
+        r.color_grass *= 0.5f;
+        r.color_map = r.color_grass * 0.5f;
         break;
       default:
         r.color_map = r.color_grass;
@@ -1060,6 +1079,15 @@ Region RegionGet (int x, int y)
 
 }
 
+
+void RegionSet (int x, int y, Region val)
+{
+
+  continent[x][y] = val;
+
+}
+
+
 void    RegionInit ()
 {
 
@@ -1131,8 +1159,9 @@ void    RegionGenerate ()
   //do_oceans_deep ();
   //do_mountains (3);
   //do_canyons (3);
-  do_rivers (4);
   do_climate ();
+  do_rivers (4);
+  do_climate ();//Do climate a second time now that rivers are in
   do_landmass ();
   for (x = 0; x < REGION_GRID; x++) {
     for (y = 0; y < REGION_GRID; y++) {
@@ -1159,11 +1188,8 @@ GLrgba RegionColorGet (int world_x, int world_y, SurfaceColor c)
 
   x = max (world_x % DITHER_SIZE, 0);
   y = max (world_y % DITHER_SIZE, 0);
-  //return glRgbaUnique ((world_x / REGION_SIZE) + world_y / REGION_SIZE);
   world_x += dithermap[x][y].x;
   world_y += dithermap[x][y].y;
-  //if (c == SURFACE_COLOR_ROCK)
-    //return glRgba (1.0f);
   offset.x = (float)(world_x % REGION_SIZE) / REGION_SIZE;
   offset.y = (float)(world_y % REGION_SIZE) / REGION_SIZE;
   origin.x = world_x / REGION_SIZE;
@@ -1206,13 +1232,16 @@ GLrgba RegionAtmosphere (int world_x, int world_y)
 
   GLcoord   origin;
   GLvector2 offset;
-  GLrgba    c0, c1, c2, c3, result;
-  Region    r0, r1, r2, r3;
 
   offset.x = (float)(world_x % REGION_SIZE) / REGION_SIZE;
   offset.y = (float)(world_y % REGION_SIZE) / REGION_SIZE;
   origin.x = world_x / REGION_SIZE;
   origin.y = world_y / REGION_SIZE;
+  return region (origin.x, origin.y).color_atmosphere;
+  /*
+  GLrgba    c0, c1, c2, c3, result;
+  Region    r0, r1, r2, r3;
+
   r0 = region (origin.x, origin.y);
   r1 = region (origin.x + 1, origin.y);
   r2 = region (origin.x, origin.y + 1);
@@ -1225,7 +1254,7 @@ GLrgba RegionAtmosphere (int world_x, int world_y)
   result.green = MathInterpolateQuad (c0.green, c1.green, c2.green, c3.green, offset);
   result.blue  = MathInterpolateQuad (c0.blue, c1.blue, c2.blue, c3.blue, offset);
   return result;
-  
+  */
 }
 
 float RegionWaterLevel (int world_x, int world_y)
@@ -1250,61 +1279,6 @@ float RegionWaterLevel (int world_x, int world_y)
   return MathInterpolateQuad (rul.geo_bias, rur.geo_bias, rbl.geo_bias, rbr.geo_bias, offset, ((origin.x + origin.y) %2) == 0);
 
 }
-
-/*
-float RegionElevation (int world_x, int world_y)
-{
-
-  float     esmall, elarge;
-  Region    rul, rur, rbl, rbr;//Four corners: upper left, upper right, etc.
-  float     eul, eur, ebl, ebr;
-  float     bias;
-  GLvector2 offset;
-  GLcoord   origin;
-  GLcoord   ul, br; //Upper left and bottom-right corners
-  GLvector2 blend;
-  bool      left;
-  float     result;
-
-  esmall = Entropy (world_x, world_y);
-  elarge = Entropy ((float)world_x / LARGE_SCALE, (float)world_y / LARGE_SCALE);
-  bias = RegionWaterLevel (world_x, world_y);
-  origin.x = world_x / REGION_SIZE;
-  origin.y = world_y / REGION_SIZE;
-  origin.x = clamp (origin.x, 0, REGION_GRID - 1);
-  origin.y = clamp (origin.y, 0, REGION_GRID - 1);
-  //Get our offset from the region origin as a pair of scalars.
-  blend.x = (float)(world_x % BLEND_DISTANCE) / BLEND_DISTANCE;
-  blend.y = (float)(world_y % BLEND_DISTANCE) / BLEND_DISTANCE;
-  left = ((origin.x + origin.y) %2) == 0;
-  offset.x = (float)((world_x) % REGION_SIZE) / REGION_SIZE;
-  offset.y = (float)((world_y) % REGION_SIZE) / REGION_SIZE;
-
-  ul.x = origin.x;
-  ul.y = origin.y;
-  br.x = (world_x + BLEND_DISTANCE) / REGION_SIZE;
-  br.y = (world_y + BLEND_DISTANCE) / REGION_SIZE;
-
-  if (ul == br) {
-    rul = region (ul.x, ul.y);
-    result = do_height (rul, offset, bias, esmall, elarge);
-    return do_height_noblend (result, rul, offset, bias);
-  }
-  rul = region (ul.x, ul.y);
-  rur = region (br.x, ul.y);
-  rbl = region (ul.x, br.y);
-  rbr = region (br.x, br.y);
-
-  eul = do_height (rul, offset, bias, esmall, elarge);
-  eur = do_height (rur, offset, bias, esmall, elarge);
-  ebl = do_height (rbl, offset, bias, esmall, elarge);
-  ebr = do_height (rbr, offset, bias, esmall, elarge);
-  result = MathInterpolateQuad (eul, eur, ebl,ebr, blend, left);
-  return do_height_noblend (result, rul, offset, bias);
-
-}
-
-*/
 
 Cell RegionCell (int world_x, int world_y)
 {

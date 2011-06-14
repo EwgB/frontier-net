@@ -191,10 +191,13 @@ void CPage::DoSurface ()
     //Sand is only for coastal regions
     if (low <= region.beach_threshold && (region.climate == CLIMATE_COAST))
       c->surface = SURFACE_SAND;
-    //Sand touched by water is dark
-    if (c->surface == SURFACE_SAND && low <= 0)
-      c->surface = SURFACE_SAND_DARK;
-
+    //dirt touched by water is dark
+    if (region.climate != CLIMATE_SWAMP) {
+      if (c->surface == SURFACE_SAND && low <= 0)
+        c->surface = SURFACE_SAND_DARK;
+      if (low <= c->water_level)
+        c->surface = SURFACE_DIRT_DARK;
+    }
 
     //if (high > 0 && low < 0 && (region.flags & REGION_FLAG_SWAMP))
       //c->surface = SURFACE_GRASS_EDGE;
@@ -213,8 +216,6 @@ void CPage::DoSurface ()
       //c->surface = SURFACE_DIRT;
     //if (low <= region.geo_bias + region.moisture)
       //c->surface = SURFACE_DIRT;
-    if (low <= c->water_level)
-      c->surface = SURFACE_DIRT_DARK;
     //if (low <= 0 && (region.climate == CLIMATE_RIVER))
       //c->surface = SURFACE_DIRT_DARK;
     //if (low <= region.geo_bias)
