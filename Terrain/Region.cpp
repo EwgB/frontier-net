@@ -21,6 +21,7 @@
 #include "math.h"
 #include "region.h"
 #include "random.h"
+#include "terraform.h"
 
 #define LARGE_SCALE       9
 //#define SMALL_STRENGTH    (REGION_SIZE / 6)
@@ -36,14 +37,6 @@
 #define NSOUTH             "Southern"
 #define NEAST              "Eastern"
 #define NWEST              "Western"
-
-enum
-{
-  NORTH,
-  SOUTH,
-  EAST,
-  WEST
-};
 
 static GLcoord      direction[] = {
   0, -1, // North
@@ -177,8 +170,10 @@ static float do_height (Region r, GLvector2 offset, float bias, float esmall, fl
   //Apply the values!
   val = esmall * SMALL_STRENGTH + elarge * LARGE_STRENGTH;
   val += bias;
-  if (r.climate == CLIMATE_SWAMP) 
+  if (r.climate == CLIMATE_SWAMP) {
     val -= r.geo_detail / 2.0f;
+    val = max (val, r.geo_detail - 1.0f);
+  }
   //Modify the final value.
   if (r.flags_shape & REGION_FLAG_MESAS) {
     float    x = abs (offset.x - 0.5f) / 5;
@@ -279,6 +274,8 @@ static GLcoord find_direction (int x, int y)
   return direction[EAST];
 
 }
+
+
 
 static bool try_river (int start_x, int start_y, int id)
 {
@@ -407,6 +404,7 @@ static bool try_river (int start_x, int start_y, int id)
 
 }
 
+/*
 //Drop a point in the middle of the terrain and attempt to
 //place a river. 
 static void do_rivers (int count)
@@ -428,6 +426,8 @@ static void do_rivers (int count)
   cycles = 0;
 
 }
+*/
+
 
 //look around the map and find an unused area of the desired size
 static bool find_plot (int radius, GLcoord* result)
@@ -451,52 +451,9 @@ static bool find_plot (int radius, GLcoord* result)
 
 }
 
-//Randomly scatter some mountains around
-static void do_mountains (int count)
-{
-
-
-  //now place a few mountains 
-  int     mtn_size;
-  int     step;
-  float   height;
-  int     i;
-  int     x, y;
-  GLcoord plot;
-  Region  r;
-
-  for (i = 0; i < count; i++) {
-    mtn_size = 3;
-    if (!find_plot (mtn_size, &plot))
-      continue;
-    for (x = -mtn_size; x <= mtn_size; x++) {
-      for (y = -mtn_size; y <= mtn_size; y++) {
-        r = continent[plot.x + x][plot.y + y];
-        step = (max (abs (x), abs (y)));
-        if (step == 0) {
-          sprintf (r.title, "Mountain Summit");
-        } else if (step == mtn_size) 
-          sprintf (r.title, "Mountain Foothills");
-        else {
-          sprintf (r.title, "Mountain");
-        }
-        r.mountain_height = mtn_size - step;
-        //Lose 20 degrees for every step up
-        height = 1.0f - (float)step / (float)mtn_size;
-        r.geo_large += 0.2f + height;
-        r.geo_detail += 0.3f;
-        r.geo_bias += (height + RandomFloat ()) * REGION_HALF;
-        r.flags_shape = REGION_FLAG_NOBLEND;
-        r.climate = CLIMATE_MOUNTAIN;
-        continent[plot.x + x][plot.y + y] = r;
-      }
-    }
-  }
-
-}
-
 //Blur the region attributes by averaging each region with its
 //neighbors.  This prevents overly harsh transitions.
+/*
 static void do_blur ()
 {
 
@@ -567,6 +524,7 @@ static void do_blur ()
   delete []lg;
   
 }
+*/
 
 //Test the given area and see if it contains the given climate.
 static bool climate_present (int x, int y, int radius, Climate c) 
@@ -609,8 +567,7 @@ static bool climate_exclusive (int x, int y, int radius, Climate c)
   return true;
 
 }
-
-
+/*
 //pass over the map, calculate the temp & moisture
 static void do_climate () 
 {
@@ -657,6 +614,9 @@ static void do_climate ()
 
 }
 
+*/
+
+/*
 static void do_oceans ()
 {
 
@@ -695,7 +655,9 @@ static void do_oceans ()
   }
 
 }
+*/
 
+/*
 static void do_coast ()
 {
 
@@ -756,6 +718,7 @@ static void do_coast ()
   }
 
 }
+*/
 
 //This will fill in all reviously un-assigned regions.
 static void do_landmass ()
@@ -866,149 +829,6 @@ static void do_canyons (int count)
 }
 
 
-//This finds and identifies the ocean regions distant from the shore.
-//(Ocean points which have ONLY ocean around them.  It hammers them
-//flat. No sense in wasting detail out there.
-static void do_oceans_deep ()
-{
-
-  int       x, y;
-  Region    r;
-
-  for (x = 0; x < REGION_GRID - 1; x++) {
-    for (y = 0; y < REGION_GRID - 1; y++) {
-      r = continent[x][y];
-      //See if this is already ocean
-      if (r.climate != CLIMATE_OCEAN)
-        continue;
-      if (climate_exclusive (x, y, 2, CLIMATE_OCEAN)) {
-        sprintf (r.title, "Deep Ocean");
-        r.geo_bias = -10;
-        r.geo_large = 0.0f;
-        r.geo_detail = 0.0f;
-        r.moisture = 1.0f;
-        r.flags_shape = REGION_FLAG_NOBLEND;
-        r.climate = CLIMATE_OCEAN;
-        continent[x][y] = r;
-      }
-    }
-  }
-
-}
-
-static void do_colors ()
-{
-
-  int       x, y;
-  Region    r;
-  float     fade;
-  GLrgba    warm_grass, cold_grass, wet_grass, dry_grass, dead_grass;
-  GLrgba    cold_dirt, warm_dirt, dry_dirt, wet_dirt;
-  GLrgba    humid_air, dry_air, cold_air, warm_air;
-  GLrgba    warm_rock, cold_rock;
-
-  for (x = 0; x < REGION_GRID; x++) {
-    for (y = 0; y < REGION_GRID; y++) {
-      r = continent[x][y];
-      //Devise a grass color
-
-      //wet grass is deep greens
-      wet_grass.red = RandomFloat () * 0.3f;
-      wet_grass.green = 0.4f + RandomFloat () * 0.6f;
-      wet_grass.blue = RandomFloat () * 0.3f;
-      //Dry grass is mostly reds and oranges
-      dry_grass.red = 0.7f + RandomFloat () * 0.3f;
-      dry_grass.green = 0.5f + RandomFloat () * 0.5f;
-      dry_grass.blue = 0.0f + RandomFloat () * 0.3f;
-      //Dead grass is pale beige
-      dead_grass = glRgba (0.7f, 0.6f, 0.5f);
-      dead_grass *= 0.7f + RandomFloat () * 0.3f;
-      if (r.moisture < 0.5f) {
-        fade = r.moisture * 2.0f;
-        warm_grass = glRgbaInterpolate (dead_grass, dry_grass, fade);
-      } else {
-        fade = (r.moisture - 0.5f) * 2.0f;
-        warm_grass = glRgbaInterpolate (dry_grass, wet_grass, fade);
-      }
-      //cold grass is pale and a little blue
-      cold_grass.red = 0.5f + RandomFloat () * 0.2f;
-      cold_grass.green = 0.8f + RandomFloat () * 0.2f;
-      cold_grass.blue = 0.7f + RandomFloat () * 0.2f;
-      if (r.temperature < COLD)
-        r.color_grass = glRgbaInterpolate (cold_grass, warm_grass, r.temperature / COLD);
-      else
-        r.color_grass = warm_grass;
-      //Devise a random but plausible dirt color
-      //Dry dirts are mostly reds, oranges, and browns
-      dry_dirt.red = 0.4f + RandomFloat () * 0.6f;
-      dry_dirt.green = 0.4f + RandomFloat () * 0.6f;
-      dry_dirt.green = min (dry_dirt.green, dry_dirt.red);
-      dry_dirt.green = 0.1f + RandomFloat () * 0.5f;
-      dry_dirt.blue = 0.2f + RandomFloat () * 0.4f;
-      dry_dirt.blue = min (dry_dirt.blue, dry_dirt.green);
-      //wet dirt is various browns
-      fade = RandomFloat () * 0.6f;
-      wet_dirt.red = 0.2f + fade;
-      wet_dirt.green = 0.1f + fade;
-      wet_dirt.blue = 0.0f +  fade / 2.0f;
-      wet_dirt.green += RandomFloat () * 0.1f;
-      //cold dirt is pale
-      cold_dirt = glRgbaInterpolate (wet_dirt, glRgba (0.7f), 0.5f);
-      //warm dirt us a fade from wet to dry
-      warm_dirt = glRgbaInterpolate (dry_dirt, wet_dirt, r.moisture);
-      fade = MathScalar (r.temperature, FREEZING, 1.0f);
-      r.color_dirt = glRgbaInterpolate (cold_dirt, warm_dirt, fade);
-
-      //"atmosphere" is the overall color of the lighting & fog. 
-      humid_air = glRgba (1.0f, 1.0f, 0.3f);
-      dry_air = glRgba (1.0f, 0.7f, 0.3f);
-      warm_air = glRgbaInterpolate (dry_air, humid_air, r.moisture);
-      cold_air = glRgba (0.3f, 0.7f, 1.0f);
-      r.color_atmosphere = glRgbaInterpolate (cold_air, warm_air, r.temperature);
-
-      //Devise a rock color
-      fade = MathScalar (r.temperature, FREEZING, 1.0f);
-      //Warm rock is red
-      warm_rock.red = 1.0f;
-      warm_rock.green = 1.0f - RandomFloat () * 0.6f;
-      warm_rock.blue = 1.0f - RandomFloat () * 0.6f;
-      //Cold rock is white or blue
-      cold_rock.blue = 1.0f;
-      cold_rock.green = 1.0f - RandomFloat () * 0.4f;
-      cold_rock.red = cold_rock.green;
-      r.color_rock = glRgbaInterpolate (cold_rock, warm_rock, fade);
-      
-      //Color the map
-      switch (r.climate) {
-      case CLIMATE_MOUNTAIN:
-        r.color_map = glRgba (0.5f, 0.5f, 0.5f);break;
-      case CLIMATE_COAST:
-        r.color_map = glRgba (0.9f, 0.7f, 0.4f);break;
-      case CLIMATE_OCEAN:
-        break;//We set this when we made the ocean
-      case CLIMATE_RIVER:
-        r.color_map = glRgba (0.0f, 0.0f, 0.6f);
-        break;
-      case CLIMATE_RIVER_BANK:
-        r.color_map = r.color_dirt;
-        break;
-      case CLIMATE_SWAMP:
-        r.color_grass *= 0.5f;
-        r.color_map = r.color_grass * 0.5f;
-        break;
-      default:
-        r.color_map = r.color_grass;
-        break;
-      }
-      if (r.geo_scale >= 0.0f)
-        r.color_map *= (r.geo_scale * 0.5f + 0.5f);
-      continent[x][y] = r;
-    }
-  }
-  
-}
-
-
 static void do_map ()
 {
 
@@ -1080,7 +900,15 @@ Region RegionGet (int x, int y)
 }
 
 
-void RegionSet (int x, int y, Region val)
+
+Region RegionMapGet (int x, int y)
+{
+
+  return continent[x][y];
+
+}
+
+void RegionMapSet (int x, int y, Region val)
 {
 
   continent[x][y] = val;
@@ -1154,14 +982,17 @@ void    RegionGenerate ()
     }
   }
 
-  do_oceans ();
-  do_coast ();
-  //do_oceans_deep ();
-  //do_mountains (3);
+  TerraformOceans ();
+  //do_coast ();
+  TerraformCoast ();
+  //TerraformMountains (1);
   //do_canyons (3);
-  do_climate ();
-  do_rivers (4);
-  do_climate ();//Do climate a second time now that rivers are in
+  TerraformClimate ();
+  //do_climate ();
+  //do_rivers (4);
+  TerraformRivers (4);
+  TerraformClimate ();
+  //do_climate ();//Do climate a second time now that rivers are in
   do_landmass ();
   for (x = 0; x < REGION_GRID; x++) {
     for (y = 0; y < REGION_GRID; y++) {
@@ -1171,8 +1002,10 @@ void    RegionGenerate ()
     }
   }
 
-  do_blur ();
-  do_colors ();
+  //do_blur ();
+  TerraformAverage ();
+  //do_colors ();
+  TerraformColors ();
   do_map ();
   
 }

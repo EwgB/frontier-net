@@ -160,7 +160,7 @@ void CGrass::Build (long stop)
     root.y = (float)world_y + RandomFloat ();
     root.z = WorldElevation (root.x, root.y);
     height = 0.1f + r.moisture * r.temperature;
-    size.x = 0.25f + RandomFloat () * 0.25f;
+    size.x = 0.5f + RandomFloat () * 0.5f;
     size.y = RandomFloat () *  height + height;
     do_flower = r.has_flowers;
     if (do_flower) //flowers are shoter than grass
@@ -212,6 +212,10 @@ void CGrass::Build (long stop)
   }
   if (_walk.Walk (GRASS_SIZE)) 
     _stage++;
+  if (_walk.Walk (GRASS_SIZE)) 
+    _stage++;
+  if (_walk.Walk (GRASS_SIZE)) 
+    _stage++;
 
 }
 
@@ -252,7 +256,7 @@ void CGrass::Render ()
   _vbo.Render ();
 
   glDisable (GL_TEXTURE_2D);
-  glDisable (GL_FOG);
+  //glDisable (GL_FOG);
   glDisable (GL_LIGHTING);
   glDepthFunc (GL_EQUAL);
   glEnable (GL_BLEND);

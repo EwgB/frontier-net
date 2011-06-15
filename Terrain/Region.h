@@ -68,8 +68,9 @@ struct Region
   bool      has_flowers;
 };
 
+Region    RegionMapGet (int x, int y);
+void      RegionMapSet (int x, int y, Region val);
 Region    RegionGet (int x, int y);
-void      RegionSet (int x, int y, Region val);
 Region    RegionGet (float x, float y);
 GLrgba    RegionColorGet (int world_x, int world_y, SurfaceColor c);
 GLrgba    RegionAtmosphere (int world_x, int world_y);

@@ -1,6 +1,3 @@
-//#define TEXTURE_SIZE      64
-//#define PATCH_SIZE        64 
-//#define PATCH_STEPS       (TEXTURE_SIZE / PATCH_SIZE)
 #define LAYERS            (sizeof (layers) / sizeof (LayerAttributes))
 #define VISIBLE           1
 #define WORLD_GRID        256

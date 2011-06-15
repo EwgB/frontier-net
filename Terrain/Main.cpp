@@ -5,14 +5,15 @@
 
 -------------------------------------------------------------------------------
 
- 
+ TODO:
+
+ * Move player movement to Avatar.cpp
+ * Migrate region building to Terraform.cpp
+ * Make water only build needed polygons.
+
 -----------------------------------------------------------------------------*/
 
 #include "stdafx.h"
-
-#include <iostream>
-#include <stdio.h>
-//#include <tchar.h>
 
 #include "camera.h"
 #include "env.h"
@@ -79,7 +80,7 @@ static void run ()
   long    remaining;
 
   while (!quit) {
-    stop = SdlTick () + 15;
+    stop = SdlTick () + 25;
     SdlUpdate ();
     CameraUpdate ();
     EnvUpdate ();

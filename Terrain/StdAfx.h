@@ -58,6 +58,14 @@ enum SurfaceType
   SURFACE_TYPES
 };
 
+enum
+{
+  NORTH,
+  SOUTH,
+  EAST,
+  WEST
+};
+
 struct Cell
 {
   float elevation;

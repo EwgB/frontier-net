@@ -18,7 +18,7 @@
 #include "World.h"
 
 //Lower values make the terrain more precise at the expense of more polygons
-#define TOLERANCE         0.25f
+#define TOLERANCE         0.1f
 //Nower numbers make the normals more extreme, exaggerate the lighting
 #define NORMAL_SCALING    0.6f
 
@@ -469,7 +469,7 @@ void CTerrain::DoQuad (int x1, int y1, int size)
   delta = abs (average - center);
   //scale the delta based on the size of the quad we are dealing with
   delta /= (float)size;
-  if (delta > 0.08f)
+  if (delta > TOLERANCE)
     PointActivate (xc, yc);
 
 }
