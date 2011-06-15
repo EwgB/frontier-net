@@ -117,6 +117,25 @@ float WorldElevation (int x, int y)
 
 }
 
+float WorldDetail (int x, int y)
+{
+
+  int     page_x, page_y;
+  CPage*   z;
+  
+  x = max (0, x);
+  y = max (0, y);
+  page_x = CPageFromPos (x);
+  page_y = CPageFromPos (y);
+  if (page_x < 0 || page_x >= PAGE_GRID || page_y < 0 || page_y >= PAGE_GRID)
+    return 0;
+  z = page[page_x][page_y];
+  if (!z) 
+    return 0;
+  return z->Detail (x % PAGE_SIZE, y % PAGE_SIZE);
+
+}
+
 float WorldElevation (float x, float y)
 {
 

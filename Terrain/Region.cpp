@@ -165,14 +165,13 @@ static float do_height (Region r, GLvector2 offset, float bias, float esmall, fl
     esmall *= strength;
   }
   
-  esmall *= r.geo_detail;
   elarge *= r.geo_large;
   //Apply the values!
-  val = esmall * SMALL_STRENGTH + elarge * LARGE_STRENGTH;
+  val = esmall * r.geo_detail + elarge * LARGE_STRENGTH;
   val += bias;
   if (r.climate == CLIMATE_SWAMP) {
     val -= r.geo_detail / 2.0f;
-    val = max (val, r.geo_detail - 1.0f);
+    val = max (val, r.geo_bias - 0.5f);
   }
   //Modify the final value.
   if (r.flags_shape & REGION_FLAG_MESAS) {
@@ -183,11 +182,12 @@ static float do_height (Region r, GLvector2 offset, float bias, float esmall, fl
     }
   }
   if (r.flags_shape & REGION_FLAG_CANYON_NS) {
-    esmall = min (esmall, 0.35f);
-    if (offset.x > (0.15f + esmall) && offset.x < (0.85f - esmall))
-      val -= r.threshold;
+    float    x = abs (offset.x - 0.5f) * 2.0f;;
+
+    if (x + esmall < 0.5f)
+      val = bias + (val - bias) / 2.0f;
     else 
-      val += r.threshold;
+      val += r.geo_bias;
   }
   if ((r.flags_shape & REGION_FLAG_BEACH) && val < r.beach_threshold && val > 0.0f) {
     val /= r.beach_threshold;
@@ -275,451 +275,6 @@ static GLcoord find_direction (int x, int y)
 
 }
 
-
-
-static bool try_river (int start_x, int start_y, int id)
-{
-
-  Region            r;
-  Region*           neighbor;
-  vector<GLcoord>   path;
-  GLcoord           selected;
-  GLcoord           last_move;
-  GLcoord           to_coast;
-  int               x, y;
-  int               xx, yy;
-  unsigned          d;
-  float             lowest;
-  float             water_level;
-  float             water_strength;
-
-  x = start_x;
-  y = start_y;
-  while (1) {
-    r = continent[x][y];
-    //If we run into the ocean, then we're done.
-    if (r.climate == CLIMATE_OCEAN) 
-      break;
-    if (r.climate == CLIMATE_MOUNTAIN) 
-      return false;
-    //If we run into a river, we've become a tributary.
-    if (r.climate == CLIMATE_RIVER) {
-      //don't become a tributary at the start of a river. Looks odd.
-      if (r.river_segment < 7)
-        return false;
-      break;
-    }
-    lowest = r.geo_bias;
-    to_coast = find_direction (x, y);
-    //lowest = 999.9f;
-    selected.Clear ();
-    for (d = 0; d < 4; d++) {
-      neighbor = &continent[x + direction[d].x][y + direction[d].y];
-      //Don't reverse course into ourselves
-      if (last_move == (direction[d] * -1))
-        continue;
-      //Don't head directly AWAY from the coast
-      if (direction[d] == to_coast * -1)
-        continue;
-      if (neighbor->geo_bias <= lowest) {
-        selected = direction[d];
-        lowest = neighbor->geo_bias;
-      }
-    }
-    //If everthing around us is above us, we can't flow downhill
-    if (!selected.x && !selected.y) //Let's just head for the edge of the map
-      selected = to_coast;
-    last_move = selected;
-    x += selected.x;
-    y += selected.y;
-    path.push_back (selected);
-  }
-  //If the river is too short, ditch it.
-  if (path.size () < (REGION_GRID / 4))
-    return false;
-  //The river is good. Place it.
-  x = start_x;
-  y = start_y;
-  water_strength = 0.03f;
-  water_level = continent[x][y].geo_bias;
-  for (d = 0; d < path.size (); d++) {
-    r = continent[x][y];
-    if (!d)
-      sprintf (r.title, "River%d-Source", id);
-    else if (d == path.size () - 1) 
-      sprintf (r.title, "River%d-Mouth", id);
-    else
-      sprintf (r.title, "River%d-%d", id, d);
-    //A river should attain full strength after crossing 1/4 of the map
-    water_strength += (1.0f / ((float)REGION_GRID / 4.0f));
-    water_strength = min (water_strength, 1);
-    r.flags_shape |= REGION_FLAG_NOBLEND;
-    r.river_id = id;
-    r.moisture = max (r.moisture, 0.5f);
-    r.river_segment = d;
-    //r.geo_detail = 8.0f + water_strength * 10.0f;
-    r.geo_detail = 28.0f - water_strength * 10.0f;
-    r.river_width = min (water_strength, 1);
-    r.climate = CLIMATE_RIVER;
-    water_level = min (r.geo_bias, water_level);
-    //We need to flatten out this space, as well as all of its neighbors.
-    r.geo_bias = water_level;
-    for (xx = x - 2; xx <= x + 2; xx++) {
-      for (yy = y - 2; yy <= y + 2; yy++) {
-        if (continent[xx][yy].climate != CLIMATE_INVALID) 
-          continue;
-        if (!xx && !yy)
-          continue;
-        continent[xx][yy].geo_bias = min (continent[xx][yy].geo_bias, water_level);
-        continent[xx][yy].geo_large = r.geo_large;
-        continent[xx][yy].geo_detail = r.geo_detail;
-        continent[xx][yy].climate = CLIMATE_RIVER_BANK;
-        continent[xx][yy].flags_shape |= REGION_FLAG_NOBLEND;
-        sprintf (continent[xx][yy].title, "River%d-Banks", id);
-      }
-    }
-    selected = path[d];
-    neighbor = &continent[x + selected.x][y + selected.y];
-    if (selected.y == -1) {//we're moving north
-      neighbor->flags_shape |= REGION_FLAG_RIVERS;
-      r.flags_shape |= REGION_FLAG_RIVERN;
-    }
-    if (selected.y == 1) {//we're moving south
-      neighbor->flags_shape |= REGION_FLAG_RIVERN;
-      r.flags_shape |= REGION_FLAG_RIVERS;
-    }
-    if (selected.x == -1) {//we're moving west
-      neighbor->flags_shape |= REGION_FLAG_RIVERE;
-      r.flags_shape |= REGION_FLAG_RIVERW;
-    }
-    if (selected.x == 1) {//we're moving east
-      neighbor->flags_shape |= REGION_FLAG_RIVERW;
-      r.flags_shape |= REGION_FLAG_RIVERE;
-    }
-    continent[x][y] = r;
-    x += selected.x;
-    y += selected.y;
-  }
-  return true;
-
-}
-
-/*
-//Drop a point in the middle of the terrain and attempt to
-//place a river. 
-static void do_rivers (int count)
-{
-
-  int         rivers;
-  int         cycles;
-  int         x, y;
-
-  rivers = 0;
-  cycles = 0;
-  while (rivers < count && cycles < 100) {
-    x = REGION_CENTER + (RandomVal () % 30) - 15;
-    y = REGION_CENTER + (RandomVal () % 30) - 15;
-    if (try_river (x, y, rivers)) 
-      rivers++;
-    cycles++;
-  }
-  cycles = 0;
-
-}
-*/
-
-
-//look around the map and find an unused area of the desired size
-static bool find_plot (int radius, GLcoord* result)
-{
-
-  int       cycles;
-  GLcoord   test;
-  
-  cycles = 0;
-  while (cycles < 20) {
-    cycles++;
-    test.x = RandomVal () % REGION_GRID;
-    test.y = RandomVal () % REGION_GRID;
-    if (is_free (test.x, test.y, radius)) {
-      *result = test;
-      return true;
-    }
-  }
-  //couldn't find a spot. Map is full, or just bad dice rolls. 
-  return false; 
-
-}
-
-//Blur the region attributes by averaging each region with its
-//neighbors.  This prevents overly harsh transitions.
-/*
-static void do_blur ()
-{
-
-  int   x, y, xx, yy, count;
-  int   radius;
-  float (*temp)[REGION_GRID];
-  float (*moist)[REGION_GRID];
-  float (*elev)[REGION_GRID];
-  float (*sm)[REGION_GRID];
-  float (*lg)[REGION_GRID];
-
-  temp = new float[REGION_GRID][REGION_GRID];
-  moist = new float[REGION_GRID][REGION_GRID];
-  elev = new float[REGION_GRID][REGION_GRID];
-  sm = new float[REGION_GRID][REGION_GRID];
-  lg = new float[REGION_GRID][REGION_GRID];
-
-  //Blur some of the attributes
-  for (int passes = 0; passes < 5; passes++) {
-
-    radius = 3;
-    for (x = radius; x < REGION_GRID - radius; x++) {
-      for (y = radius; y < REGION_GRID - radius; y++) {
-        temp[x][y] = 0;
-        moist[x][y] = 0;
-        elev[x][y] = 0;
-        sm[x][y] = 0;
-        lg[x][y] = 0;
-        count = 0;
-        for (xx = -radius; xx <= radius; xx++) {
-          for (yy = -radius; yy <= radius; yy++) {
-            temp[x][y] += continent[x + xx][y + yy].temperature;
-            moist[x][y] += continent[x + xx][y + yy].moisture;
-            elev[x][y] += continent[x + xx][y + yy].geo_bias;
-            sm[x][y] += continent[x + xx][y + yy].geo_detail;
-            lg[x][y] += continent[x + xx][y + yy].geo_large;
-            count++;
-          }
-        }
-        temp[x][y] /= (float)count;
-        moist[x][y] /= (float)count;
-        elev[x][y] /= (float)count;
-        sm[x][y] /= (float)count;
-        lg[x][y] /= (float)count;
-      }
-    }
-    //Put the blurred values back into our table
-    for (x = radius; x < REGION_GRID - radius; x++) {
-      for (y = radius; y < REGION_GRID - radius; y++) {
-        continent[x][y].temperature = temp[x][y];
-        //Rivers can get wetter through this process, but not drier.
-        if (continent[x][y].climate == CLIMATE_RIVER) 
-          continent[x][y].moisture = max (continent[x][y].moisture, moist[x][y]);
-        else if (continent[x][y].climate != CLIMATE_OCEAN) 
-          continent[x][y].moisture = moist[x][y];//No matter how arid it is, the OCEANS STAY WET!
-        if (!(continent[x][y].flags_shape & REGION_FLAG_NOBLEND)) {
-          //continent[x][y].geo_bias = elev[x][y];
-          continent[x][y].geo_detail = sm[x][y];
-          continent[x][y].geo_large = lg[x][y];
-        }
-      }
-    }
-  }
-  delete []temp;
-  delete []moist;
-  delete []elev;
-  delete []sm;
-  delete []lg;
-  
-}
-*/
-
-//Test the given area and see if it contains the given climate.
-static bool climate_present (int x, int y, int radius, Climate c) 
-{
-
-  GLcoord   start, end;
-  int       xx, yy;
-
-  start.x = max (x - radius, 0);
-  start.y = max (y - radius, 0);
-  end.x = min (x + radius, REGION_GRID - 1);
-  end.y = min (y + radius, REGION_GRID - 1);
-  for (xx = start.x; xx <= end.x; xx++) {
-    for (yy = start.y; yy <= end.y; yy++) {
-      if (continent[xx][yy].climate == c)
-        return true;
-    }
-  }
-  return false;
-
-}
-
-//Test the given area and see if it ONLY contains the given climate.
-static bool climate_exclusive (int x, int y, int radius, Climate c) 
-{
-
-  GLcoord   start, end;
-  int       xx, yy;
-
-  start.x = max (x - radius, 0);
-  start.y = max (y - radius, 0);
-  end.x = min (x + radius, REGION_GRID - 1);
-  end.y = min (y + radius, REGION_GRID - 1);
-  for (xx = start.x; xx <= end.x; xx++) {
-    for (yy = start.y; yy <= end.y; yy++) {
-      if (continent[xx][yy].climate != c)
-        return false;
-    }
-  }
-  return true;
-
-}
-/*
-//pass over the map, calculate the temp & moisture
-static void do_climate () 
-{
-
-  int     x, y;  
-  float   moist, temp;
-  Region  r;
-
-  for (y = 0; y < REGION_GRID; y++) {
-    moist = 1.0f;
-    for (x = 0; x < REGION_GRID; x++) {
-      r = continent[x][y];
-      moist -= 1.0f / REGION_CENTER;
-      //Mountains block rainfall
-      if (r.climate == CLIMATE_MOUNTAIN) {
-        moist -= 0.1f * r.mountain_height;
-      }       
-      moist = max (moist, 0);
-      r.moisture = moist;
-      //Rivers always give some moisture
-      if (r.climate == CLIMATE_RIVER) {
-        r.moisture = max (r.moisture, 0.75f);
-        moist += 0.2f;
-        moist = min (moist, 1);
-      }
-      //The north 25% is max cold.  The south 25% is all tropical
-      temp = ((float)y - (REGION_GRID / 4)) / REGION_CENTER;
-      if (r.mountain_height) {
-        temp -= (float)r.mountain_height * 0.2f;
-      }
-      temp = clamp (temp, MIN_TEMP, MAX_TEMP);
-      //oceans have a moderating effect
-      if (r.climate == CLIMATE_OCEAN) {
-        if (temp > 0.99f)
-          temp = temp;
-        temp = (temp + 0.5f) / 2.0f;
-        r.moisture = 1.0f;
-        moist = 1.0f;
-      }
-      r.temperature = temp;
-      continent[x][y] = r;
-    }
-  }
-
-}
-
-*/
-
-/*
-static void do_oceans ()
-{
-
-  int     x, y;
-  Region  r;
-  bool    is_ocean;
-  
-  //define the oceans at the edge of the world
-  for (x = 0; x < REGION_GRID; x++) {
-    for (y = 0; y < REGION_GRID; y++) {
-      r = continent[x][y];
-      is_ocean = false;
-      if (r.geo_scale <= 0.0f) 
-        is_ocean = true;
-      if (x == 0 || y == 0 || x == REGION_GRID - 1 || y == REGION_GRID - 1) 
-        is_ocean = true;
-      if (is_ocean) {
-        //depth = (-1.0f - r.elevation);
-        //r.color_map = glRgba (0.0f, 0.7f + r.elevation * 4.0f, 1.0f + r.elevation / 4.0f);
-        r.color_map.Clamp ();
-        //depth = max (depth, 0.0f);
-        //depth = abs (r.elevation) * 3;
-        //depth = min (depth, 1);
-        r.geo_large = 0.0f;
-        r.geo_detail = 0.3f;
-        r.moisture = 1.0f;
-        r.geo_bias = -10.0f;
-        r.flags_shape = REGION_FLAG_NOBLEND;
-        r.climate = CLIMATE_OCEAN;
-        sprintf (r.title, "%s Ocean", find_direction_name (x, y));
-        //Ocean rock is always white (Earthtones look bad)
-        r.color_rock = glRgba (1.0f);
-        continent[x][y] = r;
-      }        
-    }
-  }
-
-}
-*/
-
-/*
-static void do_coast ()
-{
-
-  int             x, y;
-  Region          r;
-  int             pass;
-  unsigned        i;
-  bool            is_coast;
-  vector<GLcoord> queue;
-  GLcoord         current;
-
-  //now define the coast 
-  for (pass = 0; pass < 2; pass++) {
-    queue.clear ();
-    for (x = 0; x < REGION_GRID; x++) {
-      for (y = 0; y < REGION_GRID; y++) {
-        r = continent[x][y];
-        //Skip already assigned places
-        if (r.climate != CLIMATE_INVALID)
-          continue;
-        is_coast = false;
-        //On the first pass, we add beach adjoining the sea
-        if (!pass && climate_present (x, y, 1, CLIMATE_OCEAN)) 
-          is_coast = true;
-        //One the second pass, we add beach adjoining the beach we added on the previous step
-        if (pass && climate_present (x, y, 1, CLIMATE_COAST)) 
-          is_coast = true;
-        if (is_coast) {
-          current.x = x;
-          current.y = y;
-          queue.push_back (current);
-        }
-      }
-    }
-    //Now we're done scanning the map.  Run through our list and make the new regions.
-    for (i = 0; i < queue.size (); i++) {
-      current = queue[i];
-      r = continent[current.x][current.y];
-      if (!pass) 
-        sprintf (r.title, "%s beach", find_direction_name (x, y));
-      else
-        sprintf (r.title, "%s coast", find_direction_name (x, y));
-      r.geo_large = 0.0f;
-      //beaches are low and partially submerged
-      if (!pass) {
-        r.geo_bias = -2.0f;
-        r.geo_detail = 4.0f;
-      } else {
-        r.geo_bias = 0.5f;
-        r.geo_detail = 14.5f;
-      }
-      r.moisture = 1.0f;
-      r.flags_shape |= REGION_FLAG_NOBLEND | REGION_FLAG_BEACH;
-      r.beach_threshold = 3.0f + RandomFloat () * 5.0f;
-      r.climate = CLIMATE_COAST;
-      continent[current.x][current.y] = r;
-    }
-  }
-
-}
-*/
-
 //This will fill in all reviously un-assigned regions.
 static void do_landmass ()
 {
@@ -780,14 +335,6 @@ static void do_landmass ()
         r.flags_shape |= REGION_FLAG_TIERED;
       } else if (rand == 6) {
         sprintf (r.title, "Wasteland");
-      } else if (rand == 7) {
-        sprintf (r.title, "Swamp");
-        r.climate = CLIMATE_SWAMP;
-        r.color_atmosphere = glRgba (0.0f, 0.5f, 0.0f);
-        r.moisture = 1.0f;
-        r.geo_detail = 3.0f;
-        r.has_flowers = false;
-        r.flags_shape |= REGION_FLAG_NOBLEND;
       } else {
         sprintf (r.title, "Grasslands");
         //r.geo_detail /= 3;
@@ -800,34 +347,6 @@ static void do_landmass ()
   }
 
 }
-
-static void do_canyons (int count)
-{
-
-  Region    r;
-  GLcoord   plot;
-  float     depth;
-  int       x, y;
-  int       can_size;
-
-  for (x = 0; x < count; x++) {
-    can_size = 2;
-    if (!find_plot (can_size, &plot))
-      continue;
-    depth = 0.5f + RandomFloat () * 3.0f;
-    for (y = -can_size; y <= can_size; y++) {
-      r = continent[plot.x][plot.y + y];
-      sprintf (r.title, "Canyon");
-      r.geo_large += 0.2f;
-      r.geo_detail = 0.5f;
-      r.threshold = 0.5f + depth * (float)(can_size - abs (y));
-      r.flags_shape |= REGION_FLAG_CANYON_NS;
-      continent[plot.x][plot.y + y] = r;
-    }
-  }
-
-}
-
 
 static void do_map ()
 {
@@ -993,6 +512,7 @@ void    RegionGenerate ()
   TerraformRivers (4);
   TerraformClimate ();
   //do_climate ();//Do climate a second time now that rivers are in
+  TerraformZones ();
   do_landmass ();
   for (x = 0; x < REGION_GRID; x++) {
     for (y = 0; y < REGION_GRID; y++) {
@@ -1031,7 +551,7 @@ GLrgba RegionColorGet (int world_x, int world_y, SurfaceColor c)
   r1 = region (origin.x + 1, origin.y);
   r2 = region (origin.x, origin.y + 1);
   r3 = region (origin.x + 1, origin.y + 1);
-  //return r0.color_map;////////////////////////////////////////////////////   
+  return r0.color_grass;
   switch (c) {
   case SURFACE_COLOR_GRASS:
     c0 = r0.color_grass;
@@ -1071,23 +591,7 @@ GLrgba RegionAtmosphere (int world_x, int world_y)
   origin.x = world_x / REGION_SIZE;
   origin.y = world_y / REGION_SIZE;
   return region (origin.x, origin.y).color_atmosphere;
-  /*
-  GLrgba    c0, c1, c2, c3, result;
-  Region    r0, r1, r2, r3;
 
-  r0 = region (origin.x, origin.y);
-  r1 = region (origin.x + 1, origin.y);
-  r2 = region (origin.x, origin.y + 1);
-  r3 = region (origin.x + 1, origin.y + 1);
-  c0 = r0.color_atmosphere;
-  c1 = r1.color_atmosphere;
-  c2 = r2.color_atmosphere;
-  c3 = r3.color_atmosphere;
-  result.red   = MathInterpolateQuad (c0.red, c1.red, c2.red, c3.red, offset);
-  result.green = MathInterpolateQuad (c0.green, c1.green, c2.green, c3.green, offset);
-  result.blue  = MathInterpolateQuad (c0.blue, c1.blue, c2.blue, c3.blue, offset);
-  return result;
-  */
 }
 
 float RegionWaterLevel (int world_x, int world_y)

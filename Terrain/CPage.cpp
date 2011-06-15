@@ -91,6 +91,14 @@ float CPage::Elevation (int x, int y)
 
 }
 
+float CPage::Detail (int x, int y)
+{
+
+  _last_touched = SdlTick ();
+  return _cell[x][y].detail;
+
+}
+
 bool CPage::Expired ()
 {
 
@@ -153,7 +161,7 @@ void CPage::DoSurface ()
   c = &_cell[_walk.x][_walk.y];
   if (_stage == PAGE_STAGE_SURFACE1) {
     //Get the elevation of our neighbors
-    here = high= low = c->elevation;
+    here = high = low = c->elevation;
     for (xx = -2; xx <= 2; xx++) {
       neighbor_x = _walk.x + xx;
       if (neighbor_x < 0 || neighbor_x >= PAGE_SIZE) 
@@ -167,16 +175,6 @@ void CPage::DoSurface ()
       }
     }
     delta = high - low;
-    /*
-    if ((Entropy (worldpos.x, worldpos.y) * 0.1f + region.temperature) > 0.25) {
-      if (region.moisture > 0.1f)
-        c->surface = SURFACE_GRASS;
-      else 
-        c->surface = SURFACE_DIRT;
-    } else
-      c->surface = SURFACE_ROCK;
-      */
-
     //Default surface. If the climate can support life, default to grass.
     if (region.temperature > 0.1f && region.moisture > 0.1f)
       c->surface = SURFACE_GRASS;

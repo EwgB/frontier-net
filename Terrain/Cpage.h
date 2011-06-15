@@ -37,6 +37,7 @@ class CPage
 public:
   void            Cache (int origin_x, int origin_y);
   float           Elevation (int x, int y);
+  float           Detail (int x, int y);
   GLvector        Position (int x, int y);
   GLrgba          ColorGrass (int x, int y);
   GLrgba          ColorDirt (int x, int y);

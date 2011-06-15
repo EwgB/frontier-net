@@ -157,7 +157,6 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
     }
     glEnd ();
   }
-  //return;
   for (stage = 0; stage < LAYERS; stage++) {
     if (!_surface_used[layers[stage].surface])
       continue;
@@ -168,10 +167,6 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
 	  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
     glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
 
-/*    
-    for (y = -1; y < TERRAIN_EDGE + 1; y++) {
-      for (x = -1; x < TERRAIN_EDGE + 1; x++) {
-      */
     for (y = start.y; y < end.y - 1; y++) {
       for (x = start.x; x < end.x; x++) {
         world_x = _origin.x * TERRAIN_SIZE + x;

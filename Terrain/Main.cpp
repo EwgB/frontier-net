@@ -84,7 +84,7 @@ static void run ()
   long    remaining;
 
   while (!quit) {
-    stop = SdlTick () + 25;
+    stop = SdlTick () + 15;
     SdlUpdate ();
     AvatarUpdate ();
     CameraUpdate ();

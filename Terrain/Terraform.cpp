@@ -79,9 +79,6 @@ GLcoord get_map_side (int x, int y)
 
 }
 
-
-
-
 //Test the given area and see if it contains the given climate.
 static bool is_climate_present (int x, int y, int radius, Climate c) 
 {
@@ -145,6 +142,112 @@ static bool find_plot (int radius, GLcoord* result)
   return false; 
 
 }
+
+/*-----------------------------------------------------------------------------
+Functions to place individual climates
+-----------------------------------------------------------------------------*/
+
+
+//Place one mountain
+static void do_mountain (int x, int y, int mtn_size)
+{
+
+  int     step;
+  float   height;
+  Region  r;
+  int     xx, yy;
+
+  for (xx = -mtn_size; xx <= mtn_size; xx++) {
+    for (yy = -mtn_size; yy <= mtn_size; yy++) {
+      r = RegionMapGet (xx + x, yy + y);
+      step = (max (abs (xx), abs (yy)));
+      if (step == 0) {
+        sprintf (r.title, "Mountain Summit");
+      } else if (step == mtn_size) 
+        sprintf (r.title, "Mountain Foothills");
+      else {
+        sprintf (r.title, "Mountain");
+      }
+      r.mountain_height = mtn_size - step;
+      //Lose 20 degrees for every step up
+      height = 1.0f - (float)step / (float)mtn_size;
+      //r.geo_large += 0.2f + height;
+      r.geo_detail = r.mountain_height* 10.0f;
+      r.geo_bias += r.mountain_height * REGION_HALF;
+      r.flags_shape = REGION_FLAG_NOBLEND;
+      r.climate = CLIMATE_MOUNTAIN;
+      RegionMapSet (xx + x, yy + y, r);
+    }
+  }
+
+}
+
+//Place one mountain
+static void do_rocky (int x, int y, int size)
+{
+
+  Region  r;
+  int     xx, yy;
+
+  for (xx = -size; xx <= size; xx++) {
+    for (yy = -size; yy <= size; yy++) {
+      r = RegionMapGet (xx + x, yy + y);
+      sprintf (r.title, "Rocky Wasteland");
+      r.geo_detail = 40.0f;
+      //r.flags_shape = REGION_FLAG_NOBLEND;
+      r.climate = CLIMATE_ROCKY;
+      RegionMapSet (x + xx, y + yy, r);
+    }
+  }
+
+}
+
+
+//Place one mountain
+static void do_swamp (int x, int y, int size)
+{
+
+  Region  r;
+  int     xx, yy;
+
+  for (xx = -size; xx <= size; xx++) {
+    for (yy = -size; yy <= size; yy++) {
+      r = RegionMapGet (xx + x, yy + y);
+      sprintf (r.title, "Swamp");
+      r.climate = CLIMATE_SWAMP;
+      r.color_atmosphere = glRgba (0.0f, 0.5f, 0.0f);
+      r.moisture = 1.0f;
+      r.geo_detail = 8.0f;
+      r.has_flowers = false;
+      r.flags_shape |= REGION_FLAG_NOBLEND;
+      RegionMapSet (x + xx, y + yy, r);
+    }
+  }
+
+}
+
+
+static void do_canyon (int x, int y, int radius)
+{
+
+  Region    r;
+  int       yy;
+  float     step;
+
+  for (yy = -radius; yy <= radius; yy++) {
+    r = RegionMapGet (x, yy + y);
+    step = (float)abs (yy) / (float)radius;
+    step = 1.0f - step;
+    sprintf (r.title, "Canyon");
+    r.climate = CLIMATE_CANYON;
+    r.geo_detail = 5 + step * 25.0f;
+    //r.geo_detail = 1;
+    r.flags_shape |= REGION_FLAG_CANYON_NS | REGION_FLAG_NOBLEND;
+    RegionMapSet (x, y + yy, r);
+  }
+
+}
+
 
 
 static bool try_river (int start_x, int start_y, int id)
@@ -413,8 +516,8 @@ void TerraformColors ()
       cold_grass.red = 0.5f + RandomFloat () * 0.2f;
       cold_grass.green = 0.8f + RandomFloat () * 0.2f;
       cold_grass.blue = 0.7f + RandomFloat () * 0.2f;
-      if (r.temperature < COLD)
-        r.color_grass = glRgbaInterpolate (cold_grass, warm_grass, r.temperature / COLD);
+      if (r.temperature < TEMP_COLD)
+        r.color_grass = glRgbaInterpolate (cold_grass, warm_grass, r.temperature / TEMP_COLD);
       else
         r.color_grass = warm_grass;
       //Devise a random but plausible dirt color
@@ -456,7 +559,9 @@ void TerraformColors ()
       cold_rock.green = 1.0f - RandomFloat () * 0.4f;
       cold_rock.red = cold_rock.green;
       r.color_rock = glRgbaInterpolate (cold_rock, warm_rock, fade);
-      
+      if ((x + y) % 2)
+        r.color_rock = glRgba (1.0f);
+
       //Color the map
       switch (r.climate) {
       case CLIMATE_MOUNTAIN:
@@ -476,6 +581,12 @@ void TerraformColors ()
       case CLIMATE_SWAMP:
         r.color_grass *= 0.5f;
         r.color_map = r.color_grass * 0.5f;
+        break;
+      case CLIMATE_ROCKY:
+        r.color_map = r.color_rock * 0.5f;
+        break;
+      case CLIMATE_CANYON:
+        r.color_map = r.color_rock * 0.3f;
         break;
       default:
         r.color_map = r.color_grass;
@@ -680,3 +791,64 @@ void TerraformRivers (int count)
   cycles = 0;
 
 }
+
+//Create zones of different climates.
+void TerraformZones ()
+{
+
+  int             x, y;
+  vector<Climate> climates;
+  Region          r;
+  int             radius;
+  Climate         c;
+
+  for (y = 0; y < REGION_GRID; y++) {
+    for (x = 0; x < REGION_GRID; x++) {
+      if ((x + y) % 2)
+        radius = 1;
+      else
+        radius = 2;
+      if (!is_free (x, y, 2))
+        continue;
+      r = RegionMapGet (x, y);
+      climates.clear ();
+      //swamps only appear in wet areas that aren't cold.
+      if (r.moisture > 0.9f && r.temperature > TEMP_TEMPERATE)
+        climates.push_back (CLIMATE_SWAMP);
+      //mountains only appear in the middle
+      if (abs (x - REGION_CENTER) < 10)
+        climates.push_back (CLIMATE_MOUNTAIN);
+      //fields should be not too hot or cold.
+      if (r.temperature > TEMP_TEMPERATE && r.temperature < TEMP_HOT && r.moisture > 0.5f)
+        climates.push_back (CLIMATE_FIELD);
+      //Rocky wastelands favor cold areas
+      if (r.temperature < TEMP_TEMPERATE)
+        climates.push_back (CLIMATE_ROCKY);
+      if (radius > 1)
+        climates.push_back (CLIMATE_CANYON);
+      if (climates.empty ())
+        continue;
+      c = climates[RandomVal () % climates.size ()];
+      switch (c) {
+      case CLIMATE_ROCKY:
+        do_rocky (x, y, radius);
+        break;
+      case CLIMATE_MOUNTAIN:
+        do_mountain (x, y, radius);
+        break;
+      case CLIMATE_CANYON:
+        do_canyon (x, y, radius);
+        break;
+      case CLIMATE_SWAMP:
+        do_swamp (x, y, radius);
+      }
+      //leave a bit of a gap before the next one
+      x += radius * 3;
+    }
+  }
+
+}
+
+
+
+

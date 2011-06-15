@@ -1,4 +1,5 @@
 float       WorldElevation (int x, int y);
+float       WorldDetail (int x, int y);
 float       WorldElevation (float x, float y);
 SurfaceType WorldSurface (int x, int y);
 GLvector    WorldPosition (int x, int y);
