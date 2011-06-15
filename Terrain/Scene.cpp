@@ -27,7 +27,7 @@
 
 #define GRASS_GRID      5
 #define GRASS_HALF      (GRASS_GRID / 2)
-#define RENDER_DISTANCE 13
+#define RENDER_DISTANCE 7
 
 static CTerrain*         terrain[WORLD_GRID][WORLD_GRID];
 static CGrass           grass[GRASS_GRID][GRASS_GRID];

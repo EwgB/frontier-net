@@ -19,6 +19,7 @@
 #include "text.h"
 #include "texture.h"
 
+#define TIME_SCALE          1000  //how many "milliseconds per in-game minute
 #define MAX_DISTANCE        300
 #define NIGHT_FOG           (MAX_DISTANCE / 5)
 #define ENV_TRANSITION      0.2f
@@ -33,7 +34,7 @@
 #define NIGHT_COLOR         glRgba (0.0f, 0.2f, 0.5f)
 #define DAY_COLOR           glRgba (0.4f, 0.7f, 1.0f)
 
-#define NIGHT_SCALING       glRgba (0.1f, 0.2f, 0.6f)
+#define NIGHT_SCALING       glRgba (0.0f, 0.1f, 0.4f)
 #define DAY_SCALING         glRgba (1.0f)
 
 static Env        desired;
@@ -43,16 +44,17 @@ static int        minutes;
 static int        hours;
 static int        update;
 static float      decimal_time;
+static int        last_decimal_time;    
+static bool       cycle_on;
 
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/
 
-static void do_time (float delta)
+static void do_cycle ()
 {
 
   Region*   r;
-  bool      day;
   int       i;
   GLrgba    average;
   GLrgba    base_color;
@@ -61,9 +63,6 @@ static void do_time (float delta)
   float     humid_fog;
 
   r = (Region*)CameraRegion ();
-  //Convert out hours and minutes into a decimal number. (100 "minutes" per hour.)
-  desired.light = glVector (-0.5f, 0.0f, -0.5f);
-  decimal_time = (float)hours + (float)minutes * SECONDS_TO_DECIMAL;
   humid_fog = (1.0f - r->moisture) * MAX_DISTANCE;
   if (decimal_time >= TIME_DAWN && decimal_time < TIME_DAY) { //sunrise
     fade = (decimal_time - TIME_DAWN) / (TIME_DAY - TIME_DAWN);
@@ -72,7 +71,11 @@ static void do_time (float delta)
     desired.fog_min = min (humid_fog, fade * MAX_DISTANCE);
     desired.star_fade = 1.0f - fade;
     color_scaling = glRgbaInterpolate (NIGHT_SCALING, DAY_SCALING, fade);
-    desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 1.0f, 0.5f);
+    //The light in the sky doesn't lighten until the second half of sunrise
+    if (fade > 0.5f)
+      desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 1.0f, 0.5f);
+    else
+      glRgba (0.5f, 0.7f, 1.0f);
   } else if (decimal_time >= TIME_DAY && decimal_time < TIME_SUNSET)  { //day
     base_color = DAY_COLOR;
     desired.fog_max = MAX_DISTANCE;
@@ -106,7 +109,19 @@ static void do_time (float delta)
     if (i == ENV_COLOR_SKY) 
       desired.color[i] = base_color * 0.75f;
     desired.color[i] *= color_scaling;
-  }      
+  }   
+
+}
+
+static void do_time (float delta)
+{
+
+  //Convert out hours and minutes into a decimal number. (100 "minutes" per hour.)
+  desired.light = glVector (-0.5f, 0.0f, -0.5f);
+  decimal_time = (float)hours + (float)minutes * SECONDS_TO_DECIMAL;
+  if (decimal_time != last_decimal_time)
+    do_cycle ();
+   
   for (int i = 0; i < ENV_COLOR_COUNT; i++) 
     current.color[i] = glRgbaInterpolate (current.color[i], desired.color[i], delta);
   current.fog_min = MathInterpolate (current.fog_min, desired.fog_min, delta);
@@ -132,7 +147,6 @@ void    EnvInit ()
 void    EnvUpdate ()
 {
 
-  //seconds += SdlElapsed ();
   if (InputKeyPressed (SDLK_RIGHTBRACKET))
     hours++;
   if (InputKeyPressed (SDLK_LEFTBRACKET)) {
@@ -140,8 +154,12 @@ void    EnvUpdate ()
     if (hours < 0)
       hours += 24;
   }
-  if (seconds >= 250) {
-    seconds -= 250;
+  if (InputKeyPressed (SDLK_BACKSLASH))
+    cycle_on = !cycle_on;
+  if (cycle_on)
+    seconds += SdlElapsed ();
+  if (seconds >= TIME_SCALE) {
+    seconds -= TIME_SCALE;
     minutes++;
   }
   if (minutes >= 60) {

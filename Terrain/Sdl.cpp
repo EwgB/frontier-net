@@ -11,7 +11,7 @@
 
 #define MOUSE_SCALING       0.01f
 
-#include "camera.h"
+#include "Avatar.h"
 #include "input.h"
 #include "log.h"
 #include "main.h"
@@ -20,7 +20,6 @@
 
 static bool           lmb;
 static bool           mmb;
-//static bool           warp;
 static int            center_x;
 static int            center_y;
 static long           last_update;
@@ -137,12 +136,16 @@ void SdlUpdate ()
       }
       break;
     case SDL_MOUSEMOTION:
+      if (InputMouselook ()) 
+        AvatarLook (event.motion.yrel, -event.motion.xrel);
+      /*
       if (InputMouselook ()) {
         pos = CameraAngle ();
         pos.x += event.motion.yrel;
         pos.z -= event.motion.xrel;
         CameraAngleSet (pos);
       }
+      */
       break;
     case SDL_VIDEORESIZE: //User resized window
       center_x = event.resize.w / 2;

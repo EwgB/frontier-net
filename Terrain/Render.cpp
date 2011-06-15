@@ -12,6 +12,7 @@
 #include "stdafx.h"
 
 #include <math.h>
+#include "avatar.h"
 #include "camera.h"
 #include "env.h"
 #include "log.h"
@@ -128,7 +129,7 @@ void RenderClick (int x, int y)
   p.x *= REGION_GRID * REGION_SIZE;
   p.y *= REGION_GRID * REGION_SIZE;
   p.z = REGION_SIZE;
-  CameraPositionSet (p);
+  AvatarPositionSet (p);
 
 }
 

@@ -16,6 +16,7 @@
 
 #include "stdafx.h"
 
+#include "avatar.h"
 #include "camera.h"
 #include "env.h"
 #include "sdl.h"
@@ -48,6 +49,7 @@ static void init ()
   SdlInit ();
   RenderInit ();
   EnvInit ();
+  AvatarInit ();
   CameraInit ();
   TextureInit ();
   RegionInit ();
@@ -64,6 +66,7 @@ static void init ()
 static void term ()
 {
 
+  AvatarTerm ();
   CameraTerm ();
   TextureTerm ();
   SdlTerm ();
@@ -83,6 +86,7 @@ static void run ()
   while (!quit) {
     stop = SdlTick () + 25;
     SdlUpdate ();
+    AvatarUpdate ();
     CameraUpdate ();
     EnvUpdate ();
     SkyUpdate ();
