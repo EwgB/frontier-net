@@ -464,7 +464,9 @@ void TerraformColors ()
       case CLIMATE_COAST:
         r.color_map = glRgba (0.9f, 0.7f, 0.4f);break;
       case CLIMATE_OCEAN:
-        break;//We set this when we made the ocean
+        r.color_map = glRgba (0.0f, 1.0f + r.geo_scale * 2.0f, 1.0f + r.geo_scale);
+        r.color_map.Clamp ();
+        break;
       case CLIMATE_RIVER:
         r.color_map = glRgba (0.0f, 0.0f, 0.6f);
         break;
@@ -563,6 +565,7 @@ void TerraformAverage ()
   
 }
 
+//Indentify regions where geo_scale is negative.  These will be ocean.
 void TerraformOceans ()
 {
 
@@ -580,12 +583,6 @@ void TerraformOceans ()
       if (x == 0 || y == 0 || x == REGION_GRID - 1 || y == REGION_GRID - 1) 
         is_ocean = true;
       if (is_ocean) {
-        //depth = (-1.0f - r.elevation);
-        //r.color_map = glRgba (0.0f, 0.7f + r.elevation * 4.0f, 1.0f + r.elevation / 4.0f);
-        r.color_map.Clamp ();
-        //depth = max (depth, 0.0f);
-        //depth = abs (r.elevation) * 3;
-        //depth = min (depth, 1);
         r.geo_large = 0.0f;
         r.geo_detail = 0.3f;
         r.moisture = 1.0f;
@@ -600,7 +597,7 @@ void TerraformOceans ()
 
 }
 
-
+//Find existing ocean regions and place costal regions beside them.
 void TerraformCoast ()
 {
 

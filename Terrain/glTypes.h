@@ -85,6 +85,7 @@ struct GLrgba
   float       alpha;
   OPERATORS(GLrgba);
   void        Clamp ();
+  void        Normalize ();
 };
 
 struct GLmatrix

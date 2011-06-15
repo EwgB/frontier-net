@@ -20,8 +20,21 @@
 #include "texture.h"
 
 #define MAX_DISTANCE        300
-#define ENV_TRANSITION      0.5f
+#define NIGHT_FOG           (MAX_DISTANCE / 5)
+#define ENV_TRANSITION      0.2f
 #define UPDATE_INTERVAL     200 //milliseconds
+#define SECONDS_TO_DECIMAL  (1.0f / 60.0f)
+
+#define TIME_DAWN           5.5f  // 5:30am
+#define TIME_DAY            6.5f  // 6:30am
+#define TIME_SUNSET         19.5f // 7:30pm
+#define TIME_DUSK           20.5f // 8:30pm
+
+#define NIGHT_COLOR         glRgba (0.0f, 0.2f, 0.5f)
+#define DAY_COLOR           glRgba (0.4f, 0.7f, 1.0f)
+
+#define NIGHT_SCALING       glRgba (0.1f, 0.2f, 0.6f)
+#define DAY_SCALING         glRgba (1.0f)
 
 static Env        desired;
 static Env        current;
@@ -29,6 +42,7 @@ static long       seconds;
 static int        minutes;
 static int        hours;
 static int        update;
+static float      decimal_time;
 
 /*-----------------------------------------------------------------------------
 
@@ -41,143 +55,58 @@ static void do_time (float delta)
   bool      day;
   int       i;
   GLrgba    average;
+  GLrgba    base_color;
+  GLrgba    color_scaling;
+  float     fade;
+  float     humid_fog;
 
   r = (Region*)CameraRegion ();
-  day = (hours >= 6 && hours < 21);
-  if (day) {
-    switch (hours) {
-    case 6:
-      desired.color[ENV_COLOR_NORTH] = glRgba (0.0f, 0.2f, 0.5f);
-      desired.color[ENV_COLOR_SOUTH] = glRgba (0.0f, 0.2f, 0.5f);
-      desired.color[ENV_COLOR_EAST] = glRgba (0.5f, 0.5f, 0.3f);
-      desired.color[ENV_COLOR_WEST] = glRgba (0.0f, 0.0f, 0.4f);
-      desired.color[ENV_COLOR_TOP] = glRgba (0.0f, 0.0f, 0.2f);
-      desired.color[ENV_COLOR_FOG] = glRgba (0.0f, 0.2f, 0.5f);
-      desired.color[ENV_COLOR_LIGHT] = glRgba (0.0f, 0.5f, 1.0f);
-      desired.color[ENV_COLOR_AMBIENT] = glRgba (0.0f, 0.0f, 1.0f);
-      desired.light = glVector (-0.9f, 0.0f, -0.1f);
-      desired.star_fade = 0.5f;
-      desired.fog_max = MAX_DISTANCE / 4;
-      desired.fog_min = desired.fog_max / 2;
-      break;
-    case 7:
-      desired.color[ENV_COLOR_EAST] = glRgba (1.0f, 1.0f, 0.5f);
-      desired.color[ENV_COLOR_NORTH] = glRgba (0.0f, 0.3f, 0.7f);
-      desired.color[ENV_COLOR_SOUTH] = glRgba (0.0f, 0.3f, 0.7f);
-      desired.color[ENV_COLOR_WEST] = glRgba (0.0f, 0.2f, 0.5f);
-      desired.color[ENV_COLOR_TOP] = glRgba (0.0f, 0.0f, 0.2f);
-      desired.color[ENV_COLOR_FOG] = glRgba (0.0f, 0.3f, 0.7f);
-      desired.color[ENV_COLOR_LIGHT] = glRgba (0.0f, 0.5f, 1.0f);
-      desired.color[ENV_COLOR_AMBIENT] = glRgba (0.3f, 0.3f, 0.7f);
-      desired.light = glVector (-0.5f, 0.0f, -0.5f);
-      desired.star_fade = 0.0f;
-      desired.fog_max = MAX_DISTANCE / 3;
-      desired.fog_min = desired.fog_max / 2;
-      break;
-    case 8:
-    case 9:
-    case 10:
-    case 11:
-    case 12:
-    case 13:
-    case 14:
-    case 15:
-    case 16:
-    case 17:
-    case 18:
-      desired.color[ENV_COLOR_NORTH] = glRgba (0.5f, 0.9f, 1.0f);
-      desired.color[ENV_COLOR_SOUTH] = glRgba (0.5f, 0.9f, 1.0f);
-      desired.color[ENV_COLOR_EAST] = glRgba (0.5f, 0.9f, 1.0f);
-      desired.color[ENV_COLOR_FOG] = glRgba (0.5f, 0.9f, 1.0f);
-      desired.color[ENV_COLOR_WEST] = glRgba (0.5f, 0.9f, 1.0f);
-      desired.color[ENV_COLOR_TOP] = glRgba (0.0f, 0.0f, 0.6f);
-      desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 1.0f, 1.0f);
-      desired.color[ENV_COLOR_AMBIENT] = glRgba (0.3f, 0.3f, 1.0f);
-      desired.light = glVector (-0.5f, 0.0f, -0.5f);
-      desired.star_fade = 0.0f;
-      desired.fog_max = MAX_DISTANCE;
-      desired.fog_min = MAX_DISTANCE - MAX_DISTANCE * r->moisture;
-      //desired.fog_min = MAX_DISTANCE / 2;
-      /*
-      if (r->has_flowers) {
-        desired.color[ENV_COLOR_NORTH] = glRgba (1.0f, 1.0f, 0.8f);
-        desired.color[ENV_COLOR_SOUTH] = glRgba (1.0f, 1.0f, 0.8f);
-        desired.color[ENV_COLOR_EAST] = glRgba (1.0f, 1.0f, 0.8f);
-        desired.color[ENV_COLOR_WEST] = glRgba (1.0f, 1.0f, 0.8f);
-        desired.color[ENV_COLOR_TOP] = glRgba (1.0f, 0.7f, 0.2f);
-        desired.color[ENV_COLOR_FOG] = glRgba (1.0f, 1.0f, 0.8f);
-        desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 1.0f, 0.0f);
-        desired.color[ENV_COLOR_AMBIENT] = glRgba (0.0f, 0.0f, 1.0f);
-        desired.fog_min = 1;
-      }
-      */
-      for (i = 0; i < ENV_COLOR_COUNT; i++) {
-        //if (i == ENV_COLOR_TOP)
-          //continue;
-        //if (i == ENV_COLOR_LIGHT)
-         // continue;
-        average = desired.color[i] + r->color_atmosphere;
-        desired.color[i] = average / 2;
-        desired.color[i] = r->color_atmosphere;
-      }
-      //desired.color[ENV_COLOR_TOP] = r->color_atmosphere;
-
-      break;
-    case 19:
-      desired.color[ENV_COLOR_NORTH] = glRgba (0.1f, 0.5f, 0.5f);
-      desired.color[ENV_COLOR_SOUTH] = glRgba (0.1f, 0.5f, 0.5f);
-      desired.color[ENV_COLOR_EAST] = glRgba (0.1f, 0.2f, 0.5f);
-      desired.color[ENV_COLOR_WEST] = glRgba (0.8f, 0.7f, 0.4f);
-      desired.color[ENV_COLOR_TOP] = glRgba (0.4f, 0.4f, 0.0f);
-      desired.color[ENV_COLOR_FOG] = glRgba (0.5f, 0.9f, 1.0f);
-      desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 1.0f, 0.0f);
-      desired.color[ENV_COLOR_AMBIENT] = glRgba (0.3f, 0.3f, 1.0f);
-      desired.light = glVector (-0.5f, 0.0f, -0.5f);
-      desired.star_fade = 0.0f;
-      desired.fog_max = MAX_DISTANCE;
-      desired.fog_min = MAX_DISTANCE -  MAX_DISTANCE * r->moisture;
-      break;
-    case 20:
-      desired.color[ENV_COLOR_NORTH] = glRgba (0.0f, 0.0f, 0.5f);
-      desired.color[ENV_COLOR_SOUTH] = glRgba (0.0f, 0.0f, 0.5f);
-      desired.color[ENV_COLOR_EAST] = glRgba (0.0f, 0.0f, 0.2f);
-      desired.color[ENV_COLOR_WEST] = glRgba (0.8f, 0.5f, 0.2f);
-      desired.color[ENV_COLOR_TOP] = glRgba (0.5, 0.5f, 0.0f);
-      desired.color[ENV_COLOR_FOG] = glRgba (0.5f, 0.5f, 0.0f);
-      desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 1.0f, 0.0f);
-      desired.color[ENV_COLOR_AMBIENT] = glRgba (0.3f, 0.3f, 1.0f);
-      desired.light = glVector (-0.5f, 0.0f, -0.5f);
-      desired.star_fade = 0.0f;
-      desired.fog_max = MAX_DISTANCE;
-      desired.fog_min = MAX_DISTANCE * 0.7f * r->moisture;
-      break;
-    default:
-      desired.color[ENV_COLOR_NORTH] = glRgba (0.5f, 0.7f, 1.0f);
-      desired.color[ENV_COLOR_SOUTH] = glRgba (0.5f, 0.7f, 1.0f);
-      desired.color[ENV_COLOR_EAST] = glRgba (0.5f, 0.7f, 1.0f);
-      desired.color[ENV_COLOR_WEST] = glRgba (0.5f, 0.7f, 1.0f);
-      desired.color[ENV_COLOR_TOP] = glRgba (0.1f, 0.2f, 1.0f);
-      desired.color[ENV_COLOR_FOG] = glRgba (1.0f);
-      desired.light = glVector (-0.5f, 0.0f, -0.5f);
-      desired.star_fade = 0.0f;
-      desired.fog_max = MAX_DISTANCE;
-      desired.fog_min = desired.fog_max / 2;
-      break;
-    }
-  } else { //night
-    desired.color[ENV_COLOR_NORTH] = glRgba (0.0f, 0.0f, 0.2f);
-    desired.color[ENV_COLOR_SOUTH] = glRgba (0.0f, 0.0f, 0.2f);
-    desired.color[ENV_COLOR_EAST] = glRgba (0.0f, 0.0f, 0.2f);
-    desired.color[ENV_COLOR_WEST] = glRgba (0.0f, 0.0f, 0.2f);
-    desired.color[ENV_COLOR_TOP] = glRgba (0.0f);
-    desired.color[ENV_COLOR_FOG] = glRgba (0.0f, 0.0f, 0.1f);
-    desired.color[ENV_COLOR_LIGHT] = glRgba (0.3f, 0.6f, 1.0f);
-    desired.color[ENV_COLOR_AMBIENT] = glRgba (0.3f, 0.3f, 1.0f);
-    desired.light = glVector (0.0f, -0.5f, -0.5f);
+  //Convert out hours and minutes into a decimal number. (100 "minutes" per hour.)
+  desired.light = glVector (-0.5f, 0.0f, -0.5f);
+  decimal_time = (float)hours + (float)minutes * SECONDS_TO_DECIMAL;
+  humid_fog = (1.0f - r->moisture) * MAX_DISTANCE;
+  if (decimal_time >= TIME_DAWN && decimal_time < TIME_DAY) { //sunrise
+    fade = (decimal_time - TIME_DAWN) / (TIME_DAY - TIME_DAWN);
+    base_color = glRgbaInterpolate (NIGHT_COLOR, DAY_COLOR, fade);
+    desired.fog_max = MathInterpolate (NIGHT_FOG, MAX_DISTANCE, fade);
+    desired.fog_min = min (humid_fog, fade * MAX_DISTANCE);
+    desired.star_fade = 1.0f - fade;
+    color_scaling = glRgbaInterpolate (NIGHT_SCALING, DAY_SCALING, fade);
+    desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 1.0f, 0.5f);
+  } else if (decimal_time >= TIME_DAY && decimal_time < TIME_SUNSET)  { //day
+    base_color = DAY_COLOR;
+    desired.fog_max = MAX_DISTANCE;
+    desired.fog_min = humid_fog;
+    desired.star_fade = 0.0f;
+    color_scaling = DAY_SCALING;
+    desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f) + r->color_atmosphere;
+    desired.color[ENV_COLOR_LIGHT].Normalize ();
+  } else if (decimal_time >= TIME_SUNSET && decimal_time < TIME_DUSK) { // sunset
+    fade = (decimal_time - TIME_SUNSET) / (TIME_DUSK - TIME_SUNSET);
+    base_color = glRgbaInterpolate (DAY_COLOR, NIGHT_COLOR, fade);
+    desired.fog_max = MathInterpolate (MAX_DISTANCE, NIGHT_FOG, fade);
+    desired.fog_min = min (humid_fog, (1.0f - fade) * MAX_DISTANCE);
+    desired.star_fade = fade;
+    color_scaling = glRgbaInterpolate (DAY_SCALING, NIGHT_SCALING, fade);
+    desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 0.5f, 0.5f);
+ } else { //night
+    color_scaling = NIGHT_SCALING;
+    base_color = NIGHT_COLOR;
     desired.fog_min = 1;
-    desired.fog_max = MAX_DISTANCE / 5;
+    desired.fog_max = NIGHT_FOG;
     desired.star_fade = 1.0f;
+    desired.color[ENV_COLOR_LIGHT] = glRgba (0.5f, 0.7f, 1.0f);
   }
+  for (i = 0; i < ENV_COLOR_COUNT; i++) {
+    if (i == ENV_COLOR_LIGHT) 
+      continue;
+    average = base_color + r->color_atmosphere;
+    average.Normalize ();
+    desired.color[i] = average;
+    if (i == ENV_COLOR_SKY) 
+      desired.color[i] = base_color * 0.75f;
+    desired.color[i] *= color_scaling;
+  }      
   for (int i = 0; i < ENV_COLOR_COUNT; i++) 
     current.color[i] = glRgbaInterpolate (current.color[i], desired.color[i], delta);
   current.fog_min = MathInterpolate (current.fog_min, desired.fog_min, delta);
@@ -194,7 +123,7 @@ static void do_time (float delta)
 void    EnvInit ()
 {
 
-  hours = 10;
+  hours = 8;
   do_time (1);
   current = desired;
 
@@ -221,8 +150,6 @@ void    EnvUpdate ()
   }
   if (hours >= 24)
     hours -= 24;
-    
-
   update += SdlElapsed ();
   if (update > UPDATE_INTERVAL) {
     do_time (ENV_TRANSITION);

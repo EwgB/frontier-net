@@ -20,7 +20,7 @@
 #include "Text.h"
 #include "world.h"
 
-#define MOVE_SPEED                4.0f
+#define MOVE_SPEED                6.0f
 
 static GLvector     angle;
 static GLvector     position;

@@ -116,6 +116,6 @@ void WaterRender ()
     glEnable (GL_BLEND);
     glBlendFunc (GL_ONE, GL_ONE);
   }
-  map.Render ();
+  //map.Render ();
 
 }

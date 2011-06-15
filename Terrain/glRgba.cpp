@@ -451,3 +451,20 @@ void GLrgba::Clamp ()
   alpha = clamp (alpha, 0.0f, 1.0f);
 
 }
+
+void GLrgba::Normalize ()
+{
+
+  float   n;
+
+  n = max (red, max (green, blue));
+  if (n > 1.0f) {
+    red /= n;
+    green /= n;
+    blue /= n;
+  }
+
+}
+    
+
+  

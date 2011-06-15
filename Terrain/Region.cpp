@@ -29,7 +29,7 @@
 #define LARGE_STRENGTH    (REGION_SIZE * 1)
 #define BLEND_DISTANCE    (REGION_SIZE / 4)
 #define DITHER_SIZE       (REGION_SIZE / 2)
-#define OCEAN_BUFFER      15 //The number of regions around the edge which must be ocean
+#define OCEAN_BUFFER      20 //The number of regions around the edge which must be ocean
 #define FLOWER_PALETTE    (sizeof (flower_palette) / sizeof (GLrgba))
 #define FREQUENCY         3 //Higher numbers make the overall map repeatmore often
 
@@ -965,12 +965,12 @@ void    RegionGenerate ()
       //+1 is highest elevation on the island. This is used to guide other derived numbers.
       r.geo_scale = glVectorLength (glVector ((float)from_center.x, (float)from_center.y));
       r.geo_scale /= (REGION_CENTER - OCEAN_BUFFER);
-      r.geo_scale = 1.0f - r.geo_scale;
       //Create a steep drop around the edge of the world
-      if (r.geo_scale < -0.5f)
-        r.geo_scale *= 2.0f;
-      r.geo_scale += (Entropy ((x + offset.x) * FREQUENCY, (y + offset.y) * FREQUENCY) - 0.2f) / 3;
-      r.geo_scale = clamp (r.geo_scale, -1, 1);
+      if (r.geo_scale > 1.25f)
+        r.geo_scale = 1.25f + (r.geo_scale - 1.25f) * 2.0f;
+      r.geo_scale = 1.0f - r.geo_scale;
+      r.geo_scale += (Entropy ((x + offset.x) * FREQUENCY, (y + offset.y) * FREQUENCY) - 0.2f) / 1;
+      r.geo_scale = clamp (r.geo_scale, -1.0f, 1.0f);
       if (r.geo_scale > 0.0f)
         r.geo_bias = 1.0f + r.geo_scale;
       r.geo_large = 0.3f;
