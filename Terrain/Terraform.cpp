@@ -19,6 +19,8 @@
 #include "random.h"
 #include "region.h"
 
+#define FLOWER_PALETTE    (sizeof (flower_palette) / sizeof (GLrgba))
+
 static char*        direction_name[] = 
 {
   "Northern",
@@ -34,6 +36,15 @@ static GLcoord      direction[] = {
  -1, 0   // West
 };
 
+static GLrgba       flower_palette[] = {
+  {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, //white
+  {1.0f, 0.3f, 0.3f, 1.0f}, {1.0f, 0.3f, 0.3f, 1.0f}, //red
+  {1.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 0.0f, 1.0f}, //Yellow
+  {0.7f, 0.3f, 1.0f, 1.0f}, // Violet
+  {1.0f, 0.5f, 1.0f, 1.0f}, // Pink #1
+  {1.0f, 0.5f, 0.8f, 1.0f}, // Pink #2
+  {1.0f, 0.0f, 0.5f, 1.0f}, //Maroon
+};
 
 /*-----------------------------------------------------------------------------
 Helper functions
@@ -203,7 +214,7 @@ static void do_rocky (int x, int y, int size)
 }
 
 
-//Place one mountain
+//Place a swamp
 static void do_swamp (int x, int y, int size)
 {
 
@@ -219,6 +230,40 @@ static void do_swamp (int x, int y, int size)
       r.moisture = 1.0f;
       r.geo_detail = 8.0f;
       r.has_flowers = false;
+      r.flags_shape |= REGION_FLAG_NOBLEND;
+      RegionMapSet (x + xx, y + yy, r);
+    }
+  }
+
+}
+
+//Place a field of flowers
+static void do_field (int x, int y, int size)
+{
+
+  Region    r;
+  int       xx, yy;
+  GLrgba    c;
+  int       shape;
+
+  for (xx = -size; xx <= size; xx++) {
+    for (yy = -size; yy <= size; yy++) {
+      r = RegionMapGet (xx + x, yy + y);
+      sprintf (r.title, "Field");
+      r.climate = CLIMATE_FIELD;
+      r.has_flowers = RandomVal () % 4 == 0;
+      shape = RandomVal ();
+      c = flower_palette[RandomVal () % FLOWER_PALETTE];
+      for (int i = 0; i < FLOWERS; i++) {
+        r.color_flowers[i] = c;
+        r.flower_shape[i] = shape;
+        if ((RandomVal () % 15) == 0) {
+          shape = RandomVal ();
+          c = flower_palette[RandomVal () % FLOWER_PALETTE];
+        }
+      }
+      r.color_atmosphere = glRgba (0.7f, 0.6f, 0.4f);
+      r.geo_detail = 8.0f;
       r.flags_shape |= REGION_FLAG_NOBLEND;
       RegionMapSet (x + xx, y + yy, r);
     }
@@ -578,6 +623,10 @@ void TerraformColors ()
       case CLIMATE_RIVER_BANK:
         r.color_map = r.color_dirt;
         break;
+      case CLIMATE_FIELD:
+        r.color_map = r.color_grass + glRgba (0.7f, 0.5f, 0.6f);
+        r.color_map.Normalize ();
+        break;
       case CLIMATE_SWAMP:
         r.color_grass *= 0.5f;
         r.color_map = r.color_grass * 0.5f;
@@ -841,6 +890,9 @@ void TerraformZones ()
         break;
       case CLIMATE_SWAMP:
         do_swamp (x, y, radius);
+        break;
+      case CLIMATE_FIELD:
+        do_field (x, y, radius);
       }
       //leave a bit of a gap before the next one
       x += radius * 3;

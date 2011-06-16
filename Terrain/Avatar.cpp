@@ -80,13 +80,17 @@ void AvatarUpdate (void)
   if (InputMouselook ()) {
     if (fly) {
       velocity = 0.0f;
-      move *= 15;
+      //move *= 15;
     } else {
       position.z += velocity * elapsed;
       velocity -= elapsed * GRAVITY;
     }
-    if (InputKeyState (SDLK_LSHIFT))
-      move *= 5;
+    if (InputKeyState (SDLK_LSHIFT)) {
+      if (!fly)
+        move *= 5;
+      else 
+        move *= 25;
+    }
     if (InputKeyState (SDLK_w))
       do_move (glVector (0, -move, 0));
     if (InputKeyState (SDLK_s))

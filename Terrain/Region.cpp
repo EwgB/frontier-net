@@ -24,14 +24,13 @@
 #include "terraform.h"
 
 #define LARGE_SCALE       9
-//#define SMALL_STRENGTH    (REGION_SIZE / 6)
 #define SMALL_STRENGTH    1
 #define LARGE_STRENGTH    (REGION_SIZE * 1)
 #define BLEND_DISTANCE    (REGION_SIZE / 4)
 #define DITHER_SIZE       (REGION_SIZE / 2)
 #define OCEAN_BUFFER      20 //The number of regions around the edge which must be ocean
 #define FLOWER_PALETTE    (sizeof (flower_palette) / sizeof (GLrgba))
-#define FREQUENCY         3 //Higher numbers make the overall map repeatmore often
+#define FREQUENCY         3 //Higher numbers make the overall map repeat more often
 
 #define NNORTH             "Northern"
 #define NSOUTH             "Southern"
@@ -551,7 +550,7 @@ GLrgba RegionColorGet (int world_x, int world_y, SurfaceColor c)
   r1 = region (origin.x + 1, origin.y);
   r2 = region (origin.x, origin.y + 1);
   r3 = region (origin.x + 1, origin.y + 1);
-  return r0.color_grass;
+  //return r0.color_grass;
   switch (c) {
   case SURFACE_COLOR_GRASS:
     c0 = r0.color_grass;

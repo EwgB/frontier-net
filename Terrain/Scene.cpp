@@ -27,11 +27,12 @@
 
 #define GRASS_GRID      5
 #define GRASS_HALF      (GRASS_GRID / 2)
-#define RENDER_DISTANCE 7
+#define RENDER_DISTANCE 10
 
-static CTerrain*         terrain[WORLD_GRID][WORLD_GRID];
+static CTerrain*        terrain[WORLD_GRID][WORLD_GRID];
 static CGrass           grass[GRASS_GRID][GRASS_GRID];
 static GLcoord          terrain_walk;
+static GLcoord          grass_walk;
 static int              dist_table[RENDER_DISTANCE + 1][RENDER_DISTANCE + 1];
 static int              cached;
 static int              texture_bytes;
@@ -105,9 +106,10 @@ void SceneGenerate ()
   current.y = (int)(camera.y) / GRASS_SIZE;
   for (y = 0; y < GRASS_GRID; y++) {
     for (x = 0; x < GRASS_GRID; x++) {
-      grass[x][y].Set (current.x + x - GRASS_HALF, current.y + y - GRASS_HALF);
+      grass[x][y].Set (current.x + x - GRASS_HALF, current.y + y - GRASS_HALF, 1);
     }
   }
+  grass_walk.Clear ();
 
 }
 
@@ -148,6 +150,7 @@ void SceneInit ()
     }
   }
   SceneGenerate ();
+  grass_walk.Clear ();
 
 }
 
@@ -161,6 +164,7 @@ void SceneUpdate (long stop)
   GLvector      camera;
   int           offset;
   int           size;
+  int           density;
 
   if (InputKeyPressed (SDLK_F11))
     SceneGenerate ();
@@ -170,9 +174,11 @@ void SceneUpdate (long stop)
   camera = CameraPosition ();
   current.x = (int)(camera.x) / GRASS_SIZE;
   current.y = (int)(camera.y) / GRASS_SIZE;
+  /*
   for (x = 0; x < GRASS_GRID; x++) {
     for (y = 0; y < GRASS_GRID; y++) {
       gpos = grass[x][y].Position ();
+      density = max (abs (gpos.x - current.x), abs (gpos.y - current.y));
       if (current.x - gpos.x > GRASS_HALF)
         gpos.x += GRASS_GRID;
       if (gpos.x - current.x > GRASS_HALF)
@@ -181,12 +187,29 @@ void SceneUpdate (long stop)
         gpos.y += GRASS_GRID;
       if (gpos.y - current.y > GRASS_HALF)
         gpos.y -= GRASS_GRID;
-      grass[x][y].Set (gpos.x, gpos.y);
-      
+      grass[x][y].Set (gpos.x, gpos.y, density);
       grass[x][y].Update (stop);
 
     }
   }
+  */
+  gpos = grass[grass_walk.x][grass_walk.y].Position ();
+  density = max (abs (gpos.x - current.x), abs (gpos.y - current.y));
+  if (current.x - gpos.x > GRASS_HALF)
+    gpos.x += GRASS_GRID;
+  if (gpos.x - current.x > GRASS_HALF)
+    gpos.x -= GRASS_GRID;
+  if (current.y - gpos.y > GRASS_HALF)
+    gpos.y += GRASS_GRID;
+  if (gpos.y - current.y > GRASS_HALF)
+    gpos.y -= GRASS_GRID;
+  grass[grass_walk.x][grass_walk.y].Set (gpos.x, gpos.y, density);
+  grass[grass_walk.x][grass_walk.y].Update (stop);
+  if (grass[grass_walk.x][grass_walk.y].Ready ())
+    grass_walk.Walk (GRASS_GRID);
+
+
+
   current.x = (int)(camera.x) / TERRAIN_SIZE;
   current.y = (int)(camera.y) / TERRAIN_SIZE;
   //Always update the terrain beneath us first.
@@ -254,8 +277,6 @@ void SceneRender ()
     for (y = start.y; y <= end.y; y++) {
       dist = dist_table[abs (x - current.x)][abs (y - current.y)];
       if (terrain[x][y] && dist < RENDER_DISTANCE) {
-        //terrain[x][y]->Render ();
-        //terrain[x][y]->Render ();
         terrain[x][y]->Render ();
       }
     }

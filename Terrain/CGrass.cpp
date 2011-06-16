@@ -30,12 +30,7 @@ struct uvframe
   GLvector2     BottomRight () { return br;};
   GLvector2     BottomLeft () { return glVector (ul.x, br.y);};
 };
-/*
-static GLvector2      uv_top_left = {0.0f, 1.0f};
-static GLvector2      uv_top_right = {1.0f, 1.0f};
-static GLvector2      uv_bottom_right = {1.0f, 0.0f};
-static GLvector2      uv_bottom_left = {0.0f, 0.0f};
-*/
+
 static uvframe        grass[GRASS_TYPES];
 static uvframe        flowers[GRASS_TYPES];
 static bool           uv_done;
@@ -77,13 +72,15 @@ CGrass::CGrass ()
 
 }
 
-void CGrass::Set (int x, int y)
+void CGrass::Set (int x, int y, int density)
 {
 
-  if (_origin.x == x * GRASS_SIZE && _origin.y == y * GRASS_SIZE)
+  density = max (density, 1); //detail 0 and 1 are the same level. (Maximum density.)
+  if (_origin.x == x * GRASS_SIZE && _origin.y == y * GRASS_SIZE && density == _density)
     return;
   _position.x = x;
   _position.y = y;
+  _density = density;
   _origin.x = x * GRASS_SIZE;
   _origin.y = y * GRASS_SIZE;
   _stage = GRASS_STAGE_BEGIN;
@@ -136,11 +133,15 @@ void CGrass::Build (long stop)
 {
 
   int       world_x, world_y;
+  bool      do_grass;
     
 
   world_x = _origin.x + _walk.x;
   world_y = _origin.y + _walk.y;
-  if (WorldSurface (world_x, world_y) == SURFACE_GRASS) {
+  do_grass = WorldSurface (world_x, world_y) == SURFACE_GRASS;
+  if (_walk.x % _density || _walk.y  % _density)
+    do_grass = false;
+  if (do_grass) {
     GLvector    vb0, vb1, vb2, vb3;
     GLvector    vt0, vt1, vt2, vt3;
     GLvector    normal;
@@ -168,6 +169,7 @@ void CGrass::Build (long stop)
     size.y = max (size.y, 0.3f);
     color = WorldSurfaceColor (world_x, world_y, SURFACE_COLOR_GRASS);
     color.alpha = 1.0f;
+
 
     vb0.x = root.x - size.x * -1; vb0.y = root.y - size.x * -1; vb0.z = WorldElevation (vb0.x, vb0.y);
     vb1.x = root.x - size.x *  1; vb1.y = root.y - size.x * -1; vb1.z = WorldElevation (vb1.x, vb1.y);
@@ -212,10 +214,6 @@ void CGrass::Build (long stop)
   }
   if (_walk.Walk (GRASS_SIZE)) 
     _stage++;
-  if (_walk.Walk (GRASS_SIZE)) 
-    _stage++;
-  if (_walk.Walk (GRASS_SIZE)) 
-    _stage++;
 
 }
 
@@ -250,9 +248,13 @@ void CGrass::Render ()
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
   glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
+  //glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
   glDisable (GL_CULL_FACE);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glDisable (GL_BLEND);
+  //glEnable (GL_BLEND);
+  //glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  //glDisable (GL_LIGHTING);
   _vbo.Render ();
 
   glDisable (GL_TEXTURE_2D);

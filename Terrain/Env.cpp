@@ -20,7 +20,7 @@
 #include "texture.h"
 
 #define TIME_SCALE          1000  //how many "milliseconds per in-game minute
-#define MAX_DISTANCE        300
+#define MAX_DISTANCE        450
 #define NIGHT_FOG           (MAX_DISTANCE / 5)
 #define ENV_TRANSITION      0.2f
 #define UPDATE_INTERVAL     200 //milliseconds
