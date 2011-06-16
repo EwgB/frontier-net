@@ -170,7 +170,7 @@ void AvatarLook (int x, int y)
 
   angle.x += x;
   angle.z += y;
-  angle.x = CLAMP (angle.x, 5.0f, 175.0f);
+  angle.x = clamp (angle.x, 5.0f, 175.0f);
   angle.z = fmod (angle.z, 360.0f);
   if (angle.z < 0.0f)
     angle.z += 360.0f;
@@ -182,12 +182,19 @@ void AvatarLook (int x, int y)
 
 -----------------------------------------------------------------------------*/
 
+GLvector AvatarPosition ()
+{
+
+  return position;
+
+}
+
 void AvatarPositionSet (GLvector new_pos)		
 {
 
-  new_pos.z = CLAMP (new_pos.z, -25, 2048);
-  new_pos.x = CLAMP (new_pos.x, 0, (REGION_SIZE * REGION_GRID));
-  new_pos.y = CLAMP (new_pos.y, 0, (REGION_SIZE * REGION_GRID));
+  new_pos.z = clamp (new_pos.z, -25, 2048);
+  new_pos.x = clamp (new_pos.x, 0, (REGION_SIZE * REGION_GRID));
+  new_pos.y = clamp (new_pos.y, 0, (REGION_SIZE * REGION_GRID));
   position = new_pos;
 
 }

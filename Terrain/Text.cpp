@@ -18,9 +18,9 @@
 #include <stdarg.h>
 
 #define FONT_GRID     16
-#define MAX_CHARS     1024
+#define max_CHARS     1024
 #define GLYPH         (1.0f / FONT_GRID)
-#define MAX_BUFFER    1024
+#define max_BUFFER    1024
 #define SCRATCH_COUNT 20
 #define SCRATCH_SIZE  100
 #define KILOBYTE      1024
@@ -32,8 +32,8 @@ static struct
 } scratch[SCRATCH_COUNT];
 
 static GLcoord        view_size;
-static GLvector2      glyph[MAX_CHARS]; 
-static char           buffer[MAX_BUFFER];
+static GLvector2      glyph[max_CHARS]; 
+static char           buffer[max_BUFFER];
 int                   current_scratch;
 static GLfont         font;
 
@@ -81,7 +81,7 @@ static void text_draw (char* text)
 
   GLtexture*  t;
 
-  t = TextureFromName ("font.bmp", MASK_LUMINANCE);
+  t = TextureFromName ("font.bmp", MASK_LUminANCE);
   glBindTexture (GL_TEXTURE_2D, t->id);
   len = strlen (text);
 	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	
@@ -145,7 +145,7 @@ void TextInit ()
   int         x, y;
   int         i;
 
-  for (i = 0; i < MAX_CHARS; i++) {
+  for (i = 0; i < max_CHARS; i++) {
     x = i % FONT_GRID;
     y = 255 - (i / FONT_GRID);
     glyph[i] = glVector ((float)x * GLYPH, (float)y * GLYPH);
@@ -162,7 +162,7 @@ void TextCreate (int width, int height)
 
   view_size.x = width;
   view_size.y = height;
-  t = TextureFromName ("font.bmp", MASK_LUMINANCE);
+  t = TextureFromName ("font.bmp", MASK_LUminANCE);
   font.FaceSet (t->id);
 
 }
@@ -220,7 +220,7 @@ void TextPrint (const char *fmt, ...)
   va_start(ap, fmt);		
   vsprintf(text, fmt, ap);				
   va_end(ap);	
-  if ((strlen (buffer) + strlen (text)) < MAX_BUFFER) 
+  if ((strlen (buffer) + strlen (text)) < max_BUFFER) 
     strcat (buffer, text);
   strcat (buffer, "\n");
 

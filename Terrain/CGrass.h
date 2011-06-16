@@ -1,7 +1,3 @@
-#ifndef HVBO
-#include "VBO.h"
-#endif
-
 #define GRASS_SIZE        32
 
 enum

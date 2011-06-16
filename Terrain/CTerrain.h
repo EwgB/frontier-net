@@ -8,7 +8,6 @@
 #define TERRAIN_EDGE      (TERRAIN_SIZE + 1)
 #define TERRAIN_PATCH     (TERRAIN_SIZE / _patch_steps)
 
-
 enum
 {
   NEIGHBOR_NORTH,
@@ -17,10 +16,6 @@ enum
   NEIGHBOR_WEST,
   NEIGHBOR_COUNT
 };
-
-#ifndef VBO
-#include "VBO.h"
-#endif
 
 enum 
 {

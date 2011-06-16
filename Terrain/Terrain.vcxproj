@@ -85,6 +85,7 @@
     <ClCompile Include="CGrass.cpp" />
     <ClCompile Include="CPage.cpp" />
     <ClCompile Include="CTerrain.cpp" />
+    <ClCompile Include="CTree.cpp" />
     <ClCompile Include="Entropy.cpp" />
     <ClCompile Include="Env.cpp" />
     <ClCompile Include="File.cpp" />
@@ -121,6 +122,7 @@
     <ClInclude Include="CGrass.h" />
     <ClInclude Include="Cpage.h" />
     <ClInclude Include="CTerrain.h" />
+    <ClInclude Include="CTree.h" />
     <ClInclude Include="Entropy.h" />
     <ClInclude Include="Env.h" />
     <ClInclude Include="File.h" />

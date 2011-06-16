@@ -16,7 +16,7 @@
 #include "bmpfile.h"
 #include "texture.h"
 
-#define MAX_STRING          128
+#define max_STRING          128
 
 
 static GLtexture*   head_texture;
@@ -28,7 +28,7 @@ static GLtexture*   head_texture;
 static GLtexture* LoadTexture (char* name, int mask)
 {
 
-  char              filename[MAX_STRING];
+  char              filename[max_STRING];
   GLtexture*        t;
   BMPFile*  image;
   unsigned          y;
@@ -77,7 +77,7 @@ static GLtexture* LoadTexture (char* name, int mask)
       0, GL_RGBA, GL_UNSIGNED_BYTE, 
       buffer);
     delete buffer;
-  } else if (mask == MASK_LUMINANCE) {
+  } else if (mask == MASK_LUminANCE) {
     buffer = new char[image->sizeX * image->sizeY * 4];
     for (y = 0; y < image->sizeY; y++) {
       for (x = 0; x < image->sizeX; x++) {
@@ -133,7 +133,7 @@ void TexturePurge ()
 byte* TextureRaw (char* name, int* width, int* height)
 {
 
-  char              filename[MAX_STRING];
+  char              filename[max_STRING];
   BMPFile           image;
 
   sprintf (filename, "textures/%s", name);

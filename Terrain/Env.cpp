@@ -20,8 +20,8 @@
 #include "texture.h"
 
 #define TIME_SCALE          1000  //how many "milliseconds per in-game minute
-#define MAX_DISTANCE        450
-#define NIGHT_FOG           (MAX_DISTANCE / 5)
+#define max_DISTANCE        450
+#define NIGHT_FOG           (max_DISTANCE / 5)
 #define ENV_TRANSITION      0.2f
 #define UPDATE_INTERVAL     200 //milliseconds
 #define SECONDS_TO_DECIMAL  (1.0f / 60.0f)
@@ -63,12 +63,12 @@ static void do_cycle ()
   float     humid_fog;
 
   r = (Region*)CameraRegion ();
-  humid_fog = (1.0f - r->moisture) * MAX_DISTANCE;
+  humid_fog = (1.0f - r->moisture) * max_DISTANCE;
   if (decimal_time >= TIME_DAWN && decimal_time < TIME_DAY) { //sunrise
     fade = (decimal_time - TIME_DAWN) / (TIME_DAY - TIME_DAWN);
     base_color = glRgbaInterpolate (NIGHT_COLOR, DAY_COLOR, fade);
-    desired.fog_max = MathInterpolate (NIGHT_FOG, MAX_DISTANCE, fade);
-    desired.fog_min = min (humid_fog, fade * MAX_DISTANCE);
+    desired.fog_max = MathInterpolate (NIGHT_FOG, max_DISTANCE, fade);
+    desired.fog_min = min (humid_fog, fade * max_DISTANCE);
     desired.star_fade = 1.0f - fade;
     color_scaling = glRgbaInterpolate (NIGHT_SCALING, DAY_SCALING, fade);
     //The light in the sky doesn't lighten until the second half of sunrise
@@ -78,7 +78,7 @@ static void do_cycle ()
       glRgba (0.5f, 0.7f, 1.0f);
   } else if (decimal_time >= TIME_DAY && decimal_time < TIME_SUNSET)  { //day
     base_color = DAY_COLOR;
-    desired.fog_max = MAX_DISTANCE;
+    desired.fog_max = max_DISTANCE;
     desired.fog_min = humid_fog;
     desired.star_fade = 0.0f;
     color_scaling = DAY_SCALING;
@@ -87,8 +87,8 @@ static void do_cycle ()
   } else if (decimal_time >= TIME_SUNSET && decimal_time < TIME_DUSK) { // sunset
     fade = (decimal_time - TIME_SUNSET) / (TIME_DUSK - TIME_SUNSET);
     base_color = glRgbaInterpolate (DAY_COLOR, NIGHT_COLOR, fade);
-    desired.fog_max = MathInterpolate (MAX_DISTANCE, NIGHT_FOG, fade);
-    desired.fog_min = min (humid_fog, (1.0f - fade) * MAX_DISTANCE);
+    desired.fog_max = MathInterpolate (max_DISTANCE, NIGHT_FOG, fade);
+    desired.fog_min = min (humid_fog, (1.0f - fade) * max_DISTANCE);
     desired.star_fade = fade;
     color_scaling = glRgbaInterpolate (DAY_SCALING, NIGHT_SCALING, fade);
     desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 0.5f, 0.5f);

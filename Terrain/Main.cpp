@@ -7,10 +7,10 @@
 
  TODO:
 
- * Move player movement to Avatar.cpp
- * Migrate region building to Terraform.cpp
+ x Move player movement to Avatar.cpp
+ x Migrate region building to Terraform.cpp
  * Make water only build needed polygons.
- * Move normals to pages, use them on grass.
+ x Move normals to pages, use them on grass.
 
 -----------------------------------------------------------------------------*/
 

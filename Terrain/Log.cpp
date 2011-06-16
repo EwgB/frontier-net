@@ -11,7 +11,7 @@
 
 #include "stdafx.h"
 
-#define MAX_MSG_LEN     (1024 * 10)  // 10k
+#define max_MSG_LEN     (1024 * 10)  // 10k
 #define NAME_INTERVAL   (60 * 10) // Ten mins
 
 #include <windows.h>
@@ -98,7 +98,7 @@ void LogTerm (void)
 void LogFile (char *message, ...)
 {
 
-  static char    msg_text[MAX_MSG_LEN];
+  static char    msg_text[max_MSG_LEN];
   char           time_text[65];
   char*          cr;
   va_list           marker;
@@ -125,7 +125,7 @@ void LogFile (char *message, ...)
 void Log (char* message, ...)
 {
 
-  static char    msg_text[MAX_MSG_LEN];
+  static char    msg_text[max_MSG_LEN];
   va_list           marker;
 
   va_start (marker, message);

@@ -138,7 +138,7 @@ float MathSmoothStep (float val, float a, float b)
     return 0.0f;
   val -= a;
   val /= (b - a);
-  return CLAMP (val, 0.0f, 1.0f);
+  return clamp (val, 0.0f, 1.0f);
 
 }
 

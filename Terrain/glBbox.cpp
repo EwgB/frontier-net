@@ -19,12 +19,12 @@
 void GLbbox::ContainPoint (GLvector point)
 {
 
-  min.x = MIN (min.x, point.x);
-  min.y = MIN (min.y, point.y);
-  min.z = MIN (min.z, point.z);
-  max.x = MAX (max.x, point.x);
-  max.y = MAX (max.y, point.y);
-  max.z = MAX (max.z, point.z);
+  pmin.x = min (pmin.x, point.x);
+  pmin.y = min (pmin.y, point.y);
+  pmin.z = min (pmin.z, point.z);
+  pmax.x = max (pmax.x, point.x);
+  pmax.y = max (pmax.y, point.y);
+  pmax.z = max (pmax.z, point.z);
 
 
 }
@@ -32,8 +32,8 @@ void GLbbox::ContainPoint (GLvector point)
 void GLbbox::Clear (void)
 {
 
-  max = glVector (-MAX_VALUE, -MAX_VALUE, -MAX_VALUE);
-  min = glVector ( MAX_VALUE,  MAX_VALUE,  MAX_VALUE);
+  pmax = glVector (-MAX_VALUE, -MAX_VALUE, -MAX_VALUE);
+  pmin = glVector ( MAX_VALUE,  MAX_VALUE,  MAX_VALUE);
 
 }
 
@@ -41,33 +41,33 @@ void GLbbox::Render ()
 {
   //Bottom of box (Assuming z = up)
   glBegin (GL_LINE_STRIP);
-  glVertex3f (min.x, min.y, min.z);
-  glVertex3f (max.x, min.y, min.z);
-  glVertex3f (max.x, max.y, min.z);
-  glVertex3f (min.x, max.y, min.z);
-  glVertex3f (min.x, min.y, min.z);
+  glVertex3f (pmin.x, pmin.y, pmin.z);
+  glVertex3f (pmax.x, pmin.y, pmin.z);
+  glVertex3f (pmax.x, pmax.y, pmin.z);
+  glVertex3f (pmin.x, pmax.y, pmin.z);
+  glVertex3f (pmin.x, pmin.y, pmin.z);
   glEnd ();
   //Top of box
   glBegin (GL_LINE_STRIP);
-  glVertex3f (min.x, min.y, max.z);
-  glVertex3f (max.x, min.y, max.z);
-  glVertex3f (max.x, max.y, max.z);
-  glVertex3f (min.x, max.y, max.z);
-  glVertex3f (min.x, min.y, max.z);
+  glVertex3f (pmin.x, pmin.y, pmax.z);
+  glVertex3f (pmax.x, pmin.y, pmax.z);
+  glVertex3f (pmax.x, pmax.y, pmax.z);
+  glVertex3f (pmin.x, pmax.y, pmax.z);
+  glVertex3f (pmin.x, pmin.y, pmax.z);
   glEnd ();
   //Sides
   glBegin (GL_LINES);
-  glVertex3f (min.x, min.y, min.z);
-  glVertex3f (min.x, min.y, max.z);
+  glVertex3f (pmin.x, pmin.y, pmin.z);
+  glVertex3f (pmin.x, pmin.y, pmax.z);
 
-  glVertex3f (max.x, min.y, min.z);
-  glVertex3f (max.x, min.y, max.z);
+  glVertex3f (pmax.x, pmin.y, pmin.z);
+  glVertex3f (pmax.x, pmin.y, pmax.z);
 
-  glVertex3f (max.x, max.y, min.z);
-  glVertex3f (max.x, max.y, max.z);
+  glVertex3f (pmax.x, pmax.y, pmin.z);
+  glVertex3f (pmax.x, pmax.y, pmax.z);
 
-  glVertex3f (min.x, max.y, min.z);
-  glVertex3f (min.x, max.y, max.z);
+  glVertex3f (pmin.x, pmax.y, pmin.z);
+  glVertex3f (pmin.x, pmax.y, pmax.z);
   glEnd ();
 
 }
@@ -79,11 +79,11 @@ Does the given point fall within the given Bbox?
 bool glBboxTestPoint (GLbbox box, GLvector point)
 {
 
-  if (point.x > box.max.x || point.x < box.min.x)
+  if (point.x > box.pmax.x || point.x < box.pmin.x)
     return false;
-  if (point.y > box.max.y || point.y < box.min.y)
+  if (point.y > box.pmax.y || point.y < box.pmin.y)
     return false;
-  if (point.z > box.max.z || point.z < box.min.z)
+  if (point.z > box.pmax.z || point.z < box.pmin.z)
     return false;
   return true;
 
@@ -96,12 +96,12 @@ Expand Bbox (if needed) to contain given point
 GLbbox glBboxContainPoint (GLbbox box, GLvector point)
 {
 
-  box.min.x = MIN (box.min.x, point.x);
-  box.min.y = MIN (box.min.y, point.y);
-  box.min.z = MIN (box.min.z, point.z);
-  box.max.x = MAX (box.max.x, point.x);
-  box.max.y = MAX (box.max.y, point.y);
-  box.max.z = MAX (box.max.z, point.z);
+  box.pmin.x = min (box.pmin.x, point.x);
+  box.pmin.y = min (box.pmin.y, point.y);
+  box.pmin.z = min (box.pmin.z, point.z);
+  box.pmax.x = max (box.pmax.x, point.x);
+  box.pmax.y = max (box.pmax.y, point.y);
+  box.pmax.z = max (box.pmax.z, point.z);
   return box;
   
 }
@@ -115,8 +115,8 @@ GLbbox glBboxClear (void)
 
   GLbbox      result;
 
-  result.max = glVector (-MAX_VALUE, -MAX_VALUE, -MAX_VALUE);
-  result.min = glVector ( MAX_VALUE,  MAX_VALUE,  MAX_VALUE);
+  result.pmax = glVector (-MAX_VALUE, -MAX_VALUE, -MAX_VALUE);
+  result.pmin = glVector ( MAX_VALUE,  MAX_VALUE,  MAX_VALUE);
   return result;
 
 }

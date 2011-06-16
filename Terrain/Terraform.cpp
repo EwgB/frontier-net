@@ -461,7 +461,7 @@ void TerraformClimate ()
       temp = ((float)y - (REGION_GRID / 4)) / REGION_CENTER;
       if (r.mountain_height) 
         temp -= (float)r.mountain_height * 0.2f;
-      temp = clamp (temp, MIN_TEMP, MAX_TEMP);
+      temp = clamp (temp, min_TEMP, max_TEMP);
       //oceans have a moderating effect
       if (r.climate == CLIMATE_OCEAN) {
         if (temp > 0.99f)

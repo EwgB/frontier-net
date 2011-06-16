@@ -1,8 +1,8 @@
 #ifndef glTYPES
 #define glTYPES
 
-#define GL_CLAMP_TO_EDGE 0x812F
-#define GL_MAX_GLYPHS     256
+#define GL_clamp_TO_EDGE 0x812F
+#define GL_max_GLYPHS     256
 
 #define OPERATORS(type)     \
   type    operator+  (const type& c); \
@@ -97,8 +97,8 @@ struct GLmatrix
 
 struct GLbbox
 {
-  GLvector3   min;
-  GLvector3   max;
+  GLvector3   pmin;
+  GLvector3   pmax;
 
   void        ContainPoint (GLvector point);
   void        Clear ();
@@ -145,7 +145,7 @@ struct GLglyph
 struct GLfont
 {
 private:
-  GLglyph         _glyph[GL_MAX_GLYPHS];
+  GLglyph         _glyph[GL_max_GLYPHS];
   int             _id;
   int             _line_height;
 public:

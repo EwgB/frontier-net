@@ -12,10 +12,10 @@
 #include "stdafx.h"
 #include "sdl.h"
 
-#define MAX_KEYS      512
+#define max_KEYS      512
 
-static bool   down[MAX_KEYS];
-static bool   pressed[MAX_KEYS];
+static bool   down[max_KEYS];
+static bool   pressed[max_KEYS];
 static bool   mouselook;
 static bool   fly;
 
@@ -36,7 +36,7 @@ void InputUpdate ()
 void InputKeyDown (int id)
 {
 
-  if (id < 0 || id >= MAX_KEYS)
+  if (id < 0 || id >= max_KEYS)
     return;
   if (!down[id])
     pressed[id] = true;
@@ -47,7 +47,7 @@ void InputKeyDown (int id)
 void InputKeyUp (int id)
 {
 
-  if (id < 0 || id >= MAX_KEYS)
+  if (id < 0 || id >= max_KEYS)
     return;
   down[id] = false;
 
@@ -56,7 +56,7 @@ void InputKeyUp (int id)
 bool InputKeyState (int id)
 {
 
-  if (id < 0 || id >= MAX_KEYS)
+  if (id < 0 || id >= max_KEYS)
     return false;
   return down[id];
 

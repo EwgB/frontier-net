@@ -22,8 +22,8 @@
 #include <string.h>
 #include <sys/utime.h>
 
-#define MAX_BUF_SIZE            8192
-#define MAX_FILENAME_LEN        256
+#define max_BUF_SIZE            8192
+#define max_FILENAME_LEN        256
 
 
 /*-----------------------------------------------------------------------------
@@ -162,7 +162,7 @@ bool FileIsDirectory (char* name)
 void FileCreateFolder (char* folder)
 {
 
-  char  dir[MAX_FILENAME_LEN];
+  char  dir[max_FILENAME_LEN];
   char* p;
   char* p1;
   int errcode;

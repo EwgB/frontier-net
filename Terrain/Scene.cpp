@@ -12,9 +12,11 @@
 -----------------------------------------------------------------------------*/
 
 #include "stdafx.h"
+#include "avatar.h"
 #include "camera.h"
 #include "cgrass.h"
 #include "cterrain.h"
+#include "ctree.h"
 #include "input.h"
 #include "math.h"
 #include "region.h"
@@ -33,6 +35,7 @@ static CTerrain*        terrain[WORLD_GRID][WORLD_GRID];
 static CGrass           grass[GRASS_GRID][GRASS_GRID];
 static GLcoord          terrain_walk;
 static GLcoord          grass_walk;
+static CTree            tree;
 static int              dist_table[RENDER_DISTANCE + 1][RENDER_DISTANCE + 1];
 static int              cached;
 static int              texture_bytes;
@@ -174,6 +177,16 @@ void SceneUpdate (long stop)
   camera = CameraPosition ();
   current.x = (int)(camera.x) / GRASS_SIZE;
   current.y = (int)(camera.y) / GRASS_SIZE;
+
+  if (InputKeyPressed (SDLK_t)) {
+    GLvector  apos = AvatarPosition ();
+    apos.x -= 4.0f;
+    apos.z = WorldElevation (apos.x, apos.y);
+    tree.Build (apos);
+  }
+
+
+
   /*
   for (x = 0; x < GRASS_GRID; x++) {
     for (y = 0; y < GRASS_GRID; y++) {
@@ -287,12 +300,16 @@ void SceneRender ()
   glBindTexture (GL_TEXTURE_2D, t->id);
   for (x = 0; x < GRASS_GRID; x++) {
     for (y = 0; y < GRASS_GRID; y++) {
-      grass[x][y].Render ();
+      //grass[x][y].Render ();
     }
   }
 
 
   WaterRender ();
+  glDisable (GL_BLEND);
+  t = TextureFromName ("rockface.bmp", MASK_PINK);
+  glBindTexture (GL_TEXTURE_2D, t->id);
+  tree.Render ();
   /*
   return;
   

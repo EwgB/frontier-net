@@ -165,7 +165,7 @@ void SkyRender ()
 
 /*
   GLtexture* t;
-  t = TextureFromName ("clouds2.bmp", MASK_LUMINANCE);
+  t = TextureFromName ("clouds2.bmp", MASK_LUminANCE);
 
   //glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("clouds2.bmp"));
   glBindTexture (GL_TEXTURE_2D, t->id);

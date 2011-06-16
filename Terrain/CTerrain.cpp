@@ -676,7 +676,7 @@ void CTerrain::Update (long stop)
 
         xx = Boundary (_walk.x);
         yy = Boundary (_walk.y);
-        level = MIN (xx, yy);
+        level = min (xx, yy);
         DoQuad (_walk.x - level, _walk.y - level, level * 2);
       }
       if (_walk.Walk (TERRAIN_SIZE))

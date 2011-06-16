@@ -14,7 +14,7 @@
 #include "stdafx.h"
 
 #define FORMAT_VECTOR       "%f %f %f"
-#define MAX_RESULT          256
+#define max_RESULT          256
 #define FORMAT_FLOAT        "%1.2f"
 #define INI_FILE            ".\\" APP ".ini"
 #define SECTION             "Settings"
@@ -26,7 +26,7 @@
 #include "ini.h"
 #include "main.h"
 
-static char                 result[MAX_RESULT];
+static char                 result[max_RESULT];
 
 /*-----------------------------------------------------------------------------
 
@@ -65,7 +65,7 @@ float IniFloat (char* entry)
 
   float     f;
 
-  GetPrivateProfileStringA (SECTION, entry, "", result, MAX_RESULT, INI_FILE);
+  GetPrivateProfileStringA (SECTION, entry, "", result, max_RESULT, INI_FILE);
   f = (float)atof (result);
   return f;
 
@@ -93,7 +93,7 @@ void IniFloatSet (char* entry, float val)
 char* IniString (char* entry)
 {
 
-  GetPrivateProfileStringA (SECTION, entry, "", result, MAX_RESULT, INI_FILE);
+  GetPrivateProfileStringA (SECTION, entry, "", result, max_RESULT, INI_FILE);
   return result;
 
 }
@@ -132,7 +132,7 @@ GLvector IniVector (char* entry)
   GLvector  v;
 
   v.x = v.y = v.z = 0.0f;
-  GetPrivateProfileStringA (SECTION, entry, "0 0 0", result, MAX_RESULT, INI_FILE);
+  GetPrivateProfileStringA (SECTION, entry, "0 0 0", result, max_RESULT, INI_FILE);
   sscanf (result, FORMAT_VECTOR, &v.x, &v.y, &v.z);
   return v;
 
