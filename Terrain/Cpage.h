@@ -5,7 +5,8 @@
 enum
 {
   PAGE_STAGE_BEGIN,
-  PAGE_STAGE_ELEVATION,
+  PAGE_STAGE_POSITION,
+  PAGE_STAGE_NORMAL,
   PAGE_STAGE_SURFACE1,
   PAGE_STAGE_SURFACE2,
   PAGE_STAGE_COLOR,
@@ -15,12 +16,13 @@ enum
 struct pcell
 {
   SurfaceType surface;
-  float       elevation;
   float       water_level;
   float       detail;
   GLrgba      grass;
   GLrgba      rock;
   GLrgba      dirt;
+  GLvector    normal;
+  GLvector    pos;
 };
 
 class CPage
@@ -31,14 +33,16 @@ class CPage
   pcell           _cell[PAGE_SIZE][PAGE_SIZE];
   GLbbox          _bbox;
   int             _last_touched;
-  void            DoElevation ();
+  void            DoPosition ();
   void            DoSurface ();
   void            DoColor ();
+  void            DoNormal ();
 public:
   void            Cache (int origin_x, int origin_y);
   float           Elevation (int x, int y);
   float           Detail (int x, int y);
   GLvector        Position (int x, int y);
+  GLvector        Normal (int x, int y);
   GLrgba          ColorGrass (int x, int y);
   GLrgba          ColorDirt (int x, int y);
   GLrgba          ColorRock (int x, int y);

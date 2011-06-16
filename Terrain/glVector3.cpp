@@ -251,3 +251,28 @@ bool GLvector::operator== (const GLvector& c)
     return true;
   return false;
 }
+
+
+float GLvector::Length ()
+{
+
+  return sqrt (x * x + y * y + z * z);
+
+}
+
+
+void GLvector::Normalize ()
+{
+
+  float norm;
+  float len;
+
+  len = Length ();
+  if (len < 0.000001f)
+    return;
+  norm = 1.0f / len;
+  x *= norm;
+  y *= norm;
+  z *= norm;
+
+}

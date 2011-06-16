@@ -87,7 +87,6 @@ void SdlUpdate ()
 {
 
   SDL_Event event;
-  GLvector  pos;
   long      now;
 
   while (SDL_PollEvent(&event)) { 
@@ -112,17 +111,6 @@ void SdlUpdate ()
       if (event.button.button == SDL_BUTTON_LEFT && !InputMouselook ())
         RenderClick (event.motion.x, event.motion.y);        
       break;
-      /*
-    case SDL_MOUSEBUTTONDOWN:
-      if (event.button.button == SDL_BUTTON_LEFT)
-        lmb = true;
-      else if (event.button.button == SDL_BUTTON_RIGHT)
-        InputMouselookSet (!InputMouselook ());
-      else if (event.button.button == SDL_BUTTON_MIDDLE)
-        mmb = true;
-      SDL_ShowCursor (false);
-      SDL_WM_GrabInput (SDL_GRAB_ON);
-      break;*/
     case SDL_MOUSEBUTTONUP:
       if (event.button.button == SDL_BUTTON_LEFT)
         lmb = false;
@@ -138,14 +126,6 @@ void SdlUpdate ()
     case SDL_MOUSEMOTION:
       if (InputMouselook ()) 
         AvatarLook (event.motion.yrel, -event.motion.xrel);
-      /*
-      if (InputMouselook ()) {
-        pos = CameraAngle ();
-        pos.x += event.motion.yrel;
-        pos.z -= event.motion.xrel;
-        CameraAngleSet (pos);
-      }
-      */
       break;
     case SDL_VIDEORESIZE: //User resized window
       center_x = event.resize.w / 2;

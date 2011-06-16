@@ -42,6 +42,22 @@ inline int CPageFromPos (int cell)
 
 }
 
+CPage* page_lookup (int world_x, int world_y) 
+{
+
+  int     page_x, page_y;
+  
+  if (world_x < 0 || world_y < 0)
+    return NULL;
+  page_x = CPageFromPos (world_x);
+  page_y = CPageFromPos (world_y);
+  if (page_x < 0 || page_x >= PAGE_GRID || page_y < 0 || page_y >= PAGE_GRID)
+    return NULL;
+  return page[page_x][page_y];
+
+
+}
+
 /* Module Functions *************************************************************/
 
 SurfaceType WorldSurface (int x, int y)
@@ -97,10 +113,40 @@ GLrgba WorldSurfaceColor (int x, int y, SurfaceColor sc)
 
 }
 
-
 float WorldElevation (int x, int y)
 {
+  
+  CPage*   z;
+  
+  z = page_lookup (x, y);
+  if (!z) 
+    return 0;
+  return z->Elevation (x % PAGE_SIZE, y % PAGE_SIZE);
 
+}
+
+GLvector WorldNormal (int world_x, int world_y)
+{
+  
+  CPage*   z;
+  
+  z = page_lookup (world_x, world_y);
+  if (!z) 
+    return glVector (0.0f, 0.0f, 1.0f);
+  return z->Normal (world_x % PAGE_SIZE, world_y % PAGE_SIZE);
+
+}
+
+GLvector WorldPosition (int x, int y)
+{
+  
+  CPage*   z;
+  
+  z = page_lookup (x, y);
+  if (!z) 
+    return glVector ((float)x, (float)y, 0.0f);
+  return z->Position (x % PAGE_SIZE, y % PAGE_SIZE);
+/*
   int     page_x, page_y;
   CPage*   z;
   
@@ -109,11 +155,12 @@ float WorldElevation (int x, int y)
   page_x = CPageFromPos (x);
   page_y = CPageFromPos (y);
   if (page_x < 0 || page_x >= PAGE_GRID || page_y < 0 || page_y >= PAGE_GRID)
-    return 0;
+    return glVector ((float)x, (float)y, 0.0f);
   z = page[page_x][page_y];
   if (!z) 
-    return 0;
-  return z->Elevation (x % PAGE_SIZE, y % PAGE_SIZE);
+    return glVector ((float)x, (float)y, 0.0f);
+    */
+  return z->Position (x % PAGE_SIZE, y % PAGE_SIZE);
 
 }
 
@@ -191,19 +238,6 @@ bool WorldPointAvailable (int x, int y)
   return z->Ready ();
 
 }
-
-GLvector WorldPosition (int x, int y)
-{
-
-  GLvector pos;
-
-  pos.x = (float)x;
-  pos.y = (float)y;
-  pos.z = WorldElevation (x, y);
-  return pos;
-
-}
-
 
 void WorldPurge ()
 {

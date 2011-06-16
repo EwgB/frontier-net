@@ -27,24 +27,15 @@ enum
   STAGE_BEGIN,
   STAGE_CLEAR,
   STAGE_HEIGHTMAP,
-  STAGE_NORMALS,
   STAGE_QUADTREE,
   STAGE_STITCH,
   STAGE_INVENTORY,
   STAGE_BUFFER_LOAD,
   STAGE_COMPILE,
-  //STAGE_BUFFER,
   STAGE_TEXTURE,
   STAGE_TEXTURE_FINAL,
   STAGE_DONE
 };
-/*
-struct vertex
-{
-  GLvector    pos;
-  GLvector    normal;
-  GLvector2   uv;
-};*/
 
 class CTerrain
 {

@@ -1,3 +1,3 @@
-#define APP       "Marooned"
+#define APP       "Frontier"
 
 void MainQuit ();

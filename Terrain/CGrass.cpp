@@ -157,12 +157,14 @@ void CGrass::Build (long stop)
 
     r = RegionGet (world_x, world_y);
     index = _vertex.size ();
-    root.x = (float)world_x + RandomFloat ();
-    root.y = (float)world_y + RandomFloat ();
+    //root.x = (float)world_x + Entropy (world_x * 20, world_y) * 2.0f;
+    root.x = (float)world_x + RandomFloat () * 2.0f;
+    //root.y = (float)world_y + Entropy (world_x, world_y * 20) * 2.0f;
+    root.y = (float)world_y + RandomFloat () * 2.0f;
     root.z = WorldElevation (root.x, root.y);
     height = 0.1f + r.moisture * r.temperature;
-    size.x = 0.5f + RandomFloat () * 0.5f;
-    size.y = RandomFloat () *  height + height;
+    size.x = 0.5f + Entropy (world_x, world_y) * 0.5f;
+    size.y = Entropy (world_x, world_y) *  height + height;
     do_flower = r.has_flowers;
     if (do_flower) //flowers are shoter than grass
       size.y /= 2;
@@ -182,21 +184,21 @@ void CGrass::Build (long stop)
     patch = r.flower_shape[index % FLOWERS] % GRASS_TYPES;
 
     current = _vertex.size ();
-    normal = random_normal ();
+    normal = WorldNormal (world_x, world_y);
     VertexPush (vb0, normal, color, grass[patch].BottomLeft ());
-    normal = random_normal ();
+    //normal = WorldNormal (world_x, world_y);
     VertexPush (vb1, normal, color, grass[patch].BottomLeft ());
-    normal = random_normal ();
+    //normal = random_normal ();
     VertexPush (vb2, normal, color, grass[patch].BottomRight ());
-    normal = random_normal ();
+    //normal = random_normal ();
     VertexPush (vb3, normal, color, grass[patch].BottomRight ());
-    normal = random_normal ();
+    //normal = random_normal ();
     VertexPush (vt0, normal, color, grass[patch].UpperLeft ());
-    normal = random_normal ();
+    //normal = random_normal ();
     VertexPush (vt1, normal, color, grass[patch].UpperLeft ());
-    normal = random_normal ();
+    //normal = random_normal ();
     VertexPush (vt2, normal, color, grass[patch].UpperRight ());
-    normal = random_normal ();
+    //normal = random_normal ();
     VertexPush (vt3, normal, color, grass[patch].UpperRight ());
     QuadPush (current, current + 2, current + 6, current + 4);
     QuadPush (current + 1, current + 3, current + 7, current + 5);

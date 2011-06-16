@@ -66,6 +66,8 @@ struct GLvector
   float       y;
   float       z;
   OPERATORS(GLvector);
+  void        Normalize ();
+  float       Length ();
 };
 
 typedef GLvector       GLvector3;

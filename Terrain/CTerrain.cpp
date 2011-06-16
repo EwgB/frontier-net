@@ -255,35 +255,11 @@ void CTerrain::DoHeightmap ()
     _contour[_walk.x][_walk.y].y = _contour[_walk.x][_walk.y - 1].y + glVectorLength (delta);
     _contour[_walk.x][_walk.y].y = _contour[_walk.x][_walk.y - 1].y + 1;
   }
+  _normal[_walk.x][_walk.y] = WorldNormal (_origin.x * TERRAIN_SIZE + _walk.x, _origin.y * TERRAIN_SIZE + _walk.y); 
   if (_walk.Walk (TERRAIN_EDGE))
     _stage++;
 
 }
-
-void CTerrain::DoNormals ()
-{
-
-  GLvector        normal_y, normal_x;
-
-  if (_walk.x < 1 || _walk.x >= TERRAIN_SIZE) 
-    normal_x = glVector (-1, 0, 0);
-  else
-    normal_x = _pos[_walk.x - 1][_walk.y] - _pos[_walk.x + 1][_walk.y];
-  if (_walk.y < 1 || _walk.y >= TERRAIN_SIZE) 
-    normal_y = glVector (0, -1, 0);
-  else
-    normal_y = _pos[_walk.x][_walk.y - 1] - _pos[_walk.x][_walk.y + 1];
-  _normal[_walk.x][_walk.y] = glVectorCrossProduct (normal_x, normal_y);
-  _normal[_walk.x][_walk.y].z *= NORMAL_SCALING;
-  _normal[_walk.x][_walk.y] = glVectorNormalize (_normal[_walk.x][_walk.y]);
-  if (_walk.y <= 1 || _walk.y >= TERRAIN_SIZE) 
-    _normal[_walk.x][_walk.y].y = 0;
-  _normal[_walk.x][_walk.y] = glVectorNormalize (_normal[_walk.x][_walk.y]);
-  if (_walk.Walk (TERRAIN_EDGE))
-    _stage++;
-
-}
-
 
 /*-----------------------------------------------------------------------------
 
@@ -693,9 +669,6 @@ void CTerrain::Update (long stop)
       break;
     case STAGE_HEIGHTMAP: 
       DoHeightmap ();
-      break;
-    case STAGE_NORMALS: 
-      DoNormals ();
       break;
     case STAGE_QUADTREE:
       if (!Point (_walk.x, _walk.y)) {

@@ -21,6 +21,9 @@
 #include "sdl.h"
 #include "world.h"
 
+//Lower numbers make the normals more extreme, exaggerate the lighting
+#define NORMAL_SCALING    0.4f
+
 SurfaceType CPage::Surface (int x, int y)
 {
 
@@ -41,7 +44,15 @@ GLvector CPage::Position (int x, int y)
 {
 
   _last_touched = SdlTick ();
-  return glVector ((float)x, (float)y, _cell[(x % PAGE_SIZE)][(y % PAGE_SIZE)].elevation);
+  return _cell[(x % PAGE_SIZE)][(y % PAGE_SIZE)].pos;
+
+}
+
+GLvector CPage::Normal (int x, int y)
+{
+
+  _last_touched = SdlTick ();
+  return _cell[(x % PAGE_SIZE)][(y % PAGE_SIZE)].normal;
 
 }
 
@@ -87,7 +98,7 @@ float CPage::Elevation (int x, int y)
 {
 
   _last_touched = SdlTick ();
-  return _cell[x][y].elevation;
+  return _cell[x][y].pos.z;
 
 }
 
@@ -106,7 +117,7 @@ bool CPage::Expired ()
 
 }
 
-void CPage::DoElevation ()
+void CPage::DoPosition ()
 {
 
   int     world_x, world_y;
@@ -117,7 +128,7 @@ void CPage::DoElevation ()
   //_cell[_walk.x][_walk.y].elevation = RegionElevation (world_x, world_y);
   c = RegionCell (world_x, world_y);
   //c.elevation = c.water_level;
-  _cell[_walk.x][_walk.y].elevation = c.elevation;
+  _cell[_walk.x][_walk.y].pos = glVector ((float)world_x, (float)world_y, c.elevation);
   _cell[_walk.x][_walk.y].detail = c.detail;
   _cell[_walk.x][_walk.y].water_level = c.water_level;
   //_cell[_walk.x][_walk.y].elevation = _cell[_walk.x][_walk.y].pt.elevation;
@@ -144,6 +155,28 @@ void CPage::DoColor ()
 
 }
 
+
+void CPage::DoNormal ()
+{
+
+  GLvector        normal_y, normal_x;
+
+  if (_walk.x < 1 || _walk.x >= PAGE_SIZE - 1) 
+    normal_x = glVector (-1, 0, 0);
+  else
+    normal_x = _cell[_walk.x - 1][_walk.y].pos - _cell[_walk.x + 1][_walk.y].pos;
+  if (_walk.y < 1 || _walk.y >= PAGE_SIZE - 1) 
+    normal_y = glVector (0, -1, 0);
+  else
+    normal_y = _cell[_walk.x][_walk.y - 1].pos - _cell[_walk.x][_walk.y + 1].pos;
+  _cell[_walk.x][_walk.y].normal = glVectorCrossProduct (normal_x, normal_y);
+  _cell[_walk.x][_walk.y].normal.z *= NORMAL_SCALING;
+  _cell[_walk.x][_walk.y].normal.Normalize ();
+  if (_walk.Walk (PAGE_SIZE))
+    _stage++;
+
+}
+
 void CPage::DoSurface ()
 {
 
@@ -161,7 +194,7 @@ void CPage::DoSurface ()
   c = &_cell[_walk.x][_walk.y];
   if (_stage == PAGE_STAGE_SURFACE1) {
     //Get the elevation of our neighbors
-    here = high = low = c->elevation;
+    here = high = low = c->pos.z;
     for (xx = -2; xx <= 2; xx++) {
       neighbor_x = _walk.x + xx;
       if (neighbor_x < 0 || neighbor_x >= PAGE_SIZE) 
@@ -170,8 +203,8 @@ void CPage::DoSurface ()
         neighbor_y = _walk.y + yy;
         if (neighbor_y < 0 || neighbor_y >= PAGE_SIZE) 
           continue;
-        high = max (high, _cell[neighbor_x][neighbor_y].elevation);
-        low = min (low, _cell[neighbor_x][neighbor_y].elevation);
+        high = max (high, _cell[neighbor_x][neighbor_y].pos.z);
+        low = min (low, _cell[neighbor_x][neighbor_y].pos.z);
       }
     }
     delta = high - low;
@@ -260,8 +293,11 @@ void CPage::Build (int stop)
     case PAGE_STAGE_BEGIN:
       _stage++;
       break;
-    case PAGE_STAGE_ELEVATION:
-      DoElevation ();
+    case PAGE_STAGE_POSITION:
+      DoPosition ();
+      break;
+    case PAGE_STAGE_NORMAL:
+      DoNormal ();
       break;
     case PAGE_STAGE_SURFACE1:
     case PAGE_STAGE_SURFACE2:

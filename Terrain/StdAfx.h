@@ -12,7 +12,6 @@
 #define MIN(x,y)                  ((x) < (y) ? x : y)                
 #define MAX(x,y)                  ((x) > (y) ? x : y)                
 #define clamp(n,lower,upper)      (max (min(n,(upper)), (lower)))
- 
 
 #define FREEZING                  0.32f
 #define TEMP_COLD                 0.45f
