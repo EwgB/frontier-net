@@ -43,11 +43,11 @@ static GLtexture* LoadTexture (char* name, int mask)
   strcpy (t->name, name);
   sprintf (filename, "textures/%s", name);
   image = new BMPFile;
-  image->loadFile (filename);
   if (!image) {
     t->id = 0;
     return t;
   }
+  image->loadFile (filename);
   glGenTextures (1, &t->id);// Create The Texture
 	// Typical Texture Generation Using Data From The Bitmap
 	glBindTexture (GL_TEXTURE_2D, t->id);
@@ -76,7 +76,7 @@ static GLtexture* LoadTexture (char* name, int mask)
       image->sizeY, 
       0, GL_RGBA, GL_UNSIGNED_BYTE, 
       buffer);
-    delete buffer;
+    delete[] buffer;
   } else if (mask == MASK_LUminANCE) {
     buffer = new char[image->sizeX * image->sizeY * 4];
     for (y = 0; y < image->sizeY; y++) {
@@ -96,7 +96,8 @@ static GLtexture* LoadTexture (char* name, int mask)
       image->sizeY, 
       0, GL_RGBA, GL_UNSIGNED_BYTE, 
       buffer);
-    delete buffer;  } else {
+    delete[] buffer;  
+  } else {
 	  glTexImage2D (GL_TEXTURE_2D, 0, t->bpp, 
       image->sizeX, 
       image->sizeY, 

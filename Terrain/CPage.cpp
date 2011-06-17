@@ -179,7 +179,7 @@ void CPage::DoNormal ()
 void CPage::DoSurface ()
 {
 
-  float     high, low, here, delta;
+  float     high, low, delta;
   float     fade;
   int       xx, yy;
   int       neighbor_x, neighbor_y;
@@ -193,7 +193,7 @@ void CPage::DoSurface ()
   c = &_cell[_walk.x][_walk.y];
   if (_stage == PAGE_STAGE_SURFACE1) {
     //Get the elevation of our neighbors
-    here = high = low = c->pos.z;
+    high = low = c->pos.z;
     for (xx = -2; xx <= 2; xx++) {
       neighbor_x = _walk.x + xx;
       if (neighbor_x < 0 || neighbor_x >= PAGE_SIZE) 

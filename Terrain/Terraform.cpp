@@ -164,7 +164,6 @@ static void do_mountain (int x, int y, int mtn_size)
 {
 
   int     step;
-  float   height;
   Region  r;
   int     xx, yy;
 
@@ -180,9 +179,6 @@ static void do_mountain (int x, int y, int mtn_size)
         sprintf (r.title, "Mountain");
       }
       r.mountain_height = mtn_size - step;
-      //Lose 20 degrees for every step up
-      height = 1.0f - (float)step / (float)mtn_size;
-      //r.geo_large += 0.2f + height;
       r.geo_detail = r.mountain_height* 10.0f;
       r.geo_bias += r.mountain_height * REGION_HALF;
       r.flags_shape = REGION_FLAG_NOBLEND;
@@ -464,8 +460,6 @@ void TerraformClimate ()
       temp = clamp (temp, min_TEMP, max_TEMP);
       //oceans have a moderating effect
       if (r.climate == CLIMATE_OCEAN) {
-        if (temp > 0.99f)
-          temp = temp;
         temp = (temp + 0.5f) / 2.0f;
         r.moisture = 1.0f;
         moist = 1.0f;
@@ -479,6 +473,7 @@ void TerraformClimate ()
 
 
 //Randomly scatter some mountains around
+/*
 void TerraformMountains (int count)
 {
 
@@ -486,7 +481,6 @@ void TerraformMountains (int count)
   //now place a few mountains 
   int     mtn_size;
   int     step;
-  float   height;
   int     i;
   int     x, y;
   GLcoord plot;
@@ -508,9 +502,6 @@ void TerraformMountains (int count)
           sprintf (r.title, "Mountain");
         }
         r.mountain_height = mtn_size - step;
-        //Lose 20 degrees for every step up
-        height = 1.0f - (float)step / (float)mtn_size;
-        //r.geo_large += 0.2f + height;
         r.geo_detail = r.mountain_height* 10.0f;
         r.geo_bias += r.mountain_height * REGION_HALF;
         r.flags_shape = REGION_FLAG_NOBLEND;
@@ -520,7 +511,7 @@ void TerraformMountains (int count)
     }
   }
 
-}
+}*/
 
 //Determine the grass, dirt, rock, and other colors used by this region.
 void TerraformColors ()

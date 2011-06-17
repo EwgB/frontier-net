@@ -134,7 +134,7 @@ static void entropy_erode ()
       map[index] = val;
     }
   }
-  delete buffer;
+  delete[] buffer;
   //re-normalize the map
   high = 0;
   low = 999999;

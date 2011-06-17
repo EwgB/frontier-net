@@ -40,14 +40,11 @@ static void do_name ()
 
   tm*     current;
   time_t  now;
-  char path[256];
+  char    path[256];
 
   time (&now);  
-  //now -= 60 * 60 * 24 * 6;
   current = gmtime (&now);
-  //strcpy (path, IniString ("Config", "LogPath"));
-  if (!strlen (path))
-    strcpy (path, "logs");
+  strcpy (path, "");
   sprintf (filename, "%s\\%s-%02d-%02d-%02d.log",
     path,
     prefix,

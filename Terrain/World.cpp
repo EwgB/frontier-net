@@ -40,6 +40,8 @@
 
 static Region       map[WORLD_GRID][WORLD_GRID];
 static GLcoord      dithermap[DITHER_SIZE][DITHER_SIZE];
+static float        noisef[NOISE_BUFFER];
+static unsigned     noisei[NOISE_BUFFER];
 static unsigned     map_id;
 
 
@@ -184,6 +186,10 @@ static float do_height (Region r, GLvector2 offset, float bias, float esmall, fl
   if ((r.flags_shape & REGION_FLAG_BEACH_CLIFF) && val < r.beach_threshold && val > -0.1f) {
     val -= r.beach_threshold;
   }
+  //if a point dips below the water table, make sure it's not too close to the water,
+  //to avoid ugly z-fighting
+  //if (val < bias)
+    //val = min (val, bias - 2.5f);
   return val;
 
 }
@@ -301,7 +307,22 @@ void    WorldInit ()
 
 }
 
-  
+float WorldNoisef (int index)
+{
+
+  index = abs (index % NOISE_BUFFER);
+  return noisef[index];
+
+}
+
+unsigned WorldNoisei (int index)
+{
+
+  index = abs (index % NOISE_BUFFER);
+  return noisei[index];
+
+}
+
 void    WorldGenerate ()
 {
 
@@ -310,7 +331,10 @@ void    WorldGenerate ()
   GLcoord     from_center;
   GLcoord     offset;
 
-  int z = sizeof (Region);
+  for ( x = 0; x < NOISE_BUFFER; x++) {
+    noisei[x] = RandomVal ();
+    noisef[x] = RandomFloat ();
+  }
   //Set some defaults
   offset.x = RandomVal () % 1024;
   offset.y = RandomVal () % 1024;

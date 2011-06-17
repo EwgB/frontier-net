@@ -12,10 +12,6 @@ class CGrass
 {
   GLcoord           _position;
   GLcoord           _origin;
-  GLvector*         _vertex_list;
-  GLvector*         _normal_list;
-  GLvector2*        _uv_list;
-  int               _list_size;
   int               _density;
   GLcoord           _walk;
   vector<GLrgba>    _color;
@@ -25,7 +21,6 @@ class CGrass
   vector<UINT>      _index;
   class VBO         _vbo;
   int               _stage;
-  short             _color_index[GRASS_SIZE][GRASS_SIZE];
   GLbbox            _bbox;
 
   void              Build (long stop);
@@ -35,9 +30,9 @@ class CGrass
 
 public:
   CGrass ();
-  GLcoord           Position () { return _position; }
+  GLcoord           Position () const { return _position; }
   void              Set (int origin_x, int origin_y, int density);
   void              Render ();
   void              Update (long stop);
-  bool              Ready () { return _stage == GRASS_STAGE_DONE; };
+  bool              Ready ()  const { return _stage == GRASS_STAGE_DONE; };
 };

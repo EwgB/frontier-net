@@ -14,7 +14,7 @@
 #include "entropy.h"
 #include "sdl.h"
 #include "CGrass.h"
-#include "random.h"
+//#include "random.h"
 #include "Render.h"
 #include "texture.h"
 #include "world.h"
@@ -38,7 +38,7 @@ static bool           uv_done;
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/
- 
+ /*(
 static GLvector random_normal ()
 {
 
@@ -47,7 +47,7 @@ static GLvector random_normal ()
   normal = glVector (RandomFloat () - 0.5f, RandomFloat () - 0.5f, 0.5f); 
   return glVectorNormalize (normal);
 
-}
+}*/
 
 /*-----------------------------------------------------------------------------
 
@@ -58,6 +58,9 @@ CGrass::CGrass ()
 
   _origin.x = 0;
   _origin.y = 0;
+  _density = 0;
+  _bbox.Clear ();
+  _position.Clear ();
   _walk.Clear ();
   _stage = GRASS_STAGE_BEGIN;
   if (uv_done) 
@@ -158,13 +161,13 @@ void CGrass::Build (long stop)
     r = WorldRegionFromPosition (world_x, world_y);
     index = _vertex.size ();
     //root.x = (float)world_x + Entropy (world_x * 20, world_y) * 2.0f;
-    root.x = (float)world_x + (RandomFloat () -0.5f);
+    root.x = (float)world_x + (WorldNoisef (world_x + world_y * GRASS_SIZE) -0.5f);
     //root.y = (float)world_y + Entropy (world_x, world_y * 20) * 2.0f;
-    root.y = (float)world_y + (RandomFloat () -0.5f);
+    root.y = (float)world_y + (WorldNoisef (world_x + world_y * GRASS_SIZE) -0.5f);
     root.z = CacheElevation (root.x, root.y);
     height = 0.1f + r.moisture * r.temperature;
     size.x = 0.5f + Entropy (world_x, world_y) * 0.5f;
-    size.y = Entropy (world_x, world_y) *  height + height;
+    size.y = WorldNoisef (world_x + world_y * GRASS_SIZE) *  height + height;
     do_flower = r.has_flowers;
     if (do_flower) //flowers are shoter than grass
       size.y /= 2;
@@ -232,7 +235,7 @@ void CGrass::Update (long stop)
       Build (stop);
       break;
     case GRASS_STAGE_COMPILE:
-      if (_vertex.size ())
+      if (!_vertex.empty ())
         _vbo.Create (GL_QUADS, _index.size (), _vertex.size (), &_index[0], &_vertex[0], &_normal[0], &_color[0], &_uv[0]);
       else
         _vbo.Clear ();

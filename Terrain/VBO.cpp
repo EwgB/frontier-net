@@ -53,6 +53,11 @@ VBO::VBO ()
 
   _id_vertex = _id_index = _size_vertex = _size_uv = _size_normal = _size_buffer = _index_count = 0;
   _ready = false;
+  _id_vertex = 0;
+  _id_index = 0;
+  _use_color = false;
+  _size_color = 0;
+  _polygon = 0;
 
 }
 
@@ -64,47 +69,8 @@ VBO::~VBO ()
   if (_id_vertex)
     glDeleteBuffersARB(1, &_id_vertex);
 
-}
-/*
-void VBO::Create (int polygon, int index_count, int vert_count, unsigned* index_list, GLvector* vert_list, GLvector* normal_list, GLvector2* uv_list)
-{
-  
-  char*     buffer;
-
-  if (glGenBuffersARB == NULL)
-    vbo_init ();
-  if (glGenBuffersARB == NULL)
-    return;
-  _polygon = polygon;
-  _size_vertex = sizeof (GLvector) * vert_count;
-  _size_normal = sizeof (GLvector) * vert_count;
-  _size_uv = sizeof (GLvector2) * vert_count;
-  _size_buffer = _size_vertex + _size_normal + _size_uv;
-  //Allocate the array and pack the bytes into it.
-  buffer = new char [_size_buffer];
-  memcpy (buffer, vert_list, _size_vertex);
-  memcpy (buffer + _size_vertex, normal_list, _size_normal);
-  memcpy (buffer + _size_vertex + _size_normal, uv_list, _size_uv);
-	//Create and load the buffer
-  if (_id_vertex)
-    glDeleteBuffersARB (1, &_id_vertex);
-  glGenBuffersARB (1, &_id_vertex);
-	glBindBufferARB (GL_ARRAY_BUFFER_ARB, _id_vertex);			// Bind The Buffer
-	glBufferDataARB (GL_ARRAY_BUFFER_ARB, _size_buffer, buffer, GL_STATIC_DRAW_ARB);
-  //Create and load the indicies
-  if (_id_index)
-    glDeleteBuffersARB (1, &_id_index);
-  glGenBuffersARB (1, &_id_index);
-	glBindBufferARB (GL_ELEMENT_ARRAY_BUFFER_ARB, _id_index);
-	glBufferDataARB (GL_ELEMENT_ARRAY_BUFFER_ARB, index_count * sizeof(int), index_list, GL_STATIC_DRAW_ARB);
-  _index_count = index_count;
-  delete buffer;
-  _ready = true;
-  
-  //Create (polygon, index_count, vert_count, index_list, vert_list, NULL, uv_list);
 
 }
-*/
 
 void VBO::Clear ()
 {
@@ -163,7 +129,7 @@ void VBO::Create (int polygon, int index_count, int vert_count, unsigned* index_
 	glBindBufferARB (GL_ELEMENT_ARRAY_BUFFER_ARB, _id_index);
 	glBufferDataARB (GL_ELEMENT_ARRAY_BUFFER_ARB, index_count * sizeof(int), index_list, GL_STATIC_DRAW_ARB);
   _index_count = index_count;
-  delete buffer;
+  delete[] buffer;
   _ready = true;
 
 }

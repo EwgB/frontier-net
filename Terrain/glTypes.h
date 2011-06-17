@@ -151,10 +151,10 @@ private:
 public:
   void            FaceSet (unsigned id);
   void            Select ();
-  GLglyph         Glyph (int ascii) { return _glyph[ascii]; };
-  int             GlyphDraw (int ascii, GLcoord origin);
+  GLglyph         Glyph (int ascii) const { return _glyph[ascii]; };
+  int             GlyphDraw (int ascii, GLcoord origin) const;
   int             GlyphWidth (int ascii);
-  int             LineHeight () { return _line_height;}
+  int             LineHeight () const { return _line_height;}
 };
 
 GLbbox    glBboxClear (void);

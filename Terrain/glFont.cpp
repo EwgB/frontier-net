@@ -115,7 +115,7 @@ int GLfont::GlyphWidth (int ascii)
     
 }
 
-int GLfont::GlyphDraw (int ascii, GLcoord origin)
+int GLfont::GlyphDraw (int ascii, GLcoord origin) const
 {
 
   ascii %= GL_max_GLYPHS;
