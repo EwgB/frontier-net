@@ -15,10 +15,16 @@
 -----------------------------------------------------------------------------*/
 
 #include "stdafx.h"
+#include "entropy.h"
 #include "math.h"
 #include "random.h"
 #include "world.h"
 
+//The number of regions around the edge which should be ocean.
+#define OCEAN_BUFFER      (WORLD_GRID / 6) 
+//This affects the mapping of the coastline.  Higher = busier, more repetitive coast.
+#define FREQUENCY         3 
+//How many different colors of flowers are available
 #define FLOWER_PALETTE    (sizeof (flower_palette) / sizeof (GLrgba))
 
 static char*        direction_name[] = 
@@ -471,48 +477,6 @@ void TerraformClimate ()
 
 }
 
-
-//Randomly scatter some mountains around
-/*
-void TerraformMountains (int count)
-{
-
-
-  //now place a few mountains 
-  int     mtn_size;
-  int     step;
-  int     i;
-  int     x, y;
-  GLcoord plot;
-  Region  r;
-
-  for (i = 0; i < count; i++) {
-    mtn_size = 3;
-    if (!find_plot (mtn_size, &plot))
-      continue;
-    for (x = -mtn_size; x <= mtn_size; x++) {
-      for (y = -mtn_size; y <= mtn_size; y++) {
-        r = WorldRegionGet (plot.x + x, plot.y + y);
-        step = (max (abs (x), abs (y)));
-        if (step == 0) {
-          sprintf (r.title, "Mountain Summit");
-        } else if (step == mtn_size) 
-          sprintf (r.title, "Mountain Foothills");
-        else {
-          sprintf (r.title, "Mountain");
-        }
-        r.mountain_height = mtn_size - step;
-        r.geo_detail = r.mountain_height* 10.0f;
-        r.geo_bias += r.mountain_height * REGION_HALF;
-        r.flags_shape = REGION_FLAG_NOBLEND;
-        r.climate = CLIMATE_MOUNTAIN;
-        WorldRegionSet (plot.x + x, plot.y + y, r);
-      }
-    }
-  }
-
-}*/
-
 //Determine the grass, dirt, rock, and other colors used by this region.
 void TerraformColors ()
 {
@@ -601,7 +565,7 @@ void TerraformColors ()
       //Color the map
       switch (r.climate) {
       case CLIMATE_MOUNTAIN:
-        r.color_map = glRgba (0.5f, 0.5f, 0.5f);break;
+        r.color_map = glRgba (0.9f, 0.9f, 1.0f);break;
       case CLIMATE_COAST:
         r.color_map = glRgba (0.9f, 0.7f, 0.4f);break;
       case CLIMATE_OCEAN:
@@ -623,7 +587,7 @@ void TerraformColors ()
         r.color_map = r.color_grass * 0.5f;
         break;
       case CLIMATE_ROCKY:
-        r.color_map = r.color_rock * 0.5f;
+        r.color_map = r.color_rock * 0.3f;
         break;
       case CLIMATE_CANYON:
         r.color_map = r.color_rock * 0.3f;
@@ -661,7 +625,7 @@ void TerraformAverage ()
   lg = new float[WORLD_GRID][WORLD_GRID];
 
   //Blur some of the attributes
-  for (int passes = 0; passes < 5; passes++) {
+  for (int passes = 0; passes < 1; passes++) {
 
     radius = 3;
     for (x = radius; x < WORLD_GRID - radius; x++) {
@@ -956,5 +920,53 @@ void TerraformFill ()
       WorldRegionSet (x, y, r);
     }
   }
+
+}
+
+void TerraformPrepare () 
+{
+
+
+  int         x, y;
+  Region      r;
+  GLcoord     from_center;
+  GLcoord     offset;
+
+  //Set some defaults
+  offset.x = RandomVal () % 1024;
+  offset.y = RandomVal () % 1024;
+  for (x = 0; x < WORLD_GRID; x++) {
+    for (y = 0; y < WORLD_GRID; y++) {
+      memset (&r, 0, sizeof (Region));
+      sprintf (r.title, "NOTHING");
+      r.geo_large = r.geo_detail = 0;
+      r.mountain_height = 0;
+      r.grid_pos.x = x;
+      r.grid_pos.y = y;
+      from_center.x = abs (x - WORLD_GRID_CENTER);
+      from_center.y = abs (y - WORLD_GRID_CENTER);
+      //Geo scale is a number from -1 to 1. -1 is lowest ovean. 0 is sea level. 
+      //+1 is highest elevation on the island. This is used to guide other derived numbers.
+      r.geo_scale = glVectorLength (glVector ((float)from_center.x, (float)from_center.y));
+      r.geo_scale /= (WORLD_GRID_CENTER - OCEAN_BUFFER);
+      //Create a steep drop around the edge of the world
+      if (r.geo_scale > 1.0f)
+        r.geo_scale = 1.0f + (r.geo_scale - 1.0f) * 2.0f;
+      r.geo_scale = 1.0f - r.geo_scale;
+      r.geo_scale += (Entropy ((x + offset.x), (y + offset.y)) - 0.5f);
+      r.geo_scale += (Entropy ((x + offset.x) * FREQUENCY, (y + offset.y) * FREQUENCY) - 0.2f);
+      r.geo_scale = clamp (r.geo_scale, -1.0f, 1.0f);
+      if (r.geo_scale > 0.0f)
+        r.geo_bias = 1.0f + r.geo_scale;
+      r.geo_large = 0.3f;
+      r.geo_large = 0.0f;
+      r.geo_detail = 0.0f;
+      r.color_map = glRgba (0.0f);
+      r.climate = CLIMATE_INVALID;
+      WorldRegionSet (x, y, r);
+    }
+  }
+
+
 
 }

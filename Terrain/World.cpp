@@ -31,10 +31,8 @@
 #define DITHER_SIZE       (REGION_SIZE / 2)
 //We keep a list of random nukmbers so we can have deterministic "randomness".
 #define NOISE_BUFFER      1024              
-//The number of regions around the edge which should be ocean.
-#define OCEAN_BUFFER      20 
 //This affects the mapping of the coastline.  Higher = busier, more repetitive coast.
-#define FREQUENCY         3 
+//#define FREQUENCY         3 
 //How much space in a region is spent interpolating between itself and its neighbors.
 #define BLEND_DISTANCE    (REGION_SIZE / 4)
 
@@ -195,10 +193,6 @@ static float do_height (Region r, GLvector2 offset, float bias, float esmall, fl
 }
 
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
 static void build_map_texture ()
 {
 
@@ -234,7 +228,6 @@ static void build_map_texture ()
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/
-
 
 Cell WorldCell (int world_x, int world_y)
 {
@@ -326,15 +319,16 @@ unsigned WorldNoisei (int index)
 void    WorldGenerate ()
 {
 
-  int         x, y;
-  Region      r;
-  GLcoord     from_center;
-  GLcoord     offset;
+  int         x;
+  //Region      r;
+  //GLcoord     from_center;
+  //GLcoord     offset;
 
   for ( x = 0; x < NOISE_BUFFER; x++) {
     noisei[x] = RandomVal ();
     noisef[x] = RandomFloat ();
   }
+  /*
   //Set some defaults
   offset.x = RandomVal () % 1024;
   offset.y = RandomVal () % 1024;
@@ -368,6 +362,8 @@ void    WorldGenerate ()
       map[x][y] = r;
     }
   }
+  */
+  TerraformPrepare ();
   TerraformOceans ();
   TerraformCoast ();
   TerraformClimate ();

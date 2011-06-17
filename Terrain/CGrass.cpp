@@ -144,6 +144,8 @@ void CGrass::Build (long stop)
   do_grass = CacheSurface (world_x, world_y) == SURFACE_GRASS;
   if (_walk.x % _density || _walk.y  % _density)
     do_grass = false;
+  if ((_walk.x + _walk.y) % 2)
+    do_grass = false;
   if (do_grass) {
     GLvector    vb0, vb1, vb2, vb3;
     GLvector    vt0, vt1, vt2, vt3;
@@ -160,22 +162,19 @@ void CGrass::Build (long stop)
 
     r = WorldRegionFromPosition (world_x, world_y);
     index = _vertex.size ();
-    //root.x = (float)world_x + Entropy (world_x * 20, world_y) * 2.0f;
-    root.x = (float)world_x + (WorldNoisef (world_x + world_y * GRASS_SIZE) -0.5f);
-    //root.y = (float)world_y + Entropy (world_x, world_y * 20) * 2.0f;
-    root.y = (float)world_y + (WorldNoisef (world_x + world_y * GRASS_SIZE) -0.5f);
+    root.x = (float)world_x + (WorldNoisef (world_x + world_y * GRASS_SIZE) -0.5f) * 2.0f;
+    root.y = (float)world_y + (WorldNoisef (world_x + world_y * GRASS_SIZE) -0.5f) * 2.0f;
     root.z = CacheElevation (root.x, root.y);
     height = 0.1f + r.moisture * r.temperature;
-    size.x = 0.5f + Entropy (world_x, world_y) * 0.5f;
-    size.y = WorldNoisef (world_x + world_y * GRASS_SIZE) *  height + height;
+    size.x = 0.2f + WorldNoisef (world_x - world_y * GRASS_SIZE) * 0.5f;
+    size.y = WorldNoisef (world_x + world_y * GRASS_SIZE) * height + height;
     do_flower = r.has_flowers;
     if (do_flower) //flowers are shoter than grass
       size.y /= 2;
     size.y = max (size.y, 0.3f);
     color = CacheSurfaceColor (world_x, world_y, SURFACE_COLOR_GRASS);
     color.alpha = 1.0f;
-
-
+    //Now we construct our grass panels
     vb0.x = root.x - size.x * -1; vb0.y = root.y - size.x * -1; vb0.z = CacheElevation (vb0.x, vb0.y);
     vb1.x = root.x - size.x *  1; vb1.y = root.y - size.x * -1; vb1.z = CacheElevation (vb1.x, vb1.y);
     vb2.x = root.x - size.x *  1; vb2.y = root.y - size.x *  1; vb2.z = CacheElevation (vb2.x, vb2.y);
@@ -189,23 +188,15 @@ void CGrass::Build (long stop)
     current = _vertex.size ();
     normal = CacheNormal (world_x, world_y);
     VertexPush (vb0, normal, color, grass[patch].BottomLeft ());
-    //normal = WorldNormal (world_x, world_y);
     VertexPush (vb1, normal, color, grass[patch].BottomLeft ());
-    //normal = random_normal ();
     VertexPush (vb2, normal, color, grass[patch].BottomRight ());
-    //normal = random_normal ();
     VertexPush (vb3, normal, color, grass[patch].BottomRight ());
-    //normal = random_normal ();
     VertexPush (vt0, normal, color, grass[patch].UpperLeft ());
-    //normal = random_normal ();
     VertexPush (vt1, normal, color, grass[patch].UpperLeft ());
-    //normal = random_normal ();
     VertexPush (vt2, normal, color, grass[patch].UpperRight ());
-    //normal = random_normal ();
     VertexPush (vt3, normal, color, grass[patch].UpperRight ());
     QuadPush (current, current + 2, current + 6, current + 4);
     QuadPush (current + 1, current + 3, current + 7, current + 5);
-    //QuadPush (current + 4, current + 5, current + 6, current + 7);
     if (do_flower) {
       current = _vertex.size ();
       color = r.color_flowers[index % FLOWERS];

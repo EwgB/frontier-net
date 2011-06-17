@@ -30,9 +30,9 @@ static int entropy_index (GLcoord n)
 {
 
   if (n.x < 0)
-    n.x += size.x;
+    n.x = abs (n.x);
   if (n.y < 0)
-    n.y += size.y;
+    n.y = abs (n.y);
   n.x %= size.x;
   n.y %= size.y;
   return n.x + n.y * size.x;

@@ -114,8 +114,8 @@ void WaterRender ()
   } else {
     glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
     glEnable (GL_BLEND);
-    glBlendFunc (GL_ONE, GL_ONE);
+    glBlendFunc (GL_SRC_COLOR, GL_DST_COLOR);
   }
-  //map.Render ();
+  map.Render ();
 
 }
