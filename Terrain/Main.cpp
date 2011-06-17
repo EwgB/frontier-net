@@ -11,6 +11,8 @@
  x Migrate region building to Terraform.cpp
  * Make water only build needed polygons.
  x Move normals to pages, use them on grass.
+ * Move "world" stuff to new "cache.cpp".  Move world-generation stuf to world.cpp.
+ * Fix potential wasted time in page update.
 
 -----------------------------------------------------------------------------*/
 
@@ -18,6 +20,7 @@
 
 #include "avatar.h"
 #include "camera.h"
+#include "cache.h"
 #include "env.h"
 #include "sdl.h"
 #include "main.h"
@@ -29,7 +32,6 @@
 #include "sky.h"
 #include "text.h"
 #include "texture.h"
-#include "world.h"
 
 #pragma comment (lib, "opengl32.lib")
 #pragma comment (lib, "sdl.lib")
@@ -91,7 +93,7 @@ static void run ()
     EnvUpdate ();
     SkyUpdate ();
     SceneUpdate (stop);
-    WorldUpdate (stop);
+    CacheUpdate (stop);
     RenderUpdate ();
     Render ();	
     remaining = stop - SdlTick ();

@@ -1,3 +1,4 @@
+/*
 float       WorldDetail (int x, int y);
 float       WorldElevation (int x, int y);
 float       WorldElevation (float x, float y);
@@ -10,3 +11,4 @@ SurfaceType WorldSurface (int x, int y);
 GLrgba      WorldSurfaceColor (int x, int y, SurfaceColor sc);
 void        WorldUpdate (long stop);
 void        WorldUpdateZone (int world_x, int world_y, long stop);
+*/

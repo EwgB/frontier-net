@@ -14,6 +14,7 @@
 #include "stdafx.h"
 #include "avatar.h"
 #include "camera.h"
+#include "cache.h"
 #include "cgrass.h"
 #include "cterrain.h"
 #include "ctree.h"
@@ -25,7 +26,7 @@
 #include "text.h"
 #include "texture.h"
 #include "water.h"
-#include "world.h"
+
 
 #define GRASS_GRID      5
 #define GRASS_HALF      (GRASS_GRID / 2)
@@ -81,7 +82,7 @@ void SceneClear ()
   
   int           x, y;
 
-  WorldPurge ();
+  CachePurge ();
   for (x = 0; x < WORLD_GRID; x++) {
     for (y = 0; y < WORLD_GRID; y++) {
       if (terrain[x][y]) 
@@ -181,7 +182,7 @@ void SceneUpdate (long stop)
   if (InputKeyPressed (SDLK_t)) {
     GLvector  apos = AvatarPosition ();
     apos.x -= 4.0f;
-    apos.z = WorldElevation (apos.x, apos.y);
+    apos.z = CacheElevation (apos.x, apos.y);
     tree.Build (apos);
   }
 
@@ -300,14 +301,14 @@ void SceneRender ()
   glBindTexture (GL_TEXTURE_2D, t->id);
   for (x = 0; x < GRASS_GRID; x++) {
     for (y = 0; y < GRASS_GRID; y++) {
-      //grass[x][y].Render ();
+      grass[x][y].Render ();
     }
   }
 
 
   WaterRender ();
   glDisable (GL_BLEND);
-  t = TextureFromName ("rockface.bmp", MASK_PINK);
+  t = TextureFromName ("tree.bmp", MASK_PINK);
   glBindTexture (GL_TEXTURE_2D, t->id);
   tree.Render ();
   /*

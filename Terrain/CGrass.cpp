@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "camera.h"
+#include "cache.h"
 #include "entropy.h"
 #include "sdl.h"
 #include "CGrass.h"
@@ -17,7 +18,6 @@
 #include "Render.h"
 #include "Region.h"
 #include "Texture.h"
-#include "World.h"
 
 #define GRASS_TYPES   4
 
@@ -117,13 +117,13 @@ void CGrass::QuadPush (int n1, int n2, int n3, int n4)
 bool CGrass::ZoneCheck ()
 {
 
-  if (!WorldPointAvailable (_origin.x, _origin.y))
+  if (!CachePointAvailable (_origin.x, _origin.y))
     return false;
-  if (!WorldPointAvailable (_origin.x + GRASS_SIZE, _origin.y))
+  if (!CachePointAvailable (_origin.x + GRASS_SIZE, _origin.y))
     return false;
-  if (!WorldPointAvailable (_origin.x + GRASS_SIZE,_origin.y + GRASS_SIZE))
+  if (!CachePointAvailable (_origin.x + GRASS_SIZE,_origin.y + GRASS_SIZE))
     return false;
-  if (!WorldPointAvailable (_origin.x, _origin.y + GRASS_SIZE))
+  if (!CachePointAvailable (_origin.x, _origin.y + GRASS_SIZE))
     return false;
   return true;
 
@@ -138,7 +138,7 @@ void CGrass::Build (long stop)
 
   world_x = _origin.x + _walk.x;
   world_y = _origin.y + _walk.y;
-  do_grass = WorldSurface (world_x, world_y) == SURFACE_GRASS;
+  do_grass = CacheSurface (world_x, world_y) == SURFACE_GRASS;
   if (_walk.x % _density || _walk.y  % _density)
     do_grass = false;
   if (do_grass) {
@@ -158,10 +158,10 @@ void CGrass::Build (long stop)
     r = RegionGet (world_x, world_y);
     index = _vertex.size ();
     //root.x = (float)world_x + Entropy (world_x * 20, world_y) * 2.0f;
-    root.x = (float)world_x + RandomFloat () * 2.0f;
+    root.x = (float)world_x + (RandomFloat () -0.5f);
     //root.y = (float)world_y + Entropy (world_x, world_y * 20) * 2.0f;
-    root.y = (float)world_y + RandomFloat () * 2.0f;
-    root.z = WorldElevation (root.x, root.y);
+    root.y = (float)world_y + (RandomFloat () -0.5f);
+    root.z = CacheElevation (root.x, root.y);
     height = 0.1f + r.moisture * r.temperature;
     size.x = 0.5f + Entropy (world_x, world_y) * 0.5f;
     size.y = Entropy (world_x, world_y) *  height + height;
@@ -169,14 +169,14 @@ void CGrass::Build (long stop)
     if (do_flower) //flowers are shoter than grass
       size.y /= 2;
     size.y = max (size.y, 0.3f);
-    color = WorldSurfaceColor (world_x, world_y, SURFACE_COLOR_GRASS);
+    color = CacheSurfaceColor (world_x, world_y, SURFACE_COLOR_GRASS);
     color.alpha = 1.0f;
 
 
-    vb0.x = root.x - size.x * -1; vb0.y = root.y - size.x * -1; vb0.z = WorldElevation (vb0.x, vb0.y);
-    vb1.x = root.x - size.x *  1; vb1.y = root.y - size.x * -1; vb1.z = WorldElevation (vb1.x, vb1.y);
-    vb2.x = root.x - size.x *  1; vb2.y = root.y - size.x *  1; vb2.z = WorldElevation (vb2.x, vb2.y);
-    vb3.x = root.x - size.x * -1; vb3.y = root.y - size.x *  1; vb3.z = WorldElevation (vb3.x, vb3.y);
+    vb0.x = root.x - size.x * -1; vb0.y = root.y - size.x * -1; vb0.z = CacheElevation (vb0.x, vb0.y);
+    vb1.x = root.x - size.x *  1; vb1.y = root.y - size.x * -1; vb1.z = CacheElevation (vb1.x, vb1.y);
+    vb2.x = root.x - size.x *  1; vb2.y = root.y - size.x *  1; vb2.z = CacheElevation (vb2.x, vb2.y);
+    vb3.x = root.x - size.x * -1; vb3.y = root.y - size.x *  1; vb3.z = CacheElevation (vb3.x, vb3.y);
     vt0 = vb0 + glVector (0.0f, 0.0f, size.y);
     vt1 = vb1 + glVector (0.0f, 0.0f, size.y);
     vt2 = vb2 + glVector (0.0f, 0.0f, size.y);
@@ -184,7 +184,7 @@ void CGrass::Build (long stop)
     patch = r.flower_shape[index % FLOWERS] % GRASS_TYPES;
 
     current = _vertex.size ();
-    normal = WorldNormal (world_x, world_y);
+    normal = CacheNormal (world_x, world_y);
     VertexPush (vb0, normal, color, grass[patch].BottomLeft ());
     //normal = WorldNormal (world_x, world_y);
     VertexPush (vb1, normal, color, grass[patch].BottomLeft ());

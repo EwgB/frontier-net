@@ -13,11 +13,11 @@
 
 #include <math.h>
 #include "avatar.h"
+#include "cache.h"
 #include "camera.h"
 #include "env.h"
 #include "log.h"
 #include "input.h"
-//#include "math.h"
 #include "render.h"
 #include "region.h"
 #include "scene.h"
@@ -25,7 +25,6 @@
 #include "sky.h"
 #include "texture.h"
 #include "text.h"
-#include "world.h"
 #include "water.h"
 
 #define RENDER_DISTANCE     1024
@@ -426,7 +425,7 @@ void Render (void)
   if (terrain_debug)
     SceneRenderDebug (terrain_debug);
   if (world_debug)
-    WorldRenderDebug ();
+    CacheRenderDebug ();
   TextRender ();
   if (show_map) 
     RenderTexture (RegionMap ());

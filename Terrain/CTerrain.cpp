@@ -10,12 +10,13 @@
 
 #include "stdafx.h"
 #include "camera.h"
+#include "cache.h"
 #include "sdl.h"
 #include "CTerrain.h"
 #include "Render.h"
 #include "scene.h"
 #include "Texture.h"
-#include "World.h"
+
 
 //Lower values make the terrain more precise at the expense of more polygons
 #define TOLERANCE         0.01f
@@ -147,11 +148,11 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
       world_x = _origin.x * TERRAIN_SIZE + x;
       world_y = _origin.y * TERRAIN_SIZE + y;
       glTexCoord2f ((float)x / 8, (float)y / 8);
-      surface_color = WorldSurfaceColor (world_x, world_y, SURFACE_COLOR_ROCK);
+      surface_color = CacheSurfaceColor (world_x, world_y, SURFACE_COLOR_ROCK);
       glColor3fv (&surface_color.red);
       glVertex2f ((float)x, (float)y);
       glTexCoord2f ((float)x / 8, (float)(y + 1) / 8);
-      surface_color = WorldSurfaceColor (world_x, world_y, SURFACE_COLOR_ROCK);
+      surface_color = CacheSurfaceColor (world_x, world_y, SURFACE_COLOR_ROCK);
       glColor3fv (&surface_color.red);
       glVertex2f ((float)x, (float)(y + 1));
     }
@@ -171,7 +172,7 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
       for (x = start.x; x < end.x; x++) {
         world_x = _origin.x * TERRAIN_SIZE + x;
         world_y = _origin.y * TERRAIN_SIZE + y;
-        surface = WorldSurface (world_x, world_y);
+        surface = CacheSurface (world_x, world_y);
         if (surface != layers[stage].surface)
           continue;
         pos.x = (float)x;
@@ -186,7 +187,7 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
         if (layers[stage].color == SURFACE_COLOR_BLACK)
           surface_color = glRgba (0.0f);
         else
-          surface_color = WorldSurfaceColor (world_x, world_y, layers[stage].color);
+          surface_color = CacheSurfaceColor (world_x, world_y, layers[stage].color);
         col = surface_color * layers[stage].luminance;
         col.alpha = layers[stage].opacity;
         glColor4fv (&col.red);
@@ -234,10 +235,10 @@ void CTerrain::DoHeightmap ()
 
   world.x = _origin.x * TERRAIN_SIZE + _walk.x;
   world.y = _origin.y * TERRAIN_SIZE + _walk.y;
-  _surface_used[WorldSurface (world.x, world.y)] = true;
+  _surface_used[CacheSurface (world.x, world.y)] = true;
   pos.x = (float)world.x;
   pos.y = (float)world.y;
-  pos.z = WorldElevation (_origin.x * TERRAIN_SIZE + _walk.x, _origin.y * TERRAIN_SIZE + _walk.y);
+  pos.z = CacheElevation (_origin.x * TERRAIN_SIZE + _walk.x, _origin.y * TERRAIN_SIZE + _walk.y);
   _pos[_walk.x][_walk.y] = pos;
   _uv[_walk.x][_walk.y] = glVector ((float)_walk.x / TERRAIN_SIZE, (float)_walk.y / TERRAIN_SIZE);
   if (!_walk.x)
@@ -255,7 +256,7 @@ void CTerrain::DoHeightmap ()
     _contour[_walk.x][_walk.y].y = _contour[_walk.x][_walk.y - 1].y + glVectorLength (delta);
     _contour[_walk.x][_walk.y].y = _contour[_walk.x][_walk.y - 1].y + 1;
   }
-  _normal[_walk.x][_walk.y] = WorldNormal (_origin.x * TERRAIN_SIZE + _walk.x, _origin.y * TERRAIN_SIZE + _walk.y); 
+  _normal[_walk.x][_walk.y] = CacheNormal (_origin.x * TERRAIN_SIZE + _walk.x, _origin.y * TERRAIN_SIZE + _walk.y); 
   if (_walk.Walk (TERRAIN_EDGE))
     _stage++;
 
@@ -623,20 +624,20 @@ bool CTerrain::ZoneCheck (long stop)
 {
 
   //If we're waiting on a zone, give it our update allotment
-  if (!WorldPointAvailable (_origin.x * TERRAIN_SIZE, _origin.y * TERRAIN_SIZE)) {
-    WorldUpdateZone (_origin.x * TERRAIN_SIZE, _origin.y * TERRAIN_SIZE, stop);
+  if (!CachePointAvailable (_origin.x * TERRAIN_SIZE, _origin.y * TERRAIN_SIZE)) {
+    CacheUpdatePage (_origin.x * TERRAIN_SIZE, _origin.y * TERRAIN_SIZE, stop);
     return false;
   }
-  if (!WorldPointAvailable (_origin.x * TERRAIN_SIZE + TERRAIN_EDGE, _origin.y * TERRAIN_SIZE + TERRAIN_EDGE)) {
-    WorldUpdateZone (_origin.x * TERRAIN_SIZE + TERRAIN_EDGE, _origin.y * TERRAIN_SIZE + TERRAIN_EDGE, stop);
+  if (!CachePointAvailable (_origin.x * TERRAIN_SIZE + TERRAIN_EDGE, _origin.y * TERRAIN_SIZE + TERRAIN_EDGE)) {
+    CacheUpdatePage (_origin.x * TERRAIN_SIZE + TERRAIN_EDGE, _origin.y * TERRAIN_SIZE + TERRAIN_EDGE, stop);
     return false;
   }
-  if (!WorldPointAvailable (_origin.x * TERRAIN_SIZE + TERRAIN_EDGE, _origin.y * TERRAIN_SIZE)) {
-    WorldUpdateZone (_origin.x * TERRAIN_SIZE + TERRAIN_EDGE, _origin.y * TERRAIN_SIZE, stop);
+  if (!CachePointAvailable (_origin.x * TERRAIN_SIZE + TERRAIN_EDGE, _origin.y * TERRAIN_SIZE)) {
+    CacheUpdatePage (_origin.x * TERRAIN_SIZE + TERRAIN_EDGE, _origin.y * TERRAIN_SIZE, stop);
     return false;
   }
-  if (!WorldPointAvailable (_origin.x * TERRAIN_SIZE, _origin.y * TERRAIN_SIZE + TERRAIN_EDGE)) {
-    WorldUpdateZone (_origin.x * TERRAIN_SIZE, _origin.y * TERRAIN_SIZE + TERRAIN_EDGE, stop);
+  if (!CachePointAvailable (_origin.x * TERRAIN_SIZE, _origin.y * TERRAIN_SIZE + TERRAIN_EDGE)) {
+    CacheUpdatePage (_origin.x * TERRAIN_SIZE, _origin.y * TERRAIN_SIZE + TERRAIN_EDGE, stop);
     return false;
   }
   return true;

@@ -11,13 +11,13 @@
 
 
 #include "stdafx.h"
+#include "cache.h"
 #include "camera.h"
 #include "ini.h"
 #include "input.h"
 #include "region.h"
 #include "sdl.h"
 #include "Text.h"
-#include "world.h"
 
 #define JUMP_SPEED      4.0f
 #define MOVE_SPEED      6.0f
@@ -100,7 +100,7 @@ void AvatarUpdate (void)
     if (InputKeyState (SDLK_d))
       do_move (glVector (move, 0, 0));
   }
-  e = WorldElevation (position.x, position.y);
+  e = CacheElevation (position.x, position.y);
   if (!fly) {
     if (position.z <= e) {
       on_ground = true;

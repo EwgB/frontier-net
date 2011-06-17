@@ -26,6 +26,7 @@ void CTree::Build (GLvector pos)
   float     radius;
   float     x, y, z;
   float     tier_height;
+  GLvector  core;
 
   _vertex.clear ();
   _normal.clear ();
@@ -36,6 +37,7 @@ void CTree::Build (GLvector pos)
   radius = 1.0f;
   tier_height = 1.0f;
   height = 0.0f;
+  core = glVector (0.0f, 0.0f, 0.0f);
   for (tier = 0; tier < 5; tier++) {
     for (ring = 0; ring <= steps; ring++) {
       angle = (float)ring * (360.0f / (float)steps);
@@ -50,7 +52,7 @@ void CTree::Build (GLvector pos)
       else
         _vertex.push_back (glVector (x * radius, y * radius, z));
       _normal.push_back (glVector (x, y, 0.0f));
-      _uv.push_back (glVector ((float)ring / (float) steps, z/ 5.0f));
+      _uv.push_back (glVector (((float)ring / (float) steps) * 0.5f, z/ 5.0f));
 
     }
     height += tier_height;

@@ -232,25 +232,14 @@ void CPage::DoSurface ()
 
     //if (high > 0 && low < 0 && (region.flags & REGION_FLAG_SWAMP))
       //c->surface = SURFACE_GRASS_EDGE;
-    /*
-    if (region.temperature < FREEZING) {
-      float     snow_threshold;
-      snow_threshold = FREEZING - region.temperature;
-      snow_threshold *= 8;
-      if (delta <= (snow_threshold))
-        c->surface = SURFACE_SNOW;
-      //if (c->surface == SURFACE_GRASS && region.temperature < 0.2f)
-        //c->surface = SURFACE_SNOW;
-    }
-    */
-    //if (delta >= region.moisture * 6)
-      //c->surface = SURFACE_DIRT;
-    //if (low <= region.geo_bias + region.moisture)
-      //c->surface = SURFACE_DIRT;
+    if (delta >= region.moisture * 6)
+      c->surface = SURFACE_DIRT;
+    if (low <= region.geo_bias + region.moisture)
+      c->surface = SURFACE_DIRT;
     //if (low <= 0 && (region.climate == CLIMATE_RIVER))
       //c->surface = SURFACE_DIRT_DARK;
-    //if (low <= region.geo_bias)
-      //c->surface = SURFACE_DIRT_DARK;
+    if (low <= region.geo_bias)
+      c->surface = SURFACE_DIRT_DARK;
     if (low <= 2.5f && (region.climate == CLIMATE_OCEAN))
       c->surface = SURFACE_SAND;
     if (delta > 3.0f)
