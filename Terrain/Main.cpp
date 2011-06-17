@@ -26,12 +26,12 @@
 #include "main.h"
 #include "log.h"
 #include "random.h"
-#include "region.h"
 #include "render.h"
 #include "scene.h"
 #include "sky.h"
 #include "text.h"
 #include "texture.h"
+#include "world.h"
 
 #pragma comment (lib, "opengl32.lib")
 #pragma comment (lib, "sdl.lib")
@@ -54,7 +54,7 @@ static void init ()
   AvatarInit ();
   CameraInit ();
   TextureInit ();
-  RegionInit ();
+  WorldInit ();
   SceneInit ();
   SkyInit ();
   TextInit ();

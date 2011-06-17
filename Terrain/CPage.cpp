@@ -17,7 +17,6 @@
 #include "stdafx.h"
 #include "cpage.h"
 #include "entropy.h"
-#include "region.h"
 #include "sdl.h"
 #include "world.h"
 
@@ -126,7 +125,7 @@ void CPage::DoPosition ()
   world_x = (_origin.x * PAGE_SIZE + _walk.x);
   world_y = (_origin.y * PAGE_SIZE + _walk.y);
   //_cell[_walk.x][_walk.y].elevation = RegionElevation (world_x, world_y);
-  c = RegionCell (world_x, world_y);
+  c = WorldCell (world_x, world_y);
   //c.elevation = c.water_level;
   _cell[_walk.x][_walk.y].pos = glVector ((float)world_x, (float)world_y, c.elevation);
   _cell[_walk.x][_walk.y].detail = c.detail;
@@ -146,10 +145,10 @@ void CPage::DoColor ()
   world_x = (_origin.x * PAGE_SIZE + _walk.x);
   world_y = (_origin.y * PAGE_SIZE + _walk.y);
   if (_cell[_walk.x][_walk.y].surface == SURFACE_GRASS || _cell[_walk.x][_walk.y].surface == SURFACE_GRASS_EDGE)
-    _cell[_walk.x][_walk.y].grass = RegionColorGet (world_x, world_y, SURFACE_COLOR_GRASS);
+    _cell[_walk.x][_walk.y].grass = WorldColorGet (world_x, world_y, SURFACE_COLOR_GRASS);
   if (_cell[_walk.x][_walk.y].surface == SURFACE_DIRT || _cell[_walk.x][_walk.y].surface == SURFACE_DIRT_DARK)
-    _cell[_walk.x][_walk.y].dirt = RegionColorGet (world_x, world_y, SURFACE_COLOR_DIRT);
-  _cell[_walk.x][_walk.y].rock = RegionColorGet (world_x, world_y, SURFACE_COLOR_ROCK);
+    _cell[_walk.x][_walk.y].dirt = WorldColorGet (world_x, world_y, SURFACE_COLOR_DIRT);
+  _cell[_walk.x][_walk.y].rock = WorldColorGet (world_x, world_y, SURFACE_COLOR_ROCK);
   if (_walk.Walk (PAGE_SIZE))
     _stage++;
 
@@ -190,7 +189,7 @@ void CPage::DoSurface ()
 
   worldpos.x = _origin.x * PAGE_SIZE + _walk.x;
   worldpos.y = _origin.y * PAGE_SIZE + _walk.y;
-  region = RegionGet (worldpos.x, worldpos.y);
+  region = WorldRegionFromPosition (worldpos.x, worldpos.y);
   c = &_cell[_walk.x][_walk.y];
   if (_stage == PAGE_STAGE_SURFACE1) {
     //Get the elevation of our neighbors

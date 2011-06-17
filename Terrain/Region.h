@@ -1,8 +1,9 @@
+#if 0 
 #define REGION_SIZE       64
 #define REGION_HALF       (REGION_SIZE / 2)
-#define REGION_GRID       128
-#define REGION_GRID_EDGE  (REGION_GRID + 1)
-#define REGION_CENTER     (REGION_GRID / 2)
+#define WORLD_GRID       128
+#define WORLD_GRID_EDGE  (WORLD_GRID + 1)
+#define WORLD_GRID_CENTER     (WORLD_GRID / 2)
 
 #define REGION_FLAG_TEST        0x0001
 #define REGION_FLAG_MESAS       0x0002
@@ -71,15 +72,16 @@ struct Region
   bool      has_flowers;
 };
 
-Region    RegionMapGet (int x, int y);
-void      RegionMapSet (int x, int y, Region val);
+Region    WorldRegionGet (int x, int y);
+void      WorldRegionSet (int x, int y, Region val);
 Region    RegionGet (int x, int y);
 Region    RegionGet (float x, float y);
-GLrgba    RegionColorGet (int world_x, int world_y, SurfaceColor c);
+GLrgba    WorldColorGet (int world_x, int world_y, SurfaceColor c);
 GLrgba    RegionAtmosphere (int world_x, int world_y);
 float     RegionElevation (int world_x, int world_y);
-Cell      RegionCell (int world_x, int world_y);
+Cell      WorldCell (int world_x, int world_y);
 void      RegionInit ();
 unsigned  RegionMap ();
 float     RegionWaterLevel (int world_x, int world_y);
 void      RegionGenerate ();
+#endif

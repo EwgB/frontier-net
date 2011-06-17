@@ -16,8 +16,8 @@
 #include "CGrass.h"
 #include "random.h"
 #include "Render.h"
-#include "Region.h"
-#include "Texture.h"
+#include "texture.h"
+#include "world.h"
 
 #define GRASS_TYPES   4
 
@@ -155,7 +155,7 @@ void CGrass::Build (long stop)
     bool        do_flower;
     int         patch;
 
-    r = RegionGet (world_x, world_y);
+    r = WorldRegionFromPosition (world_x, world_y);
     index = _vertex.size ();
     //root.x = (float)world_x + Entropy (world_x * 20, world_y) * 2.0f;
     root.x = (float)world_x + (RandomFloat () -0.5f);

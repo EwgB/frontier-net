@@ -9,7 +9,6 @@
 -----------------------------------------------------------------------------*/
 
 #include "stdafx.h"
-#include "region.h"
 #include "camera.h"
 #include "env.h"
 #include "input.h"
@@ -18,6 +17,7 @@
 #include "sdl.h"
 #include "text.h"
 #include "texture.h"
+#include "world.h"
 
 #define TIME_SCALE          1000  //how many "milliseconds per in-game minute
 #define max_DISTANCE        450

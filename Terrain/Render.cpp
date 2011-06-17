@@ -19,13 +19,13 @@
 #include "log.h"
 #include "input.h"
 #include "render.h"
-#include "region.h"
 #include "scene.h"
 #include "sdl.h"
 #include "sky.h"
 #include "texture.h"
 #include "text.h"
 #include "water.h"
+#include "world.h"
 
 #define RENDER_DISTANCE     1024
 #define FOV                 90
@@ -55,7 +55,7 @@ static void draw_water (float tile)
   int     edge;
 
   return;
-  edge = REGION_SIZE * REGION_GRID;
+  edge = REGION_SIZE * WORLD_GRID;
   glDisable (GL_CULL_FACE);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glBegin (GL_QUADS);
@@ -125,8 +125,8 @@ void RenderClick (int x, int y)
     return;
   p.x = (float) x / MAP_SIZE;
   p.y = (float) y / MAP_SIZE;
-  p.x *= REGION_GRID * REGION_SIZE;
-  p.y *= REGION_GRID * REGION_SIZE;
+  p.x *= WORLD_GRID * REGION_SIZE;
+  p.y *= WORLD_GRID * REGION_SIZE;
   p.z = REGION_SIZE;
   AvatarPositionSet (p);
 
@@ -284,8 +284,8 @@ void RenderTexture (unsigned id)
     c = glRgbaUnique (r);
     glBindTexture (GL_TEXTURE_2D, 0);
     pos = CameraPosition ();
-    pos /= (REGION_GRID * REGION_SIZE);
-    //pos.y /= (REGION_GRID * REGION_SIZE);
+    pos /= (WORLD_GRID * REGION_SIZE);
+    //pos.y /= (WORLD_GRID * REGION_SIZE);
     pos *= MAP_SIZE;
     pos.y += view_height - MAP_SIZE;
     glColor3fv (&c.red);
@@ -351,7 +351,7 @@ void Render (void)
 
   pos = CameraPosition ();
   e = EnvGet ();
-  water_level = RegionWaterLevel ((int)pos.x, (int)pos.y);
+  water_level = WorldWaterLevel ((int)pos.x, (int)pos.y);
   water_level = max (water_level, 0);
   if (pos.z >= water_level) {
     //cfog = (current_diffuse + glRgba (0.0f, 0.0f, 1.0f)) / 2;
@@ -428,7 +428,7 @@ void Render (void)
     CacheRenderDebug ();
   TextRender ();
   if (show_map) 
-    RenderTexture (RegionMap ());
+    RenderTexture (WorldMap ());
   SDL_GL_SwapBuffers ();
 
 

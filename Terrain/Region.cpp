@@ -16,7 +16,7 @@
 
 
 #include "stdafx.h"
-
+#if 0
 #include "entropy.h"
 #include "math.h"
 #include "region.h"
@@ -54,7 +54,7 @@ static GLrgba       flower_palette[] = {
   {1.0f, 0.0f, 0.5f, 1.0f}, //Maroon
 };
 
-static Region       continent[REGION_GRID][REGION_GRID];
+static Region       continent[WORLD_GRID][WORLD_GRID];
 static GLcoord      dithermap[DITHER_SIZE][DITHER_SIZE];
 static unsigned     map_id;
 
@@ -205,7 +205,7 @@ static float do_height (Region r, GLvector2 offset, float bias, float esmall, fl
 
 static Region region (int x, int y)
 {
-  if (x < 0 || y < 0 || x >= REGION_GRID || y >= REGION_GRID)
+  if (x < 0 || y < 0 || x >= WORLD_GRID || y >= WORLD_GRID)
     return continent[0][0];
   return continent[x][y];
 
@@ -214,138 +214,6 @@ static Region region (int x, int y)
 /*-----------------------------------------------------------------------------
 The following functions are used when building a new world.
 -----------------------------------------------------------------------------*/
-
-//check the regions around the given one, see if they are unused
-static bool is_free (int x, int y, int radius)
-{
-
-  int       xx, yy;
-  Region    r;
-
-  for (xx = -radius; xx <= radius; xx++) {
-    for (yy = -radius; yy <= radius; yy++) {
-      r = region (x + xx, y + yy);
-      if (r.climate != CLIMATE_INVALID)
-        return false;
-    }
-  }
-  return true;
-
-}
-
-//In general, what part of the map is this coordinate in?
-static char* find_direction_name (int x, int y)
-{
-
-  GLcoord   from_center;
-
-  from_center.x = abs (x - REGION_CENTER);
-  from_center.y = abs (y - REGION_CENTER);
-  if (from_center.x < from_center.y) {
-    if (y < REGION_CENTER)
-      return NNORTH;
-    else
-      return NSOUTH;
-  } 
-  if (x < REGION_CENTER)
-    return NWEST;
-  return NEAST;
-
-}
-
-
-//In general, what part of the map is this coordinate in?
-static GLcoord find_direction (int x, int y)
-{
-
-  GLcoord   from_center;
-
-  from_center.x = abs (x - REGION_CENTER);
-  from_center.y = abs (y - REGION_CENTER);
-  if (from_center.x < from_center.y) {
-    if (y < REGION_CENTER)
-      return direction[NORTH];
-    else
-      return direction[SOUTH];
-  } 
-  if (x < REGION_CENTER)
-    return direction[WEST];
-  return direction[EAST];
-
-}
-
-//This will fill in all reviously un-assigned regions.
-static void do_landmass ()
-{
-
-  int       x, y;
-  Region    r;
-  unsigned  rand;
-
-  //now define the interior 
-  for (x = 1; x < REGION_GRID - 1; x++) {
-    for (y = 1; y < REGION_GRID - 1; y++) {
-      r = continent[x][y];
-      //See if this is already ocean
-      if (r.climate != CLIMATE_INVALID)
-        continue;
-      //noise = Entropy (x, y);
-      sprintf (r.title, "???");
-      r.geo_bias = r.geo_scale * 10.0f;
-      r.geo_detail = 20.0f;
-      //Have them trend more hilly in dry areas
-      //r.geo_detail += (1.0f - r.moisture) * RandomFloat () * 0.5f;
-      //r.geo_bias += RandomFloat () * 6;
-      
-      rand = RandomVal () % 8;
-      if (r.moisture > 0.3f && r.temperature > 0.5f) {
-        GLrgba    c;
-        int       shape;
-        
-        r.has_flowers = RandomVal () % 4 == 0;
-        shape = RandomVal ();
-        c = flower_palette[RandomVal () % FLOWER_PALETTE];
-        for (int i = 0; i < FLOWERS; i++) {
-          r.color_flowers[i] = c;
-          r.flower_shape[i] = shape;
-          if ((RandomVal () % 15) == 0) {
-            shape = RandomVal ();
-            c = flower_palette[RandomVal () % FLOWER_PALETTE];
-          }
-        }
-      }      
-      if (rand == 0) {
-        r.flags_shape |= REGION_FLAG_MESAS;
-        sprintf (r.title, "Mesas");
-      } else if (rand == 1) {
-        sprintf (r.title, "Craters");
-        r.flags_shape |= REGION_FLAG_CRATER;
-      } else if (rand == 2) {
-        sprintf (r.title, "TEST");
-        r.flags_shape |= REGION_FLAG_TEST;
-      } else if (rand == 3) {
-        sprintf (r.title, "Sinkhole");
-        r.flags_shape |= REGION_FLAG_SINKHOLE;
-      } else if (rand == 4) {
-        sprintf (r.title, "Crack");
-        r.flags_shape |= REGION_FLAG_CRACK;
-      } else if (rand == 5) {
-        sprintf (r.title, "Tiered");
-        r.flags_shape |= REGION_FLAG_TIERED;
-      } else if (rand == 6) {
-        sprintf (r.title, "Wasteland");
-      } else {
-        sprintf (r.title, "Grasslands");
-        //r.geo_detail /= 3;
-        //r.geo_large /= 3;
-      }  
-      
-
-      continent[x][y] = r;
-    }
-  }
-
-}
 
 static void do_map ()
 {
@@ -361,20 +229,20 @@ static void do_map ()
   unsigned char* buffer; 
   unsigned char*  ptr;
 
-  buffer = new unsigned char[REGION_GRID * REGION_GRID * 3];
+  buffer = new unsigned char[WORLD_GRID * WORLD_GRID * 3];
 
-  for (x = 0; x < REGION_GRID; x++) {
-    for (y = 0; y < REGION_GRID; y++) {
+  for (x = 0; x < WORLD_GRID; x++) {
+    for (y = 0; y < WORLD_GRID; y++) {
       //Flip it vertically, because the OpenGL texture coord system is retarded.
-      yy = (REGION_GRID - 1) - y;
+      yy = (WORLD_GRID - 1) - y;
       r = continent[x][yy];
-      ptr = &buffer[(x + y * REGION_GRID) * 3];
+      ptr = &buffer[(x + y * WORLD_GRID) * 3];
       ptr[0] = (unsigned char)(r.color_map.red * 255.0f);
       ptr[1] = (unsigned char)(r.color_map.green * 255.0f);
       ptr[2] = (unsigned char)(r.color_map.blue * 255.0f);
     }
   }
-  glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, REGION_GRID, REGION_GRID, 0, GL_RGB, GL_UNSIGNED_BYTE, &buffer[0]);
+  glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, WORLD_GRID, WORLD_GRID, 0, GL_RGB, GL_UNSIGNED_BYTE, &buffer[0]);
   delete buffer;
 
 }
@@ -396,7 +264,7 @@ Region RegionGet (float x, float y)
   
   x /= REGION_SIZE;
   y /= REGION_SIZE;
-  if (x < 0 || y < 0 || x >= REGION_GRID || y >= REGION_GRID)
+  if (x < 0 || y < 0 || x >= WORLD_GRID || y >= WORLD_GRID)
     return continent[0][0];
   return continent[(int)x][(int)y];
 
@@ -411,22 +279,20 @@ Region RegionGet (int x, int y)
   y += dithermap[x % DITHER_SIZE][y% DITHER_SIZE].y;
   x /= REGION_SIZE;
   y /= REGION_SIZE;
-  if (x < 0 || y < 0 || x >= REGION_GRID || y >= REGION_GRID)
+  if (x < 0 || y < 0 || x >= WORLD_GRID || y >= WORLD_GRID)
     return continent[0][0];
   return continent[x][y];
 
 }
 
-
-
-Region RegionMapGet (int x, int y)
+Region WorldRegionGet (int x, int y)
 {
 
   return continent[x][y];
 
 }
 
-void RegionMapSet (int x, int y, Region val)
+void WorldRegionSet (int x, int y, Region val)
 {
 
   continent[x][y] = val;
@@ -448,8 +314,8 @@ void    RegionInit ()
     }
   }
   //Set some defaults
-  for (x = 0; x < REGION_GRID; x++) {
-    for (y = 0; y < REGION_GRID; y++) {
+  for (x = 0; x < WORLD_GRID; x++) {
+    for (y = 0; y < WORLD_GRID; y++) {
       memset (&r, 0, sizeof (Region));
       continent[x][y] = r;
     }
@@ -469,20 +335,20 @@ void    RegionGenerate ()
   //Set some defaults
   offset.x = RandomVal () % 1024;
   offset.y = RandomVal () % 1024;
-  for (x = 0; x < REGION_GRID; x++) {
-    for (y = 0; y < REGION_GRID; y++) {
+  for (x = 0; x < WORLD_GRID; x++) {
+    for (y = 0; y < WORLD_GRID; y++) {
       memset (&r, 0, sizeof (Region));
       sprintf (r.title, "NOTHING");
       r.geo_large = r.geo_detail = 0;
       r.mountain_height = 0;
       r.grid_pos.x = x;
       r.grid_pos.y = y;
-      from_center.x = abs (x - REGION_CENTER);
-      from_center.y = abs (y - REGION_CENTER);
+      from_center.x = abs (x - WORLD_GRID_CENTER);
+      from_center.y = abs (y - WORLD_GRID_CENTER);
       //Geo scale is a number from -1 to 1. -1 is lowest ovean. 0 is sea level. 
       //+1 is highest elevation on the island. This is used to guide other derived numbers.
       r.geo_scale = glVectorLength (glVector ((float)from_center.x, (float)from_center.y));
-      r.geo_scale /= (REGION_CENTER - OCEAN_BUFFER);
+      r.geo_scale /= (WORLD_GRID_CENTER - OCEAN_BUFFER);
       //Create a steep drop around the edge of the world
       if (r.geo_scale > 1.25f)
         r.geo_scale = 1.25f + (r.geo_scale - 1.25f) * 2.0f;
@@ -499,37 +365,20 @@ void    RegionGenerate ()
       continent[x][y] = r;
     }
   }
-
   TerraformOceans ();
-  //do_coast ();
   TerraformCoast ();
-  //TerraformMountains (1);
-  //do_canyons (3);
   TerraformClimate ();
-  //do_climate ();
-  //do_rivers (4);
   TerraformRivers (4);
-  TerraformClimate ();
-  //do_climate ();//Do climate a second time now that rivers are in
+  TerraformClimate ();//Do climate a second time now that rivers are in
   TerraformZones ();
-  do_landmass ();
-  for (x = 0; x < REGION_GRID; x++) {
-    for (y = 0; y < REGION_GRID; y++) {
-      r = continent[x][y];
-      //r.geo_detail = 0.0f;
-      continent[x][y] = r;
-    }
-  }
-
-  //do_blur ();
+  TerraformFill ();
   TerraformAverage ();
-  //do_colors ();
   TerraformColors ();
   do_map ();
   
 }
 
-GLrgba RegionColorGet (int world_x, int world_y, SurfaceColor c)
+GLrgba WorldColorGet (int world_x, int world_y, SurfaceColor c)
 {
 
   GLcoord   origin;
@@ -604,8 +453,8 @@ float RegionWaterLevel (int world_x, int world_y)
   world_y += REGION_HALF;
   origin.x = world_x / REGION_SIZE;
   origin.y = world_y / REGION_SIZE;
-  origin.x = clamp (origin.x, 0, REGION_GRID - 1);
-  origin.y = clamp (origin.y, 0, REGION_GRID - 1);
+  origin.x = clamp (origin.x, 0, WORLD_GRID - 1);
+  origin.y = clamp (origin.y, 0, WORLD_GRID - 1);
   offset.x = (float)((world_x) % REGION_SIZE) / REGION_SIZE;
   offset.y = (float)((world_y) % REGION_SIZE) / REGION_SIZE;
   rul = region (origin.x, origin.y);
@@ -616,7 +465,7 @@ float RegionWaterLevel (int world_x, int world_y)
 
 }
 
-Cell RegionCell (int world_x, int world_y)
+Cell WorldCell (int world_x, int world_y)
 {
 
   float     esmall, elarge;
@@ -635,8 +484,8 @@ Cell RegionCell (int world_x, int world_y)
   bias = RegionWaterLevel (world_x, world_y);
   origin.x = world_x / REGION_SIZE;
   origin.y = world_y / REGION_SIZE;
-  origin.x = clamp (origin.x, 0, REGION_GRID - 1);
-  origin.y = clamp (origin.y, 0, REGION_GRID - 1);
+  origin.x = clamp (origin.x, 0, WORLD_GRID - 1);
+  origin.y = clamp (origin.y, 0, WORLD_GRID - 1);
   //Get our offset from the region origin as a pair of scalars.
   blend.x = (float)(world_x % BLEND_DISTANCE) / BLEND_DISTANCE;
   blend.y = (float)(world_y % BLEND_DISTANCE) / BLEND_DISTANCE;
@@ -671,3 +520,5 @@ Cell RegionCell (int world_x, int world_y)
   return result;
 
 }
+
+#endif

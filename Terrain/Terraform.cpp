@@ -17,7 +17,7 @@
 #include "stdafx.h"
 #include "math.h"
 #include "random.h"
-#include "region.h"
+#include "world.h"
 
 #define FLOWER_PALETTE    (sizeof (flower_palette) / sizeof (GLrgba))
 
@@ -56,15 +56,15 @@ static char* get_direction_name (int x, int y)
 
   GLcoord   from_center;
 
-  from_center.x = abs (x - REGION_CENTER);
-  from_center.y = abs (y - REGION_CENTER);
+  from_center.x = abs (x - WORLD_GRID_CENTER);
+  from_center.y = abs (y - WORLD_GRID_CENTER);
   if (from_center.x < from_center.y) {
-    if (y < REGION_CENTER)
+    if (y < WORLD_GRID_CENTER)
       return direction_name[NORTH];
     else
       return direction_name[SOUTH];
   } 
-  if (x < REGION_CENTER)
+  if (x < WORLD_GRID_CENTER)
     return direction_name[WEST];
   return direction_name[EAST];
 
@@ -76,15 +76,15 @@ GLcoord get_map_side (int x, int y)
 
   GLcoord   from_center;
 
-  from_center.x = abs (x - REGION_CENTER);
-  from_center.y = abs (y - REGION_CENTER);
+  from_center.x = abs (x - WORLD_GRID_CENTER);
+  from_center.y = abs (y - WORLD_GRID_CENTER);
   if (from_center.x < from_center.y) {
-    if (y < REGION_CENTER)
+    if (y < WORLD_GRID_CENTER)
       return direction[NORTH];
     else
       return direction[SOUTH];
   } 
-  if (x < REGION_CENTER)
+  if (x < WORLD_GRID_CENTER)
     return direction[WEST];
   return direction[EAST];
 
@@ -100,11 +100,11 @@ static bool is_climate_present (int x, int y, int radius, Climate c)
 
   start.x = max (x - radius, 0);
   start.y = max (y - radius, 0);
-  end.x = min (x + radius, REGION_GRID - 1);
-  end.y = min (y + radius, REGION_GRID - 1);
+  end.x = min (x + radius, WORLD_GRID - 1);
+  end.y = min (y + radius, WORLD_GRID - 1);
   for (xx = start.x; xx <= end.x; xx++) {
     for (yy = start.y; yy <= end.y; yy++) {
-      r = RegionMapGet (xx, yy);
+      r = WorldRegionGet (xx, yy);
       if (r.climate == c)
         return true;
     }
@@ -122,7 +122,7 @@ static bool is_free (int x, int y, int radius)
 
   for (xx = -radius; xx <= radius; xx++) {
     for (yy = -radius; yy <= radius; yy++) {
-      r = RegionMapGet (x + xx, y + yy);
+      r = WorldRegionGet (x + xx, y + yy);
       if (r.climate != CLIMATE_INVALID)
         return false;
     }
@@ -142,8 +142,8 @@ static bool find_plot (int radius, GLcoord* result)
   cycles = 0;
   while (cycles < 20) {
     cycles++;
-    test.x = RandomVal () % REGION_GRID;
-    test.y = RandomVal () % REGION_GRID;
+    test.x = RandomVal () % WORLD_GRID;
+    test.y = RandomVal () % WORLD_GRID;
     if (is_free (test.x, test.y, radius)) {
       *result = test;
       return true;
@@ -170,7 +170,7 @@ static void do_mountain (int x, int y, int mtn_size)
 
   for (xx = -mtn_size; xx <= mtn_size; xx++) {
     for (yy = -mtn_size; yy <= mtn_size; yy++) {
-      r = RegionMapGet (xx + x, yy + y);
+      r = WorldRegionGet (xx + x, yy + y);
       step = (max (abs (xx), abs (yy)));
       if (step == 0) {
         sprintf (r.title, "Mountain Summit");
@@ -187,7 +187,7 @@ static void do_mountain (int x, int y, int mtn_size)
       r.geo_bias += r.mountain_height * REGION_HALF;
       r.flags_shape = REGION_FLAG_NOBLEND;
       r.climate = CLIMATE_MOUNTAIN;
-      RegionMapSet (xx + x, yy + y, r);
+      WorldRegionSet (xx + x, yy + y, r);
     }
   }
 
@@ -202,12 +202,12 @@ static void do_rocky (int x, int y, int size)
 
   for (xx = -size; xx <= size; xx++) {
     for (yy = -size; yy <= size; yy++) {
-      r = RegionMapGet (xx + x, yy + y);
+      r = WorldRegionGet (xx + x, yy + y);
       sprintf (r.title, "Rocky Wasteland");
       r.geo_detail = 40.0f;
       //r.flags_shape = REGION_FLAG_NOBLEND;
       r.climate = CLIMATE_ROCKY;
-      RegionMapSet (x + xx, y + yy, r);
+      WorldRegionSet (x + xx, y + yy, r);
     }
   }
 
@@ -223,7 +223,7 @@ static void do_swamp (int x, int y, int size)
 
   for (xx = -size; xx <= size; xx++) {
     for (yy = -size; yy <= size; yy++) {
-      r = RegionMapGet (xx + x, yy + y);
+      r = WorldRegionGet (xx + x, yy + y);
       sprintf (r.title, "Swamp");
       r.climate = CLIMATE_SWAMP;
       r.color_atmosphere = glRgba (0.0f, 0.5f, 0.0f);
@@ -231,7 +231,7 @@ static void do_swamp (int x, int y, int size)
       r.geo_detail = 8.0f;
       r.has_flowers = false;
       r.flags_shape |= REGION_FLAG_NOBLEND;
-      RegionMapSet (x + xx, y + yy, r);
+      WorldRegionSet (x + xx, y + yy, r);
     }
   }
 
@@ -248,7 +248,7 @@ static void do_field (int x, int y, int size)
 
   for (xx = -size; xx <= size; xx++) {
     for (yy = -size; yy <= size; yy++) {
-      r = RegionMapGet (xx + x, yy + y);
+      r = WorldRegionGet (xx + x, yy + y);
       sprintf (r.title, "Field");
       r.climate = CLIMATE_FIELD;
       r.has_flowers = RandomVal () % 4 == 0;
@@ -265,7 +265,7 @@ static void do_field (int x, int y, int size)
       r.color_atmosphere = glRgba (0.7f, 0.6f, 0.4f);
       r.geo_detail = 8.0f;
       r.flags_shape |= REGION_FLAG_NOBLEND;
-      RegionMapSet (x + xx, y + yy, r);
+      WorldRegionSet (x + xx, y + yy, r);
     }
   }
 
@@ -280,7 +280,7 @@ static void do_canyon (int x, int y, int radius)
   float     step;
 
   for (yy = -radius; yy <= radius; yy++) {
-    r = RegionMapGet (x, yy + y);
+    r = WorldRegionGet (x, yy + y);
     step = (float)abs (yy) / (float)radius;
     step = 1.0f - step;
     sprintf (r.title, "Canyon");
@@ -288,7 +288,7 @@ static void do_canyon (int x, int y, int radius)
     r.geo_detail = 5 + step * 25.0f;
     //r.geo_detail = 1;
     r.flags_shape |= REGION_FLAG_CANYON_NS | REGION_FLAG_NOBLEND;
-    RegionMapSet (x, y + yy, r);
+    WorldRegionSet (x, y + yy, r);
   }
 
 }
@@ -314,7 +314,7 @@ static bool try_river (int start_x, int start_y, int id)
   x = start_x;
   y = start_y;
   while (1) {
-    r = RegionMapGet (x, y);
+    r = WorldRegionGet (x, y);
     //If we run into the ocean, then we're done.
     if (r.climate == CLIMATE_OCEAN) 
       break;
@@ -332,7 +332,7 @@ static bool try_river (int start_x, int start_y, int id)
     //lowest = 999.9f;
     selected.Clear ();
     for (d = 0; d < 4; d++) {
-      neighbor = RegionMapGet (x + direction[d].x, y + direction[d].y);
+      neighbor = WorldRegionGet (x + direction[d].x, y + direction[d].y);
       //Don't reverse course into ourselves
       if (last_move == (direction[d] * -1))
         continue;
@@ -343,7 +343,7 @@ static bool try_river (int start_x, int start_y, int id)
         selected = direction[d];
         lowest = neighbor.geo_bias;
       }
-      RegionMapSet (x + direction[d].x, y + direction[d].y, neighbor);
+      WorldRegionSet (x + direction[d].x, y + direction[d].y, neighbor);
     }
     //If everthing around us is above us, we can't flow downhill
     if (!selected.x && !selected.y) //Let's just head for the edge of the map
@@ -354,15 +354,15 @@ static bool try_river (int start_x, int start_y, int id)
     path.push_back (selected);
   }
   //If the river is too short, ditch it.
-  if (path.size () < (REGION_GRID / 4))
+  if (path.size () < (WORLD_GRID / 4))
     return false;
   //The river is good. Place it.
   x = start_x;
   y = start_y;
   water_strength = 0.03f;
-  water_level = RegionMapGet (x, y).geo_bias;
+  water_level = WorldRegionGet (x, y).geo_bias;
   for (d = 0; d < path.size (); d++) {
-    r = RegionMapGet (x, y);
+    r = WorldRegionGet (x, y);
     if (!d)
       sprintf (r.title, "River%d-Source", id);
     else if (d == path.size () - 1) 
@@ -370,7 +370,7 @@ static bool try_river (int start_x, int start_y, int id)
     else
       sprintf (r.title, "River%d-%d", id, d);
     //A river should attain full strength after crossing 1/4 of the map
-    water_strength += (1.0f / ((float)REGION_GRID / 4.0f));
+    water_strength += (1.0f / ((float)WORLD_GRID / 4.0f));
     water_strength = min (water_strength, 1);
     r.flags_shape |= REGION_FLAG_NOBLEND;
     r.river_id = id;
@@ -385,7 +385,7 @@ static bool try_river (int start_x, int start_y, int id)
     r.geo_bias = water_level;
     for (xx = x - 2; xx <= x + 2; xx++) {
       for (yy = y - 2; yy <= y + 2; yy++) {
-        neighbor = RegionMapGet (xx, yy);
+        neighbor = WorldRegionGet (xx, yy);
         if (neighbor.climate != CLIMATE_INVALID) 
           continue;
         if (!xx && !yy)
@@ -396,12 +396,12 @@ static bool try_river (int start_x, int start_y, int id)
         neighbor.climate = CLIMATE_RIVER_BANK;
         neighbor.flags_shape |= REGION_FLAG_NOBLEND;
         sprintf (neighbor.title, "River%d-Banks", id);
-        RegionMapSet (xx, yy, neighbor);
+        WorldRegionSet (xx, yy, neighbor);
       }
     }
     selected = path[d];
     //neighbor = &continent[x + selected.x][y + selected.y];
-    neighbor = RegionMapGet (x + selected.x, y + selected.y);
+    neighbor = WorldRegionGet (x + selected.x, y + selected.y);
     if (selected.y == -1) {//we're moving north
       neighbor.flags_shape |= REGION_FLAG_RIVERS;
       r.flags_shape |= REGION_FLAG_RIVERN;
@@ -418,8 +418,8 @@ static bool try_river (int start_x, int start_y, int id)
       neighbor.flags_shape |= REGION_FLAG_RIVERW;
       r.flags_shape |= REGION_FLAG_RIVERE;
     }
-    RegionMapSet (x, y, r);
-    RegionMapSet (x + selected.x, y + selected.y, neighbor);
+    WorldRegionSet (x, y, r);
+    WorldRegionSet (x + selected.x, y + selected.y, neighbor);
     x += selected.x;
     y += selected.y;
   }
@@ -440,11 +440,11 @@ void TerraformClimate ()
   float   moist, temp;
   Region  r;
 
-  for (y = 0; y < REGION_GRID; y++) {
+  for (y = 0; y < WORLD_GRID; y++) {
     moist = 1.0f;
-    for (x = 0; x < REGION_GRID; x++) {
-      r = RegionMapGet (x, y);
-      moist -= 1.0f / REGION_CENTER;
+    for (x = 0; x < WORLD_GRID; x++) {
+      r = WorldRegionGet (x, y);
+      moist -= 1.0f / WORLD_GRID_CENTER;
       //Mountains block rainfall
       if (r.climate == CLIMATE_MOUNTAIN) {
         moist -= 0.1f * r.mountain_height;
@@ -458,7 +458,7 @@ void TerraformClimate ()
         moist = min (moist, 1);
       }
       //The north 25% is max cold.  The south 25% is all tropical
-      temp = ((float)y - (REGION_GRID / 4)) / REGION_CENTER;
+      temp = ((float)y - (WORLD_GRID / 4)) / WORLD_GRID_CENTER;
       if (r.mountain_height) 
         temp -= (float)r.mountain_height * 0.2f;
       temp = clamp (temp, min_TEMP, max_TEMP);
@@ -471,7 +471,7 @@ void TerraformClimate ()
         moist = 1.0f;
       }
       r.temperature = temp;
-      RegionMapSet (x, y, r);
+      WorldRegionSet (x, y, r);
     }
   }
 
@@ -498,7 +498,7 @@ void TerraformMountains (int count)
       continue;
     for (x = -mtn_size; x <= mtn_size; x++) {
       for (y = -mtn_size; y <= mtn_size; y++) {
-        r = RegionMapGet (plot.x + x, plot.y + y);
+        r = WorldRegionGet (plot.x + x, plot.y + y);
         step = (max (abs (x), abs (y)));
         if (step == 0) {
           sprintf (r.title, "Mountain Summit");
@@ -515,7 +515,7 @@ void TerraformMountains (int count)
         r.geo_bias += r.mountain_height * REGION_HALF;
         r.flags_shape = REGION_FLAG_NOBLEND;
         r.climate = CLIMATE_MOUNTAIN;
-        RegionMapSet (plot.x + x, plot.y + y, r);
+        WorldRegionSet (plot.x + x, plot.y + y, r);
       }
     }
   }
@@ -534,9 +534,9 @@ void TerraformColors ()
   GLrgba    humid_air, dry_air, cold_air, warm_air;
   GLrgba    warm_rock, cold_rock;
 
-  for (x = 0; x < REGION_GRID; x++) {
-    for (y = 0; y < REGION_GRID; y++) {
-      r = RegionMapGet (x, y);
+  for (x = 0; x < WORLD_GRID; x++) {
+    for (y = 0; y < WORLD_GRID; y++) {
+      r = WorldRegionGet (x, y);
       //Devise a grass color
 
       //wet grass is deep greens
@@ -643,7 +643,7 @@ void TerraformColors ()
       }
       if (r.geo_scale >= 0.0f)
         r.color_map *= (r.geo_scale * 0.5f + 0.5f);
-      RegionMapSet (x, y, r);
+      WorldRegionSet (x, y, r);
     }
   }
   
@@ -657,24 +657,24 @@ void TerraformAverage ()
   int       x, y, xx, yy, count;
   int       radius;
   Region    r;
-  float     (*temp)[REGION_GRID];
-  float     (*moist)[REGION_GRID];
-  float     (*elev)[REGION_GRID];
-  float     (*sm)[REGION_GRID];
-  float     (*lg)[REGION_GRID];
+  float     (*temp)[WORLD_GRID];
+  float     (*moist)[WORLD_GRID];
+  float     (*elev)[WORLD_GRID];
+  float     (*sm)[WORLD_GRID];
+  float     (*lg)[WORLD_GRID];
 
-  temp = new float[REGION_GRID][REGION_GRID];
-  moist = new float[REGION_GRID][REGION_GRID];
-  elev = new float[REGION_GRID][REGION_GRID];
-  sm = new float[REGION_GRID][REGION_GRID];
-  lg = new float[REGION_GRID][REGION_GRID];
+  temp = new float[WORLD_GRID][WORLD_GRID];
+  moist = new float[WORLD_GRID][WORLD_GRID];
+  elev = new float[WORLD_GRID][WORLD_GRID];
+  sm = new float[WORLD_GRID][WORLD_GRID];
+  lg = new float[WORLD_GRID][WORLD_GRID];
 
   //Blur some of the attributes
   for (int passes = 0; passes < 5; passes++) {
 
     radius = 3;
-    for (x = radius; x < REGION_GRID - radius; x++) {
-      for (y = radius; y < REGION_GRID - radius; y++) {
+    for (x = radius; x < WORLD_GRID - radius; x++) {
+      for (y = radius; y < WORLD_GRID - radius; y++) {
         temp[x][y] = 0;
         moist[x][y] = 0;
         elev[x][y] = 0;
@@ -683,7 +683,7 @@ void TerraformAverage ()
         count = 0;
         for (xx = -radius; xx <= radius; xx++) {
           for (yy = -radius; yy <= radius; yy++) {
-            r = RegionMapGet (x + xx, y + yy);
+            r = WorldRegionGet (x + xx, y + yy);
             temp[x][y] += r.temperature;
             moist[x][y] += r.moisture;
             elev[x][y] += r.geo_bias;
@@ -700,9 +700,9 @@ void TerraformAverage ()
       }
     }
     //Put the blurred values back into our table
-    for (x = radius; x < REGION_GRID - radius; x++) {
-      for (y = radius; y < REGION_GRID - radius; y++) {
-        r = RegionMapGet (x, y);
+    for (x = radius; x < WORLD_GRID - radius; x++) {
+      for (y = radius; y < WORLD_GRID - radius; y++) {
+        r = WorldRegionGet (x, y);
         //Rivers can get wetter through this process, but not drier.
         if (r.climate == CLIMATE_RIVER) 
           r.moisture = max (r.moisture, moist[x][y]);
@@ -713,7 +713,7 @@ void TerraformAverage ()
           r.geo_detail = sm[x][y];
           r.geo_large = lg[x][y];
         }
-        RegionMapSet (x, y, r);
+        WorldRegionSet (x, y, r);
       }
     }
   }
@@ -734,13 +734,13 @@ void TerraformOceans ()
   bool    is_ocean;
   
   //define the oceans at the edge of the world
-  for (x = 0; x < REGION_GRID; x++) {
-    for (y = 0; y < REGION_GRID; y++) {
-      r = RegionMapGet (x, y);
+  for (x = 0; x < WORLD_GRID; x++) {
+    for (y = 0; y < WORLD_GRID; y++) {
+      r = WorldRegionGet (x, y);
       is_ocean = false;
       if (r.geo_scale <= 0.0f) 
         is_ocean = true;
-      if (x == 0 || y == 0 || x == REGION_GRID - 1 || y == REGION_GRID - 1) 
+      if (x == 0 || y == 0 || x == WORLD_GRID - 1 || y == WORLD_GRID - 1) 
         is_ocean = true;
       if (is_ocean) {
         r.geo_large = 0.0f;
@@ -750,7 +750,7 @@ void TerraformOceans ()
         r.flags_shape = REGION_FLAG_NOBLEND;
         r.climate = CLIMATE_OCEAN;
         sprintf (r.title, "%s Ocean", get_direction_name (x, y));
-        RegionMapSet (x, y, r);
+        WorldRegionSet (x, y, r);
       }        
     }
   }
@@ -772,9 +772,9 @@ void TerraformCoast ()
   //now define the coast 
   for (pass = 0; pass < 2; pass++) {
     queue.clear ();
-    for (x = 0; x < REGION_GRID; x++) {
-      for (y = 0; y < REGION_GRID; y++) {
-        r = RegionMapGet (x, y);
+    for (x = 0; x < WORLD_GRID; x++) {
+      for (y = 0; y < WORLD_GRID; y++) {
+        r = WorldRegionGet (x, y);
         //Skip already assigned places
         if (r.climate != CLIMATE_INVALID)
           continue;
@@ -795,7 +795,7 @@ void TerraformCoast ()
     //Now we're done scanning the map.  Run through our list and make the new regions.
     for (i = 0; i < queue.size (); i++) {
       current = queue[i];
-      r = RegionMapGet (current.x, current.y);
+      r = WorldRegionGet (current.x, current.y);
       if (!pass) 
         sprintf (r.title, "%s beach", get_direction_name (current.x, current.y));
       else
@@ -813,7 +813,7 @@ void TerraformCoast ()
       r.flags_shape |= REGION_FLAG_NOBLEND | REGION_FLAG_BEACH;
       r.beach_threshold = 3.0f + RandomFloat () * 5.0f;
       r.climate = CLIMATE_COAST;
-      RegionMapSet (current.x, current.y, r);
+      WorldRegionSet (current.x, current.y, r);
     }
   }
 
@@ -831,8 +831,8 @@ void TerraformRivers (int count)
   rivers = 0;
   cycles = 0;
   while (rivers < count && cycles < 100) {
-    x = REGION_CENTER + (RandomVal () % 30) - 15;
-    y = REGION_CENTER + (RandomVal () % 30) - 15;
+    x = WORLD_GRID_CENTER + (RandomVal () % 30) - 15;
+    y = WORLD_GRID_CENTER + (RandomVal () % 30) - 15;
     if (try_river (x, y, rivers)) 
       rivers++;
     cycles++;
@@ -851,21 +851,21 @@ void TerraformZones ()
   int             radius;
   Climate         c;
 
-  for (y = 0; y < REGION_GRID; y++) {
-    for (x = 0; x < REGION_GRID; x++) {
+  for (y = 0; y < WORLD_GRID; y++) {
+    for (x = 0; x < WORLD_GRID; x++) {
       if ((x + y) % 2)
         radius = 1;
       else
         radius = 2;
       if (!is_free (x, y, 2))
         continue;
-      r = RegionMapGet (x, y);
+      r = WorldRegionGet (x, y);
       climates.clear ();
       //swamps only appear in wet areas that aren't cold.
       if (r.moisture > 0.9f && r.temperature > TEMP_TEMPERATE)
         climates.push_back (CLIMATE_SWAMP);
       //mountains only appear in the middle
-      if (abs (x - REGION_CENTER) < 10)
+      if (abs (x - WORLD_GRID_CENTER) < 10)
         climates.push_back (CLIMATE_MOUNTAIN);
       //fields should be not too hot or cold.
       if (r.temperature > TEMP_TEMPERATE && r.temperature < TEMP_HOT && r.moisture > 0.5f)
@@ -902,5 +902,68 @@ void TerraformZones ()
 }
 
 
+//This will fill in all previously un-assigned regions.
+void TerraformFill ()
+{
 
+  int       x, y;
+  Region    r;
+  unsigned  rand;
 
+  for (x = 0; x < WORLD_GRID; x++) {
+    for (y = 0; y < WORLD_GRID; y++) {
+      r = WorldRegionGet (x, y);
+      //See if this is already ocean
+      if (r.climate != CLIMATE_INVALID)
+        continue;
+      sprintf (r.title, "???");
+      r.geo_bias = r.geo_scale * 10.0f;
+      r.geo_detail = 20.0f;
+      //Have them trend more hilly in dry areas
+      rand = RandomVal () % 8;
+      if (r.moisture > 0.3f && r.temperature > 0.5f) {
+        GLrgba    c;
+        int       shape;
+        
+        r.has_flowers = RandomVal () % 4 == 0;
+        shape = RandomVal ();
+        c = flower_palette[RandomVal () % FLOWER_PALETTE];
+        for (int i = 0; i < FLOWERS; i++) {
+          r.color_flowers[i] = c;
+          r.flower_shape[i] = shape;
+          if ((RandomVal () % 15) == 0) {
+            shape = RandomVal ();
+            c = flower_palette[RandomVal () % FLOWER_PALETTE];
+          }
+        }
+      }      
+      if (rand == 0) {
+        r.flags_shape |= REGION_FLAG_MESAS;
+        sprintf (r.title, "Mesas");
+      } else if (rand == 1) {
+        sprintf (r.title, "Craters");
+        r.flags_shape |= REGION_FLAG_CRATER;
+      } else if (rand == 2) {
+        sprintf (r.title, "TEST");
+        r.flags_shape |= REGION_FLAG_TEST;
+      } else if (rand == 3) {
+        sprintf (r.title, "Sinkhole");
+        r.flags_shape |= REGION_FLAG_SINKHOLE;
+      } else if (rand == 4) {
+        sprintf (r.title, "Crack");
+        r.flags_shape |= REGION_FLAG_CRACK;
+      } else if (rand == 5) {
+        sprintf (r.title, "Tiered");
+        r.flags_shape |= REGION_FLAG_TIERED;
+      } else if (rand == 6) {
+        sprintf (r.title, "Wasteland");
+      } else {
+        sprintf (r.title, "Grasslands");
+        //r.geo_detail /= 3;
+        //r.geo_large /= 3;
+      }  
+      WorldRegionSet (x, y, r);
+    }
+  }
+
+}

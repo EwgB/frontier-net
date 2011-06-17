@@ -20,12 +20,12 @@
 #include "ctree.h"
 #include "input.h"
 #include "math.h"
-#include "region.h"
 #include "scene.h"
 #include "sdl.h"
 #include "text.h"
 #include "texture.h"
 #include "water.h"
+#include "world.h"
 
 
 #define GRASS_GRID      5
@@ -103,7 +103,7 @@ void SceneGenerate ()
   int         x, y;
 
   SceneClear ();
-  RegionGenerate ();
+  WorldGenerate ();
   WaterBuild ();
   camera = CameraPosition ();
   current.x = (int)(camera.x) / GRASS_SIZE;
@@ -318,9 +318,9 @@ void SceneRender ()
   glNormal3f (0, 0, 1);
   glDisable (GL_BLEND);
   glBindTexture (GL_TEXTURE_2D, 0);
-  for (y = 0; y < REGION_GRID - 2; y++) {
+  for (y = 0; y < WORLD_GRID - 2; y++) {
     glBegin (GL_QUAD_STRIP);
-    for (x = 0; x < REGION_GRID - 1; x++) {
+    for (x = 0; x < WORLD_GRID - 1; x++) {
       glVertex3fv (&water[x][y].x);
       glVertex3fv (&water[x][y + 1].x);
     }
@@ -372,7 +372,7 @@ void SceneRenderDebug (int style)
     for (y = 0; y < WORLD_GRID; y++) {
       if (terrain[x][y]) {
         pos = terrain[x][y]->Origin ();
-        r = RegionGet (pos.x, pos.y);
+        r = WorldRegionFromPosition (pos.x, pos.y);
         switch (style) {
         case DEBUG_RENDER_UNIQUE:
           col = glRgbaUnique (1 + x + y * 34); break;

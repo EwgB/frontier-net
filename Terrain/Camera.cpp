@@ -11,7 +11,7 @@
 
 #include "stdafx.h"
 #include "ini.h"
-#include "Region.h"
+#include "world.h"
 
 static GLvector     angle;
 static GLvector     position;
@@ -52,8 +52,8 @@ void CameraPositionSet (GLvector new_pos)
 {
 
   new_pos.z = clamp (new_pos.z, -25, 1024);
-  new_pos.x = clamp (new_pos.x, -512, (REGION_SIZE * REGION_GRID));
-  new_pos.y = clamp (new_pos.y, -512, (REGION_SIZE * REGION_GRID));
+  new_pos.x = clamp (new_pos.x, -512, (REGION_SIZE * WORLD_GRID));
+  new_pos.y = clamp (new_pos.y, -512, (REGION_SIZE * WORLD_GRID));
   position = new_pos;
 
 }
@@ -124,7 +124,7 @@ void CameraInit (void)
 void CameraUpdate (void)		
 {
 
-  region = RegionGet (position.x, position.y);
+  region = WorldRegionFromPosition (position.x, position.y);
 
 }
 

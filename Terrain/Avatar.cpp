@@ -15,9 +15,9 @@
 #include "camera.h"
 #include "ini.h"
 #include "input.h"
-#include "region.h"
 #include "sdl.h"
 #include "Text.h"
+#include "world.h"
 
 #define JUMP_SPEED      4.0f
 #define MOVE_SPEED      6.0f
@@ -108,7 +108,7 @@ void AvatarUpdate (void)
     } else
       on_ground = false;
   }
-  region = RegionGet (position.x, position.y);
+  region = WorldRegionFromPosition (position.x, position.y);
   direction = "North";
   if (angle.z < 22.5f)
     direction = "North";
@@ -131,7 +131,7 @@ void AvatarUpdate (void)
   TextPrint ("Temp:%1.1f%c Moisture:%1.0f%%\nGeo Scale: %1.2f Elevation Bias: %1.2f Topography Detail:%1.2f Topography Large:%1.2f", 
     region.temperature * 100.0f, 186, region.moisture * 100.0f, region.geo_scale, region.geo_bias, region.geo_detail, region.geo_large);
   
-  //Cell c = RegionCell ((int)position.x, (int)position.y);
+  //Cell c = WorldCell ((int)position.x, (int)position.y);
   //TextPrint ("%f %f", c.elevation, c.water_level);
 
   /*
@@ -193,8 +193,8 @@ void AvatarPositionSet (GLvector new_pos)
 {
 
   new_pos.z = clamp (new_pos.z, -25, 2048);
-  new_pos.x = clamp (new_pos.x, 0, (REGION_SIZE * REGION_GRID));
-  new_pos.y = clamp (new_pos.y, 0, (REGION_SIZE * REGION_GRID));
+  new_pos.x = clamp (new_pos.x, 0, (REGION_SIZE * WORLD_GRID));
+  new_pos.y = clamp (new_pos.y, 0, (REGION_SIZE * WORLD_GRID));
   position = new_pos;
 
 }

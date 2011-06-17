@@ -10,9 +10,9 @@
 
 #include "stdafx.h"
 #include "random.h"
-#include "region.h"
 #include "texture.h"
 #include "vbo.h"
+#include "world.h"
 
 #define WATER_TILE      7
 
@@ -37,12 +37,12 @@ void WaterBuild ()
   int               width, height;
 
   width = height =0;
-  for (y = 0; y < REGION_GRID_EDGE; y += 0.25f) {
+  for (y = 0; y < WORLD_GRID_EDGE; y += 0.25f) {
     width = 0;
-    for (x = 0; x < REGION_GRID_EDGE; x += 0.25f) {
+    for (x = 0; x < WORLD_GRID_EDGE; x += 0.25f) {
       elev = RegionWaterLevel ((int)(x * REGION_SIZE), (int)(y * REGION_SIZE));
       elev = max (elev, 0.0f);
-      uv_map.push_back (glVector ((float)x / REGION_GRID , (float)(REGION_GRID - y) / REGION_GRID));
+      uv_map.push_back (glVector ((float)x / WORLD_GRID , (float)(WORLD_GRID - y) / WORLD_GRID));
       uv.push_back (glVector ((float)x * WATER_TILE , (float)y * WATER_TILE));
       normal.push_back (glVector (0.0f, 0.0f, 1.0f));
       vert.push_back (glVector ((float)x * REGION_SIZE, (float)y * REGION_SIZE, elev));
@@ -71,22 +71,22 @@ void WaterBuild ()
   int               x, y;
   float             elev;
 
-  for (y = 0; y < REGION_GRID_EDGE; y++) {
-    for (x = 0; x < REGION_GRID_EDGE; x++) {
-      elev = RegionWaterLevel (x * REGION_SIZE, y * REGION_SIZE);
+  for (y = 0; y < WORLD_GRID_EDGE; y++) {
+    for (x = 0; x < WORLD_GRID_EDGE; x++) {
+      elev = WorldWaterLevel (x * REGION_SIZE, y * REGION_SIZE);
       elev = max (elev, 0.0f);
-      uv_map.push_back (glVector ((float)x / REGION_GRID , (float)(REGION_GRID - y) / REGION_GRID));
+      uv_map.push_back (glVector ((float)x / WORLD_GRID, (float)(WORLD_GRID - y) / WORLD_GRID));
       uv.push_back (glVector ((float)x * WATER_TILE , (float)y * WATER_TILE));
       normal.push_back (glVector (0.0f, 0.0f, 1.0f));
       vert.push_back (glVector ((float)x * REGION_SIZE, (float)y * REGION_SIZE, elev));
     }
   }
-  for (y = 0; y < REGION_GRID; y++) {
-    for (x = 0; x < REGION_GRID; x++) {
-      index.push_back ((x + 0) + (y + 0) * REGION_GRID_EDGE);
-      index.push_back ((x + 1) + (y + 0) * REGION_GRID_EDGE);
-      index.push_back ((x + 1) + (y + 1) * REGION_GRID_EDGE);
-      index.push_back ((x + 0) + (y + 1) * REGION_GRID_EDGE);
+  for (y = 0; y < WORLD_GRID; y++) {
+    for (x = 0; x < WORLD_GRID; x++) {
+      index.push_back ((x + 0) + (y + 0) * WORLD_GRID_EDGE);
+      index.push_back ((x + 1) + (y + 0) * WORLD_GRID_EDGE);
+      index.push_back ((x + 1) + (y + 1) * WORLD_GRID_EDGE);
+      index.push_back ((x + 0) + (y + 1) * WORLD_GRID_EDGE);
     }
   }
 
@@ -105,7 +105,7 @@ void WaterRender ()
   glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
   water.Render ();  
   glDepthMask (true);
-  glBindTexture (GL_TEXTURE_2D, RegionMap ());
+  glBindTexture (GL_TEXTURE_2D, WorldMap ());
   //glDisable (GL_FOG);
 
   if (0) {

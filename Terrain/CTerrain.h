@@ -1,6 +1,6 @@
 #define LAYERS            (sizeof (layers) / sizeof (LayerAttributes))
 #define VISIBLE           1
-#define WORLD_GRID        256
+//#define TERRAIN_GRID      256
 
 #define PPM               16
 #define TERRAIN_SIZE      32
