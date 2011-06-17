@@ -19,7 +19,7 @@
 #include "texture.h"
 #include "world.h"
 
-#define TIME_SCALE          1000  //how many "milliseconds per in-game minute
+#define TIME_SCALE          250  //how many "milliseconds per in-game minute
 #define max_DISTANCE        450
 #define NIGHT_FOG           (max_DISTANCE / 5)
 #define ENV_TRANSITION      0.2f
@@ -36,6 +36,13 @@
 
 #define NIGHT_SCALING       glRgba (0.0f, 0.1f, 0.4f)
 #define DAY_SCALING         glRgba (1.0f)
+
+#define VECTOR_NIGHT        glVector ( 0.0f, 0.0f, -1.0f)
+#define VECTOR_SUNRISE      glVector (-0.8f, 0.0f, -0.2f)
+#define VECTOR_MORNING      glVector (-0.5f, 0.0f, -0.5f)
+#define VECTOR_AFTERNOON    glVector ( 0.5f, 0.0f, -0.5f)
+#define VECTOR_SUNSET       glVector ( 0.8f, 0.0f, -0.2f)
+
 
 static Env        desired;
 static Env        current;
@@ -76,7 +83,9 @@ static void do_cycle ()
       desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 1.0f, 0.5f);
     else
       glRgba (0.5f, 0.7f, 1.0f);
+    desired.light = glVectorInterpolate (VECTOR_SUNRISE, VECTOR_MORNING, fade);
   } else if (decimal_time >= TIME_DAY && decimal_time < TIME_SUNSET)  { //day
+    fade = (decimal_time - TIME_DAY) / (TIME_SUNSET - TIME_DAY);
     base_color = DAY_COLOR;
     desired.fog_max = max_DISTANCE;
     desired.fog_min = humid_fog;
@@ -84,6 +93,8 @@ static void do_cycle ()
     color_scaling = DAY_SCALING;
     desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f) + r->color_atmosphere;
     desired.color[ENV_COLOR_LIGHT].Normalize ();
+    desired.light = glVector (0, 0.5f, -0.5f);
+    desired.light = glVectorInterpolate (VECTOR_MORNING, VECTOR_AFTERNOON, fade);
   } else if (decimal_time >= TIME_SUNSET && decimal_time < TIME_DUSK) { // sunset
     fade = (decimal_time - TIME_SUNSET) / (TIME_DUSK - TIME_SUNSET);
     base_color = glRgbaInterpolate (DAY_COLOR, NIGHT_COLOR, fade);
@@ -92,6 +103,8 @@ static void do_cycle ()
     desired.star_fade = fade;
     color_scaling = glRgbaInterpolate (DAY_SCALING, NIGHT_SCALING, fade);
     desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 0.5f, 0.5f);
+    desired.light = glVector (0.8f, 0.0f, -0.2f);
+    desired.light = glVectorInterpolate (VECTOR_AFTERNOON, VECTOR_SUNSET, fade);
  } else { //night
     color_scaling = NIGHT_SCALING;
     base_color = NIGHT_COLOR;
@@ -99,6 +112,7 @@ static void do_cycle ()
     desired.fog_max = NIGHT_FOG;
     desired.star_fade = 1.0f;
     desired.color[ENV_COLOR_LIGHT] = glRgba (0.5f, 0.7f, 1.0f);
+    desired.light = VECTOR_NIGHT;
   }
   for (i = 0; i < ENV_COLOR_COUNT; i++) {
     if (i == ENV_COLOR_LIGHT) 
@@ -128,6 +142,7 @@ static void do_time (float delta)
   current.fog_max = MathInterpolate (current.fog_max, desired.fog_max, delta);
   current.star_fade = MathInterpolate (current.star_fade, desired.star_fade, delta);
   current.light = glVectorInterpolate (current.light, desired.light, delta);
+  current.light.Normalize ();
 
 }
 
