@@ -18,6 +18,8 @@ struct Env
   float       star_fade;
   float       sunrise_fade;
   float       sunset_fade;
+  float       sun_angle;
+  bool        draw_sun;
 };
 
 void      EnvInit ();

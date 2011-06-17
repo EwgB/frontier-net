@@ -27,6 +27,8 @@
 #define SKY_TILE    5
 //How big the sunrise / set is. Larger = smaller. Don't set lower than near clip plane. 
 #define SUNSET_SIZE 0.25f
+//The size of the sun itself
+#define SUN_SIZE    0.5f
 
 
 static GLvector   sky[DISC];
@@ -39,6 +41,35 @@ static float      star_fade;
 
 
 -----------------------------------------------------------------------------*/
+
+//The sun angle begins at zero on the eastern horizon. 90 degrees is high noon.
+//180 is west.
+static void draw_sun (float sun_angle, float size)
+{
+
+  float     x, z;
+  float     s, c;
+
+  sun_angle = (sun_angle - 90.0f) * DEGREES_TO_RADIANS;
+  s = -sin (sun_angle);
+  c = cos (sun_angle);
+  x = s * 3;
+  z = c * 3;
+  s *= size;
+  c *= size;
+    
+  glBegin (GL_QUADS);
+  glTexCoord2f (0.0f, 0.0f);
+  glVertex3f (x - c,-size, z + s);
+  glTexCoord2f (1.0f, 0.0f);
+  glVertex3f (x + c,-size, z - s);
+  glTexCoord2f (1.0f, 1.0f);
+  glVertex3f (x + c, size, z - s);
+  glTexCoord2f (0.0f, 1.0f);
+  glVertex3f (x - c, size, z + s);
+  glEnd ();
+
+}
 
 static void build_sky ()
 {
@@ -192,26 +223,13 @@ void SkyRender ()
     glEnd ();
   }
   //Draw the sun
-  /*
-  {
-    static float  aa;
-    aa += 0.01f;
-    float     sun_angle = aa * DEGREES_TO_RADIANS;
-    float     x, z;
-    GLvector  pt[4];
-    float     s, c;
 
-    s = sin (sun_angle);
-    c = cos (sun_angle);
-    x = s * 3 + c;
-    z = c * 3 - s;
-    */
-
-
-
-
-
-
+  if (e->draw_sun) {
+    color = e->color[ENV_COLOR_LIGHT];
+    glColor3fv (&color.red);
+    glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("sun.bmp"));
+    draw_sun (e->sun_angle, SUN_SIZE);  
+  }
   //Cleanup and put the modelview matrix back where we found it
   glEnable (GL_LIGHTING);
   glEnable (GL_CULL_FACE);
