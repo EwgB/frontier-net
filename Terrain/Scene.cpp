@@ -27,12 +27,12 @@
 #include "water.h"
 #include "world.h"
 
-
 #define GRASS_GRID      5
 #define GRASS_HALF      (GRASS_GRID / 2)
 #define RENDER_DISTANCE 10
+#define TERRAIN_GRID    (WORLD_SIZE_METERS / TERRAIN_SIZE)
 
-static CTerrain*        terrain[WORLD_GRID][WORLD_GRID];
+static CTerrain*        terrain[TERRAIN_GRID][TERRAIN_GRID];
 static CGrass           grass[GRASS_GRID][GRASS_GRID];
 static GLcoord          terrain_walk;
 static GLcoord          grass_walk;
@@ -62,7 +62,7 @@ static void terrain_update (int x, int y, int dist, long stop)
   int     res;
 
 
-  if (x < 0 || x >= WORLD_GRID || y < 0 || y >= WORLD_GRID)
+  if (x < 0 || x >= TERRAIN_GRID || y < 0 || y >= TERRAIN_GRID)
     return;
   res = resolution (dist);
   if (terrain[x][y] == NULL) {
@@ -83,8 +83,8 @@ void SceneClear ()
   int           x, y;
 
   CachePurge ();
-  for (x = 0; x < WORLD_GRID; x++) {
-    for (y = 0; y < WORLD_GRID; y++) {
+  for (x = 0; x < TERRAIN_GRID; x++) {
+    for (y = 0; y < TERRAIN_GRID; y++) {
       if (terrain[x][y]) 
         delete terrain[x][y];
       terrain[x][y] = NULL;
@@ -277,8 +277,8 @@ void SceneRender ()
   current.y = (int)(camera.y) / TERRAIN_SIZE;
   start.x = max (current.x - RENDER_DISTANCE, 0); 
   start.y = max (current.y - RENDER_DISTANCE, 0);
-  end.x = min (current.x + RENDER_DISTANCE, WORLD_GRID - 1); 
-  end.y = min (current.y + RENDER_DISTANCE, WORLD_GRID - 1);
+  end.x = min (current.x + RENDER_DISTANCE, TERRAIN_GRID - 1); 
+  end.y = min (current.y + RENDER_DISTANCE, TERRAIN_GRID - 1);
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glPolygonMode(GL_FRONT, GL_FILL);

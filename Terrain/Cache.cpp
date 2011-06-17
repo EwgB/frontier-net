@@ -8,15 +8,15 @@
 
 -----------------------------------------------------------------------------*/
 
-#define PAGE_GRID      256
-
-
 #include "stdafx.h"
 #include "cpage.h"
 #include "entropy.h"
-#include "region.h"
 #include "sdl.h"
 #include "text.h"
+#include "world.h"
+
+#define PAGE_GRID   (WORLD_SIZE_METERS / PAGE_SIZE)
+
 
 static CPage*       page[PAGE_GRID][PAGE_GRID];
 static int          page_count;
