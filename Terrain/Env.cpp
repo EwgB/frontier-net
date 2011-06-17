@@ -71,12 +71,15 @@ static void do_cycle ()
 
   r = (Region*)CameraRegion ();
   humid_fog = (1.0f - r->moisture) * max_DISTANCE;
+  desired.sunrise_fade = desired.sunset_fade = 0.0f;
   if (decimal_time >= TIME_DAWN && decimal_time < TIME_DAY) { //sunrise
     fade = (decimal_time - TIME_DAWN) / (TIME_DAY - TIME_DAWN);
     base_color = glRgbaInterpolate (NIGHT_COLOR, DAY_COLOR, fade);
     desired.fog_max = MathInterpolate (NIGHT_FOG, max_DISTANCE, fade);
     desired.fog_min = min (humid_fog, fade * max_DISTANCE);
-    desired.star_fade = 1.0f - fade;
+    desired.star_fade = max (1.0f - fade * 2.0f, 0.0f);
+    //Sunrise fades in, then back out
+    desired.sunrise_fade = 1.0f - abs (fade -0.5f) * 2.0f;
     color_scaling = glRgbaInterpolate (NIGHT_SCALING, DAY_SCALING, fade);
     //The light in the sky doesn't lighten until the second half of sunrise
     if (fade > 0.5f)
@@ -100,7 +103,10 @@ static void do_cycle ()
     base_color = glRgbaInterpolate (DAY_COLOR, NIGHT_COLOR, fade);
     desired.fog_max = MathInterpolate (max_DISTANCE, NIGHT_FOG, fade);
     desired.fog_min = min (humid_fog, (1.0f - fade) * max_DISTANCE);
-    desired.star_fade = fade;
+    if (fade > 0.5f)
+      desired.star_fade = (fade - 0.5f) * 2.0f;
+    //Sunset fades in, then back out
+    desired.sunset_fade = 1.0f - abs (fade -0.5f) * 2.0f;
     color_scaling = glRgbaInterpolate (DAY_SCALING, NIGHT_SCALING, fade);
     desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 0.5f, 0.5f);
     desired.light = glVector (0.8f, 0.0f, -0.2f);
@@ -141,6 +147,8 @@ static void do_time (float delta)
   current.fog_min = MathInterpolate (current.fog_min, desired.fog_min, delta);
   current.fog_max = MathInterpolate (current.fog_max, desired.fog_max, delta);
   current.star_fade = MathInterpolate (current.star_fade, desired.star_fade, delta);
+  current.sunset_fade = MathInterpolate (current.sunset_fade, desired.sunset_fade, delta);
+  current.sunrise_fade = MathInterpolate (current.sunrise_fade, desired.sunrise_fade, delta);
   current.light = glVectorInterpolate (current.light, desired.light, delta);
   current.light.Normalize ();
 

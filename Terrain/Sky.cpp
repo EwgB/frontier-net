@@ -25,7 +25,8 @@
 #define SKY_HALF    (SKY_GRID / 2)
 #define SKY_DOME    0.5f
 #define SKY_TILE    5
-
+//How big the sunrise / set is. Larger = smaller. Don't set lower than near clip plane. 
+#define SUNSET_SIZE 0.25f
 
 
 static GLvector   sky[DISC];
@@ -54,13 +55,9 @@ static void build_sky ()
   for (y = 0; y < SKY_EDGE; y++) {
     for (x = 0; x < SKY_EDGE; x++) {
       distance = glVector ((float)x - SKY_HALF, (float)y - SKY_HALF);
-      //offset = max (abs (x - SKY_HALF), abs (y - SKY_HALF));
-      //dist = 1.0f - ((float)offset / (SKY_HALF));
       dist = 1.0f - glVectorLength (distance) / (SKY_HALF - 3);
-      //vert.push_back (glVector ((float)x - SKY_HALF, (float)y - SKY_HALF, dist * SKY_DOME) - SKY_DOME / 8);
       vert.push_back (glVector ((float)x - SKY_HALF, (float)y - SKY_HALF, dist * SKY_DOME));
       normal.push_back (glVector (0.0f, 0.0f, 1.0f));
-      //uv.push_back (glVector (((float)x / SKY_GRID) * SKY_TILE, ((float)y / SKY_GRID) * SKY_TILE));
       uv.push_back (glVector (((float)(x) / SKY_GRID) * SKY_TILE, ((float)(y) / SKY_GRID) * SKY_TILE));
 
     }
@@ -88,7 +85,6 @@ static void build_sky ()
     }
   }
   skydome.Create (GL_TRIANGLES, index.size (), vert.size (), &index[0], &vert[0], &normal[0], NULL, &uv[0]);
-  //skydome.Create (GL_LINE_STRIP, index.size (), vert.size (), &index[0], &vert[0], &normal[0], NULL, &uv[0]);
 
 
 }
@@ -129,11 +125,12 @@ void SkyUpdate ()
 void SkyRender ()
 {
 
-  GLvector angle;
-  Env*    e;
+  GLvector  angle;
+  Env*      e;
+  GLrgba    color;
 
+  //We want to use a camera space that uses the camera orientation, but not its position.
   e = EnvGet ();
-  //return;
   angle = CameraAngle ();
   glPushMatrix ();
   glLoadIdentity ();
@@ -144,10 +141,11 @@ void SkyRender ()
   glDepthMask (false);
   glDisable (GL_LIGHTING);
   glDisable (GL_BLEND);
+  glDisable (GL_CULL_FACE);
   glDisable (GL_TEXTURE_2D);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  //glBegin (GL_TRIANGLE_FAN);
-  
+
+  //Draw the cone, which forms the horizon.  The tip is darker than the edge.
   glBegin (GL_TRIANGLE_FAN);
   glColor3fv (&e->color[ENV_COLOR_SKY].red);
   glVertex3fv (&tip.x);
@@ -155,53 +153,68 @@ void SkyRender ()
   for (int i = 0; i <= DISC; i++) 
     glVertex3fv (&sky[i % DISC].x);
   glEnd ();
-
+  //Render the skydome
   glEnable (GL_BLEND);
   glEnable (GL_TEXTURE_2D);
   glBlendFunc (GL_ONE, GL_ONE);
   glBindTexture (GL_TEXTURE_2D, texture_stars);
   glColor3f (star_fade,star_fade,star_fade);
   skydome.Render ();
+  //Possibly render the sunset / sunrise polygon, which puts a huge gradient in the sky.
+  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
+  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("sunrise.bmp"));
+  if (e->sunset_fade > 0.0f) {
+    color = e->color[ENV_COLOR_LIGHT] * e->sunset_fade;
+    glColor3fv (&color.red);
+    glBegin (GL_QUADS);
+    glTexCoord2f (0.0f, 0.0f);
+    glVertex3f (-SUNSET_SIZE,-1.0f, 0.25f);
+    glTexCoord2f (1.0f, 0.0f);
+    glVertex3f (-SUNSET_SIZE, 1.0f, 0.25f);
+    glTexCoord2f (1.0f, 1.0f);
+    glVertex3f (-SUNSET_SIZE, 1.0f,-1.0f);
+    glTexCoord2f (0.0f, 1.0f);
+    glVertex3f (-SUNSET_SIZE,-1.0f,-1.0f);
+    glEnd ();
+  }
+  if (e->sunrise_fade > 0.0f) {
+    color = e->color[ENV_COLOR_LIGHT] * e->sunrise_fade;
+    glColor3fv (&color.red);
+    glBegin (GL_QUADS);
+    glTexCoord2f (0.0f, 0.0f);
+    glVertex3f (SUNSET_SIZE,-1.0f, 0.25f);
+    glTexCoord2f (1.0f, 0.0f);
+    glVertex3f (SUNSET_SIZE, 1.0f, 0.25f);
+    glTexCoord2f (1.0f, 1.0f);
+    glVertex3f (SUNSET_SIZE, 1.0f,-1.0f);
+    glTexCoord2f (0.0f, 1.0f);
+    glVertex3f (SUNSET_SIZE,-1.0f,-1.0f);
+    glEnd ();
+  }
+  //Draw the sun
+  /*
+  {
+    static float  aa;
+    aa += 0.01f;
+    float     sun_angle = aa * DEGREES_TO_RADIANS;
+    float     x, z;
+    GLvector  pt[4];
+    float     s, c;
 
-/*
-  GLtexture* t;
-  t = TextureFromName ("clouds2.bmp", MASK_LUminANCE);
-
-  //glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("clouds2.bmp"));
-  glBindTexture (GL_TEXTURE_2D, t->id);
-  //glBindTexture (GL_TEXTURE_2D, 0);
-  glColor3f (0.3f,0.3f,0.3f);
-  //starcube.Render ();
-  glEnable (GL_ALPHA_TEST);
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glBlendFunc (GL_ONE, GL_ONE);
-  glColor3f (0.1f,0.1f,0.1f);
-
-  static float    x;
-  float o;
-
-  glMatrixMode (GL_TEXTURE);
-  glLoadIdentity ();
-  x += 0.001f;
-  o = sin (x);
-
-  glAlphaFunc (GL_GREATER, abs (o));
-
-  glTranslatef (x, 0.0f, 5.0f);
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINES);
-  //glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glBlendFunc (GL_SRC_COLOR, GL_DST_COLOR);
-  //glBlendFunc (GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
-  glBlendFunc (GL_ONE, GL_ONE);
-  //skydome.Render ();
-  glLoadIdentity ();
+    s = sin (sun_angle);
+    c = cos (sun_angle);
+    x = s * 3 + c;
+    z = c * 3 - s;
+    */
 
 
-  glMatrixMode (GL_MODELVIEW);
-  
-  glAlphaFunc (GL_GREATER, 0.0f);
-  */
+
+
+
+
+  //Cleanup and put the modelview matrix back where we found it
   glEnable (GL_LIGHTING);
+  glEnable (GL_CULL_FACE);
 
   glDepthMask (true);
   glPopMatrix ();

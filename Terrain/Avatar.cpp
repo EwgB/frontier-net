@@ -21,7 +21,7 @@
 
 #define JUMP_SPEED      4.0f
 #define MOVE_SPEED      6.0f
-#define EYE_HEIGHT      1.6f
+#define EYE_HEIGHT      1.8f
 
 static GLvector         angle;
 static GLvector         position;

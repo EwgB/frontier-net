@@ -144,8 +144,8 @@ void CGrass::Build (long stop)
   do_grass = CacheSurface (world_x, world_y) == SURFACE_GRASS;
   if (_walk.x % _density || _walk.y  % _density)
     do_grass = false;
-  if ((_walk.x + _walk.y) % 2)
-    do_grass = false;
+  //if ((_walk.x + _walk.y) % 2)
+    //do_grass = false;
   if (do_grass) {
     GLvector    vb0, vb1, vb2, vb3;
     GLvector    vt0, vt1, vt2, vt3;

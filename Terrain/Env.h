@@ -16,6 +16,8 @@ struct Env
   float       fog_min;
   float       fog_max;
   float       star_fade;
+  float       sunrise_fade;
+  float       sunset_fade;
 };
 
 void      EnvInit ();
