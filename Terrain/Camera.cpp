@@ -124,7 +124,7 @@ void CameraInit (void)
 void CameraUpdate (void)		
 {
 
-  region = WorldRegionFromPosition (position.x, position.y);
+  region = WorldRegionFromPosition ((int)position.x, (int)position.y);
 
 }
 

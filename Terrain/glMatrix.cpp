@@ -13,6 +13,7 @@
 #include "stdafx.h"
 
 #define M(e,x,y)                (e.elements[x][y])
+#define E(x,y)                  (elements[x][y])
 
 /*** Order type constants, constructors, extractors ***/
 
@@ -196,9 +197,12 @@ GLvector glMatrixTransformPoint (GLmatrix m, GLvector in)
 
   GLvector              out;
 
-  out.x = (M(m,0,0) * in.x + M(m,1,0) * in.y + M(m,2,0) * in.z + M(m,3,0)) * M(m,0,3);
-  out.y = (M(m,0,1) * in.x + M(m,1,1) * in.y + M(m,2,1) * in.z + M(m,3,1)) * M(m,1,3);
-  out.z = (M(m,0,2) * in.x + M(m,1,2) * in.y + M(m,2,2) * in.z + M(m,3,2)) * M(m,2,3);
+  //out.x = (M(m,0,0) * in.x + M(m,1,0) * in.y + M(m,2,0) * in.z + M(m,3,0)) * M(m,0,3);
+  //out.y = (M(m,0,1) * in.x + M(m,1,1) * in.y + M(m,2,1) * in.z + M(m,3,1)) * M(m,1,3);
+  //out.z = (M(m,0,2) * in.x + M(m,1,2) * in.y + M(m,2,2) * in.z + M(m,3,2)) * M(m,2,3);
+  out.x = (M(m,0,0) * in.x + M(m,1,0) * in.y + M(m,2,0) * in.z + M(m,3,0)); //* M(m,0,3);
+  out.y = (M(m,0,1) * in.x + M(m,1,1) * in.y + M(m,2,1) * in.z + M(m,3,1)); //* M(m,1,3);
+  out.z = (M(m,0,2) * in.x + M(m,1,2) * in.y + M(m,2,2) * in.z + M(m,3,2));// * M(m,2,3);
   return out;
 
 }
@@ -330,4 +334,88 @@ GLvector glMatrixToEuler (GLmatrix mat, int order)
   }
   //ea.w = order;
   return (ea);
+}
+
+void GLmatrix::Identity ()
+{
+
+  int             x;
+  int             y;
+
+  for (x = 0; x < 4; x++) {
+    for (y = 0; y < 4; y++) {
+      E(x,y) = identity_matrix[x][y];
+    }
+  }
+
+}
+
+void GLmatrix::Rotate (float theta, float x, float y, float z)
+{
+
+  GLmatrix              r;
+  float                 length;
+  float                 s, c, t;
+  GLvector              in;
+
+  r = *this;
+  theta *= DEGREES_TO_RADIANS;
+  //Identity ();
+  length = (float)sqrt (x * x + y * y + z * z); 
+  if (length < 0.00001f)
+    return;
+  x /= length;
+  y /= length;
+  z /= length;
+  s = (float)sin (theta);
+  c = (float)cos (theta);
+  t = 1.0f - c;  
+ 
+  in.x = in.y = in.z = 1.0f;
+  E(0,0) = t*x*x + c;
+  E(1,0) = t*x*y - s*z;
+  E(2,0) = t*x*z + s*y;
+  E(3,0) = 0;
+
+  E(0,1) = t*x*y + s*z;
+  E(1,1) = t*y*y + c;
+  E(2,1) = t*y*z - s*x;
+  E(3,1) = 0;
+
+  E(0,2) = t*x*z - s*y;
+  E(1,2) = t*y*z + s*x;
+  E(2,2) = t*z*z + c;
+  E(3,2) = 0;
+
+  Multiply (r);
+
+}
+
+
+/*---------------------------------------------------------------------------
+A matrix multiplication (dot product) of two 4x4 matrices.
+---------------------------------------------------------------------------*/
+
+void GLmatrix::Multiply (GLmatrix a)
+{
+
+  GLmatrix        b;
+  
+  b = *this;
+  E(0,0) = M(a, 0,0) * M(b, 0, 0) + M(a, 1,0) * M(b, 0, 1) + M(a, 2,0) * M(b, 0, 2);
+  E(1,0) = M(a, 0,0) * M(b, 1, 0) + M(a, 1,0) * M(b, 1, 1) + M(a, 2,0) * M(b, 1, 2);
+  E(2,0) = M(a, 0,0) * M(b, 2, 0) + M(a, 1,0) * M(b, 2, 1) + M(a, 2,0) * M(b, 2, 2);
+  E(3,0) = M(a, 0,0) * M(b, 3, 0) + M(a, 1,0) * M(b, 3, 1) + M(a, 2,0) * M(b, 3, 2) + M(a, 3,0);
+  
+  E(0,1) = M(a, 0,1) * M(b, 0, 0) + M(a, 1,1) * M(b, 0, 1) + M(a, 2,1) * M(b, 0, 2);
+  E(1,1) = M(a, 0,1) * M(b, 1, 0) + M(a, 1,1) * M(b, 1, 1) + M(a, 2,1) * M(b, 1, 2);
+  E(2,1) = M(a, 0,1) * M(b, 2, 0) + M(a, 1,1) * M(b, 2, 1) + M(a, 2,1) * M(b, 2, 2);
+  E(3,1) = M(a, 0,1) * M(b, 3, 0) + M(a, 1,1) * M(b, 3, 1) + M(a, 2,1) * M(b, 3, 2) + M(a, 3,1);
+
+  E(0,2) = M(a, 0,2) * M(b, 0, 0) + M(a, 1,2) * M(b, 0, 1) + M(a, 2,2) * M(b, 0, 2);
+  E(1,2) = M(a, 0,2) * M(b, 1, 0) + M(a, 1,2) * M(b, 1, 1) + M(a, 2,2) * M(b, 1, 2);
+  E(2,2) = M(a, 0,2) * M(b, 2, 0) + M(a, 1,2) * M(b, 2, 1) + M(a, 2,2) * M(b, 2, 2);
+  E(3,2) = M(a, 0,2) * M(b, 3, 0) + M(a, 1,2) * M(b, 3, 1) + M(a, 2,2) * M(b, 3, 2) + M(a, 3,2);
+  
+
 }

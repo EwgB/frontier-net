@@ -2,7 +2,7 @@ enum
 {
   MASK_NONE,
   MASK_PINK,
-  MASK_LUminANCE,
+  MASK_LUMINANCE,
 };
 
 class GLtexture

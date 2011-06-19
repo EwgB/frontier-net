@@ -81,7 +81,7 @@ static void text_draw (char* text)
 
   GLtexture*  t;
 
-  t = TextureFromName ("font.bmp", MASK_LUminANCE);
+  t = TextureFromName ("font.bmp", MASK_LUMINANCE);
   glBindTexture (GL_TEXTURE_2D, t->id);
   len = strlen (text);
 	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	
@@ -162,7 +162,7 @@ void TextCreate (int width, int height)
 
   view_size.x = width;
   view_size.y = height;
-  t = TextureFromName ("font.bmp", MASK_LUminANCE);
+  t = TextureFromName ("font.bmp", MASK_LUMINANCE);
   font.FaceSet (t->id);
 
 }

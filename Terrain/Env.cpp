@@ -19,11 +19,11 @@
 #include "texture.h"
 #include "world.h"
 
-#define TIME_SCALE          500  //how many "milliseconds per in-game minute
+#define TIME_SCALE          1000  //how many milliseconds per in-game minute
 #define MAX_DISTANCE        450
 #define NIGHT_FOG           (MAX_DISTANCE / 5)
 #define ENV_TRANSITION      0.02f
-#define UPDATE_INTERVAL     100 //milliseconds
+#define UPDATE_INTERVAL     50 //milliseconds
 #define SECONDS_TO_DECIMAL  (1.0f / 60.0f)
 
 #define TIME_DAWN           5.5f  // 5:30am

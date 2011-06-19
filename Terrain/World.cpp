@@ -62,6 +62,7 @@ static float do_height_noblend (float val, Region r, GLvector2 offset, float wat
     //if this river is strictly north / south
     if (r.flags_shape & REGION_FLAG_RIVERNS && !(r.flags_shape & REGION_FLAG_RIVEREW)) {
       //This makes the river bend side-to-side
+        /*
       switch ((r.grid_pos.x + r.grid_pos.y) % 4) {
       case 0:
         offset.x += abs (sin (offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;break;
@@ -71,6 +72,21 @@ static float do_height_noblend (float val, Region r, GLvector2 offset, float wat
         offset.x += abs (sin (offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.1f;break;
       case 3:
         offset.x -= abs (sin (offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.1f;break;
+      }
+        */
+      switch ((r.grid_pos.x + r.grid_pos.y) % 6) {
+      case 0:
+        offset.x += abs (sin (offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;break;
+      case 1:
+        offset.x -= abs (sin (offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;break;
+      case 2:
+        offset.x += abs (sin (offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.1f;break;
+      case 3:
+        offset.x -= abs (sin (offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.1f;break;
+      case 4:
+        offset.x += sin (offset.y * 360.0f * DEGREES_TO_RADIANS) * 0.1f;break;
+      case 5:
+        offset.x += sin (offset.y * 360.0f * DEGREES_TO_RADIANS) * 0.1f;break;
       }
     }
     //if this river is strictly east / west

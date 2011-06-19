@@ -96,7 +96,7 @@ void  water_map (bool underwater)
   glDepthMask (true);
   return;
   if (!underwater) {
-    t = TextureFromName ("water1.bmp", MASK_LUminANCE);
+    t = TextureFromName ("water1.bmp", MASK_LUMINANCE);
     t = TextureFromName ("water.bmp");
     glBindTexture (GL_TEXTURE_2D, t->id);
   	//glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	

@@ -52,7 +52,7 @@ void GLfont::FaceSet (unsigned id)
   buffer = new unsigned char[size.x * size.y * 4];
   glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
   box_size = size.x / GLYPH_GRID;
-  for (i = 0; i < GL_max_GLYPHS; i++) {
+  for (i = 0; i < GL_MAX_GLYPHS; i++) {
     col = i % GLYPH_GRID;
     row = (GLYPH_GRID - 1) - i / GLYPH_GRID;
     origin.x = col * box_size;
@@ -108,9 +108,9 @@ void GLfont::FaceSet (unsigned id)
 int GLfont::GlyphWidth (int ascii)
 {
 
-  ascii %= GL_max_GLYPHS;
+  ascii %= GL_MAX_GLYPHS;
   if (ascii < 0)
-    ascii = GL_max_GLYPHS + ascii;
+    ascii = GL_MAX_GLYPHS + ascii;
   return _glyph[ascii].size.x;
     
 }
@@ -118,9 +118,9 @@ int GLfont::GlyphWidth (int ascii)
 int GLfont::GlyphDraw (int ascii, GLcoord origin) const
 {
 
-  ascii %= GL_max_GLYPHS;
+  ascii %= GL_MAX_GLYPHS;
   if (ascii < 0)
-    ascii = GL_max_GLYPHS + ascii;
+    ascii = GL_MAX_GLYPHS + ascii;
   glTexCoord2f (_glyph[ascii].uv1.x, _glyph[ascii].uv1.y);
   glVertex2i (origin.x, origin.y + _glyph[ascii].size.y);
   
@@ -150,7 +150,7 @@ void glFontInit ()
   GLtexture*  t;
 
   return;
-  t = TextureFromName ("font2.bmp", MASK_LUminANCE);
+  t = TextureFromName ("font2.bmp", MASK_LUMINANCE);
   f.FaceSet (t->id);
 
 }

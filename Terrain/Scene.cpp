@@ -158,6 +158,7 @@ void SceneInit ()
 
 }
 
+static GLvector last_tree;
 
 void SceneUpdate (long stop)
 {
@@ -184,7 +185,10 @@ void SceneUpdate (long stop)
     apos.x -= 4.0f;
     apos.z = CacheElevation (apos.x, apos.y);
     tree.Build (apos);
+    last_tree = apos;
   }
+  if (InputKeyPressed (SDLK_r)) 
+    tree.Build (last_tree);
 
 
 

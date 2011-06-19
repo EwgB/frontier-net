@@ -1,8 +1,16 @@
 #ifndef glTYPES
 #define glTYPES
 
-#define GL_clamp_TO_EDGE 0x812F
-#define GL_max_GLYPHS     256
+#define GL_CLAMP_TO_EDGE 0x812F
+#define GL_MAX_GLYPHS     256
+
+enum
+{
+  GLUV_UPPER_LEFT,
+  GLUV_UPPER_RIGHT,
+  GLUV_LOWER_RIGHT,
+  GLUV_LOWER_LEFT
+};
 
 #define OPERATORS(type)     \
   type    operator+  (const type& c); \
@@ -80,6 +88,17 @@ struct GLvector2
   OPERATORS(GLvector2);
 };
 
+struct GLuvbox
+{
+  GLvector2 ul;
+  GLvector2 lr;
+  void      Set (GLvector2 ul, GLvector2 lr);
+  void      Set (float repeats);
+  GLvector2 Corner (unsigned index);
+  GLvector2 Center ();
+
+};
+
 struct GLrgba
 {
   float       red;
@@ -91,9 +110,15 @@ struct GLrgba
   OPERATORS(GLrgba);
 };
 
+
+
 struct GLmatrix
 {
   float       elements[4][4];
+  void        Identity ();
+  void        Rotate (float theta, float x, float y, float z);
+  void        Multiply (GLmatrix m);
+  GLvector    TransformPoint ();
 };
 
 struct GLbbox
@@ -146,7 +171,7 @@ struct GLglyph
 struct GLfont
 {
 private:
-  GLglyph         _glyph[GL_max_GLYPHS];
+  GLglyph         _glyph[GL_MAX_GLYPHS];
   int             _id;
   int             _line_height;
 public:

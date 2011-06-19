@@ -96,6 +96,7 @@
     <ClCompile Include="glMatrix.cpp" />
     <ClCompile Include="glQuat.cpp" />
     <ClCompile Include="glRgba.cpp" />
+    <ClCompile Include="glUvbox.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="Region.cpp" />
     <ClCompile Include="Scene.cpp" />
