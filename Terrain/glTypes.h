@@ -65,9 +65,9 @@ struct GLvector
   float       x;
   float       y;
   float       z;
-  OPERATORS(GLvector);
   void        Normalize ();
   float       Length ();
+  OPERATORS(GLvector);
 };
 
 typedef GLvector       GLvector3;
@@ -76,6 +76,7 @@ struct GLvector2
 {
   float       x;
   float       y;
+  float       Length ();
   OPERATORS(GLvector2);
 };
 
@@ -85,9 +86,9 @@ struct GLrgba
   float       green;
   float       blue;
   float       alpha;
-  OPERATORS(GLrgba);
   void        Clamp ();
   void        Normalize ();
+  OPERATORS(GLrgba);
 };
 
 struct GLmatrix

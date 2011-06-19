@@ -212,12 +212,6 @@ void CPage::DoSurface ()
       c->surface = SURFACE_GRASS;
     else //Too cold or dry
       c->surface = SURFACE_ROCK;
-    //The colder it is, the more surface becomes snow, beginning at the lowest points.
-    if (region.temperature < FREEZING) {
-      fade = region.temperature / FREEZING;
-      if ((1.0f - c->detail) > fade)
-        c->surface = SURFACE_SNOW;
-    }
     //Sand is only for coastal regions
     if (low <= region.beach_threshold && (region.climate == CLIMATE_COAST))
       c->surface = SURFACE_SAND;
@@ -233,15 +227,21 @@ void CPage::DoSurface ()
       //c->surface = SURFACE_GRASS_EDGE;
     if (delta >= region.moisture * 6)
       c->surface = SURFACE_DIRT;
-    if (low <= region.geo_bias + region.moisture)
+    if (low <= region.geo_water + region.moisture)
       c->surface = SURFACE_DIRT;
     //if (low <= 0 && (region.climate == CLIMATE_RIVER))
       //c->surface = SURFACE_DIRT_DARK;
-    if (low <= region.geo_bias)
+    if (low <= region.geo_water)
       c->surface = SURFACE_DIRT_DARK;
+    //The colder it is, the more surface becomes snow, beginning at the lowest points.
+    if (region.temperature < FREEZING) {
+      fade = region.temperature / FREEZING;
+      if ((1.0f - c->detail) > fade)
+        c->surface = SURFACE_SNOW;
+    }
     if (low <= 2.5f && (region.climate == CLIMATE_OCEAN))
       c->surface = SURFACE_SAND;
-    if (delta > 3.0f)
+    if (delta > 3.0f && region.temperature > 0.0f)
       c->surface = SURFACE_ROCK;
     /*
     if (c->detail > 0.5f)

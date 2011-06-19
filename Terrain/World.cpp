@@ -49,7 +49,7 @@ The following functions are used when generating elevation data
 
 //This modifies the passed elevation value AFTER region cross-fading is complete,
 //For things that should not be mimicked by neighbors. (Like rivers.)
-static float do_height_noblend (float val, Region r, GLvector2 offset, float bias)
+static float do_height_noblend (float val, Region r, GLvector2 offset, float water)
 {
 
   //return val;
@@ -57,6 +57,7 @@ static float do_height_noblend (float val, Region r, GLvector2 offset, float bia
     GLvector2   cen;
     float       strength;
     float       delta;
+    GLvector2   new_off;
 
     //if this river is strictly north / south
     if (r.flags_shape & REGION_FLAG_RIVERNS && !(r.flags_shape & REGION_FLAG_RIVEREW)) {
@@ -86,7 +87,27 @@ static float do_height_noblend (float val, Region r, GLvector2 offset, float bia
         offset.y += abs (sin (offset.x * 180.0f * DEGREES_TO_RADIANS)) * 0.10f;break;
       }
     }
-    
+    //if this river
+    if (r.flags_shape & REGION_FLAG_RIVERNW && !(r.flags_shape & REGION_FLAG_RIVERSE)) 
+      offset.x = offset.y = offset.Length ();
+    if (r.flags_shape & REGION_FLAG_RIVERSE && !(r.flags_shape & REGION_FLAG_RIVERNW)) {
+      new_off.x = 1.0f - offset.x;
+      new_off.y = 1.0f - offset.y;
+      new_off.x = new_off.y = new_off.Length ();
+      offset = new_off;
+    }    
+    if (r.flags_shape & REGION_FLAG_RIVERNE && !(r.flags_shape & REGION_FLAG_RIVERSW)) {
+      new_off.x = 1.0f - offset.x;
+      new_off.y = offset.y;
+      new_off.x = new_off.y = new_off.Length ();
+      offset = new_off;
+    }    
+    if (r.flags_shape & REGION_FLAG_RIVERSW && !(r.flags_shape & REGION_FLAG_RIVERNE)) {
+      new_off.x = offset.x;
+      new_off.y = 1.0f - offset.y;
+      new_off.x = new_off.y = new_off.Length ();
+      offset = new_off;
+    }    
     cen.x = abs ((offset.x - 0.5f) * 2.0f);
     cen.y = abs ((offset.y - 0.5f) * 2.0f);
     strength = glVectorLength (cen);
@@ -100,7 +121,7 @@ static float do_height_noblend (float val, Region r, GLvector2 offset, float bia
       strength = min (strength, cen.y);
     if (strength < (r.river_width / 2)) {
       strength *= 1.0f / (r.river_width / 2);
-      delta = (val - bias) + 4.0f * r.river_width;
+      delta = (val - water) + 4.0f * r.river_width;
       val -= (delta) * (1.0f - strength);
     }
   }
@@ -110,32 +131,34 @@ static float do_height_noblend (float val, Region r, GLvector2 offset, float bia
 
 //This takes the given properties and generates a single unit of elevation data,
 //according to the local region rules.
-static float do_height (Region r, GLvector2 offset, float bias, float esmall, float elarge)
+// Water is the water level.  Detail is the height of the rolling hills. Bias
+//is a direct height added on to these.
+static float do_height (Region r, GLvector2 offset, float water, float detail, float bias)
 {
 
   float     val;
 
   //Modify the detail values before they are applied
   if (r.flags_shape & REGION_FLAG_CRATER) {
-    if (esmall > 0.5f)
-      esmall = 0.5f;
+    if (detail > 0.5f)
+      detail = 0.5f;
   }
   if (r.flags_shape & REGION_FLAG_TIERED) {
-    if (esmall < 0.2f)
-      esmall += 0.2f;
+    if (detail < 0.2f)
+      detail += 0.2f;
     else
-    if (esmall < 0.5f)
-      esmall -= 0.2f;
+    if (detail < 0.5f)
+      detail -= 0.2f;
   }
   if (r.flags_shape & REGION_FLAG_CRACK) {
-    if (esmall > 0.2f && esmall < 0.3f)
-      esmall = 0.0f;
+    if (detail > 0.2f && detail < 0.3f)
+      detail = 0.0f;
   }
   if (r.flags_shape & REGION_FLAG_SINKHOLE) {
     float    x = abs (offset.x - 0.5f);
     float    y = abs (offset.y - 0.5f);
-    if (esmall > max (x, y))
-      esmall /= 4.0f;
+    if (detail > max (x, y))
+      detail /= 4.0f;
   }
   //Soften up the banks of a river 
   if (r.flags_shape & REGION_FLAG_RIVER_ANY) {
@@ -146,32 +169,30 @@ static float do_height (Region r, GLvector2 offset, float bias, float esmall, fl
     cen.y = abs ((offset.y - 0.5f) * 2.0f);
     strength = min (cen.x, cen.y);
     strength = max (strength, 0.2f);
-    esmall *= strength;
+    detail *= strength;
   }
   
-  elarge *= r.geo_large;
   //Apply the values!
-  val = esmall * r.geo_detail + elarge * LARGE_STRENGTH;
-  val += bias;
+  val = water + detail * r.geo_detail + bias * LARGE_STRENGTH;
   if (r.climate == CLIMATE_SWAMP) {
     val -= r.geo_detail / 2.0f;
-    val = max (val, r.geo_bias - 0.5f);
+    val = max (val, r.geo_water - 0.5f);
   }
   //Modify the final value.
   if (r.flags_shape & REGION_FLAG_MESAS) {
     float    x = abs (offset.x - 0.5f) / 5;
     float    y = abs (offset.y - 0.5f) / 5;
-    if ((esmall + 0.01f) < (x + y)) {
+    if ((detail + 0.01f) < (x + y)) {
       val += 5;
     }
   }
   if (r.flags_shape & REGION_FLAG_CANYON_NS) {
     float    x = abs (offset.x - 0.5f) * 2.0f;;
 
-    if (x + esmall < 0.5f)
-      val = bias + (val - bias) / 2.0f;
+    if (x + detail < 0.5f)
+      val = water + (val - water) / 2.0f;
     else 
-      val += r.geo_bias;
+      val += r.geo_water;
   }
   if ((r.flags_shape & REGION_FLAG_BEACH) && val < r.beach_threshold && val > 0.0f) {
     val /= r.beach_threshold;
@@ -229,13 +250,61 @@ static void build_map_texture ()
 
 -----------------------------------------------------------------------------*/
 
+float WorldWaterLevel (int world_x, int world_y)
+{
+
+  GLcoord   origin;
+  GLvector2 offset;
+  Region    rul, rur, rbl, rbr;//Four corners: upper left, upper right, etc.
+
+  world_x += REGION_HALF;
+  world_y += REGION_HALF;
+  origin.x = world_x / REGION_SIZE;
+  origin.y = world_y / REGION_SIZE;
+  origin.x = clamp (origin.x, 0, WORLD_GRID - 1);
+  origin.y = clamp (origin.y, 0, WORLD_GRID - 1);
+  offset.x = (float)((world_x) % REGION_SIZE) / REGION_SIZE;
+  offset.y = (float)((world_y) % REGION_SIZE) / REGION_SIZE;
+  rul = WorldRegionGet (origin.x, origin.y);
+  rur = WorldRegionGet (origin.x + 1, origin.y);
+  rbl = WorldRegionGet (origin.x, origin.y + 1);
+  rbr = WorldRegionGet (origin.x + 1, origin.y + 1);
+  return MathInterpolateQuad (rul.geo_water, rur.geo_water, rbl.geo_water, rbr.geo_water, offset, ((origin.x + origin.y) %2) == 0);
+
+}
+
+
+float WorldBiasLevel (int world_x, int world_y)
+{
+
+  GLcoord   origin;
+  GLvector2 offset;
+  Region    rul, rur, rbl, rbr;//Four corners: upper left, upper right, etc.
+
+  world_x += REGION_HALF;
+  world_y += REGION_HALF;
+  origin.x = world_x / REGION_SIZE;
+  origin.y = world_y / REGION_SIZE;
+  origin.x = clamp (origin.x, 0, WORLD_GRID - 1);
+  origin.y = clamp (origin.y, 0, WORLD_GRID - 1);
+  offset.x = (float)((world_x) % REGION_SIZE) / REGION_SIZE;
+  offset.y = (float)((world_y) % REGION_SIZE) / REGION_SIZE;
+  rul = WorldRegionGet (origin.x, origin.y);
+  rur = WorldRegionGet (origin.x + 1, origin.y);
+  rbl = WorldRegionGet (origin.x, origin.y + 1);
+  rbr = WorldRegionGet (origin.x + 1, origin.y + 1);
+  return MathInterpolateQuad (rul.geo_bias, rur.geo_bias, rbl.geo_bias, rbr.geo_bias, offset, ((origin.x + origin.y) %2) == 0);
+
+}
+
 Cell WorldCell (int world_x, int world_y)
 {
 
-  float     esmall, elarge;
+  float     detail;
+  float     bias;
   Region    rul, rur, rbl, rbr;//Four corners: upper left, upper right, etc.
   float     eul, eur, ebl, ebr;
-  float     bias;
+  float     water;
   GLvector2 offset;
   GLcoord   origin;
   GLcoord   ul, br; //Upper left and bottom-right corners
@@ -243,9 +312,9 @@ Cell WorldCell (int world_x, int world_y)
   bool      left;
   Cell      result;
 
-  esmall = Entropy (world_x, world_y);
-  elarge = Entropy ((float)world_x / LARGE_SCALE, (float)world_y / LARGE_SCALE);
-  bias = WorldWaterLevel (world_x, world_y);
+  detail = Entropy (world_x, world_y);
+  bias = WorldBiasLevel (world_x, world_y);
+  water = WorldWaterLevel (world_x, world_y);
   origin.x = world_x / REGION_SIZE;
   origin.y = world_y / REGION_SIZE;
   origin.x = clamp (origin.x, 0, WORLD_GRID - 1);
@@ -256,8 +325,8 @@ Cell WorldCell (int world_x, int world_y)
   left = ((origin.x + origin.y) %2) == 0;
   offset.x = (float)((world_x) % REGION_SIZE) / REGION_SIZE;
   offset.y = (float)((world_y) % REGION_SIZE) / REGION_SIZE;
-  result.detail = esmall;
-  result.water_level = bias;
+  result.detail = detail;
+  result.water_level = water;
 
   ul.x = origin.x;
   ul.y = origin.y;
@@ -266,8 +335,8 @@ Cell WorldCell (int world_x, int world_y)
 
   if (ul == br) {
     rul = WorldRegionGet (ul.x, ul.y);
-    result.elevation = do_height (rul, offset, bias, esmall, elarge);
-    result.elevation = do_height_noblend (result.elevation, rul, offset, bias);
+    result.elevation = do_height (rul, offset, water, detail, bias);
+    result.elevation = do_height_noblend (result.elevation, rul, offset, water);
     return result;
   }
   rul = WorldRegionGet (ul.x, ul.y);
@@ -275,12 +344,12 @@ Cell WorldCell (int world_x, int world_y)
   rbl = WorldRegionGet (ul.x, br.y);
   rbr = WorldRegionGet (br.x, br.y);
 
-  eul = do_height (rul, offset, bias, esmall, elarge);
-  eur = do_height (rur, offset, bias, esmall, elarge);
-  ebl = do_height (rbl, offset, bias, esmall, elarge);
-  ebr = do_height (rbr, offset, bias, esmall, elarge);
+  eul = do_height (rul, offset, water, detail, bias);
+  eur = do_height (rur, offset, water, detail, bias);
+  ebl = do_height (rbl, offset, water, detail, bias);
+  ebr = do_height (rbr, offset, water, detail, bias);
   result.elevation = MathInterpolateQuad (eul, eur, ebl,ebr, blend, left);
-  result.elevation = do_height_noblend (result.elevation, rul, offset, bias);
+  result.elevation = do_height_noblend (result.elevation, rul, offset, water);
   return result;
 
 }
@@ -350,49 +419,11 @@ void    WorldGenerate ()
 {
 
   int         x;
-  //Region      r;
-  //GLcoord     from_center;
-  //GLcoord     offset;
 
   for ( x = 0; x < NOISE_BUFFER; x++) {
     noisei[x] = RandomVal ();
     noisef[x] = RandomFloat ();
   }
-  /*
-  //Set some defaults
-  offset.x = RandomVal () % 1024;
-  offset.y = RandomVal () % 1024;
-  for (x = 0; x < WORLD_GRID; x++) {
-    for (y = 0; y < WORLD_GRID; y++) {
-      memset (&r, 0, sizeof (Region));
-      sprintf (r.title, "NOTHING");
-      r.geo_large = r.geo_detail = 0;
-      r.mountain_height = 0;
-      r.grid_pos.x = x;
-      r.grid_pos.y = y;
-      from_center.x = abs (x - WORLD_GRID_CENTER);
-      from_center.y = abs (y - WORLD_GRID_CENTER);
-      //Geo scale is a number from -1 to 1. -1 is lowest ovean. 0 is sea level. 
-      //+1 is highest elevation on the island. This is used to guide other derived numbers.
-      r.geo_scale = glVectorLength (glVector ((float)from_center.x, (float)from_center.y));
-      r.geo_scale /= (WORLD_GRID_CENTER - OCEAN_BUFFER);
-      //Create a steep drop around the edge of the world
-      if (r.geo_scale > 1.25f)
-        r.geo_scale = 1.25f + (r.geo_scale - 1.25f) * 2.0f;
-      r.geo_scale = 1.0f - r.geo_scale;
-      r.geo_scale += (Entropy ((x + offset.x) * FREQUENCY, (y + offset.y) * FREQUENCY) - 0.2f) / 1;
-      r.geo_scale = clamp (r.geo_scale, -1.0f, 1.0f);
-      if (r.geo_scale > 0.0f)
-        r.geo_bias = 1.0f + r.geo_scale;
-      r.geo_large = 0.3f;
-      r.geo_large = 0.0f;
-      r.geo_detail = 0.0f;
-      r.color_map = glRgba (0.0f);
-      r.climate = CLIMATE_INVALID;
-      map[x][y] = r;
-    }
-  }
-  */
   TerraformPrepare ();
   TerraformOceans ();
   TerraformCoast ();
@@ -400,6 +431,7 @@ void    WorldGenerate ()
   TerraformRivers (4);
   TerraformClimate ();//Do climate a second time now that rivers are in
   TerraformZones ();
+  TerraformClimate ();//Now again, since we have added clime-modifying features (Mountains, etc.)
   TerraformFill ();
   TerraformAverage ();
   TerraformColors ();
@@ -496,29 +528,5 @@ unsigned WorldMap ()
 {
 
   return map_id;
-
-}
-
-
-float WorldWaterLevel (int world_x, int world_y)
-{
-
-  GLcoord   origin;
-  GLvector2 offset;
-  Region    rul, rur, rbl, rbr;//Four corners: upper left, upper right, etc.
-
-  world_x += REGION_HALF;
-  world_y += REGION_HALF;
-  origin.x = world_x / REGION_SIZE;
-  origin.y = world_y / REGION_SIZE;
-  origin.x = clamp (origin.x, 0, WORLD_GRID - 1);
-  origin.y = clamp (origin.y, 0, WORLD_GRID - 1);
-  offset.x = (float)((world_x) % REGION_SIZE) / REGION_SIZE;
-  offset.y = (float)((world_y) % REGION_SIZE) / REGION_SIZE;
-  rul = WorldRegionGet (origin.x, origin.y);
-  rur = WorldRegionGet (origin.x + 1, origin.y);
-  rbl = WorldRegionGet (origin.x, origin.y + 1);
-  rbr = WorldRegionGet (origin.x + 1, origin.y + 1);
-  return MathInterpolateQuad (rul.geo_bias, rur.geo_bias, rbl.geo_bias, rbr.geo_bias, offset, ((origin.x + origin.y) %2) == 0);
 
 }

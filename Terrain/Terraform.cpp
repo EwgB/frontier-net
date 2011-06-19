@@ -184,9 +184,9 @@ static void do_mountain (int x, int y, int mtn_size)
       else {
         sprintf (r.title, "Mountain");
       }
-      r.mountain_height = mtn_size - step;
-      r.geo_detail = r.mountain_height* 10.0f;
-      r.geo_bias += r.mountain_height * REGION_HALF;
+      r.mountain_height = 1 + (mtn_size - step);
+      r.geo_detail = 13.0f + r.mountain_height* 3.0f;
+      r.geo_bias = (WorldNoisef (xx + yy) * 0.5f + (float)r.mountain_height) * REGION_SIZE;
       r.flags_shape = REGION_FLAG_NOBLEND;
       r.climate = CLIMATE_MOUNTAIN;
       WorldRegionSet (xx + x, yy + y, r);
@@ -329,7 +329,7 @@ static bool try_river (int start_x, int start_y, int id)
         return false;
       break;
     }
-    lowest = r.geo_bias;
+    lowest = r.geo_water;
     to_coast = get_map_side (x, y);
     //lowest = 999.9f;
     selected.Clear ();
@@ -341,9 +341,9 @@ static bool try_river (int start_x, int start_y, int id)
       //Don't head directly AWAY from the coast
       if (direction[d] == to_coast * -1)
         continue;
-      if (neighbor.geo_bias <= lowest) {
+      if (neighbor.geo_water <= lowest) {
         selected = direction[d];
-        lowest = neighbor.geo_bias;
+        lowest = neighbor.geo_water;
       }
       WorldRegionSet (x + direction[d].x, y + direction[d].y, neighbor);
     }
@@ -362,7 +362,7 @@ static bool try_river (int start_x, int start_y, int id)
   x = start_x;
   y = start_y;
   water_strength = 0.03f;
-  water_level = WorldRegionGet (x, y).geo_bias;
+  water_level = WorldRegionGet (x, y).geo_water;
   for (d = 0; d < path.size (); d++) {
     r = WorldRegionGet (x, y);
     if (!d)
@@ -382,9 +382,9 @@ static bool try_river (int start_x, int start_y, int id)
     r.geo_detail = 28.0f - water_strength * 10.0f;
     r.river_width = min (water_strength, 1);
     r.climate = CLIMATE_RIVER;
-    water_level = min (r.geo_bias, water_level);
+    water_level = min (r.geo_water, water_level);
     //We need to flatten out this space, as well as all of its neighbors.
-    r.geo_bias = water_level;
+    r.geo_water = water_level;
     for (xx = x - 2; xx <= x + 2; xx++) {
       for (yy = y - 2; yy <= y + 2; yy++) {
         neighbor = WorldRegionGet (xx, yy);
@@ -392,8 +392,8 @@ static bool try_river (int start_x, int start_y, int id)
           continue;
         if (!xx && !yy)
           continue;
-        neighbor.geo_bias = min (neighbor.geo_bias, water_level);
-        neighbor.geo_large = r.geo_large;
+        neighbor.geo_water = min (neighbor.geo_water, water_level);
+        neighbor.geo_bias = r.geo_bias;
         neighbor.geo_detail = r.geo_detail;
         neighbor.climate = CLIMATE_RIVER_BANK;
         neighbor.flags_shape |= REGION_FLAG_NOBLEND;
@@ -448,9 +448,8 @@ void TerraformClimate ()
       r = WorldRegionGet (x, y);
       moist -= 1.0f / WORLD_GRID_CENTER;
       //Mountains block rainfall
-      if (r.climate == CLIMATE_MOUNTAIN) {
+      if (r.climate == CLIMATE_MOUNTAIN) 
         moist -= 0.1f * r.mountain_height;
-      }       
       moist = max (moist, 0);
       r.moisture = moist;
       //Rivers always give some moisture
@@ -461,8 +460,9 @@ void TerraformClimate ()
       }
       //The north 25% is max cold.  The south 25% is all tropical
       temp = ((float)y - (WORLD_GRID / 4)) / WORLD_GRID_CENTER;
+      //Mountains are cooler at the top
       if (r.mountain_height) 
-        temp -= (float)r.mountain_height * 0.2f;
+        temp -= (float)r.mountain_height * 0.15f;
       temp = clamp (temp, min_TEMP, max_TEMP);
       //oceans have a moderating effect
       if (r.climate == CLIMATE_OCEAN) {
@@ -616,13 +616,13 @@ void TerraformAverage ()
   float     (*moist)[WORLD_GRID];
   float     (*elev)[WORLD_GRID];
   float     (*sm)[WORLD_GRID];
-  float     (*lg)[WORLD_GRID];
+  float     (*bias)[WORLD_GRID];
 
   temp = new float[WORLD_GRID][WORLD_GRID];
   moist = new float[WORLD_GRID][WORLD_GRID];
   elev = new float[WORLD_GRID][WORLD_GRID];
   sm = new float[WORLD_GRID][WORLD_GRID];
-  lg = new float[WORLD_GRID][WORLD_GRID];
+  bias = new float[WORLD_GRID][WORLD_GRID];
 
   //Blur some of the attributes
   for (int passes = 0; passes < 1; passes++) {
@@ -634,16 +634,16 @@ void TerraformAverage ()
         moist[x][y] = 0;
         elev[x][y] = 0;
         sm[x][y] = 0;
-        lg[x][y] = 0;
+        bias[x][y] = 0;
         count = 0;
         for (xx = -radius; xx <= radius; xx++) {
           for (yy = -radius; yy <= radius; yy++) {
             r = WorldRegionGet (x + xx, y + yy);
             temp[x][y] += r.temperature;
             moist[x][y] += r.moisture;
-            elev[x][y] += r.geo_bias;
+            elev[x][y] += r.geo_water;
             sm[x][y] += r.geo_detail;
-            lg[x][y] += r.geo_large;
+            bias[x][y] += r.geo_bias;
             count++;
           }
         }
@@ -651,7 +651,7 @@ void TerraformAverage ()
         moist[x][y] /= (float)count;
         elev[x][y] /= (float)count;
         sm[x][y] /= (float)count;
-        lg[x][y] /= (float)count;
+        bias[x][y] /= (float)count;
       }
     }
     //Put the blurred values back into our table
@@ -664,9 +664,9 @@ void TerraformAverage ()
         else if (r.climate != CLIMATE_OCEAN) 
           r.moisture = moist[x][y];//No matter how arid it is, the OCEANS STAY WET!
         if (!(r.flags_shape & REGION_FLAG_NOBLEND)) {
-          //r.geo_bias = elev[x][y];
+          //r.geo_water = elev[x][y];
           r.geo_detail = sm[x][y];
-          r.geo_large = lg[x][y];
+          r.geo_bias = bias[x][y];
         }
         WorldRegionSet (x, y, r);
       }
@@ -676,7 +676,7 @@ void TerraformAverage ()
   delete []moist;
   delete []elev;
   delete []sm;
-  delete []lg;
+  delete []bias;
   
 }
 
@@ -698,10 +698,10 @@ void TerraformOceans ()
       if (x == 0 || y == 0 || x == WORLD_GRID - 1 || y == WORLD_GRID - 1) 
         is_ocean = true;
       if (is_ocean) {
-        r.geo_large = 0.0f;
+        r.geo_bias = -10.0f;
         r.geo_detail = 0.3f;
         r.moisture = 1.0f;
-        r.geo_bias = -10.0f;
+        r.geo_water = 0.0f;
         r.flags_shape = REGION_FLAG_NOBLEND;
         r.climate = CLIMATE_OCEAN;
         sprintf (r.title, "%s Ocean", get_direction_name (x, y));
@@ -755,13 +755,13 @@ void TerraformCoast ()
         sprintf (r.title, "%s beach", get_direction_name (current.x, current.y));
       else
         sprintf (r.title, "%s coast", get_direction_name (current.x, current.y));
-      r.geo_large = 0.0f;
+      r.geo_bias = 0.0f;
       //beaches are low and partially submerged
       if (!pass) {
-        r.geo_bias = -2.0f;
+        r.geo_water = -2.0f;
         r.geo_detail = 4.0f;
       } else {
-        r.geo_bias = 0.5f;
+        r.geo_water = 0.5f;
         r.geo_detail = 14.5f;
       }
       r.moisture = 1.0f;
@@ -872,7 +872,7 @@ void TerraformFill ()
       if (r.climate != CLIMATE_INVALID)
         continue;
       sprintf (r.title, "???");
-      r.geo_bias = r.geo_scale * 10.0f;
+      r.geo_water = r.geo_scale * 10.0f;
       r.geo_detail = 20.0f;
       //Have them trend more hilly in dry areas
       rand = RandomVal () % 8;
@@ -939,7 +939,7 @@ void TerraformPrepare ()
     for (y = 0; y < WORLD_GRID; y++) {
       memset (&r, 0, sizeof (Region));
       sprintf (r.title, "NOTHING");
-      r.geo_large = r.geo_detail = 0;
+      r.geo_bias = r.geo_detail = 0;
       r.mountain_height = 0;
       r.grid_pos.x = x;
       r.grid_pos.y = y;
@@ -957,9 +957,8 @@ void TerraformPrepare ()
       r.geo_scale += (Entropy ((x + offset.x) * FREQUENCY, (y + offset.y) * FREQUENCY) - 0.2f);
       r.geo_scale = clamp (r.geo_scale, -1.0f, 1.0f);
       if (r.geo_scale > 0.0f)
-        r.geo_bias = 1.0f + r.geo_scale;
-      r.geo_large = 0.3f;
-      r.geo_large = 0.0f;
+        r.geo_water = 1.0f + r.geo_scale;
+      r.geo_bias = 0.0f;
       r.geo_detail = 0.0f;
       r.color_map = glRgba (0.0f);
       r.climate = CLIMATE_INVALID;

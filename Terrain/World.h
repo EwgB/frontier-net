@@ -23,6 +23,10 @@
 
 #define REGION_FLAG_RIVERNS     (REGION_FLAG_RIVERN | REGION_FLAG_RIVERS)
 #define REGION_FLAG_RIVEREW     (REGION_FLAG_RIVERE | REGION_FLAG_RIVERW)
+#define REGION_FLAG_RIVERNW     (REGION_FLAG_RIVERN | REGION_FLAG_RIVERW)
+#define REGION_FLAG_RIVERSE     (REGION_FLAG_RIVERS | REGION_FLAG_RIVERE)
+#define REGION_FLAG_RIVERNE     (REGION_FLAG_RIVERN | REGION_FLAG_RIVERE)
+#define REGION_FLAG_RIVERSW     (REGION_FLAG_RIVERS | REGION_FLAG_RIVERW)
 #define REGION_FLAG_RIVER_ANY   (REGION_FLAG_RIVERNS | REGION_FLAG_RIVEREW)
 
 #define FLOWERS                 3
@@ -52,9 +56,9 @@ struct Region
   int       river_segment;
   float     river_width;
   float     geo_scale; //Number from -1 to 1, lowest to highest elevation. 0 is sea level
-  float     geo_bias;
+  float     geo_water;
   float     geo_detail;
-  float     geo_large;
+  float     geo_bias;
   unsigned  flags_shape;
   Climate   climate;
   float     temperature;

@@ -108,7 +108,7 @@ void AvatarUpdate (void)
     } else
       on_ground = false;
   }
-  region = WorldRegionFromPosition ((int)position.x, (int)position.y);
+  region = WorldRegionGet ((int)(position.x + REGION_HALF) / REGION_SIZE, (int)(position.y + REGION_HALF) / REGION_SIZE);
   direction = "North";
   if (angle.z < 22.5f)
     direction = "North";
@@ -128,16 +128,16 @@ void AvatarUpdate (void)
     direction = "Northeast";
   
   //TextPrint ("%s @%1.2f Y:%1.2f Z:%1.2f - Facing %s", region.title, position.x, position.y, position.z, direction);
-  TextPrint ("%s @%s - Facing %s", region.title, WorldLocationName ((int)position.x, (int)position.y), direction);
-  TextPrint ("Temp:%1.1f%c Moisture:%1.0f%%\nGeo Scale: %1.2f Elevation Bias: %1.2f Topography Detail:%1.2f Topography Large:%1.2f", 
-    region.temperature * 100.0f, 186, region.moisture * 100.0f, region.geo_scale, region.geo_bias, region.geo_detail, region.geo_large);
+  TextPrint ("%s @%s - Facing %s", region.title, WorldLocationName (region.grid_pos.x, region.grid_pos.y), direction);
+  TextPrint ("Temp:%1.1f%c Moisture:%1.0f%%\nGeo Scale: %1.2f Water Level: %1.2f Topography Detail:%1.2f Topography Bias:%1.2f", 
+    region.temperature * 100.0f, 186, region.moisture * 100.0f, region.geo_scale, region.geo_water, region.geo_detail, region.geo_bias);
   
   //Cell c = WorldCell ((int)position.x, (int)position.y);
   //TextPrint ("%f %f", c.elevation, c.water_level);
 
   /*
   TextPrint ("%s\nTemp:%1.1f%c Moisture:%1.0f%%\nGeo Scale: %1.2f Elevation Bias: %1.2f Topography Detail:%1.2f Topography Large:%1.2f", 
-    region.title, region.temperature * 100.0f, 186, region.moisture * 100.0f, region.elevation * 100.0f, region.geo_bias, region.geo_detail, region.geo_large);
+    region.title, region.temperature * 100.0f, 186, region.moisture * 100.0f, region.elevation * 100.0f, region.geo_water, region.geo_detail, region.geo_large);
     */
   cam = position;
   cam.z += EYE_HEIGHT;

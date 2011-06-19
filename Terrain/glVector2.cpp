@@ -219,3 +219,11 @@ bool GLvector2::operator== (const GLvector2& c)
     return true;
   return false;
 }
+
+
+float GLvector2::Length ()
+{
+
+  return (float)sqrt (x * x + y * y);
+
+}

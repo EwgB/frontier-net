@@ -170,7 +170,7 @@ static float do_height (Region r, GLvector2 offset, float bias, float esmall, fl
   val += bias;
   if (r.climate == CLIMATE_SWAMP) {
     val -= r.geo_detail / 2.0f;
-    val = max (val, r.geo_bias - 0.5f);
+    val = max (val, r.geo_water - 0.5f);
   }
   //Modify the final value.
   if (r.flags_shape & REGION_FLAG_MESAS) {
@@ -186,7 +186,7 @@ static float do_height (Region r, GLvector2 offset, float bias, float esmall, fl
     if (x + esmall < 0.5f)
       val = bias + (val - bias) / 2.0f;
     else 
-      val += r.geo_bias;
+      val += r.geo_water;
   }
   if ((r.flags_shape & REGION_FLAG_BEACH) && val < r.beach_threshold && val > 0.0f) {
     val /= r.beach_threshold;
@@ -356,7 +356,7 @@ void    RegionGenerate ()
       r.geo_scale += (Entropy ((x + offset.x) * FREQUENCY, (y + offset.y) * FREQUENCY) - 0.2f) / 1;
       r.geo_scale = clamp (r.geo_scale, -1.0f, 1.0f);
       if (r.geo_scale > 0.0f)
-        r.geo_bias = 1.0f + r.geo_scale;
+        r.geo_water = 1.0f + r.geo_scale;
       r.geo_large = 0.3f;
       r.geo_large = 0.0f;
       r.geo_detail = 0.0f;
@@ -461,7 +461,7 @@ float RegionWaterLevel (int world_x, int world_y)
   rur = region (origin.x + 1, origin.y);
   rbl = region (origin.x, origin.y + 1);
   rbr = region (origin.x + 1, origin.y + 1);
-  return MathInterpolateQuad (rul.geo_bias, rur.geo_bias, rbl.geo_bias, rbr.geo_bias, offset, ((origin.x + origin.y) %2) == 0);
+  return MathInterpolateQuad (rul.geo_water, rur.geo_water, rbl.geo_water, rbr.geo_water, offset, ((origin.x + origin.y) %2) == 0);
 
 }
 

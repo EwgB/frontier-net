@@ -53,7 +53,7 @@ struct Region
   float     river_width;
   //float     elevation;
   float     geo_scale; //Number from -1 to 1, lowest to highest elevation
-  float     geo_bias;
+  float     geo_water;
   float     geo_detail;
   float     geo_large;
   unsigned  flags_shape;
