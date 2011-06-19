@@ -25,7 +25,7 @@
 #define SKY_HALF    (SKY_GRID / 2)
 #define SKY_DOME    0.5f
 #define SKY_TILE    5
-//How big the sunrise / set is. Larger = smaller. Don't set lower than near clip plane. 
+//How big the sunrise / set is. Higher = smaller. Don't set lower than near clip plane. 
 #define SUNSET_SIZE 0.25f
 //The size of the sun itself
 #define SUN_SIZE    0.5f

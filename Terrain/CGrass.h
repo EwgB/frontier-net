@@ -22,6 +22,7 @@ class CGrass
   class VBO         _vbo;
   int               _stage;
   GLbbox            _bbox;
+  bool              _valid;
 
   void              Build (long stop);
   void              VertexPush (GLvector vert, GLvector normal, GLrgba color, GLvector2 uv);
@@ -35,4 +36,5 @@ public:
   void              Render ();
   void              Update (long stop);
   bool              Ready ()  const { return _stage == GRASS_STAGE_DONE; };
+  void              Invalidate () { _valid = false; };
 };

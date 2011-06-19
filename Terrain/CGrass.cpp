@@ -59,6 +59,7 @@ CGrass::CGrass ()
   _origin.x = 0;
   _origin.y = 0;
   _density = 0;
+  _valid = false;
   _bbox.Clear ();
   _position.Clear ();
   _walk.Clear ();
@@ -231,6 +232,7 @@ void CGrass::Update (long stop)
       else
         _vbo.Clear ();
       _stage++;
+      _valid = true;
       break;
     }
   }
@@ -241,6 +243,9 @@ void CGrass::Update (long stop)
 void CGrass::Render ()
 {
 
+  //We need at least one successful build before we can draw.
+  if (!_valid)
+    return;
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
   glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	

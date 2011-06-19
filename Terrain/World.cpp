@@ -285,6 +285,36 @@ Cell WorldCell (int world_x, int world_y)
 
 }
 
+char*     WorldLocationName (int world_x, int world_y)
+{
+
+  static char   result[20];
+  char          lat[20];
+  char          lng[20];
+
+  world_x /= REGION_SIZE;
+  world_y /= REGION_SIZE;
+  world_x -= WORLD_GRID_CENTER;
+  world_y -= WORLD_GRID_CENTER;
+  if (!world_x && !world_y)
+    return "Equatorial meridian";
+  if (world_x == 0)
+    strcpy (lng, "meridian");
+  else if (world_x < 0)
+    sprintf (lng, "%d west", abs (world_x));
+  else
+    sprintf (lng, "%d east", world_x);
+  if (world_y == 0)
+    strcpy (lat, "Equator");
+  else if (world_y < 0)
+    sprintf (lat, "%d north", abs (world_y));
+  else
+    sprintf (lat, "%d south", world_y);
+  sprintf (result, "%s, %s", lat, lng);
+  return result;
+
+}
+
 void    WorldInit ()
 {
 

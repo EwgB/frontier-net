@@ -88,7 +88,6 @@ void SceneClear ()
       if (terrain[x][y]) 
         delete terrain[x][y];
       terrain[x][y] = NULL;
-
     }
   }
 
@@ -110,6 +109,7 @@ void SceneGenerate ()
   current.y = (int)(camera.y) / GRASS_SIZE;
   for (y = 0; y < GRASS_GRID; y++) {
     for (x = 0; x < GRASS_GRID; x++) {
+      grass[x][y].Invalidate (); 
       grass[x][y].Set (current.x + x - GRASS_HALF, current.y + y - GRASS_HALF, 1);
     }
   }

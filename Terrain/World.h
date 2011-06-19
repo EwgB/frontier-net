@@ -73,12 +73,15 @@ struct Region
 
 Cell      WorldCell (int world_x, int world_y);
 GLrgba    WorldColorGet (int world_x, int world_y, SurfaceColor c);
+char*     WorldLocationName (int world_x, int world_y);
+Region    WorldRegionFromPosition (int world_x, int world_y);
+Region    WorldRegionFromPosition (int world_x, int world_y);
+float     WorldWaterLevel (int world_x, int world_y);
+
 void      WorldGenerate ();
 void      WorldInit ();
 unsigned  WorldMap ();
-unsigned  WorldNoisei (int index);Region    WorldRegionGet (int index_x, int index_y);
+unsigned  WorldNoisei (int index);
 float     WorldNoisef (int index);
+Region    WorldRegionGet (int index_x, int index_y);
 void      WorldRegionSet (int index_x, int index_y, Region val);
-Region    WorldRegionFromPosition (int world_x, int world_y);
-Region    WorldRegionFromPosition (float world_x, float world_y);
-float     WorldWaterLevel (int world_x, int world_y);
