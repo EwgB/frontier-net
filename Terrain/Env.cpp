@@ -43,6 +43,10 @@
 #define VECTOR_AFTERNOON    glVector ( 0.5f, 0.0f, -0.5f)
 #define VECTOR_SUNSET       glVector ( 0.8f, 0.0f, -0.2f)
 
+#define SUN_ANGLE_SUNRISE   -10
+#define SUN_ANGLE_MORNING   15
+#define SUN_ANGLE_AFTERNOON 165
+#define SUN_ANGLE_SUNSET    190
 
 static Env        desired;
 static Env        current;
@@ -87,7 +91,7 @@ static void do_cycle ()
     else
       glRgba (0.5f, 0.7f, 1.0f);
     desired.light = glVectorInterpolate (VECTOR_SUNRISE, VECTOR_MORNING, fade);
-    desired.sun_angle = MathInterpolate (-45.0f, 45.0f, fade);
+    desired.sun_angle = MathInterpolate (SUN_ANGLE_SUNRISE, SUN_ANGLE_MORNING, fade);
     desired.draw_sun = true;
   } else if (decimal_time >= TIME_DAY && decimal_time < TIME_SUNSET)  { //day
     fade = (decimal_time - TIME_DAY) / (TIME_SUNSET - TIME_DAY);
@@ -100,7 +104,7 @@ static void do_cycle ()
     desired.color[ENV_COLOR_LIGHT].Normalize ();
     desired.light = glVector (0, 0.5f, -0.5f);
     desired.light = glVectorInterpolate (VECTOR_MORNING, VECTOR_AFTERNOON, fade);
-    desired.sun_angle = MathInterpolate (45.0f, 135.0f, fade);
+    desired.sun_angle = MathInterpolate (SUN_ANGLE_MORNING, SUN_ANGLE_AFTERNOON, fade);
     desired.draw_sun = true;
   } else if (decimal_time >= TIME_SUNSET && decimal_time < TIME_DUSK) { // sunset
     fade = (decimal_time - TIME_SUNSET) / (TIME_DUSK - TIME_SUNSET);
@@ -115,7 +119,7 @@ static void do_cycle ()
     desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 0.5f, 0.5f);
     desired.light = glVector (0.8f, 0.0f, -0.2f);
     desired.light = glVectorInterpolate (VECTOR_AFTERNOON, VECTOR_SUNSET, fade);
-    desired.sun_angle = MathInterpolate (135.0f, 225.0f, fade);
+    desired.sun_angle = MathInterpolate (SUN_ANGLE_AFTERNOON, SUN_ANGLE_SUNSET, fade);
     desired.draw_sun = true;
  } else { //night
     color_scaling = NIGHT_SCALING;
@@ -171,7 +175,7 @@ static void do_time (float delta)
 void    EnvInit ()
 {
 
-  hours = 8;
+  hours = 19;
   do_time (1);
   current = desired;
 
