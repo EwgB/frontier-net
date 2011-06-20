@@ -29,6 +29,7 @@ struct Leaf
   float         angle;
   float         size;
   float         brightness;
+  float         dist;
   unsigned      neighbor;
 };
 
@@ -42,6 +43,7 @@ class CTree
   float             _branch_reach;
   float             _trunk_bend;
   float             _foliage_size;
+  float             _leaf_size;
   unsigned          _texture;
   TreeTrunkStyle    _trunk_style;
   TreeFoliageStyle  _foliage_style;

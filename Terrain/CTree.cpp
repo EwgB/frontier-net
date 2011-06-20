@@ -254,15 +254,16 @@ void CTree::Build (GLvector pos)
   _uv.clear ();
   _index.clear ();
 
-  _height = 10.0f + WorldNoisef (ii++) * 10.0f;
-  _base_radius = 1.0f + WorldNoisef (ii++) * 3.0f;
-  _branch_lift = -1.0f + WorldNoisef (ii++) * 2.0f;
-  _branch_reach = 0.5f + WorldNoisef (ii++) * 0.5f;
+  _height = 8.0f + WorldNoisef (ii++) * 8.0f;
+  _base_radius = 0.3f + WorldNoisef (ii++) * 2.0f;
+  _branch_reach = 0.75f + WorldNoisef (ii++) * 0.5f;
+  _branch_lift = WorldNoisef (ii++);
   _trunk_style = (TreeTrunkStyle)(WorldNoisei (ii) % TREE_TRUNK_TYPES); 
   _foliage_style = (WorldNoisei (ii++) % 2) ? TREE_FOLIAGE_UMBRELLA : TREE_FOLIAGE_PANEL;
   _lowest_branch = 0.15f + WorldNoisef (ii++) * 0.5f;
   _branches = 3 + WorldNoisei (ii++) % 4;
   _foliage_size = 6.0f;
+  _leaf_size = 0.125f;
   _trunk_bend = WorldNoisef (ii++) * _height / 3.0f;
 
   DoTexture ();
@@ -274,7 +275,7 @@ void CTree::Build (GLvector pos)
 
   circumference = _base_radius * _base_radius * (float)PI;
   radial_steps = (int)(circumference * SEGMENTS_PER_METER);
-  radial_steps = max (radial_steps, MIN_SEGMENTS);
+  radial_steps = max (radial_steps, MIN_SEGMENTS) + 1;
   radial_edge = radial_steps + 1;
   radius = 1.0f;
   core = glVector (0.0f, 0.0f, 0.0f);
@@ -464,16 +465,22 @@ void CTree::DoTexture ()
     frame = WorldNoisei (ii++) % frames;
     uvframe.Set (glVector (0.0f, (float)frame * frame_size), glVector (1.0f, (float)(frame + 1) * frame_size));
     leaf_color = glRgba (0.3f, 0.6f, 0.0f);
-    leaf_count = 56;
+    leaf_count = 32;
     for (i = 0; i < leaf_count; i++) {
       fade = (float)i / (float)leaf_count;
-      l.size = 32.0f - WorldNoisef(ii++) * (0.5f + fade * 0.5f) * 32.0f;
-      l.position.x = TEXTURE_HALF + ((WorldNoisef(ii++) - 0.5f) * (TEXTURE_SIZE - l.size * 2.0f));
-      l.position.y = TEXTURE_HALF + ((WorldNoisef(ii++) - 0.5f) * (TEXTURE_SIZE - l.size * 2.0f));
+      l.size = TEXTURE_SIZE * _leaf_size;
+      l.size = l.size - WorldNoisef(ii++) * (0.5f + fade * 0.5f) * l.size;
+      if (i) {
+        l.position.x = TEXTURE_HALF + ((WorldNoisef(ii++) - 0.5f) * (TEXTURE_SIZE - l.size * 2.0f));
+        l.position.y = TEXTURE_HALF + ((WorldNoisef(ii++) - 0.5f) * (TEXTURE_SIZE - l.size * 2.0f));
+        l.angle = -MathAngle (TEXTURE_HALF, TEXTURE_HALF, l.position.x, l.position.y);
+      } else {
+        l.position.x = TEXTURE_HALF;
+        l.position.y = TEXTURE_HALF;
+        l.angle = 0.0f;
+      }
       //l.position.x = (float)((i % 8) * 32);
-      l.angle = -MathAngle (TEXTURE_HALF, TEXTURE_HALF, l.position.x, l.position.y);
-      l.angle = -MathAngle (TEXTURE_HALF, TEXTURE_HALF, l.position.x, 0);
-      l.position.x += TEXTURE_SIZE;//Move to the right side of our texture
+      //l.angle = -MathAngle (TEXTURE_HALF, TEXTURE_HALF, l.position.x, 0);
       l.brightness = 0.25f + fade * 0.75f;
       leaves.push_back (l);
     }
@@ -485,12 +492,41 @@ void CTree::DoTexture ()
     l.size = 32.0f;
     leaves.push_back (l);
     glBindTexture (GL_TEXTURE_2D, 0);
+
     
+
+    for (i = 0; i < leaves.size (); i++) {
+      unsigned    j;
+      float       nearest;
+      float       consider;
+      GLvector2   delta;
+
+      nearest = 9999.9f;
+      leaves[i].neighbor = 0;
+      for (j = 0; j < leaves.size (); j++) {
+        if (j == i)
+          continue;
+        delta.x = abs (leaves[i].position.x - leaves[j].position.x);
+        delta.y = abs (leaves[i].position.y - leaves[j].position.y);
+        consider = delta.Length ();
+        if (consider < nearest) {
+          nearest = consider;
+          leaves[i].neighbor = j;
+        }
+      }
+
+    }
+
+    for (i = 0; i < leaves.size (); i++) 
+      leaves[i].position.x += TEXTURE_SIZE;//Move to the right side of our texture
+
+
     glLineWidth (5.0f);
     glColor3f (0.45f, 0.3f, 0.0f);
     glBegin (GL_LINES);
-    for (i = 0; i < leaves.size (); i += 5) {
-      glVertex2f (TEXTURE_SIZE + TEXTURE_HALF, TEXTURE_HALF);
+    for (i = 0; i < leaves.size (); i++) {
+      //glVertex2f (TEXTURE_SIZE + TEXTURE_HALF, TEXTURE_HALF);
+      glVertex2fv (&leaves[leaves[i].neighbor].position.x);
       glVertex2fv (&leaves[i].position.x);
     }
     glEnd ();
@@ -498,8 +534,9 @@ void CTree::DoTexture ()
     glLineWidth (3.0f);
     glColor3f (0.75f, 0.5f, 0.2f);
     glBegin (GL_LINES);
-    for (i = 0; i < leaves.size (); i += 5) {
-      glVertex2f (TEXTURE_SIZE + TEXTURE_HALF, TEXTURE_HALF);
+    for (i = 0; i < leaves.size (); i++) {
+      //glVertex2f (TEXTURE_SIZE + TEXTURE_HALF, TEXTURE_HALF);
+      glVertex2fv (&leaves[leaves[i].neighbor].position.x);
       glVertex2fv (&leaves[i].position.x);
     }
     glEnd ();

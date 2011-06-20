@@ -38,7 +38,8 @@ void SdlInit ()
     return;
   }
   SDL_WM_SetIcon(SDL_LoadBMP("/textures/blob.bmp"), NULL);
-  RenderCreate (1280, 768, 32, false);
+  //RenderCreate (1280, 768, 32, false);
+  RenderCreate (1920, 1200, 32, true);
   //Here we initialize SDL as we would do with any SDL application.
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
