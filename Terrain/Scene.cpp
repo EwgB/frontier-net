@@ -176,6 +176,7 @@ void SceneUpdate (long stop)
 
 
   TextPrint ("%d Terrains cached: %s\nTexture memory: %s\n%d Terrain triangles", cached, TextBytes (cached * sizeof (CTerrain)), TextBytes (texture_bytes), polygons);
+  TextPrint ("Tree has %d polys.", tree.Polygons ());
   camera = CameraPosition ();
   current.x = (int)(camera.x) / GRASS_SIZE;
   current.y = (int)(camera.y) / GRASS_SIZE;

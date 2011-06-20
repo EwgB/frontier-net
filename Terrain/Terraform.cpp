@@ -477,6 +477,68 @@ void TerraformClimate ()
 
 }
 
+GLrgba TerraformColorGenerate (SurfaceColor c, float moisture, float temperature, int seed)
+{
+
+  float     fade;
+
+  switch (c) {
+  case SURFACE_COLOR_GRASS:
+    GLrgba    warm_grass, cold_grass, wet_grass, dry_grass, dead_grass;
+
+    wet_grass.red = WorldNoisef (seed++) * 0.3f;
+    wet_grass.green = 0.4f + WorldNoisef (seed++) * 0.6f;
+    wet_grass.blue = WorldNoisef (seed++) * 0.3f;
+    //Dry grass is mostly reds and oranges
+    dry_grass.red = 0.7f + WorldNoisef (seed++) * 0.3f;
+    dry_grass.green = 0.5f + WorldNoisef (seed++) * 0.5f;
+    dry_grass.blue = 0.0f + WorldNoisef (seed++) * 0.3f;
+    //Dead grass is pale beige
+    dead_grass = glRgba (0.7f, 0.6f, 0.5f);
+    dead_grass *= 0.7f + WorldNoisef (seed++) * 0.3f;
+    if (moisture < 0.5f) {
+      fade = moisture * 2.0f;
+      warm_grass = glRgbaInterpolate (dead_grass, dry_grass, fade);
+    } else {
+      fade = (moisture - 0.5f) * 2.0f;
+      warm_grass = glRgbaInterpolate (dry_grass, wet_grass, fade);
+    }
+    //cold grass is pale and a little blue
+    cold_grass.red = 0.5f + WorldNoisef (seed++) * 0.2f;
+    cold_grass.green = 0.8f + WorldNoisef (seed++) * 0.2f;
+    cold_grass.blue = 0.7f + WorldNoisef (seed++) * 0.2f;
+    if (temperature < TEMP_COLD)
+      return glRgbaInterpolate (cold_grass, warm_grass, temperature / TEMP_COLD);
+    return warm_grass;
+  case SURFACE_COLOR_DIRT:
+    GLrgba    cold_dirt, warm_dirt, dry_dirt, wet_dirt;
+
+    //Devise a random but plausible dirt color
+    //Dry dirts are mostly reds, oranges, and browns
+    dry_dirt.red = 0.4f + WorldNoisef (seed++) * 0.6f;
+    dry_dirt.green = 0.4f + WorldNoisef (seed++) * 0.6f;
+    dry_dirt.green = min (dry_dirt.green, dry_dirt.red);
+    dry_dirt.green = 0.1f + WorldNoisef (seed++) * 0.5f;
+    dry_dirt.blue = 0.2f + WorldNoisef (seed++) * 0.4f;
+    dry_dirt.blue = min (dry_dirt.blue, dry_dirt.green);
+    //wet dirt is various browns
+    fade = WorldNoisef (seed++) * 0.6f;
+    wet_dirt.red = 0.2f + fade;
+    wet_dirt.green = 0.1f + fade;
+    wet_dirt.blue = 0.0f +  fade / 2.0f;
+    wet_dirt.green += WorldNoisef (seed++) * 0.1f;
+    //cold dirt is pale
+    cold_dirt = glRgbaInterpolate (wet_dirt, glRgba (0.7f), 0.5f);
+    //warm dirt us a fade from wet to dry
+    warm_dirt = glRgbaInterpolate (dry_dirt, wet_dirt, moisture);
+    fade = MathScalar (temperature, FREEZING, 1.0f);
+    return glRgbaInterpolate (cold_dirt, warm_dirt, fade);
+  }
+  //Shouldn't happen. Returns pink to flag the problem.
+  return glRgba (1.0f, 0.0f, 1.0f);
+
+}
+
 //Determine the grass, dirt, rock, and other colors used by this region.
 void TerraformColors ()
 {
@@ -493,7 +555,7 @@ void TerraformColors ()
     for (y = 0; y < WORLD_GRID; y++) {
       r = WorldRegionGet (x, y);
       //Devise a grass color
-
+      /*
       //wet grass is deep greens
       wet_grass.red = RandomFloat () * 0.3f;
       wet_grass.green = 0.4f + RandomFloat () * 0.6f;
@@ -520,8 +582,11 @@ void TerraformColors ()
         r.color_grass = glRgbaInterpolate (cold_grass, warm_grass, r.temperature / TEMP_COLD);
       else
         r.color_grass = warm_grass;
+        */
+      r.color_grass = TerraformColorGenerate (SURFACE_COLOR_GRASS, r.moisture, r.temperature, r.grid_pos.x + r.grid_pos.y * WORLD_GRID);
       //Devise a random but plausible dirt color
       //Dry dirts are mostly reds, oranges, and browns
+      /*
       dry_dirt.red = 0.4f + RandomFloat () * 0.6f;
       dry_dirt.green = 0.4f + RandomFloat () * 0.6f;
       dry_dirt.green = min (dry_dirt.green, dry_dirt.red);
@@ -540,6 +605,8 @@ void TerraformColors ()
       warm_dirt = glRgbaInterpolate (dry_dirt, wet_dirt, r.moisture);
       fade = MathScalar (r.temperature, FREEZING, 1.0f);
       r.color_dirt = glRgbaInterpolate (cold_dirt, warm_dirt, fade);
+      */
+      r.color_dirt = TerraformColorGenerate (SURFACE_COLOR_DIRT, r.moisture, r.temperature, r.grid_pos.x + r.grid_pos.y * WORLD_GRID);
 
       //"atmosphere" is the overall color of the lighting & fog. 
       humid_air = glRgba (1.0f, 1.0f, 0.3f);
