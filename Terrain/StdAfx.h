@@ -13,12 +13,12 @@
 #define TEMP_COLD                 0.45f
 #define TEMP_TEMPERATE            0.6f
 #define TEMP_HOT                  0.9f
-#define min_TEMP                  0.0f
-#define max_TEMP                  1.0f
+#define MIN_TEMP                  0.0f
+#define MAX_TEMP                  1.0f
 #define DEGREES_TO_RADIANS        .017453292F
 #define RADIANS_TO_DEGREES        57.29577951F
 #define NEGLIGIBLE                0.000000000001f
-#define PI                        ((double)3.1415926535F)
+#define PI                        (3.1415926535f)
 #define GRAVITY                   9.5f
 
 #include <vector>

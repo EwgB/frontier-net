@@ -88,6 +88,8 @@ struct GLvector2
   OPERATORS(GLvector2);
 };
 
+
+
 struct GLuvbox
 {
   GLvector2 ul;
@@ -182,6 +184,26 @@ public:
   int             GlyphDraw (int ascii, GLcoord origin) const;
   int             GlyphWidth (int ascii);
   int             LineHeight () const { return _line_height;}
+};
+
+struct GLmesh
+{
+  vector<UINT>      _index;
+  vector<GLvector>  _vertex;
+  vector<GLvector>  _normal;
+  vector<GLvector2> _uv;
+
+  void              CalculateNormals ();
+  void              CalculateNormalsSeamless ();
+  void              Clear ();
+  void              PushTriangle (UINT i1, UINT i2, UINT i3);
+  void              PushQuad (UINT i1, UINT i2, UINT i3, UINT i4);
+  void              PushVertex (GLvector vert, GLvector normal, GLvector2 uv);
+  unsigned          Vertices () { return _vertex.size (); };
+  unsigned          Triangles () { return _index.size () / 3; };
+
+  void    operator+= (const GLmesh& c);
+
 };
 
 GLbbox    glBboxClear (void);

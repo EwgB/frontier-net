@@ -94,6 +94,7 @@
     <ClCompile Include="glCoord.cpp" />
     <ClCompile Include="glFont.cpp" />
     <ClCompile Include="glMatrix.cpp" />
+    <ClCompile Include="glMesh.cpp" />
     <ClCompile Include="glQuat.cpp" />
     <ClCompile Include="glRgba.cpp" />
     <ClCompile Include="glUvbox.cpp" />

@@ -463,7 +463,7 @@ void TerraformClimate ()
       //Mountains are cooler at the top
       if (r.mountain_height) 
         temp -= (float)r.mountain_height * 0.15f;
-      temp = clamp (temp, min_TEMP, max_TEMP);
+      temp = clamp (temp, MIN_TEMP, MAX_TEMP);
       //oceans have a moderating effect
       if (r.climate == CLIMATE_OCEAN) {
         temp = (temp + 0.5f) / 2.0f;

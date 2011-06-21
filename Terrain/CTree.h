@@ -62,11 +62,13 @@ class CTree
   bool              _no_branches;
   int               _branches;
   float             _height;
+  float             _texture_tile;
   float             _base_radius;
   float             _lowest_branch;
   float             _branch_lift;
   float             _branch_reach;
   float             _trunk_bend;
+  float             _trunk_bend_frequency;
   float             _foliage_size;
   float             _leaf_size;
   unsigned          _texture;
@@ -75,11 +77,7 @@ class CTree
   GLrgba            _bark_color2;
   GLrgba            _leaf_color;
   vector<Leaf>      _leaf_list;
-  vector<UINT>      _index;
-  vector<GLvector>  _vertex;
-  vector<GLvector>  _normal;
-  vector<GLvector2> _uv;
-  vector<GLcoord>   _sticks;
+  GLmesh            _mesh;
   VBO               _vbo;
 
   void              PushTriangle (int n1, int n2, int n3);
@@ -92,6 +90,7 @@ public:
   void              Build (GLvector pos, float moisture, float temperature, int seed);
   void              Render ();
   int               Polygons () { return _polygons; };
+  GLmesh*           Mesh () { return &_mesh; };
 
 
 };
