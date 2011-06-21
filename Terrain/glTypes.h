@@ -107,6 +107,7 @@ struct GLrgba
   float       alpha;
   void        Clamp ();
   void        Normalize ();
+  float       Brighness ();
   OPERATORS(GLrgba);
 };
 

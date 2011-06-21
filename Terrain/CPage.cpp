@@ -21,7 +21,7 @@
 #include "world.h"
 
 //Lower numbers make the normals more extreme, exaggerate the lighting
-#define NORMAL_SCALING    0.4f
+#define NORMAL_SCALING    0.7f
 
 SurfaceType CPage::Surface (int x, int y)
 {
@@ -241,7 +241,7 @@ void CPage::DoSurface ()
     }
     if (low <= 2.5f && (region.climate == CLIMATE_OCEAN))
       c->surface = SURFACE_SAND;
-    if (delta > 3.0f && region.temperature > 0.0f)
+    if (delta > 4.0f && region.temperature > 0.0f)
       c->surface = SURFACE_ROCK;
     /*
     if (c->detail > 0.5f)

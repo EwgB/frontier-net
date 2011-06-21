@@ -467,4 +467,11 @@ void GLrgba::Normalize ()
 }
     
 
+float GLrgba::Brighness ()
+{
+
+  return (red + blue + green) / 3.0f;
+
+}
+
   

@@ -18,6 +18,7 @@
 #include "cgrass.h"
 #include "cterrain.h"
 #include "ctree.h"
+#include "ini.h"
 #include "input.h"
 #include "math.h"
 #include "scene.h"
@@ -123,10 +124,13 @@ void SceneTexturePurge ()
 
   int           x, y;
 
-  for (x = 0; x < WORLD_GRID; x++) {
-    for (y = 0; y < WORLD_GRID; y++) {
+
+  for (x = 0; x < TERRAIN_GRID; x++) {
+    for (y = 0; y < TERRAIN_GRID; y++) {
       if (terrain[x][y]) 
-        terrain[x][y]->TexturePurge ();
+        delete terrain[x][y];
+      terrain[x][y] = NULL;
+
     }
   }
 
@@ -142,6 +146,8 @@ CTerrain* SceneTerrainGet (int x, int y)
 
 }
 
+static GLvector last_tree;
+
 void SceneInit ()
 {
 
@@ -155,10 +161,11 @@ void SceneInit ()
   }
   SceneGenerate ();
   grass_walk.Clear ();
+  last_tree = IniVector ("Treepos");
 
 }
 
-static GLvector last_tree;
+static int  seed;
 
 void SceneUpdate (long stop)
 {
@@ -185,11 +192,15 @@ void SceneUpdate (long stop)
     GLvector  apos = AvatarPosition ();
     apos.x -= 4.0f;
     apos.z = CacheElevation (apos.x, apos.y);
-    tree.Build (apos);
+    tree.Build (apos, 0.0f, 0.0f, 0);
     last_tree = apos;
+    IniVectorSet ("Treepos", last_tree);
   }
-  if (InputKeyPressed (SDLK_r)) 
-    tree.Build (last_tree);
+  if (InputKeyPressed (SDLK_r)) {
+    tree.Build (last_tree, WorldNoisef (seed + 1), WorldNoisef (seed + 2), seed);
+    seed++;
+  }
+
 
 
 

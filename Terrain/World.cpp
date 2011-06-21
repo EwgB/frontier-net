@@ -62,18 +62,6 @@ static float do_height_noblend (float val, Region r, GLvector2 offset, float wat
     //if this river is strictly north / south
     if (r.flags_shape & REGION_FLAG_RIVERNS && !(r.flags_shape & REGION_FLAG_RIVEREW)) {
       //This makes the river bend side-to-side
-        /*
-      switch ((r.grid_pos.x + r.grid_pos.y) % 4) {
-      case 0:
-        offset.x += abs (sin (offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;break;
-      case 1:
-        offset.x -= abs (sin (offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;break;
-      case 2:
-        offset.x += abs (sin (offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.1f;break;
-      case 3:
-        offset.x -= abs (sin (offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.1f;break;
-      }
-        */
       switch ((r.grid_pos.x + r.grid_pos.y) % 6) {
       case 0:
         offset.x += abs (sin (offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;break;
@@ -103,7 +91,7 @@ static float do_height_noblend (float val, Region r, GLvector2 offset, float wat
         offset.y += abs (sin (offset.x * 180.0f * DEGREES_TO_RADIANS)) * 0.10f;break;
       }
     }
-    //if this river
+    //if this river curves around a bend
     if (r.flags_shape & REGION_FLAG_RIVERNW && !(r.flags_shape & REGION_FLAG_RIVERSE)) 
       offset.x = offset.y = offset.Length ();
     if (r.flags_shape & REGION_FLAG_RIVERSE && !(r.flags_shape & REGION_FLAG_RIVERNW)) {
@@ -176,6 +164,7 @@ static float do_height (Region r, GLvector2 offset, float water, float detail, f
     if (detail > max (x, y))
       detail /= 4.0f;
   }
+  
   //Soften up the banks of a river 
   if (r.flags_shape & REGION_FLAG_RIVER_ANY) {
     GLvector2   cen;
@@ -184,10 +173,13 @@ static float do_height (Region r, GLvector2 offset, float water, float detail, f
     cen.x = abs ((offset.x - 0.5f) * 2.0f);
     cen.y = abs ((offset.y - 0.5f) * 2.0f);
     strength = min (cen.x, cen.y);
-    strength = max (strength, 0.2f);
+    strength = max (strength, 0.1f);
     detail *= strength;
   }
   
+
+
+
   //Apply the values!
   val = water + detail * r.geo_detail + bias * LARGE_STRENGTH;
   if (r.climate == CLIMATE_SWAMP) {

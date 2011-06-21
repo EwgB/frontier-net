@@ -533,6 +533,20 @@ GLrgba TerraformColorGenerate (SurfaceColor c, float moisture, float temperature
     warm_dirt = glRgbaInterpolate (dry_dirt, wet_dirt, moisture);
     fade = MathScalar (temperature, FREEZING, 1.0f);
     return glRgbaInterpolate (cold_dirt, warm_dirt, fade);
+  case SURFACE_COLOR_ROCK:
+    GLrgba    warm_rock, cold_rock;
+
+    //Devise a rock color
+    fade = MathScalar (temperature, FREEZING, 1.0f);
+    //Warm rock is red
+    warm_rock.red = 1.0f;
+    warm_rock.green = 1.0f - RandomFloat () * 0.6f;
+    warm_rock.blue = 1.0f - RandomFloat () * 0.6f;
+    //Cold rock is white or blue
+    cold_rock.blue = 1.0f;
+    cold_rock.green = 1.0f - RandomFloat () * 0.4f;
+    cold_rock.red = cold_rock.green;
+    return glRgbaInterpolate (cold_rock, warm_rock, fade);
   }
   //Shouldn't happen. Returns pink to flag the problem.
   return glRgba (1.0f, 0.0f, 1.0f);
@@ -545,11 +559,11 @@ void TerraformColors ()
 
   int       x, y;
   Region    r;
-  float     fade;
-  GLrgba    warm_grass, cold_grass, wet_grass, dry_grass, dead_grass;
-  GLrgba    cold_dirt, warm_dirt, dry_dirt, wet_dirt;
+//  float     fade;
+  //GLrgba    warm_grass, cold_grass, wet_grass, dry_grass, dead_grass;
+  //GLrgba    cold_dirt, warm_dirt, dry_dirt, wet_dirt;
   GLrgba    humid_air, dry_air, cold_air, warm_air;
-  GLrgba    warm_rock, cold_rock;
+//  GLrgba    warm_rock, cold_rock;
 
   for (x = 0; x < WORLD_GRID; x++) {
     for (y = 0; y < WORLD_GRID; y++) {
@@ -616,6 +630,7 @@ void TerraformColors ()
       r.color_atmosphere = glRgbaInterpolate (cold_air, warm_air, r.temperature);
 
       //Devise a rock color
+      /*
       fade = MathScalar (r.temperature, FREEZING, 1.0f);
       //Warm rock is red
       warm_rock.red = 1.0f;
@@ -628,6 +643,8 @@ void TerraformColors ()
       r.color_rock = glRgbaInterpolate (cold_rock, warm_rock, fade);
       if ((x + y) % 2)
         r.color_rock = glRgba (1.0f);
+        */
+      r.color_rock = TerraformColorGenerate (SURFACE_COLOR_ROCK, r.moisture, r.temperature, r.grid_pos.x + r.grid_pos.y * WORLD_GRID);
 
       //Color the map
       switch (r.climate) {

@@ -116,9 +116,6 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
   GLrgba      surface_color;
   GLcoord     start, end;
 
-  //col = glRgbaUnique (patch_x + patch_y * 100);
-  //glClearColor (col.red, col.green, col.blue, 1.0f);
-  //glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glDisable (GL_CULL_FACE);
   glDisable (GL_FOG);
   glEnable (GL_BLEND);
@@ -127,8 +124,6 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
   glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
 	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	
   glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
-
-
   if (_patch_steps > 1) {
     int     texture_step = TERRAIN_SIZE / _patch_steps;
     start.x = _walk.x * texture_step - 3;
