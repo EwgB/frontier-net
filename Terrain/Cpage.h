@@ -1,6 +1,8 @@
 #define PAGE_SIZE       64
 #define PAGE_HALF       (PAGE_SIZE / 2)
 #define PAGE_EXPIRE     30000 //milliseconds
+#define TREE_SPACING    8 //Power of 2, how far apart trees should be. (Roughly)
+#define TREE_MAP        (PAGE_SIZE / TREE_SPACING)
 
 enum
 {

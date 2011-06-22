@@ -193,17 +193,31 @@ void CPage::DoTrees ()
   GLcoord   worldpos;
   Region    region;
   pcell*    c;
+  int       x, y;
+  GLcoord   plant;
+  bool      valid;
+  float     lowest;
 
-  c = &_cell[_walk.x][_walk.y];
-  if (!(_walk.x % 16) && !(_walk.y % 16) /*&& c->surface == SURFACE_GRASS*/) {
-    worldpos.x = _origin.x * PAGE_SIZE + _walk.x;
-    worldpos.y = _origin.y * PAGE_SIZE + _walk.y;
-    region = WorldRegionFromPosition (worldpos.x, worldpos.y);
-    c = &_cell[_walk.x][_walk.y];
-    if (c->detail < 0.15f)
-      c->tree_id = region.tree_type;
+  worldpos.x = _origin.x * PAGE_SIZE + _walk.x;
+  worldpos.y = _origin.y * PAGE_SIZE + _walk.y;
+  region = WorldRegionFromPosition (worldpos.x, worldpos.y);
+  valid = false;
+  lowest = 99999.9f;
+  for (x = 0; x < TREE_SPACING / 2; x++) {
+    for (y = 0; y < TREE_SPACING / 2; y++) {
+      c = &_cell[_walk.x * TREE_SPACING + x][_walk.y * TREE_SPACING + y];
+      if (c->detail < 0.1f && c->pos.z < lowest && c->surface == SURFACE_GRASS) {
+        plant.x = _walk.x * TREE_SPACING + x;
+        plant.y = _walk.y * TREE_SPACING + y;
+        valid = true;
+      }
+    }
   }
-  if (_walk.Walk (PAGE_SIZE))
+  if (valid) {
+    c = &_cell[plant.x][plant.y];
+    c->tree_id = region.tree_type;
+  }
+  if (_walk.Walk (TREE_MAP))
     _stage++;
 
 }

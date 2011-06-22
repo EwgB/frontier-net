@@ -24,6 +24,7 @@ struct TreeVBO
 
 class CForest
 {
+  int               _compile_step;
   bool              _swap;
   GLcoord           _position;
   GLcoord           _origin;

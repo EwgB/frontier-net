@@ -617,8 +617,8 @@ void TerraformColors ()
       }
       if (r.geo_scale >= 0.0f)
         r.color_map *= (r.geo_scale * 0.5f + 0.5f);
-      if (r.geo_scale >= 0.0f)
-        r.color_map = glRgbaUnique (r.tree_type);
+      //if (r.geo_scale >= 0.0f)
+        //r.color_map = glRgbaUnique (r.tree_type);
       WorldRegionSet (x, y, r);
     }
   }

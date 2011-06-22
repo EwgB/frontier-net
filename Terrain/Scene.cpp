@@ -29,7 +29,7 @@
 #include "water.h"
 #include "world.h"
 
-#define FOREST_GRID     2
+#define FOREST_GRID     5
 #define FOREST_HALF     (FOREST_GRID / 2)
 #define GRASS_GRID      5
 #define GRASS_HALF      (GRASS_GRID / 2)
@@ -222,22 +222,6 @@ void SceneUpdate (long stop)
   }*/
 
   
-  forest_current.x = (int)(camera.x) / FOREST_SIZE;
-  forest_current.y = (int)(camera.y) / FOREST_SIZE;
-  fpos = forest[forest_walk.x][forest_walk.y].Position ();
-  if (forest_current.x - fpos.x > FOREST_HALF)
-    fpos.x += FOREST_GRID;
-  if (fpos.x - forest_current.x > FOREST_HALF)
-    fpos.x -= FOREST_GRID;
-  if (forest_current.y - fpos.y > FOREST_HALF)
-    fpos.y += FOREST_GRID;
-  if (fpos.y - forest_current.y > FOREST_HALF)
-    fpos.y -= FOREST_GRID;
-  forest[forest_walk.x][forest_walk.y].Set (fpos.x, fpos.y);
-  forest[forest_walk.x][forest_walk.y].Update (stop);
-  if (forest[forest_walk.x][forest_walk.y].Ready ())
-    forest_walk.Walk (FOREST_GRID);
-
 
 
   grass_current.x = (int)(camera.x) / GRASS_SIZE;
@@ -257,6 +241,23 @@ void SceneUpdate (long stop)
   if (grass[grass_walk.x][grass_walk.y].Ready ())
     grass_walk.Walk (GRASS_GRID);
 
+  forest_current.x = (int)(camera.x) / FOREST_SIZE;
+  forest_current.y = (int)(camera.y) / FOREST_SIZE;
+  fpos = forest[forest_walk.x][forest_walk.y].Position ();
+  if (forest_current.x - fpos.x > FOREST_HALF)
+    fpos.x += FOREST_GRID;
+  if (fpos.x - forest_current.x > FOREST_HALF)
+    fpos.x -= FOREST_GRID;
+  if (forest_current.y - fpos.y > FOREST_HALF)
+    fpos.y += FOREST_GRID;
+  if (fpos.y - forest_current.y > FOREST_HALF)
+    fpos.y -= FOREST_GRID;
+  forest[forest_walk.x][forest_walk.y].Set (fpos.x, fpos.y);
+  forest[forest_walk.x][forest_walk.y].Update (stop);
+  if (forest[forest_walk.x][forest_walk.y].Ready ())
+    forest_walk.Walk (FOREST_GRID);
+
+
 
   terrain_current.x = (int)(camera.x) / TERRAIN_SIZE;
   terrain_current.y = (int)(camera.y) / TERRAIN_SIZE;
@@ -273,6 +274,11 @@ void SceneUpdate (long stop)
     if (SdlTick () >= stop)
       break;
   }
+
+
+
+
+
   //Now look for terrains to release
   for (int i = 0; i < TERRAIN_GRID / 2; i++) {
     if (terrain[terrain_walk.x][terrain_walk.y]) {

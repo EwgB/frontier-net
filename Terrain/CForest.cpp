@@ -75,6 +75,7 @@ void CForest::Set (int x, int y)
     return;
   //if (_stage > FOREST_STAGE_BEGIN && _stage < FOREST_STAGE_DONE)
     //return;
+  _compile_step = 0;
   _position.x = x;
   _position.y = y;
   _origin.x = x * FOREST_SIZE;
@@ -112,15 +113,10 @@ void CForest::Build (long stop)
     mat.Rotate (WorldNoisef (_walk.x + _walk.y * FOREST_SIZE) * 360.0f, 0.0f, 0.0f, 1.0f);
     origin = CachePosition (world_x, world_y);
     tree = WorldTree (tree_id);
-    //tree = WorldTree (_walk.x);
-    tree = WorldTree (5 + (vvv++) % 2);
-    //tree = WorldTree (12);
     tm = tree->Mesh ();
     texture_id = tree->Texture ();
     mesh_index = MeshFromTexture (texture_id);
-    //_mesh_list[mesh_index]._mesh.Clear ();
     base_index = _mesh_list[mesh_index]._mesh.Vertices ();
-    
     for (i = 0; i < tm->Vertices (); i++) {
       newpos = glMatrixTransformPoint (mat, tm->_vertex[i]);
       newpos.z *= 0.5f + WorldNoisef (2 + _walk.x + _walk.y * FOREST_SIZE) * 1.0f;
@@ -128,11 +124,11 @@ void CForest::Build (long stop)
       _mesh_list[mesh_index]._mesh.PushVertex (newpos + origin, newnorm, tm->_uv[i]);
     }
     //_mesh_list[mesh_index]._mesh.PushVertex (glVector (world_x, world_y, 0.0f), glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f));
-    _mesh_list[mesh_index]._mesh.PushVertex (glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f));
     //_mesh_list[mesh_index]._mesh.PushVertex (glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f));
-    _mesh_list[mesh_index]._mesh.PushVertex (glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f));
-    _mesh_list[mesh_index]._mesh.PushVertex (glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f));
-    _mesh_list[mesh_index]._mesh.PushVertex (glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f));
+    //_mesh_list[mesh_index]._mesh.PushVertex (glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f));
+    //_mesh_list[mesh_index]._mesh.PushVertex (glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f));
+    //_mesh_list[mesh_index]._mesh.PushVertex (glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f));
+    //_mesh_list[mesh_index]._mesh.PushVertex (glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f));
     for (i = 0; i < tm->Triangles (); i++) {
       unsigned i1, i2, i3;
       i1 = base_index + tm->_index[i * 3];
@@ -158,20 +154,19 @@ void CForest::Compile ()
 {
 
   unsigned    i;
-  TreeVBO     tvbo;
 
   //First, purge the existing VBO
   for (i = 0; i < _vbo_list.size (); i++) 
     _vbo_list[i]._vbo.Clear ();
   _vbo_list.clear ();
   //Now compile the new list
+  _vbo_list.resize (_mesh_list.size ());
   for (i = 0; i < _mesh_list.size (); i++) {
-    _vbo_list.push_back (tvbo);
-    _vbo_list[_vbo_list.size () - 1]._vbo.Clear ();
-    _vbo_list[_vbo_list.size () - 1]._bbox = _mesh_list[i]._mesh._bbox;
-    _vbo_list[_vbo_list.size () - 1]._texture_id= _mesh_list[i]._texture_id;
+    _vbo_list[i]._vbo.Clear ();
+    _vbo_list[i]._bbox = _mesh_list[i]._mesh._bbox;
+    _vbo_list[i]._texture_id= _mesh_list[i]._texture_id;
     if (!_mesh_list[i]._mesh._vertex.empty ())
-      _vbo_list[_vbo_list.size () - 1]._vbo.Create (GL_TRIANGLES, 
+      _vbo_list[i]._vbo.Create (GL_TRIANGLES, 
       _mesh_list[i]._mesh.Triangles () * 3, 
       _mesh_list[i]._mesh.Vertices (), 
       &_mesh_list[i]._mesh._index[0], 
@@ -181,12 +176,13 @@ void CForest::Compile ()
   }
   //Now purge the mesh list, so it can begin building again in the background
   //when the time comes.
-  //for (i = 0; i < _mesh_list.size (); i++) 
-    //_mesh_list[i]._mesh.Clear ();
-  //_mesh_list.clear ();
+  for (i = 0; i < _mesh_list.size (); i++) 
+    _mesh_list[i]._mesh.Clear ();
+  _mesh_list.clear ();
   _valid = true;
   _stage++;
   
+
 }
 
 void CForest::Update (long stop)
@@ -220,8 +216,8 @@ void CForest::Render ()
     return;
   glEnable (GL_BLEND);
 
-  glDisable (GL_LIGHTING);
-  glDisable (GL_FOG);
+  //glDisable (GL_LIGHTING);
+  //glDisable (GL_FOG);
   //glBlendFunc (GL_ONE, GL_ONE);
 
 
@@ -234,31 +230,19 @@ void CForest::Render ()
     //_vbo_list[i]._vbo.Render ();
   }
 
-  GLbbox    bb;
-  GLrgba    c = glRgbaUnique (_origin.x + _origin.y * 5);
+  //GLbbox    bb;
+  //GLrgba    c = glRgbaUnique (_origin.x + _origin.y * 5);
 
-  glDisable (GL_LIGHTING);
+  //glDisable (GL_LIGHTING);
   //glBlendFunc (GL_ONE, GL_ONE);
-  bb.Clear ();
-  bb.ContainPoint (glVector ((float)_origin.x, (float)_origin.y, 0.0f));
-  bb.ContainPoint (glVector ((float)_origin.x + FOREST_SIZE, (float)_origin.y + FOREST_SIZE,  + FOREST_SIZE));
-  glColor3fv (&c.red);
-  bb.Render ();
-
-  c *= 0.5f;
-  glColor3fv (&c.red);
+  //bb.Clear ();
+  //bb.ContainPoint (glVector ((float)_origin.x, (float)_origin.y, 0.0f));
+  //bb.ContainPoint (glVector ((float)_origin.x + FOREST_SIZE, (float)_origin.y + FOREST_SIZE,  + FOREST_SIZE));
+  //glColor3fv (&c.red);
+  //bb.Render ();
   for (i = 0; i < _vbo_list.size (); i++) {
-    c = glRgbaUnique (i + 10) * 5.0f;
-    glColor3fv (&c.red);
     glBindTexture (GL_TEXTURE_2D, _vbo_list[i]._texture_id);
-    //glBindTexture (GL_TEXTURE_2D, 0);
-    glPushMatrix ();
-    glTranslatef (0.0f, 0.0f, 20.0f);
     _vbo_list[i]._vbo.Render ();
-    glPopMatrix ();
-    _mesh_list[i]._mesh.Render ();
-    glBindTexture (GL_TEXTURE_2D, 0);
-    //_vbo_list[i]._bbox.Render ();
   }
 
 }

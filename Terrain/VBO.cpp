@@ -127,10 +127,12 @@ void VBO::Create (int polygon, int index_count, int vert_count, unsigned* index_
   glGenBuffersARB (1, &_id_vertex);
 	glBindBufferARB (GL_ARRAY_BUFFER_ARB, _id_vertex);			// Bind The Buffer
 	glBufferDataARB (GL_ARRAY_BUFFER_ARB, _size_buffer, buffer, GL_STATIC_DRAW_ARB);
+	glBindBufferARB (GL_ARRAY_BUFFER_ARB, 0);			// Unbind The Buffer
   //Create and load the indicies
   glGenBuffersARB (1, &_id_index);
 	glBindBufferARB (GL_ELEMENT_ARRAY_BUFFER_ARB, _id_index);
-	glBufferDataARB (GL_ELEMENT_ARRAY_BUFFER_ARB, index_count * sizeof(int), index_list, GL_STATIC_DRAW_ARB);
+	glBufferDataARB (GL_ELEMENT_ARRAY_BUFFER_ARB, index_count * sizeof(unsigned), index_list, GL_STATIC_DRAW_ARB);
+	glBindBufferARB (GL_ELEMENT_ARRAY_BUFFER_ARB, 0); //Unbind
   _index_count = index_count;
   delete[] buffer;
   _ready = true;
