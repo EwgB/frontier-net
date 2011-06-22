@@ -22,10 +22,6 @@
 #define TEXTURE_SIZE          256
 #define TEXTURE_HALF          (TEXTURE_SIZE / 2)
 #define MIN_RADIUS            0.3f
-//#define TEXTURE_TILE          0.5f
-
-//static int      ii;
-
 
 /*-----------------------------------------------------------------------------
 
@@ -102,7 +98,24 @@ void CTree::DoFoliage (GLvector pos, float fsize, float angle)
   fsize = min (pos.z - 2.0f, fsize);
   if (fsize < 0.1f)
     return;
-  if (_foliage_style == TREE_FOLIAGE_UMBRELLA || _foliage_style == TREE_FOLIAGE_BOWL) {
+  if (_foliage_style == TREE_FOLIAGE_BOWL) {
+    float  tip_height;
+
+    tip_height = fsize / 4.0f;
+    if (_foliage_style == TREE_FOLIAGE_BOWL)
+      tip_height *= -1.0f;
+    _mesh.PushVertex (glVector (0.0f, 0.0f, tip_height), glVector (0.0f, 0.0f, 1.0f), uv.Center ());
+    _mesh.PushVertex (glVector (-fsize, -fsize, -tip_height), glVector (-0.5f, -0.5f, 0.0f), uv.Corner (0));
+    _mesh.PushVertex (glVector (fsize, -fsize, -tip_height), glVector ( 0.5f, -0.5f, 0.0f), uv.Corner (1));
+    _mesh.PushVertex (glVector (fsize, fsize, -tip_height), glVector ( 0.5f, 0.5f, 0.0f), uv.Corner (2));
+    _mesh.PushVertex (glVector (-fsize, fsize, -tip_height), glVector ( -0.5f, 0.5f, 0.0f), uv.Corner (3));
+    _mesh.PushTriangle (base_index, base_index + 1, base_index + 2);
+    _mesh.PushTriangle (base_index, base_index + 2, base_index + 3);
+    _mesh.PushTriangle (base_index, base_index + 3, base_index + 4);
+    _mesh.PushTriangle (base_index, base_index + 4, base_index + 1);
+    _mesh.PushQuad (base_index + 1, base_index + 4, base_index + 3, base_index + 2);
+  }
+  if (_foliage_style == TREE_FOLIAGE_UMBRELLA) {
     float  tip_height;
 
     tip_height = fsize / 4.0f;
@@ -117,6 +130,11 @@ void CTree::DoFoliage (GLvector pos, float fsize, float angle)
     _mesh.PushTriangle (base_index, base_index + 3, base_index + 2);
     _mesh.PushTriangle (base_index, base_index + 4, base_index + 3);
     _mesh.PushTriangle (base_index, base_index + 1, base_index + 4);
+    _mesh.PushTriangle (base_index, base_index + 1, base_index + 2);
+    _mesh.PushTriangle (base_index, base_index + 2, base_index + 3);
+    _mesh.PushTriangle (base_index, base_index + 3, base_index + 4);
+    _mesh.PushTriangle (base_index, base_index + 4, base_index + 1);
+    //_mesh.PushQuad (base_index + 1, base_index + 2, base_index + 3, base_index + 4);
   }
   
   if (_foliage_style == TREE_FOLIAGE_PANEL) {
@@ -259,9 +277,9 @@ void CTree::DoBranch (BranchAnchor anchor, float branch_angle)
   for (tier = 0; tier < tier_count; tier++) {
     for (ring = 0; ring < radial_steps; ring++) {
       _mesh.PushQuad (base_index + (ring + 0) + (tier + 0) * (radial_edge),
-        base_index + (ring + 1) + (tier + 0) * (radial_edge),
+        base_index + (ring + 0) + (tier + 1) * (radial_edge),
         base_index + (ring + 1) + (tier + 1) * (radial_edge),
-        base_index + (ring + 0) + (tier + 1) * (radial_edge));
+        base_index + (ring + 1) + (tier + 0) * (radial_edge));
     }
   }
   pos = glVector (0.0f, anchor.length, 0.0f);
@@ -272,7 +290,7 @@ void CTree::DoBranch (BranchAnchor anchor, float branch_angle)
     
 }
 
-void CTree::Build (GLvector pos, float moisture, float temperature, int seed_in)
+void CTree::Build ()
 {
 
   int                   ring, tier, tier_count;
@@ -288,51 +306,12 @@ void CTree::Build (GLvector pos, float moisture, float temperature, int seed_in)
   vector<BranchAnchor>  branch_list;
   BranchAnchor          branch;
   int                   i;
-
-  //Prepare, clear the tables, etc.
-  _leaf_list.clear ();
-  _mesh.Clear ();
-  _seed = seed_in;
-  _seed_current = _seed;
-  //Funnel trunk trees taper off quickly at the base.
-  _funnel_trunk = (WorldNoisei (_seed_current++) % 6) == 0;
-  //If bark is light on dark or dark on light. Coin flip.
-  _height = 10.0f + WorldNoisef (_seed_current++) * 12.0f;//10 + r 12
-  _base_radius = 0.3f + WorldNoisef (_seed_current++) * 2.0f;
-  if (_funnel_trunk) {//Funnel trees need to be bigger and taller to look right
-    _base_radius *= 2.0f;
-    _height *= 1.5f;
-  }
-  _trunk_style = (TreeTrunkStyle)(WorldNoisei (_seed_current) % TREE_TRUNK_STYLES); 
-  _foliage_style = (TreeFoliageStyle)(WorldNoisei (_seed_current++) % TREE_FOLIAGE_STYLES);
-  _lift_style = (TreeLiftStyle)(WorldNoisei (_seed_current++) % TREE_LIFT_STYLES);
-  _leaf_style = (TreeLeafStyle)(WorldNoisei (_seed_current++) % TREE_LEAF_STYLES);
-  _no_branches = temperature + (WorldNoisef (_seed_current++) * 0.25f) < 0.5f;
-  _branch_reach = 1.0f + WorldNoisef (_seed_current++) * 0.5f;
-  _branch_lift = 1.0f + WorldNoisef (_seed_current++);
-  //Keep branches away from the ground, since they don't have collision
-  _lowest_branch = (3.0f / _height);
-  _foliage_size = 1.0f;
-  _leaf_size = 0.125f;
-  _trunk_bend = _height / 3.0f;
-  _leaf_color = TerraformColorGenerate (SURFACE_COLOR_GRASS, moisture, temperature,_seed_current++);
-  _bark_color1 = TerraformColorGenerate (SURFACE_COLOR_DIRT, moisture, temperature, _seed_current++);
-  _bark_color2 = _bark_color1;
-  _bark_color1 = _bark_color2 * 0.5f;
   
-  DoLeaves ();
-  DoTexture ();
-
 
   _branches = 4 + WorldNoisei (_seed_current++) % 3;
   _trunk_bend_frequency = 3.0f + WorldNoisef (_seed_current++) * 4.0f;
   angle_offset = WorldNoisef (_seed_current++) * 360.0f;
-
-
-
-
   //Determine the branch locations
-
   branch_spacing = (0.95f - _lowest_branch) / (float)_branches;
   for (i = 0; i < _branches; i++) {
     vertical_pos = _lowest_branch + branch_spacing * (float)i;
@@ -388,9 +367,9 @@ void CTree::Build (GLvector pos, float moisture, float temperature, int seed_in)
   for (tier = 0; tier < tier_count - 1; tier++) {
     for (ring = 0; ring < radial_steps; ring++) {
       _mesh.PushQuad ((ring + 0) + (tier + 0) * (radial_edge),
-        (ring + 0) + (tier + 1) * (radial_edge),
+        (ring + 1) + (tier + 0) * (radial_edge),
         (ring + 1) + (tier + 1) * (radial_edge),
-        (ring + 1) + (tier + 0) * (radial_edge));
+        (ring + 0) + (tier + 1) * (radial_edge));
 
     }
   }
@@ -413,57 +392,54 @@ void CTree::Build (GLvector pos, float moisture, float temperature, int seed_in)
       DoBranch (branch_list[i], angle);
     }
   } 
-  /*
-  {
-    unsigned      base;
-
-    base = _mesh.Vertices ();
-
-    _mesh.PushVertex (glVector (0.0f, 0.0f, 25.0f), glVector (0.0f, 0.0f, 1.0f), glVector (0.0f, 0.0f));
-    _mesh.PushVertex (glVector (0.0f, 0.0f, 15.0f), glVector (0.0f, 0.0f, 1.0f), glVector (0.0f, 0.0f));
-    for (x = 0; x <= 18; x += 1.0f) {
-      angle = (x * 20) * DEGREES_TO_RADIANS;
-      _mesh.PushVertex (glVector (sin (angle) * 5, cos (angle) * 5, 20.0f), glVector (0.0f, 0.0f, 1.0f), glVector (0.0f, 0.0f));
-    }
-    for (x = 0; x < 18; x += 1.0f) {
-      int index1 = base + 2 + (int)x;
-      int index2 = base + 2 + (int)(x + 1);
-      _mesh.PushTriangle (base, index2, index1);
-      _mesh.PushTriangle (base + 1, index1, index2);
-    }
-  }
-  */
-  /*
-  {
-    unsigned      base;
-
-    base = _mesh.Vertices ();
-
-    for (x = 0; x <= 9; x += 1.0f) {
-      angle = (x * 40) * DEGREES_TO_RADIANS;
-      _mesh.PushVertex (glVector (0.0f, 0.0f, 25.0f), glVector (0.0f, 0.0f, 1.0f), glVector (0.0f, 0.0f));
-      _mesh.PushVertex (glVector (sin (angle) * 5, cos (angle) * 5, 20.0f), glVector (0.0f, 0.0f, 1.0f), glVector (0.0f, 0.0f));
-      _mesh.PushVertex (glVector (0.0f, 0.0f, 15.0f), glVector (0.0f, 0.0f, 1.0f), glVector (0.0f, 0.0f));
-    }
-    for (x = 0; x < 9; x += 1.0f) {
-      int index1 = base + (int)x * 3;
-      int index2 = base + (int)x * 3 + 1;
-      int index3 = base + (int)x * 3 + 1 + 3;
-      int index4 = base + (int)x * 3 + 2;
-      _mesh.PushTriangle (index1, index3, index2);
-      _mesh.PushTriangle (index2, index3, index4);
-    }
-  }
-  */
-
-  //_mesh.CalculateNormalsSeamless ();
   _mesh.CalculateNormalsSeamless ();
   //DEV - move tree to requested origin
-  for (i = 0; i < (int)_mesh.Vertices (); i++) 
-    _mesh._vertex[i] += pos;
+  //for (i = 0; i < (int)_mesh.Vertices (); i++) 
+    //_mesh._vertex[i] += pos;
   //_vbo.Create (GL_TRIANGLES, _index.size (), _vertex.size (), &_index[0], &_vertex[0], &_normal[0], NULL, &_uv[0]);
-  _vbo.Create (GL_TRIANGLES, _mesh.Triangles () * 3, _mesh.Vertices (), &_mesh._index[0], &_mesh._vertex[0], &_mesh._normal[0], NULL, &_mesh._uv[0]);
+  //_vbo.Create (GL_TRIANGLES, _mesh.Triangles () * 3, _mesh.Vertices (), &_mesh._index[0], &_mesh._vertex[0], &_mesh._normal[0], NULL, &_mesh._uv[0]);
   _polygons = _mesh.Triangles ();
+
+}
+
+
+void CTree::Create (float moisture, float temperature, int seed_in)
+{
+
+  
+  //Prepare, clear the tables, etc.
+  _leaf_list.clear ();
+  _mesh.Clear ();
+  _seed = seed_in;
+  _seed_current = _seed;
+  //Funnel trunk trees taper off quickly at the base.
+  _funnel_trunk = (WorldNoisei (_seed_current++) % 6) == 0;
+  _height = 10.0f + WorldNoisef (_seed_current++) * 12.0f;//10 + r 12
+  _base_radius = 0.3f + WorldNoisef (_seed_current++) * 2.0f;
+  if (_funnel_trunk) {//Funnel trees need to be bigger and taller to look right
+    _base_radius *= 2.0f;
+    _height *= 1.5f;
+  }
+  _trunk_style = (TreeTrunkStyle)(WorldNoisei (_seed_current) % TREE_TRUNK_STYLES); 
+  _foliage_style = (TreeFoliageStyle)(WorldNoisei (_seed_current++) % TREE_FOLIAGE_STYLES);
+  _lift_style = (TreeLiftStyle)(WorldNoisei (_seed_current++) % TREE_LIFT_STYLES);
+  _leaf_style = (TreeLeafStyle)(WorldNoisei (_seed_current++) % TREE_LEAF_STYLES);
+  _no_branches = temperature + (WorldNoisef (_seed_current++) * 0.25f) < 0.5f;
+  _branch_reach = 1.0f + WorldNoisef (_seed_current++) * 0.5f;
+  _branch_lift = 1.0f + WorldNoisef (_seed_current++);
+  //Keep branches away from the ground, since they don't have collision
+  _lowest_branch = (3.0f / _height);
+  _foliage_size = 1.0f;
+  _leaf_size = 0.125f;
+  _trunk_bend = _height / 3.0f;
+  _leaf_color = TerraformColorGenerate (SURFACE_COLOR_GRASS, moisture, temperature,_seed_current++);
+  _bark_color1 = TerraformColorGenerate (SURFACE_COLOR_DIRT, moisture, temperature, _seed_current++);
+  _bark_color2 = _bark_color1;
+  _bark_color1 = _bark_color2 * 0.5f;
+
+  DoLeaves ();
+  DoTexture ();
+  Build ();
 
 }
 
@@ -476,7 +452,7 @@ void CTree::Render ()
   glBindTexture (GL_TEXTURE_2D, _texture);
   //glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("tree.bmp"));
   //glColorMask (false, false, false, false);
-  glPolygonMode (GL_FRONT, GL_LINE);
+  glPolygonMode (GL_BACK, GL_LINE);
   _vbo.Render ();
   //glColorMask (true, true, true, true);
   //glColor4f (1.0f, 1.0f, 1.0f, 0.0f);

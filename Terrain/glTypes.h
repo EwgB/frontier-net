@@ -188,6 +188,7 @@ public:
 
 struct GLmesh
 {
+  GLbbox            _bbox;
   vector<UINT>      _index;
   vector<GLvector>  _vertex;
   vector<GLvector>  _normal;
@@ -199,8 +200,9 @@ struct GLmesh
   void              PushTriangle (UINT i1, UINT i2, UINT i3);
   void              PushQuad (UINT i1, UINT i2, UINT i3, UINT i4);
   void              PushVertex (GLvector vert, GLvector normal, GLvector2 uv);
-  unsigned          Vertices () { return _vertex.size (); };
+  void              Render ();
   unsigned          Triangles () { return _index.size () / 3; };
+  unsigned          Vertices () { return _vertex.size (); };
 
   void    operator+= (const GLmesh& c);
 

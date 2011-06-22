@@ -18,9 +18,9 @@
 -----------------------------------------------------------------------------*/
 
 #include "stdafx.h"
+#include "ctree.h"
 #include "entropy.h"
 #include "math.h"
-//#include "region.h"
 #include "random.h"
 #include "terraform.h"
 #include "world.h"
@@ -29,19 +29,19 @@
 #define LARGE_SCALE       9 //Not used. Considering removing.
 //The dither map scatters surface data so that grass colorings end up in adjacent regions.
 #define DITHER_SIZE       (REGION_SIZE / 2)
-//We keep a list of random nukmbers so we can have deterministic "randomness".
+//We keep a list of random numbers so we can have deterministic "randomness".
 #define NOISE_BUFFER      1024              
-//This affects the mapping of the coastline.  Higher = busier, more repetitive coast.
-//#define FREQUENCY         3 
 //How much space in a region is spent interpolating between itself and its neighbors.
 #define BLEND_DISTANCE    (REGION_SIZE / 4)
+
+#define TREE_TYPES        5
 
 static Region       map[WORLD_GRID][WORLD_GRID];
 static GLcoord      dithermap[DITHER_SIZE][DITHER_SIZE];
 static float        noisef[NOISE_BUFFER];
 static unsigned     noisei[NOISE_BUFFER];
 static unsigned     map_id;
-
+static CTree        tree[TREE_TYPES][TREE_TYPES];
 
 /*-----------------------------------------------------------------------------
 The following functions are used when generating elevation data
@@ -362,7 +362,29 @@ Cell WorldCell (int world_x, int world_y)
 
 }
 
-char*     WorldLocationName (int world_x, int world_y)
+unsigned WorldTreeType (float moisture, float temperature)
+{
+
+  int   m, t;
+
+  m = (int)(moisture * TREE_TYPES);
+  t = (int)(temperature * TREE_TYPES);
+  return m + t * TREE_TYPES;
+
+}
+
+CTree* WorldTree (unsigned id)
+{
+
+  unsigned    m, t;
+
+  m = id % TREE_TYPES;
+  t = (id - m) / TREE_TYPES;
+  return &tree[m][t];
+
+}
+
+char* WorldLocationName (int world_x, int world_y)
 {
 
   static char   result[20];
@@ -427,10 +449,16 @@ void    WorldGenerate ()
 {
 
   int         x;
+  unsigned    m, t;
 
-  for ( x = 0; x < NOISE_BUFFER; x++) {
+  for (x = 0; x < NOISE_BUFFER; x++) {
     noisei[x] = RandomVal ();
     noisef[x] = RandomFloat ();
+  }
+  for (m = 0; m < TREE_TYPES; m++) {
+    for (t = 0; t < TREE_TYPES; t++) {
+      tree[m][t].Create ((float)m / TREE_TYPES, (float)t / TREE_TYPES, m + t * TREE_TYPES);
+    }
   }
   TerraformPrepare ();
   TerraformOceans ();

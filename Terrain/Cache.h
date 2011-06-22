@@ -15,3 +15,4 @@ bool        CachePointAvailable (int world_x, int world_y);
 GLvector    CachePosition (int world_x, int world_y);
 SurfaceType CacheSurface (int world_x, int world_y);
 GLrgba      CacheSurfaceColor (int world_x, int world_y, SurfaceColor sc);
+unsigned    CacheTree (int world_x, int world_y);

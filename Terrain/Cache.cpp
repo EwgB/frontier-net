@@ -167,6 +167,20 @@ SurfaceType CacheSurface (int world_x, int world_y)
 
 }
 
+
+
+unsigned CacheTree (int world_x, int world_y)
+{
+
+  CPage*   p;
+
+  p = page_lookup (world_x, world_y);
+  if (!p) 
+    return 0;
+  return p->Tree (world_x % PAGE_SIZE, world_y % PAGE_SIZE);
+
+}
+
 GLrgba CacheSurfaceColor (int world_x, int world_y, SurfaceColor sc)
 {
 
@@ -203,8 +217,10 @@ void CachePurge ()
 
   for (y = 0; y < PAGE_GRID; y++) {
     for (x = 0; x < PAGE_GRID; x++) {
-      if (page[x][y])
+      if (page[x][y]) {
+        page_count--;
         delete page[x][y];
+      }
       page[x][y] = NULL;
     }
   }
@@ -234,6 +250,7 @@ void CacheUpdate (long stop)
     if (page[walk.x][walk.y] && page[walk.x][walk.y]->Expired ()) {
       delete page[walk.x][walk.y];
       page[walk.x][walk.y] = NULL;
+      page_count--;
     }
     walk.Walk (PAGE_GRID);
   }  

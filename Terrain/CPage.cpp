@@ -93,6 +93,15 @@ void CPage::Render ()
 
 }
 
+
+unsigned CPage::Tree (int x, int y)
+{
+
+  _last_touched = SdlTick ();
+  return _cell[x][y].tree_id;
+
+}
+
 float CPage::Elevation (int x, int y)
 {
 
@@ -130,6 +139,7 @@ void CPage::DoPosition ()
   _cell[_walk.x][_walk.y].pos = glVector ((float)world_x, (float)world_y, c.elevation);
   _cell[_walk.x][_walk.y].detail = c.detail;
   _cell[_walk.x][_walk.y].water_level = c.water_level;
+  _cell[_walk.x][_walk.y].tree_id = 0;
   //_cell[_walk.x][_walk.y].elevation = _cell[_walk.x][_walk.y].pt.elevation;
   _bbox.ContainPoint (Position (world_x, world_y));
   if (_walk.Walk (PAGE_SIZE))
@@ -175,6 +185,29 @@ void CPage::DoNormal ()
     _stage++;
 
 }
+
+
+void CPage::DoTrees ()
+{
+
+  GLcoord   worldpos;
+  Region    region;
+  pcell*    c;
+
+  c = &_cell[_walk.x][_walk.y];
+  if (!(_walk.x % 16) && !(_walk.y % 16) /*&& c->surface == SURFACE_GRASS*/) {
+    worldpos.x = _origin.x * PAGE_SIZE + _walk.x;
+    worldpos.y = _origin.y * PAGE_SIZE + _walk.y;
+    region = WorldRegionFromPosition (worldpos.x, worldpos.y);
+    c = &_cell[_walk.x][_walk.y];
+    if (c->detail < 0.15f)
+      c->tree_id = region.tree_type;
+  }
+  if (_walk.Walk (PAGE_SIZE))
+    _stage++;
+
+}
+
 
 void CPage::DoSurface ()
 {
@@ -293,6 +326,9 @@ void CPage::Build (int stop)
       break;
     case PAGE_STAGE_COLOR:
       DoColor ();
+      break;
+    case PAGE_STAGE_TREES:
+      DoTrees ();
       break;
     }
   }

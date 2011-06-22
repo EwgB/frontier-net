@@ -438,14 +438,18 @@ The following functions are used when building a new world.
 void TerraformClimate () 
 {
 
-  int     x, y;  
-  float   moist, temp;
-  Region  r;
+  int       x, y;  
+  float     moist, temp;
+  Region    r;
+  GLvector2 from_center;
+  float     distance;
 
   for (y = 0; y < WORLD_GRID; y++) {
     moist = 1.0f;
     for (x = 0; x < WORLD_GRID; x++) {
       r = WorldRegionGet (x, y);
+      from_center = glVector ((float)(x - WORLD_GRID_CENTER), (float)(x - WORLD_GRID_CENTER));
+      distance = from_center.Length () / WORLD_GRID_CENTER;
       moist -= 1.0f / WORLD_GRID_CENTER;
       //Mountains block rainfall
       if (r.climate == CLIMATE_MOUNTAIN) 
@@ -463,6 +467,9 @@ void TerraformClimate ()
       //Mountains are cooler at the top
       if (r.mountain_height) 
         temp -= (float)r.mountain_height * 0.15f;
+      //We add a slight bit of heat to the center of the map, to
+      //round off climate boundaries.
+      temp += distance * 0.2f;
       temp = clamp (temp, MIN_TEMP, MAX_TEMP);
       //oceans have a moderating effect
       if (r.climate == CLIMATE_OCEAN) {
@@ -471,6 +478,7 @@ void TerraformClimate ()
         moist = 1.0f;
       }
       r.temperature = temp;
+      r.tree_type =  WorldTreeType (r.moisture, r.temperature);
       WorldRegionSet (x, y, r);
     }
   }
@@ -559,93 +567,20 @@ void TerraformColors ()
 
   int       x, y;
   Region    r;
-//  float     fade;
-  //GLrgba    warm_grass, cold_grass, wet_grass, dry_grass, dead_grass;
-  //GLrgba    cold_dirt, warm_dirt, dry_dirt, wet_dirt;
   GLrgba    humid_air, dry_air, cold_air, warm_air;
-//  GLrgba    warm_rock, cold_rock;
 
   for (x = 0; x < WORLD_GRID; x++) {
     for (y = 0; y < WORLD_GRID; y++) {
       r = WorldRegionGet (x, y);
-      //Devise a grass color
-      /*
-      //wet grass is deep greens
-      wet_grass.red = RandomFloat () * 0.3f;
-      wet_grass.green = 0.4f + RandomFloat () * 0.6f;
-      wet_grass.blue = RandomFloat () * 0.3f;
-      //Dry grass is mostly reds and oranges
-      dry_grass.red = 0.7f + RandomFloat () * 0.3f;
-      dry_grass.green = 0.5f + RandomFloat () * 0.5f;
-      dry_grass.blue = 0.0f + RandomFloat () * 0.3f;
-      //Dead grass is pale beige
-      dead_grass = glRgba (0.7f, 0.6f, 0.5f);
-      dead_grass *= 0.7f + RandomFloat () * 0.3f;
-      if (r.moisture < 0.5f) {
-        fade = r.moisture * 2.0f;
-        warm_grass = glRgbaInterpolate (dead_grass, dry_grass, fade);
-      } else {
-        fade = (r.moisture - 0.5f) * 2.0f;
-        warm_grass = glRgbaInterpolate (dry_grass, wet_grass, fade);
-      }
-      //cold grass is pale and a little blue
-      cold_grass.red = 0.5f + RandomFloat () * 0.2f;
-      cold_grass.green = 0.8f + RandomFloat () * 0.2f;
-      cold_grass.blue = 0.7f + RandomFloat () * 0.2f;
-      if (r.temperature < TEMP_COLD)
-        r.color_grass = glRgbaInterpolate (cold_grass, warm_grass, r.temperature / TEMP_COLD);
-      else
-        r.color_grass = warm_grass;
-        */
       r.color_grass = TerraformColorGenerate (SURFACE_COLOR_GRASS, r.moisture, r.temperature, r.grid_pos.x + r.grid_pos.y * WORLD_GRID);
-      //Devise a random but plausible dirt color
-      //Dry dirts are mostly reds, oranges, and browns
-      /*
-      dry_dirt.red = 0.4f + RandomFloat () * 0.6f;
-      dry_dirt.green = 0.4f + RandomFloat () * 0.6f;
-      dry_dirt.green = min (dry_dirt.green, dry_dirt.red);
-      dry_dirt.green = 0.1f + RandomFloat () * 0.5f;
-      dry_dirt.blue = 0.2f + RandomFloat () * 0.4f;
-      dry_dirt.blue = min (dry_dirt.blue, dry_dirt.green);
-      //wet dirt is various browns
-      fade = RandomFloat () * 0.6f;
-      wet_dirt.red = 0.2f + fade;
-      wet_dirt.green = 0.1f + fade;
-      wet_dirt.blue = 0.0f +  fade / 2.0f;
-      wet_dirt.green += RandomFloat () * 0.1f;
-      //cold dirt is pale
-      cold_dirt = glRgbaInterpolate (wet_dirt, glRgba (0.7f), 0.5f);
-      //warm dirt us a fade from wet to dry
-      warm_dirt = glRgbaInterpolate (dry_dirt, wet_dirt, r.moisture);
-      fade = MathScalar (r.temperature, FREEZING, 1.0f);
-      r.color_dirt = glRgbaInterpolate (cold_dirt, warm_dirt, fade);
-      */
       r.color_dirt = TerraformColorGenerate (SURFACE_COLOR_DIRT, r.moisture, r.temperature, r.grid_pos.x + r.grid_pos.y * WORLD_GRID);
-
+      r.color_rock = TerraformColorGenerate (SURFACE_COLOR_ROCK, r.moisture, r.temperature, r.grid_pos.x + r.grid_pos.y * WORLD_GRID);
       //"atmosphere" is the overall color of the lighting & fog. 
       humid_air = glRgba (1.0f, 1.0f, 0.3f);
       dry_air = glRgba (1.0f, 0.7f, 0.3f);
       warm_air = glRgbaInterpolate (dry_air, humid_air, r.moisture);
       cold_air = glRgba (0.3f, 0.7f, 1.0f);
       r.color_atmosphere = glRgbaInterpolate (cold_air, warm_air, r.temperature);
-
-      //Devise a rock color
-      /*
-      fade = MathScalar (r.temperature, FREEZING, 1.0f);
-      //Warm rock is red
-      warm_rock.red = 1.0f;
-      warm_rock.green = 1.0f - RandomFloat () * 0.6f;
-      warm_rock.blue = 1.0f - RandomFloat () * 0.6f;
-      //Cold rock is white or blue
-      cold_rock.blue = 1.0f;
-      cold_rock.green = 1.0f - RandomFloat () * 0.4f;
-      cold_rock.red = cold_rock.green;
-      r.color_rock = glRgbaInterpolate (cold_rock, warm_rock, fade);
-      if ((x + y) % 2)
-        r.color_rock = glRgba (1.0f);
-        */
-      r.color_rock = TerraformColorGenerate (SURFACE_COLOR_ROCK, r.moisture, r.temperature, r.grid_pos.x + r.grid_pos.y * WORLD_GRID);
-
       //Color the map
       switch (r.climate) {
       case CLIMATE_MOUNTAIN:
@@ -682,6 +617,8 @@ void TerraformColors ()
       }
       if (r.geo_scale >= 0.0f)
         r.color_map *= (r.geo_scale * 0.5f + 0.5f);
+      if (r.geo_scale >= 0.0f)
+        r.color_map = glRgbaUnique (r.tree_type);
       WorldRegionSet (x, y, r);
     }
   }
@@ -709,9 +646,9 @@ void TerraformAverage ()
   bias = new float[WORLD_GRID][WORLD_GRID];
 
   //Blur some of the attributes
-  for (int passes = 0; passes < 1; passes++) {
+  for (int passes = 0; passes < 2; passes++) {
 
-    radius = 3;
+    radius = 2;
     for (x = radius; x < WORLD_GRID - radius; x++) {
       for (y = radius; y < WORLD_GRID - radius; y++) {
         temp[x][y] = 0;

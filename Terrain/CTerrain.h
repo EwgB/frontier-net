@@ -52,7 +52,7 @@ private:
   GLvector*         _vertex_list;
   GLvector*         _normal_list;
   GLvector2*        _uv_list;
-  int               _rebuild;
+  long              _rebuild;
   int               _neighbors[NEIGHBOR_COUNT];
   vector<GLvector>  _vert;
 
@@ -62,7 +62,6 @@ private:
   void              DoTexture ();
   void              DoHeightmap ();
   void              DoNormals ();
-  //void        DoBuffer ();
   void              DoQuad (int x1, int y1, int size);
   bool              DoCheckNeighbors ();
   bool              ZoneCheck (long stop);

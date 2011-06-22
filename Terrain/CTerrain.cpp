@@ -661,6 +661,11 @@ void CTerrain::Update (long stop)
       PointActivate (0, TERRAIN_SIZE);
       PointActivate (TERRAIN_SIZE, 0);
       PointActivate (TERRAIN_SIZE, TERRAIN_SIZE);
+      for (int i =0; i < SURFACE_TYPES; i++)
+        _surface_used[i] = false;
+      for (int i =0; i < NEIGHBOR_COUNT; i++)
+        _neighbors[i] = 0;
+      _list_size = 0;
       _stage++;
       break;
     case STAGE_HEIGHTMAP: 
@@ -719,9 +724,13 @@ void CTerrain::Update (long stop)
       _stage++;
       break; 
     case STAGE_COMPILE:
+      if (_index_buffer)
+        free (_index_buffer);
       _index_buffer_size = 0;
       _index_buffer = NULL;
       CompileBlock (0, 0, TERRAIN_SIZE);
+      if (_vbo.Ready ())
+        _vbo.Clear ();
       _vbo.Create (GL_TRIANGLES, _index_buffer_size, _list_size, _index_buffer, _vertex_list, _normal_list, NULL, _uv_list);
       if (_index_buffer)
         free (_index_buffer);
@@ -771,6 +780,18 @@ void CTerrain::Clear ()
     glDeleteTextures (1, &_back_texture); 
   _front_texture = 0;
   _back_texture = 0;
+  if (_vertex_list)
+    delete _vertex_list;
+  if (_normal_list)
+    delete _normal_list;
+  if (_uv_list)
+    delete _uv_list;
+  if (_index_buffer)
+    delete _index_buffer;
+  _stage = STAGE_BEGIN;
+  _walk.Clear ();
+
+
 
 }
 
@@ -815,6 +836,11 @@ void CTerrain::TexturePurge ()
     _stage = STAGE_TEXTURE;
     _walk.Clear ();
   }
+  _index_buffer = NULL;
+  _vertex_list = NULL;
+  _normal_list = NULL;
+  _uv_list = NULL;
+  _list_size = 0;
 
 }
 

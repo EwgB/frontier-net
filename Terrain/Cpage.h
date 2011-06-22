@@ -10,6 +10,7 @@ enum
   PAGE_STAGE_SURFACE1,
   PAGE_STAGE_SURFACE2,
   PAGE_STAGE_COLOR,
+  PAGE_STAGE_TREES,
   PAGE_STAGE_DONE
 };
 
@@ -23,6 +24,7 @@ struct pcell
   GLrgba      dirt;
   GLvector    normal;
   GLvector    pos;
+  unsigned    tree_id;
 };
 
 class CPage
@@ -33,6 +35,8 @@ class CPage
   pcell           _cell[PAGE_SIZE][PAGE_SIZE];
   GLbbox          _bbox;
   int             _last_touched;
+
+  void            DoTrees ();
   void            DoPosition ();
   void            DoSurface ();
   void            DoColor ();
@@ -43,6 +47,7 @@ public:
   float           Detail (int x, int y);
   GLvector        Position (int x, int y);
   GLvector        Normal (int x, int y);
+  unsigned        Tree (int x, int y);
   GLrgba          ColorGrass (int x, int y);
   GLrgba          ColorDirt (int x, int y);
   GLrgba          ColorRock (int x, int y);

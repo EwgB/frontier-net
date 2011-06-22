@@ -24,5 +24,6 @@ public:
   void      Create (int polygon, int index_count, int vert_count, unsigned* index_list, GLvector* vert_list, GLvector* normal_list, GLrgba* color_list, GLvector2* uv_list);
   void      Clear ();
   void      Render ();
+  bool      Ready () { return _ready; };
 };
 #endif

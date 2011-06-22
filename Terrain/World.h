@@ -54,6 +54,7 @@ struct Region
   int       mountain_height;
   int       river_id;
   int       river_segment;
+  unsigned  tree_type;
   float     river_width;
   float     geo_scale; //Number from -1 to 1, lowest to highest elevation. 0 is sea level
   float     geo_water;
@@ -75,17 +76,19 @@ struct Region
   bool      has_flowers;
 };
 
-Cell      WorldCell (int world_x, int world_y);
-GLrgba    WorldColorGet (int world_x, int world_y, SurfaceColor c);
-char*     WorldLocationName (int world_x, int world_y);
-Region    WorldRegionFromPosition (int world_x, int world_y);
-Region    WorldRegionFromPosition (int world_x, int world_y);
-float     WorldWaterLevel (int world_x, int world_y);
+Cell          WorldCell (int world_x, int world_y);
+GLrgba        WorldColorGet (int world_x, int world_y, SurfaceColor c);
+char*         WorldLocationName (int world_x, int world_y);
+Region        WorldRegionFromPosition (int world_x, int world_y);
+Region        WorldRegionFromPosition (int world_x, int world_y);
+float         WorldWaterLevel (int world_x, int world_y);
 
-void      WorldGenerate ();
-void      WorldInit ();
-unsigned  WorldMap ();
-unsigned  WorldNoisei (int index);
-float     WorldNoisef (int index);
-Region    WorldRegionGet (int index_x, int index_y);
-void      WorldRegionSet (int index_x, int index_y, Region val);
+void          WorldGenerate ();
+void          WorldInit ();
+unsigned      WorldMap ();
+unsigned      WorldNoisei (int index);
+float         WorldNoisef (int index);
+Region        WorldRegionGet (int index_x, int index_y);
+void          WorldRegionSet (int index_x, int index_y, Region val);
+unsigned      WorldTreeType (float moisture, float temperature);
+class CTree*  WorldTree (unsigned id);

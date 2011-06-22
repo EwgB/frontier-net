@@ -81,6 +81,9 @@ void VBO::Clear ()
     glDeleteBuffersARB (1, &_id_index);
   _id_vertex = 0;
   _id_index = 0;
+  _use_color = false;
+  _size_color = 0;
+  _polygon = 0;
   _ready = false;
 
 }

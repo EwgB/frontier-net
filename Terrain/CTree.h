@@ -86,10 +86,12 @@ class CTree
   void              DoBranch (BranchAnchor anchor, float angle);
   void              DoTexture ();
   GLvector          TrunkPosition (float delta, float* radius);
+  void              Build ();
 public:
-  void              Build (GLvector pos, float moisture, float temperature, int seed);
+  void              Create ( float moisture, float temperature, int seed);
   void              Render ();
   int               Polygons () { return _polygons; };
+  unsigned          Texture () { return _texture; };
   GLmesh*           Mesh () { return &_mesh; };
 
 
