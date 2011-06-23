@@ -206,7 +206,9 @@ void CPage::DoTrees ()
   for (x = 0; x < TREE_SPACING / 2; x++) {
     for (y = 0; y < TREE_SPACING / 2; y++) {
       c = &_cell[_walk.x * TREE_SPACING + x][_walk.y * TREE_SPACING + y];
-      if (c->detail < 0.1f && c->pos.z < lowest && c->surface == SURFACE_GRASS) {
+      if (c->surface != SURFACE_GRASS && c->surface != SURFACE_SNOW)
+        continue;
+      if (c->detail < 0.1f && c->pos.z < lowest) {
         plant.x = _walk.x * TREE_SPACING + x;
         plant.y = _walk.y * TREE_SPACING + y;
         valid = true;

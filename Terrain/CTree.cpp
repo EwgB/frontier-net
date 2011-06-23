@@ -13,6 +13,7 @@
 #include "math.h"
 #include "render.h"
 #include "terraform.h"
+#include "text.h"
 #include "texture.h"
 #include "vbo.h"
 #include "world.h"
@@ -22,6 +23,7 @@
 #define TEXTURE_SIZE          256
 #define TEXTURE_HALF          (TEXTURE_SIZE / 2)
 #define MIN_RADIUS            0.3f
+#define UP                    glVector (0.0f, 0.0f, 1.0f)
 
 /*-----------------------------------------------------------------------------
 
@@ -44,6 +46,13 @@ int sort_leaves (const void* elem1, const void* elem2)
 
 -----------------------------------------------------------------------------*/
 
+GLmesh* CTree::Mesh (unsigned alt, LOD lod)
+{
+
+  return &_meshes[alt % TREE_ALTS][lod];
+
+}
+
 //Given the value of 0.0 (root) to 1.0f (top), return the center of the trunk 
 //at that height.
 GLvector CTree::TrunkPosition (float delta, float* radius)
@@ -60,18 +69,18 @@ GLvector CTree::TrunkPosition (float delta, float* radius)
   } else 
     delta_curve = delta;
   if (radius) {
-    *radius = _base_radius * (1.0f - delta_curve);
+    *radius = _current_base_radius * (1.0f - delta_curve);
     *radius = max (*radius, MIN_RADIUS);
   }
   bend = delta * delta;
   switch (_trunk_style) {
   case TREE_TRUNK_BENT:
-    trunk.x = bend * _trunk_bend;
+    trunk.x = bend * _current_height / 3.0f;
     trunk.y = 0.0f;
     break;
   case TREE_TRUNK_JAGGED:
-    trunk.x = bend * _trunk_bend / 2;
-    trunk.y = sin (delta * _trunk_bend_frequency) * _trunk_bend;
+    trunk.x = bend * _current_height / 2.0f;
+    trunk.y = sin (delta * _current_bend_frequency) * _current_height / 3.0f;
     break;
   case TREE_TRUNK_NORMAL:
   default:
@@ -79,12 +88,12 @@ GLvector CTree::TrunkPosition (float delta, float* radius)
     trunk.y = 0.0f;
     break;
   }
-  trunk.z = delta * _height;
+  trunk.z = delta * _current_height;
   return trunk;
   
 }
 
-void CTree::DoFoliage (GLvector pos, float fsize, float angle)
+void CTree::DoFoliage (GLmesh* m, GLvector pos, float fsize, float angle)
 {
 
   GLuvbox   uv;
@@ -92,134 +101,117 @@ void CTree::DoFoliage (GLvector pos, float fsize, float angle)
 
   pos.z += 1.0f;
   uv.Set (glVector (0.5f, 0.0f), glVector (1.0f, 1.0f));
-  base_index = _mesh._vertex.size ();
+  base_index = m->_vertex.size ();
 
   //don't let the foliage get so big it touches the ground.
   fsize = min (pos.z - 2.0f, fsize);
   if (fsize < 0.1f)
     return;
-  if (_foliage_style == TREE_FOLIAGE_BOWL) {
-    float  tip_height;
-
-    tip_height = fsize / 4.0f;
-    if (_foliage_style == TREE_FOLIAGE_BOWL)
-      tip_height *= -1.0f;
-    _mesh.PushVertex (glVector (0.0f, 0.0f, tip_height), glVector (0.0f, 0.0f, 1.0f), uv.Center ());
-    _mesh.PushVertex (glVector (-fsize, -fsize, -tip_height), glVector (-0.5f, -0.5f, 0.0f), uv.Corner (0));
-    _mesh.PushVertex (glVector (fsize, -fsize, -tip_height), glVector ( 0.5f, -0.5f, 0.0f), uv.Corner (1));
-    _mesh.PushVertex (glVector (fsize, fsize, -tip_height), glVector ( 0.5f, 0.5f, 0.0f), uv.Corner (2));
-    _mesh.PushVertex (glVector (-fsize, fsize, -tip_height), glVector ( -0.5f, 0.5f, 0.0f), uv.Corner (3));
-    _mesh.PushTriangle (base_index, base_index + 1, base_index + 2);
-    _mesh.PushTriangle (base_index, base_index + 2, base_index + 3);
-    _mesh.PushTriangle (base_index, base_index + 3, base_index + 4);
-    _mesh.PushTriangle (base_index, base_index + 4, base_index + 1);
-    _mesh.PushQuad (base_index + 1, base_index + 4, base_index + 3, base_index + 2);
-  }
-  if (_foliage_style == TREE_FOLIAGE_UMBRELLA) {
-    float  tip_height;
-
-    tip_height = fsize / 4.0f;
-    if (_foliage_style == TREE_FOLIAGE_BOWL)
-      tip_height *= -1.0f;
-    _mesh.PushVertex (glVector (0.0f, 0.0f, tip_height), glVector (0.0f, 0.0f, 1.0f), uv.Center ());
-    _mesh.PushVertex (glVector (-fsize, -fsize, -tip_height), glVector (-0.5f, -0.5f, 0.0f), uv.Corner (0));
-    _mesh.PushVertex (glVector (fsize, -fsize, -tip_height), glVector ( 0.5f, -0.5f, 0.0f), uv.Corner (1));
-    _mesh.PushVertex (glVector (fsize, fsize, -tip_height), glVector ( 0.5f, 0.5f, 0.0f), uv.Corner (2));
-    _mesh.PushVertex (glVector (-fsize, fsize, -tip_height), glVector ( -0.5f, 0.5f, 0.0f), uv.Corner (3));
-    _mesh.PushTriangle (base_index, base_index + 2, base_index + 1);
-    _mesh.PushTriangle (base_index, base_index + 3, base_index + 2);
-    _mesh.PushTriangle (base_index, base_index + 4, base_index + 3);
-    _mesh.PushTriangle (base_index, base_index + 1, base_index + 4);
-    _mesh.PushTriangle (base_index, base_index + 1, base_index + 2);
-    _mesh.PushTriangle (base_index, base_index + 2, base_index + 3);
-    _mesh.PushTriangle (base_index, base_index + 3, base_index + 4);
-    _mesh.PushTriangle (base_index, base_index + 4, base_index + 1);
-    //_mesh.PushQuad (base_index + 1, base_index + 2, base_index + 3, base_index + 4);
-  }
-  
   if (_foliage_style == TREE_FOLIAGE_PANEL) {
-    GLvector    p;
-    GLvector    n;
-    //first panel
-    p = glVector (-fsize, 0.0f, -fsize);
-    n = pos;
-    n.Normalize ();
-    _mesh.PushVertex (p, n, uv.Corner (0));
+    m->PushVertex (glVector ( fsize / 2, 0.0f,  0.0f), UP, uv.Center ());
+    m->PushVertex (glVector (0.0f, -fsize, 0.0f), UP, uv.Corner (0));
+    m->PushVertex (glVector (0.0f,  0.0f,  fsize), UP, uv.Corner (1));
+    m->PushVertex (glVector (0.0f,  fsize, 0.0f), UP, uv.Corner (2));
+    m->PushVertex (glVector (0.0f,  0.0f,  -fsize), UP, uv.Corner (3));
+    m->PushVertex (glVector (-fsize / 2, 0.0f,  0.0f), UP, uv.Center ());
+    //Cap
+    m->PushTriangle (base_index, base_index + 1, base_index + 2);
+    m->PushTriangle (base_index, base_index + 2, base_index + 3);
+    m->PushTriangle (base_index, base_index + 3, base_index + 4);
+    m->PushTriangle (base_index, base_index + 4, base_index + 1);
+    m->PushTriangle (base_index + 5, base_index + 2, base_index + 1);
+    m->PushTriangle (base_index + 5, base_index + 3, base_index + 2);
+    m->PushTriangle (base_index + 5, base_index + 4, base_index + 3);
+    m->PushTriangle (base_index + 5, base_index + 1, base_index + 4);
+  } else if (_foliage_style == TREE_FOLIAGE_SAG) {
+    /*     /\
+          /__\
+         /|  |\
+         \|__|/
+          \  /
+           \/   */
+    float level1   = fsize * -0.4f;
+    float level2   = fsize * -1.2f;
+    //Center
+    m->PushVertex (glVector ( 0.0f, 0.0f, 0.0f), UP, glVector ( 0.75f, 0.5f));
+    //First ring
+    m->PushVertex (glVector (-fsize / 2, -fsize / 2, level1), UP, glVector ( 0.5f, 0.5f));//1
+    m->PushVertex (glVector ( fsize / 2, -fsize / 2, level1), UP, glVector (0.75f, 0.0f));//2
+    m->PushVertex (glVector ( fsize / 2,  fsize / 2, level1), UP, glVector ( 1.0f, 0.5f));//3
+    m->PushVertex (glVector (-fsize / 2,  fsize / 2, level1), UP, glVector (0.75f, 1.0f));//4
+    //Tips
+    m->PushVertex (glVector (0.0f, -fsize, level2), UP, glVector ( 0.5f, 0.0f));//5
+    m->PushVertex (glVector (fsize,  0.0f, level2), UP, glVector ( 1.0f, 0.0f));//6
+    m->PushVertex (glVector (0.0f,  fsize, level2), UP, glVector ( 1.0f, 1.0f));//7
+    m->PushVertex (glVector (-fsize, 0.0f, level2), UP, glVector ( 0.5f, 1.0f));//8
 
-    p = glVector (fsize, 0.0f, -fsize);
-    n = glVectorNormalize (pos);
-    _mesh.PushVertex (p, n, uv.Corner (1));
+    //Cap
+    m->PushTriangle (base_index, base_index + 1, base_index + 2);
+    m->PushTriangle (base_index, base_index + 2, base_index + 3);
+    m->PushTriangle (base_index, base_index + 3, base_index + 4);
+    m->PushTriangle (base_index, base_index + 4, base_index + 1);
+    //Outer triangles
+    m->PushTriangle (base_index + 5, base_index + 2, base_index + 1);
+    m->PushTriangle (base_index + 6, base_index + 3, base_index + 2);
+    m->PushTriangle (base_index + 7, base_index + 4, base_index + 3);
+    m->PushTriangle (base_index + 8, base_index + 1, base_index + 4);
 
-    p = glVector (fsize, 0.0f, fsize);
-    n = glVectorNormalize (pos);
-    _mesh.PushVertex (p, n, uv.Corner (2));
+  } else if (_foliage_style == TREE_FOLIAGE_BOWL) {
+    float  tip_height;
 
-    p = glVector (-fsize, 0.0f, fsize);
-    n = glVectorNormalize (pos);
-    _mesh.PushVertex (p, n, uv.Corner (3));
-    //Second panel
-    p = glVector (0.0f, -fsize, -fsize);
-    n = glVectorNormalize (pos);
-    _mesh.PushVertex (p, n, uv.Corner (0));
+    tip_height = fsize / 4.0f;
+    if (_foliage_style == TREE_FOLIAGE_BOWL)
+      tip_height *= -1.0f;
+    m->PushVertex (glVector (0.0f, 0.0f, tip_height), glVector (0.0f, 0.0f, 1.0f), uv.Center ());
+    m->PushVertex (glVector (-fsize, -fsize, -tip_height), glVector (-0.5f, -0.5f, 0.0f), uv.Corner (0));
+    m->PushVertex (glVector (fsize, -fsize, -tip_height), glVector ( 0.5f, -0.5f, 0.0f), uv.Corner (1));
+    m->PushVertex (glVector (fsize, fsize, -tip_height), glVector ( 0.5f, 0.5f, 0.0f), uv.Corner (2));
+    m->PushVertex (glVector (-fsize, fsize, -tip_height), glVector ( -0.5f, 0.5f, 0.0f), uv.Corner (3));
+    m->PushTriangle (base_index, base_index + 1, base_index + 2);
+    m->PushTriangle (base_index, base_index + 2, base_index + 3);
+    m->PushTriangle (base_index, base_index + 3, base_index + 4);
+    m->PushTriangle (base_index, base_index + 4, base_index + 1);
+    m->PushQuad (base_index + 1, base_index + 4, base_index + 3, base_index + 2);
+  } else if (_foliage_style == TREE_FOLIAGE_UMBRELLA) {
+    float  tip_height;
 
-    p = glVector (0.0f, fsize, -fsize);
-    n = glVectorNormalize (pos);
-    _mesh.PushVertex (p, n, uv.Corner (1));
-
-    p = glVector (0.0f, fsize, fsize);
-    n = glVectorNormalize (pos);
-    _mesh.PushVertex (p, n, uv.Corner (2));
-
-    p = glVector (0.0f, -fsize, fsize);
-    n = glVectorNormalize (pos);
-    _mesh.PushVertex (p, n, uv.Corner (3));
-    //Horizontal panel
-    p = glVector (-fsize, -fsize, 0.0f);
-    n = glVectorNormalize (pos);
-    _mesh.PushVertex (p, n, uv.Corner (0));
-
-    p = glVector (fsize, -fsize, 0.0f);
-    n = glVectorNormalize (pos);
-    _mesh.PushVertex (p, n, uv.Corner (1));
-
-    p = glVector (fsize, fsize, 0.0f);
-    n = glVectorNormalize (pos);
-    _mesh.PushVertex (p, n, uv.Corner (2));
-
-    p = glVector (-fsize, fsize, 0.0f);
-    n = glVectorNormalize (pos);
-    _mesh.PushVertex (p, n, uv.Corner (3));
-
-    //First
-    _mesh.PushTriangle (base_index, base_index + 1, base_index + 2);
-    _mesh.PushTriangle (base_index, base_index + 2, base_index + 3);
-    //Second
-    _mesh.PushTriangle (base_index + 4, base_index + 5, base_index + 6);
-    _mesh.PushTriangle (base_index + 4, base_index + 7, base_index + 6);
-    //Horizontal
-    _mesh.PushTriangle (base_index + 8, base_index + 9, base_index + 10);
-    _mesh.PushTriangle (base_index + 8, base_index + 11, base_index + 10);
-  }
-  
-  GLmatrix  m;
+    tip_height = fsize / 4.0f;
+    if (_foliage_style == TREE_FOLIAGE_BOWL)
+      tip_height *= -1.0f;
+    m->PushVertex (glVector (0.0f, 0.0f, tip_height), glVector (0.0f, 0.0f, 1.0f), uv.Center ());
+    m->PushVertex (glVector (-fsize, -fsize, -tip_height), glVector (-0.5f, -0.5f, 0.0f), uv.Corner (0));
+    m->PushVertex (glVector (fsize, -fsize, -tip_height), glVector ( 0.5f, -0.5f, 0.0f), uv.Corner (1));
+    m->PushVertex (glVector (fsize, fsize, -tip_height), glVector ( 0.5f, 0.5f, 0.0f), uv.Corner (2));
+    m->PushVertex (glVector (-fsize, fsize, -tip_height), glVector ( -0.5f, 0.5f, 0.0f), uv.Corner (3));
+    m->PushTriangle (base_index, base_index + 2, base_index + 1);
+    m->PushTriangle (base_index, base_index + 3, base_index + 2);
+    m->PushTriangle (base_index, base_index + 4, base_index + 3);
+    m->PushTriangle (base_index, base_index + 1, base_index + 4);
+    m->PushTriangle (base_index, base_index + 1, base_index + 2);
+    m->PushTriangle (base_index, base_index + 2, base_index + 3);
+    m->PushTriangle (base_index, base_index + 3, base_index + 4);
+    m->PushTriangle (base_index, base_index + 4, base_index + 1);
+    //m->PushQuad (base_index + 1, base_index + 2, base_index + 3, base_index + 4);
+  }   
+  GLmatrix  mat;
   unsigned  i;
   //angle = MathAngle (pos.x, pos.y, 0.0f, 0.0f);
-  angle += 45.0f;
-  m.Identity ();
-  m.Rotate (angle, 0.0f, 0.0f, 1.0f);
-  for (i = base_index; i < _mesh._vertex.size (); i++) {
-    _mesh._vertex[i] = glMatrixTransformPoint (m, _mesh._vertex[i]);
-    _mesh._vertex[i] += pos;
+  //angle += 45.0f;
+  mat.Identity ();
+  mat.Rotate (angle, 0.0f, 0.0f, 1.0f);
+  for (i = base_index; i < m->_vertex.size (); i++) {
+    m->_vertex[i] = glMatrixTransformPoint (mat, m->_vertex[i]);
+    m->_vertex[i] += pos;
   }
 
 }
 
-void CTree::DoBranch (BranchAnchor anchor, float branch_angle)
+void CTree::DoBranch (GLmesh* m, BranchAnchor anchor, float branch_angle, LOD lod)
 {
   
-  int           ring, tier, tier_count;
+  int           ring, segment, segment_count;
   int           radial_steps, radial_edge;
-  float         circumference;
+//  float         circumference;
   float         radius;
   float         angle;
   float         horz_pos;
@@ -227,26 +219,34 @@ void CTree::DoBranch (BranchAnchor anchor, float branch_angle)
   GLvector      core;
   GLvector      pos;
   unsigned      base_index;
-  GLmatrix      m;
+  GLmatrix      mat;
   GLvector2     uv;  
 
   if (anchor.length < 2.0f)
     return;
   if (anchor.radius < MIN_RADIUS)
     return;
-  tier_count = (int)(anchor.length * SEGMENTS_PER_METER);
-  tier_count = max (tier_count, MIN_SEGMENTS);
-  base_index = _mesh._vertex.size ();
-  m.Identity ();
-  m.Rotate (branch_angle, 0.0f, 0.0f, 1.0f);
-  circumference = (float)PI * (anchor.radius * anchor.radius);
-  radial_steps = (int)(circumference * SEGMENTS_PER_METER);
-  radial_steps = max (radial_steps, 4);
+  segment_count = (int)(anchor.length * SEGMENTS_PER_METER);
+  segment_count = max (segment_count, MIN_SEGMENTS);
+  segment_count += 3;
+  base_index = m->_vertex.size ();
+  mat.Identity ();
+  mat.Rotate (branch_angle, 0.0f, 0.0f, 1.0f);
+  if (lod == LOD_LOW) {
+    segment_count = 2;
+    radial_steps = 2;
+  } else if (lod == LOD_MED) {
+    radial_steps = 3;
+    segment_count = 3;
+  } else {
+    segment_count = 5;
+    radial_steps = 6;
+  }
   radial_edge = radial_steps + 1;
   core = anchor.root;
   radius = anchor.radius;
-  for (tier = 0; tier <= tier_count; tier++) {
-    horz_pos = (float)tier / (float)(tier_count);
+  for (segment= 0; segment <= segment_count; segment++) {
+    horz_pos = (float)segment/ (float)(segment_count + 1);
     if (_lift_style == TREE_LIFT_OUT) 
       curve = horz_pos * horz_pos;
     else if (_lift_style == TREE_LIFT_IN) {
@@ -258,7 +258,15 @@ void CTree::DoBranch (BranchAnchor anchor, float branch_angle)
     radius = max (MIN_RADIUS, anchor.radius * (1.0f - horz_pos));
     core.z = anchor.root.z + anchor.lift * curve * _branch_lift;
     uv.x = 0.0f;
-    for (ring = 0; ring <= radial_steps; ring++) {
+    //if this is the last segment, don't make a ring of points. Make ONE, in the center.
+    //This is so the branch can end at a point.
+    if (segment== segment_count) {
+      pos.x = 0.0f;
+      pos.y = anchor.length * horz_pos;
+      pos.z = 0.0f;
+      pos = glMatrixTransformPoint (mat, pos);
+      m->PushVertex (pos + core, glVector (pos.x, 0.0f, pos.z), glVector (0.25f, pos.y * _texture_tile));
+    } else for (ring = 0; ring <= radial_steps; ring++) {
       //Make sure the final edge perfectly matches the starting one. Can't leave
       //this to floating-point math.
       if (ring == radial_steps || ring == 0)
@@ -269,76 +277,79 @@ void CTree::DoBranch (BranchAnchor anchor, float branch_angle)
       pos.x = sin (angle) * radius;
       pos.y = anchor.length * horz_pos;
       pos.z = cos (angle) * radius;
-      pos = glMatrixTransformPoint (m, pos);
-      _mesh.PushVertex (pos + core, glVector (pos.x, 0.0f, pos.z), glVector (((float)ring / (float) radial_steps) * 0.5f, pos.y * _texture_tile));
+      pos = glMatrixTransformPoint (mat, pos);
+      m->PushVertex (pos + core, glVector (pos.x, 0.0f, pos.z), glVector (((float)ring / (float) radial_steps) * 0.5f, pos.y * _texture_tile));
     }
   }
   //Make the triangles for the branch
-  for (tier = 0; tier < tier_count; tier++) {
+  for (segment= 0; segment< segment_count; segment++) {
     for (ring = 0; ring < radial_steps; ring++) {
-      _mesh.PushQuad (base_index + (ring + 0) + (tier + 0) * (radial_edge),
-        base_index + (ring + 0) + (tier + 1) * (radial_edge),
-        base_index + (ring + 1) + (tier + 1) * (radial_edge),
-        base_index + (ring + 1) + (tier + 0) * (radial_edge));
+      if (segment< segment_count - 1) {
+        m->PushQuad (base_index + (ring + 0) + (segment+ 0) * (radial_edge),
+          base_index + (ring + 0) + (segment+ 1) * (radial_edge),
+          base_index + (ring + 1) + (segment+ 1) * (radial_edge),
+          base_index + (ring + 1) + (segment+ 0) * (radial_edge));
+      } else {//this is the last segment. It ends in a single point
+        m->PushTriangle (
+          base_index + (ring + 0) + segment* (radial_edge),
+          base_index + (ring + 1) + segment* (radial_edge),
+          m->Vertices () - 1);
+      }
     }
   }
-  pos = glVector (0.0f, anchor.length, 0.0f);
-  pos = glMatrixTransformPoint (m, pos);
-  //DoFoliage (pos + core, anchor.length * 0.96f, branch_angle);
-  DoFoliage (_mesh._vertex[base_index + (tier_count) * radial_edge], anchor.length * 0.96f, branch_angle);
+  //Grap the last point and use it as the origin for the foliage
+  pos = m->_vertex[m->Vertices () - 1];
+  DoFoliage (m, pos, anchor.length * 0.56f, branch_angle);
 
     
 }
 
-void CTree::Build ()
+void CTree::DoTrunk (GLmesh* m, unsigned local_seed, LOD lod)
 {
 
-  int                   ring, tier, tier_count;
+  int                   ring, segment, segment_count;
   int                   radial_steps, radial_edge;
+  //int                   branch_count;
   float                 branch_spacing;
   float                 angle;
   float                 radius;
   float                 x, y;
   float                 vertical_pos;
   float                 circumference;
-  float                 angle_offset;
+  //float                 angle_offset;
+ 
   GLvector              core;
   vector<BranchAnchor>  branch_list;
   BranchAnchor          branch;
   int                   i;
-  
 
-  _branches = 4 + WorldNoisei (_seed_current++) % 3;
-  _trunk_bend_frequency = 3.0f + WorldNoisef (_seed_current++) * 4.0f;
-  angle_offset = WorldNoisef (_seed_current++) * 360.0f;
   //Determine the branch locations
-  branch_spacing = (0.95f - _lowest_branch) / (float)_branches;
-  for (i = 0; i < _branches; i++) {
-    vertical_pos = _lowest_branch + branch_spacing * (float)i;
+  branch_spacing = (0.95f - _current_lowest_branch) / (float)_current_branches;
+  for (i = 0; i < _current_branches; i++) {
+    vertical_pos = _current_lowest_branch + branch_spacing * (float)i;
     branch.root = TrunkPosition (vertical_pos, &branch.radius);
-    branch.length = (_height - branch.root.z) * _branch_reach;
-    branch.length = min (branch.length, _height / 2);
+    branch.length = (_current_height - branch.root.z) * _branch_reach;
+    branch.length = min (branch.length, _current_height / 2);
     branch.lift = (branch.length) / 2;
     branch_list.push_back (branch);
   }
-
   //Work out the circumference of the BASE of the tree
-  circumference = _base_radius * _base_radius * (float)PI;
+  circumference = _current_base_radius * _current_base_radius * (float)PI;
   //The texture will repeat ONCE horizontally around the tree.  Set the vertical to repeat in the same distance.
   _texture_tile = 1.0f / circumference; 
-  radial_steps = (int)(circumference * SEGMENTS_PER_METER);
-  radial_steps = max (radial_steps, 5);
+  if (lod == LOD_LOW) 
+    radial_steps = 3;
+  else if (lod == LOD_MED)
+    radial_steps = 5;
+  else
+    radial_steps = 7;
   radial_edge = radial_steps + 1;
-  radius = 1.0f;
-  core = glVector (0.0f, 0.0f, 0.0f);
-
-
- 
-  tier_count = 0;
+  segment_count = 0;
+  //Work our way up the tree, building rings of verts
   for (i = -1; i < (int)branch_list.size (); i++) {
     if (i < 0) { //-1 is the bottom rung, the root. Put it underground, widen it a bit
       core = TrunkPosition (0.0f, &radius);
-      radius *= 1.2f;
+      radius *= 1.5f;
       core.z -= 2.0f;
     } else {
       core = branch_list[i].root;
@@ -354,87 +365,107 @@ void CTree::Build ()
       angle *= DEGREES_TO_RADIANS;
       x = sin (angle);
       y = cos (angle);
-      _mesh.PushVertex (core + glVector (x * radius, y * radius, 0.0f),
+      m->PushVertex (core + glVector (x * radius, y * radius, 0.0f),
         glVector (x, y, 0.0f),
         glVector (((float)ring / (float) radial_steps) * 0.5f, core.z * _texture_tile));
 
     }
-    tier_count++;
+    segment_count++;
   }
   //Push one more point, for the very tip of the tree
-  _mesh.PushVertex (TrunkPosition (1.0f, NULL), glVector (0.0f, 0.0f, 1.0f), glVector (0.0f, 0.0f));
+  m->PushVertex (TrunkPosition (1.0f, NULL), glVector (0.0f, 0.0f, 1.0f), glVector (0.0f, 0.0f));
   //Make the triangles for the main trunk.
-  for (tier = 0; tier < tier_count - 1; tier++) {
+  for (segment = 0; segment < segment_count - 1; segment++) {
     for (ring = 0; ring < radial_steps; ring++) {
-      _mesh.PushQuad ((ring + 0) + (tier + 0) * (radial_edge),
-        (ring + 1) + (tier + 0) * (radial_edge),
-        (ring + 1) + (tier + 1) * (radial_edge),
-        (ring + 0) + (tier + 1) * (radial_edge));
+      m->PushQuad ((ring + 0) + (segment + 0) * (radial_edge),
+        (ring + 1) + (segment + 0) * (radial_edge),
+        (ring + 1) + (segment + 1) * (radial_edge),
+        (ring + 0) + (segment + 1) * (radial_edge));
 
     }
   }
   
   //Make the triangles for the tip
   for (ring = 0; ring < radial_steps; ring++) {
-    _mesh.PushTriangle ((ring + 0) + (tier_count - 1) * radial_edge, _mesh._vertex.size () - 1,
-      (ring + 1) + (tier_count - 1) * radial_edge);
+    m->PushTriangle ((ring + 0) + (segment_count - 1) * radial_edge, m->_vertex.size () - 1,
+      (ring + 1) + (segment_count - 1) * radial_edge);
   }
   
   //DoFoliage (TrunkPosition (vertical_pos, NULL), vertical_pos * _height, 0.0f);
-  if (_no_branches) { //just rings of foliage, like an evergreen
+  if (_evergreen) { //just rings of foliage, like an evergreen
     for (i = 0; i < (int)branch_list.size (); i++) {
       angle = (float)i * ((360.0f / (float)branch_list.size ()));
-      DoFoliage (branch_list[i].root, branch_list[i].length, angle);
+      DoFoliage (m, branch_list[i].root, branch_list[i].length, angle);
     }
   } else { //has branches
     for (i = 0; i < (int)branch_list.size (); i++) {
-      angle = angle_offset + (float)i * ((360.0f / (float)branch_list.size ()) + 180.0f);
-      DoBranch (branch_list[i], angle);
+      angle = _current_angle_offset + (float)i * ((360.0f / (float)branch_list.size ()) + 180.0f);
+      DoBranch (m, branch_list[i], angle, lod);
     }
   } 
-  _mesh.CalculateNormalsSeamless ();
-  //DEV - move tree to requested origin
-  //for (i = 0; i < (int)_mesh.Vertices (); i++) 
-    //_mesh._vertex[i] += pos;
-  //_vbo.Create (GL_TRIANGLES, _index.size (), _vertex.size (), &_index[0], &_vertex[0], &_normal[0], NULL, &_uv[0]);
-  //_vbo.Create (GL_TRIANGLES, _mesh.Triangles () * 3, _mesh.Vertices (), &_mesh._index[0], &_mesh._vertex[0], &_mesh._normal[0], NULL, &_mesh._uv[0]);
-  _polygons = _mesh.Triangles ();
+
+}
+
+void CTree::Build ()
+{
+
+  unsigned    lod;
+  unsigned    alt;
+
+  //_branches = 3 + WorldNoisei (_seed_current++) % 3;
+  //_trunk_bend_frequency = 3.0f + WorldNoisef (_seed_current++) * 4.0f;
+  _seed_current = _seed;
+  for (alt = 0; alt < TREE_ALTS; alt++) {
+    _current_angle_offset = WorldNoisef (_seed_current++) * 360.0f;
+    _current_height = _default_height + WorldNoisef (_seed_current++) * 8.0f;
+    _current_base_radius = _default_base_radius * (0.5f + WorldNoisef (_seed_current++));
+    _current_branches = _default_branches + WorldNoisei (_seed_current++) % 3;
+    _current_bend_frequency = _default_bend_frequency + WorldNoisef (_seed_current++);
+    _current_lowest_branch = _default_lowest_branch + WorldNoisef (_seed_current++) * 0.2f;
+    for (lod = 0; lod < LOD_LEVELS; lod++) {
+      _meshes[alt][lod].Clear ();
+      DoTrunk (&_meshes[alt][lod], _seed_current + alt, (LOD)lod);
+      _meshes[alt][lod].CalculateNormalsSeamless ();
+    }
+  }
 
 }
 
 
-void CTree::Create (float moisture, float temperature, int seed_in)
+void CTree::Create (float moisture, float temp_in, int seed_in)
 {
-
   
   //Prepare, clear the tables, etc.
   _leaf_list.clear ();
-  _mesh.Clear ();
   _seed = seed_in;
   _seed_current = _seed;
+  _moisture = moisture;
+  _temperature = temp_in;
+  _seed_current = _seed;
+  //We want our height to fall on a bell curve
+  _default_height = 8.0f + WorldNoisef (_seed_current++) * 8.0f + WorldNoisef (_seed_current++) * 8.0f;
+  _default_base_radius = 0.3f + WorldNoisef (_seed_current++) * 2.0f;
+  _default_branches = 2 + WorldNoisei (_seed_current) % 2;
+  //Keep branches away from the ground, since they don't have collision
+  _default_lowest_branch = (3.0f / _default_height);
   //Funnel trunk trees taper off quickly at the base.
   _funnel_trunk = (WorldNoisei (_seed_current++) % 6) == 0;
-  _height = 10.0f + WorldNoisef (_seed_current++) * 12.0f;//10 + r 12
-  _base_radius = 0.3f + WorldNoisef (_seed_current++) * 2.0f;
   if (_funnel_trunk) {//Funnel trees need to be bigger and taller to look right
-    _base_radius *= 2.0f;
-    _height *= 1.5f;
+    _default_base_radius *= 2.0f;
+    _default_height *= 1.5f;
   }
   _trunk_style = (TreeTrunkStyle)(WorldNoisei (_seed_current) % TREE_TRUNK_STYLES); 
   _foliage_style = (TreeFoliageStyle)(WorldNoisei (_seed_current++) % TREE_FOLIAGE_STYLES);
   _lift_style = (TreeLiftStyle)(WorldNoisei (_seed_current++) % TREE_LIFT_STYLES);
   _leaf_style = (TreeLeafStyle)(WorldNoisei (_seed_current++) % TREE_LEAF_STYLES);
-  _no_branches = temperature + (WorldNoisef (_seed_current++) * 0.25f) < 0.5f;
+  _evergreen = _temperature + (WorldNoisef (_seed_current++) * 0.25f) < 0.5f;
+  
   _branch_reach = 1.0f + WorldNoisef (_seed_current++) * 0.5f;
   _branch_lift = 1.0f + WorldNoisef (_seed_current++);
-  //Keep branches away from the ground, since they don't have collision
-  _lowest_branch = (3.0f / _height);
   _foliage_size = 1.0f;
   _leaf_size = 0.125f;
-  _trunk_bend = _height / 3.0f;
-  _leaf_color = TerraformColorGenerate (SURFACE_COLOR_GRASS, moisture, temperature,_seed_current++);
-  _bark_color1 = TerraformColorGenerate (SURFACE_COLOR_DIRT, moisture, temperature, _seed_current++);
-  _bark_color2 = _bark_color1;
+  _leaf_color = TerraformColorGenerate (SURFACE_COLOR_GRASS, moisture, _temperature, _seed_current++);
+  _bark_color2 = TerraformColorGenerate (SURFACE_COLOR_DIRT, moisture, _temperature, _seed_current++);
   _bark_color1 = _bark_color2 * 0.5f;
 
   DoLeaves ();
@@ -453,7 +484,7 @@ void CTree::Render ()
   //glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("tree.bmp"));
   //glColorMask (false, false, false, false);
   glPolygonMode (GL_BACK, GL_LINE);
-  _vbo.Render ();
+  //_vbo.Render ();
   //glColorMask (true, true, true, true);
   //glColor4f (1.0f, 1.0f, 1.0f, 0.0f);
   //_vbo.Render ();
@@ -668,5 +699,12 @@ void CTree::DoTexture ()
   glCopyTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, 0, 0, TEXTURE_SIZE * 2, TEXTURE_SIZE);
   RenderCanvasEnd ();
 
+
+}
+
+void CTree::Info ()
+{
+
+  TextPrint ("TREE:\nSeed:%d Moisture: %f Temp: %f", _seed, _moisture, _temperature);
 
 }

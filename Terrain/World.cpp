@@ -369,6 +369,9 @@ unsigned WorldTreeType (float moisture, float temperature)
 
   m = (int)(moisture * TREE_TYPES);
   t = (int)(temperature * TREE_TYPES);
+  m = clamp (m, 0, TREE_TYPES - 1);
+  t = clamp (t, 0, TREE_TYPES - 1);
+  CTree* tt = &tree[m][t];
   return m + t * TREE_TYPES;
 
 }
@@ -420,8 +423,8 @@ void    WorldInit ()
   int         x, y;
 
   //Fill in the dither table - a table of random offsets
-  for (x = 0; x < DITHER_SIZE; x++) {
-    for (y = 0; y < DITHER_SIZE; y++) {
+  for (y = 0; y < DITHER_SIZE; y++) {
+    for (x = 0; x < DITHER_SIZE; x++) {
       dithermap[x][y].x = RandomVal () % DITHER_SIZE + RandomVal () % DITHER_SIZE;
       dithermap[x][y].y = RandomVal () % DITHER_SIZE + RandomVal () % DITHER_SIZE;
     }
@@ -450,14 +453,16 @@ void    WorldGenerate ()
 
   int         x;
   unsigned    m, t;
+  unsigned    seed;
 
   for (x = 0; x < NOISE_BUFFER; x++) {
     noisei[x] = RandomVal ();
     noisef[x] = RandomFloat ();
   }
+  seed = 0;
   for (m = 0; m < TREE_TYPES; m++) {
     for (t = 0; t < TREE_TYPES; t++) {
-      tree[m][t].Create ((float)m / TREE_TYPES, (float)t / TREE_TYPES, m + t * TREE_TYPES);
+      tree[m][t].Create ((float)m / TREE_TYPES, (float)t / TREE_TYPES, seed++);
     }
   }
   TerraformPrepare ();

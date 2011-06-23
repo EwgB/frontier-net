@@ -29,14 +29,22 @@ GLvector2 GLuvbox::Corner (unsigned index)
 {
 
   switch (index) {
-  case GLUV_UPPER_LEFT:
+  case GLUV_TOP_LEFT:
     return ul;
-  case GLUV_UPPER_RIGHT:
+  case GLUV_TOP_RIGHT:
     return glVector (lr.x, ul.y);
-  case GLUV_LOWER_RIGHT:
+  case GLUV_BOTTOM_RIGHT:
     return lr;
-  case GLUV_LOWER_LEFT:
+  case GLUV_BOTTOM_LEFT:
     return glVector (ul.x, lr.y);
+  case GLUV_LEFT_EDGE:
+    return glVector (ul.x, (ul.y + lr.y) / 2);
+  case GLUV_RIGHT_EDGE:
+    return glVector (lr.x, (ul.y + lr.y) / 2);
+  case GLUV_TOP_EDGE:
+    return glVector ((ul.x + lr.x) / 2, ul.y);
+  case GLUV_BOTTOM_EDGE:
+    return glVector ((ul.x + lr.x) / 2, lr.y);
   }
   return glVector (0.0f, 0.0f);
 

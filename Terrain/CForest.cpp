@@ -38,9 +38,6 @@ unsigned CForest::MeshFromTexture (unsigned texture_id)
   unsigned      i;
   TreeMesh      tm;
 
-  //if (!_mesh_list.empty ())
-    //return 0;
-  
   for (i = 0; i < _mesh_list.size (); i++) {
     if (_mesh_list[i]._texture_id == texture_id)
       return i;
@@ -68,14 +65,14 @@ bool CForest::ZoneCheck ()
 
 }
 
-void CForest::Set (int x, int y)
+void CForest::Set (int x, int y, LOD lod)
 {
 
-  if (_origin.x == x * FOREST_SIZE && _origin.y == y * FOREST_SIZE)
+  if (_origin.x == x * FOREST_SIZE && _origin.y == y * FOREST_SIZE && _lod == lod)
     return;
   //if (_stage > FOREST_STAGE_BEGIN && _stage < FOREST_STAGE_DONE)
     //return;
-  _compile_step = 0;
+  _lod = lod;
   _position.x = x;
   _position.y = y;
   _origin.x = x * FOREST_SIZE;
@@ -86,8 +83,6 @@ void CForest::Set (int x, int y)
   _mesh_list.clear ();
 
 }
-
-static int  vvv;
 
 void CForest::Build (long stop)
 {
@@ -104,45 +99,33 @@ void CForest::Build (long stop)
   int           world_x, world_y;
   GLmatrix      mat;
   unsigned      mesh_index;
+  unsigned      alt;
 
   world_x = _origin.x + _walk.x;
   world_y = _origin.y + _walk.y;
   tree_id = CacheTree (world_x, world_y);
   if (tree_id) {
+    alt = _walk.x + _walk.y * FOREST_SIZE;
     mat.Identity ();
-    mat.Rotate (WorldNoisef (_walk.x + _walk.y * FOREST_SIZE) * 360.0f, 0.0f, 0.0f, 1.0f);
+    mat.Rotate (WorldNoisef (alt) * 360.0f, 0.0f, 0.0f, 1.0f);
     origin = CachePosition (world_x, world_y);
     tree = WorldTree (tree_id);
-    tm = tree->Mesh ();
+    tm = tree->Mesh (alt, _lod);
     texture_id = tree->Texture ();
     mesh_index = MeshFromTexture (texture_id);
     base_index = _mesh_list[mesh_index]._mesh.Vertices ();
     for (i = 0; i < tm->Vertices (); i++) {
       newpos = glMatrixTransformPoint (mat, tm->_vertex[i]);
-      newpos.z *= 0.5f + WorldNoisef (2 + _walk.x + _walk.y * FOREST_SIZE) * 1.0f;
+      //newpos.z *= 0.5f + WorldNoisef (2 + _walk.x + _walk.y * FOREST_SIZE) * 1.0f;
       newnorm = glMatrixTransformPoint (mat, tm->_normal[i]);
       _mesh_list[mesh_index]._mesh.PushVertex (newpos + origin, newnorm, tm->_uv[i]);
     }
-    //_mesh_list[mesh_index]._mesh.PushVertex (glVector (world_x, world_y, 0.0f), glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f));
-    //_mesh_list[mesh_index]._mesh.PushVertex (glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f));
-    //_mesh_list[mesh_index]._mesh.PushVertex (glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f));
-    //_mesh_list[mesh_index]._mesh.PushVertex (glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f));
-    //_mesh_list[mesh_index]._mesh.PushVertex (glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f));
-    //_mesh_list[mesh_index]._mesh.PushVertex (glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f));
     for (i = 0; i < tm->Triangles (); i++) {
       unsigned i1, i2, i3;
       i1 = base_index + tm->_index[i * 3];
       i2 = base_index + tm->_index[i * 3 + 1];
       i3 = base_index + tm->_index[i * 3 + 2];
       _mesh_list[mesh_index]._mesh.PushTriangle (i1, i2, i3);
-    }
-    
-    //_mesh_list[mesh_index]._mesh = *tm;
-    //for (i = 0; i < tm->Vertices (); i++) 
-      //_mesh_list[mesh_index]._mesh._vertex[i] += origin;
-    base_index = _mesh_list[mesh_index]._mesh.Vertices ();
-    {
-      base_index = base_index;
     }
   }
   if (_walk.Walk (FOREST_SIZE))

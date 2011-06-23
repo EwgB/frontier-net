@@ -1,3 +1,4 @@
+#define TREE_ALTS   3
 
 enum TreeTrunkStyle
 {
@@ -12,6 +13,7 @@ enum TreeFoliageStyle
   TREE_FOLIAGE_UMBRELLA,
   TREE_FOLIAGE_BOWL,
   TREE_FOLIAGE_PANEL,
+  TREE_FOLIAGE_SAG,
   TREE_FOLIAGE_STYLES
 };
 
@@ -59,40 +61,52 @@ class CTree
   int               _seed;
   int               _seed_current;
   bool              _funnel_trunk;
-  bool              _no_branches;
-  int               _branches;
-  float             _height;
+  bool              _evergreen;
+  
+  int               _default_branches;
+  float             _default_height;
+  float             _default_bend_frequency;
+  float             _default_base_radius;
+  float             _default_lowest_branch;
+
+  int               _current_branches;
+  float             _current_height;
+  float             _current_bend_frequency;
+  float             _current_angle_offset;
+  float             _current_base_radius;
+  float             _current_lowest_branch;
+
+  float             _moisture;
+  float             _temperature;
+
   float             _texture_tile;
-  float             _base_radius;
-  float             _lowest_branch;
+  
   float             _branch_lift;
   float             _branch_reach;
-  float             _trunk_bend;
-  float             _trunk_bend_frequency;
   float             _foliage_size;
   float             _leaf_size;
   unsigned          _texture;
-  int               _polygons;
   GLrgba            _bark_color1;
   GLrgba            _bark_color2;
   GLrgba            _leaf_color;
   vector<Leaf>      _leaf_list;
-  GLmesh            _mesh;
-  VBO               _vbo;
+  //VBO               _vbo;
+  GLmesh            _meshes[TREE_ALTS][LOD_LEVELS];
 
-  void              PushTriangle (int n1, int n2, int n3);
-  void              DoFoliage (GLvector pos, float size, float angle);
+  void              DoFoliage (GLmesh* m, GLvector pos, float size, float angle);
+  void              DoBranch (GLmesh* m, BranchAnchor anchor, float angle, LOD lod);
+  void              DoTrunk (GLmesh* m, unsigned local_seed, LOD lod);
   void              DoLeaves ();
-  void              DoBranch (BranchAnchor anchor, float angle);
   void              DoTexture ();
   GLvector          TrunkPosition (float delta, float* radius);
   void              Build ();
 public:
   void              Create ( float moisture, float temperature, int seed);
   void              Render ();
-  int               Polygons () { return _polygons; };
+  //int               Polygons () { return _polygons; };
   unsigned          Texture () { return _texture; };
-  GLmesh*           Mesh () { return &_mesh; };
+  GLmesh*           Mesh (unsigned alt, LOD lod);
+  void              Info ();
 
 
 };

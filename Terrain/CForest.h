@@ -24,7 +24,7 @@ struct TreeVBO
 
 class CForest
 {
-  int               _compile_step;
+  LOD               _lod;
   bool              _swap;
   GLcoord           _position;
   GLcoord           _origin;
@@ -42,7 +42,7 @@ class CForest
 public:
   CForest ();
   GLcoord           Position () const { return _position; };
-  void              Set (int x, int y);
+  void              Set (int x, int y, LOD lod);
   void              Render ();
   void              Update (long stop);
   bool              Ready ()  const { return _stage == FOREST_STAGE_DONE; };

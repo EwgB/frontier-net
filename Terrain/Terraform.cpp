@@ -186,7 +186,7 @@ static void do_mountain (int x, int y, int mtn_size)
       }
       r.mountain_height = 1 + (mtn_size - step);
       r.geo_detail = 13.0f + r.mountain_height* 3.0f;
-      r.geo_bias = (WorldNoisef (xx + yy) * 0.5f + (float)r.mountain_height) * REGION_SIZE;
+      r.geo_bias = (WorldNoisef (xx + yy) * 0.5f + (float)r.mountain_height) * REGION_SIZE / 2;
       r.flags_shape = REGION_FLAG_NOBLEND;
       r.climate = CLIMATE_MOUNTAIN;
       WorldRegionSet (xx + x, yy + y, r);

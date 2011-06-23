@@ -29,7 +29,7 @@
 #include "water.h"
 #include "world.h"
 
-#define FOREST_GRID     5
+#define FOREST_GRID     2
 #define FOREST_HALF     (FOREST_GRID / 2)
 #define GRASS_GRID      5
 #define GRASS_HALF      (GRASS_GRID / 2)
@@ -124,7 +124,7 @@ void SceneGenerate ()
   current.y = (int)(camera.y) / FOREST_SIZE;
   for (y = 0; y < FOREST_GRID; y++) {
     for (x = 0; x < FOREST_GRID; x++) {
-      forest[x][y].Set (current.x + x - FOREST_HALF, current.y + y - FOREST_HALF);
+      forest[x][y].Set (current.x + x - FOREST_HALF, current.y + y - FOREST_HALF, LOD_LOW);
     }
   }
   grass_walk.Clear ();
@@ -194,15 +194,19 @@ void SceneUpdate (long stop)
   int           offset;
   int           size;
   int           density;
+  Region*       r;
+  CTree*        tree;
 
   if (InputKeyPressed (SDLK_F11))
     SceneGenerate ();
 
 
-  TextPrint ("%d Terrains cached: %s\nTexture memory: %s\n%d Terrain triangles", cached, TextBytes (cached * sizeof (CTerrain)), TextBytes (texture_bytes), polygons);
-  TextPrint ("Tree has %d polys.", tree.Polygons ());
+  //TextPrint ("%d Terrains cached: %s\nTexture memory: %s\n%d Terrain triangles", cached, TextBytes (cached * sizeof (CTerrain)), TextBytes (texture_bytes), polygons);
+  //TextPrint ("Tree has %d polys.", tree.Polygons ());
   camera = CameraPosition ();
-
+  r = (Region*)CameraRegion ();
+  tree = WorldTree (r->tree_type);
+  tree->Info ();
   if (InputKeyPressed (SDLK_r)) {
     camera = CameraPosition ();
     grass_current.x = (int)(camera.x) / FOREST_SIZE;
@@ -241,6 +245,9 @@ void SceneUpdate (long stop)
   if (grass[grass_walk.x][grass_walk.y].Ready ())
     grass_walk.Walk (GRASS_GRID);
 
+  LOD   lod;
+  int   dist;
+
   forest_current.x = (int)(camera.x) / FOREST_SIZE;
   forest_current.y = (int)(camera.y) / FOREST_SIZE;
   fpos = forest[forest_walk.x][forest_walk.y].Position ();
@@ -252,7 +259,12 @@ void SceneUpdate (long stop)
     fpos.y += FOREST_GRID;
   if (fpos.y - forest_current.y > FOREST_HALF)
     fpos.y -= FOREST_GRID;
-  forest[forest_walk.x][forest_walk.y].Set (fpos.x, fpos.y);
+  dist = max (abs (fpos.x - forest_current.x), abs (fpos.y - forest_current.y));
+  if (dist <= 1) 
+    lod = LOD_HIGH;
+  else
+    lod = LOD_LOW;
+  forest[forest_walk.x][forest_walk.y].Set (fpos.x, fpos.y, lod);
   forest[forest_walk.x][forest_walk.y].Update (stop);
   if (forest[forest_walk.x][forest_walk.y].Ready ())
     forest_walk.Walk (FOREST_GRID);

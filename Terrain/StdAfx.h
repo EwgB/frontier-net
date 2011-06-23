@@ -56,6 +56,14 @@ enum SurfaceType
   SURFACE_TYPES
 };
 
+enum LOD
+{
+  LOD_LOW,
+  LOD_MED,
+  LOD_HIGH,
+  LOD_LEVELS
+};
+
 enum
 {
   NORTH,
