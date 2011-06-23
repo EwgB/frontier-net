@@ -29,19 +29,15 @@
 #define LARGE_SCALE       9 //Not used. Considering removing.
 //The dither map scatters surface data so that grass colorings end up in adjacent regions.
 #define DITHER_SIZE       (REGION_SIZE / 2)
-//We keep a list of random numbers so we can have deterministic "randomness".
-#define NOISE_BUFFER      1024              
 //How much space in a region is spent interpolating between itself and its neighbors.
 #define BLEND_DISTANCE    (REGION_SIZE / 4)
 
-#define TREE_TYPES        5
 
-static Region       map[WORLD_GRID][WORLD_GRID];
 static GLcoord      dithermap[DITHER_SIZE][DITHER_SIZE];
-static float        noisef[NOISE_BUFFER];
-static unsigned     noisei[NOISE_BUFFER];
 static unsigned     map_id;
+static World        planet;//THE WHOLE THING!
 static CTree        tree[TREE_TYPES][TREE_TYPES];
+
 
 /*-----------------------------------------------------------------------------
 The following functions are used when generating elevation data
@@ -242,7 +238,7 @@ static void build_map_texture ()
     for (y = 0; y < WORLD_GRID; y++) {
       //Flip it vertically, because the OpenGL texture coord system is retarded.
       yy = (WORLD_GRID - 1) - y;
-      r = map[x][yy];
+      r = planet.map[x][yy];
       ptr = &buffer[(x + y * WORLD_GRID) * 3];
       ptr[0] = (unsigned char)(r.color_map.red * 255.0f);
       ptr[1] = (unsigned char)(r.color_map.green * 255.0f);
@@ -280,7 +276,6 @@ float WorldWaterLevel (int world_x, int world_y)
   return MathInterpolateQuad (rul.geo_water, rur.geo_water, rbl.geo_water, rbr.geo_water, offset, ((origin.x + origin.y) %2) == 0);
 
 }
-
 
 float WorldBiasLevel (int world_x, int world_y)
 {
@@ -371,7 +366,6 @@ unsigned WorldTreeType (float moisture, float temperature)
   t = (int)(temperature * TREE_TYPES);
   m = clamp (m, 0, TREE_TYPES - 1);
   t = clamp (t, 0, TREE_TYPES - 1);
-  CTree* tt = &tree[m][t];
   return m + t * TREE_TYPES;
 
 }
@@ -436,7 +430,7 @@ float WorldNoisef (int index)
 {
 
   index = abs (index % NOISE_BUFFER);
-  return noisef[index];
+  return planet.noisef[index];
 
 }
 
@@ -444,7 +438,7 @@ unsigned WorldNoisei (int index)
 {
 
   index = abs (index % NOISE_BUFFER);
-  return noisei[index];
+  return planet.noisei[index];
 
 }
 
@@ -456,8 +450,8 @@ void    WorldGenerate ()
   unsigned    seed;
 
   for (x = 0; x < NOISE_BUFFER; x++) {
-    noisei[x] = RandomVal ();
-    noisef[x] = RandomFloat ();
+    planet.noisei[x] = RandomVal ();
+    planet.noisef[x] = RandomFloat ();
   }
   seed = 0;
   for (m = 0; m < TREE_TYPES; m++) {
@@ -465,11 +459,14 @@ void    WorldGenerate ()
       tree[m][t].Create ((float)m / TREE_TYPES, (float)t / TREE_TYPES, seed++);
     }
   }
+  planet.wind_from_west = (RandomVal () % 2) ? true : false;
+  planet.northern_hemisphere = (RandomVal () % 2) ? true : false;
+  planet.river_count = 3 + RandomVal () % 3;
   TerraformPrepare ();
   TerraformOceans ();
   TerraformCoast ();
   TerraformClimate ();
-  TerraformRivers (4);
+  TerraformRivers (planet.river_count);
   TerraformClimate ();//Do climate a second time now that rivers are in
   TerraformZones ();
   TerraformClimate ();//Now again, since we have added clime-modifying features (Mountains, etc.)
@@ -483,14 +480,14 @@ void    WorldGenerate ()
 Region WorldRegionGet (int index_x, int index_y)
 {
 
-  return map[index_x][index_y];
+  return planet.map[index_x][index_y];
 
 }
 
 void WorldRegionSet (int index_x, int index_y, Region val)
 {
 
-  map[index_x][index_y] = val;
+  planet.map[index_x][index_y] = val;
 
 }
 
@@ -504,8 +501,8 @@ Region WorldRegionFromPosition (int world_x, int world_y)
   world_x /= REGION_SIZE;
   world_y /= REGION_SIZE;
   if (world_x >= WORLD_GRID || world_y >= WORLD_GRID)
-    return map[0][0];
-  return map[world_x][world_y];
+    return planet.map[0][0];
+  return planet.map[world_x][world_y];
 
 }
 
@@ -569,5 +566,12 @@ unsigned WorldMap ()
 {
 
   return map_id;
+
+}
+
+World* WorldPtr ()
+{
+
+  return &planet;
 
 }

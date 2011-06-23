@@ -439,49 +439,67 @@ void TerraformClimate ()
 {
 
   int       x, y;  
-  float     moist, temp;
+  float     rainfall, rain_loss, temp;
   Region    r;
   GLvector2 from_center;
   float     distance;
+  GLcoord   walk;
+  World*    w;
 
-  for (y = 0; y < WORLD_GRID; y++) {
-    moist = 1.0f;
-    for (x = 0; x < WORLD_GRID; x++) {
-      r = WorldRegionGet (x, y);
-      from_center = glVector ((float)(x - WORLD_GRID_CENTER), (float)(x - WORLD_GRID_CENTER));
-      distance = from_center.Length () / WORLD_GRID_CENTER;
-      moist -= 1.0f / WORLD_GRID_CENTER;
-      //Mountains block rainfall
-      if (r.climate == CLIMATE_MOUNTAIN) 
-        moist -= 0.1f * r.mountain_height;
-      moist = max (moist, 0);
-      r.moisture = moist;
-      //Rivers always give some moisture
-      if (r.climate == CLIMATE_RIVER) {
-        r.moisture = max (r.moisture, 0.75f);
-        moist += 0.2f;
-        moist = min (moist, 1);
-      }
-      //The north 25% is max cold.  The south 25% is all tropical
+  rainfall = 1.0f;
+  w = WorldPtr ();
+  walk.Clear ();
+  do {
+    //Wind (and thus rainfall) come from west.
+    if (w->wind_from_west) 
+      x = walk.x; 
+    else 
+      x = (WORLD_GRID - 1) - walk.x;
+    y = walk.y;
+    r = WorldRegionGet (x, y);
+    //************   TEMPERATURE *******************//
+    //The north 25% is max cold.  The south 25% is all tropical
+    //On a southern hemisphere map, this is reversed.
+    if (w->northern_hemisphere)
       temp = ((float)y - (WORLD_GRID / 4)) / WORLD_GRID_CENTER;
-      //Mountains are cooler at the top
-      if (r.mountain_height) 
-        temp -= (float)r.mountain_height * 0.15f;
-      //We add a slight bit of heat to the center of the map, to
-      //round off climate boundaries.
-      temp += distance * 0.2f;
-      temp = clamp (temp, MIN_TEMP, MAX_TEMP);
-      //oceans have a moderating effect
-      if (r.climate == CLIMATE_OCEAN) {
-        temp = (temp + 0.5f) / 2.0f;
-        r.moisture = 1.0f;
-        moist = 1.0f;
-      }
-      r.temperature = temp;
-      r.tree_type =  WorldTreeType (r.moisture, r.temperature);
-      WorldRegionSet (x, y, r);
+    else 
+      temp = ((float)(WORLD_GRID - y) - (WORLD_GRID / 4)) / WORLD_GRID_CENTER;
+    //Mountains are cooler at the top
+    if (r.mountain_height) 
+      temp -= (float)r.mountain_height * 0.15f;
+    //We add a slight bit of heat to the center of the map, to
+    //round off climate boundaries.
+    from_center = glVector ((float)(x - WORLD_GRID_CENTER), (float)(x - WORLD_GRID_CENTER));
+    distance = from_center.Length () / WORLD_GRID_CENTER;
+    temp += distance * 0.2f;
+    temp = clamp (temp, MIN_TEMP, MAX_TEMP);
+    //************  RAINFALL *******************//
+    //Oceans are ALWAYS WET.
+    if (r.climate == CLIMATE_OCEAN)
+      rainfall = 1.0f;
+    //Rivers always give some moisture
+    if (r.climate == CLIMATE_RIVER) {
+      r.moisture = max (r.moisture, 0.75f);
+      rainfall += 0.2f;
+      rainfall = min (rainfall, 1);
     }
-  }
+    //We lose rainfall as we move inland.
+    rain_loss = 1.0f / WORLD_GRID_CENTER;
+    //We lose rainfall more slowly as it gets colder.
+    if (temp < 0.5f)
+      rain_loss *= temp * 2.0f;
+    rainfall -= rain_loss;
+    //Mountains block rainfall
+    if (r.climate == CLIMATE_MOUNTAIN) 
+      rainfall -= 0.1f * r.mountain_height;
+    r.moisture = max (rainfall, 0);
+    //oceans have a moderating effect on climate
+    if (r.climate == CLIMATE_OCEAN) 
+      temp = (temp + 0.5f) / 2.0f;
+    r.temperature = temp;
+    r.tree_type =  WorldTreeType (r.moisture, r.temperature);
+    WorldRegionSet (x, y, r);
+  } while (!walk.Walk (WORLD_GRID));
 
 }
 

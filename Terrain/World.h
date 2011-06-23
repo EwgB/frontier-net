@@ -46,6 +46,13 @@ enum Climate
   CLIMATE_TYPES,
 };
 
+//We keep a list of random numbers so we can have deterministic "randomness". 
+//This is the size of that list.
+#define NOISE_BUFFER      1024              
+//This is the size of the grid of trees.  The total number of tree species 
+//in the world is the square of this value, minus one. ("tree zero" is actually
+//"no trees at all".)
+#define TREE_TYPES        5
 
 struct Region
 {
@@ -76,6 +83,19 @@ struct Region
   bool      has_flowers;
 };
 
+//Only one of these is ever instanced.  This is everything that goes into a "save file".
+//Using only this, the entire world can be re-created.
+struct World
+{
+  bool         wind_from_west;
+  bool         northern_hemisphere;
+  unsigned     river_count;
+  float        noisef[NOISE_BUFFER];
+  unsigned     noisei[NOISE_BUFFER];
+  Region       map[WORLD_GRID][WORLD_GRID];
+};
+
+
 Cell          WorldCell (int world_x, int world_y);
 GLrgba        WorldColorGet (int world_x, int world_y, SurfaceColor c);
 char*         WorldLocationName (int world_x, int world_y);
@@ -92,3 +112,4 @@ Region        WorldRegionGet (int index_x, int index_y);
 void          WorldRegionSet (int index_x, int index_y, Region val);
 unsigned      WorldTreeType (float moisture, float temperature);
 class CTree*  WorldTree (unsigned id);
+World*        WorldPtr ();

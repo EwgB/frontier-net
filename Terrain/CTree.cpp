@@ -467,7 +467,14 @@ void CTree::Create (float moisture, float temp_in, int seed_in)
   _leaf_color = TerraformColorGenerate (SURFACE_COLOR_GRASS, moisture, _temperature, _seed_current++);
   _bark_color2 = TerraformColorGenerate (SURFACE_COLOR_DIRT, moisture, _temperature, _seed_current++);
   _bark_color1 = _bark_color2 * 0.5f;
-
+  //1 in 8 trees has white bark
+  if (!(WorldNoisei (_seed_current++) % 8))
+    _bark_color2 = glRgba (1.0f);
+  //These two foliage styles don't look right on evergreens.
+  if (_evergreen && _foliage_style == TREE_FOLIAGE_BOWL)
+    _foliage_style = TREE_FOLIAGE_UMBRELLA;
+  if (_evergreen && _foliage_style == TREE_FOLIAGE_PANEL)
+    _foliage_style = TREE_FOLIAGE_SAG;
   DoLeaves ();
   DoTexture ();
   Build ();
