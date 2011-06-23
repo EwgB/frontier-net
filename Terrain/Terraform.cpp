@@ -338,14 +338,20 @@ static bool try_river (int start_x, int start_y, int id)
       //Don't reverse course into ourselves
       if (last_move == (direction[d] * -1))
         continue;
+      //ALWAYS for for the ocean, if available
+      if (neighbor.climate == CLIMATE_OCEAN) {
+        selected = direction[d];
+        lowest = neighbor.geo_water;
+      } 
       //Don't head directly AWAY from the coast
       if (direction[d] == to_coast * -1)
         continue;
+      //Go whichever way is lowest
       if (neighbor.geo_water <= lowest) {
         selected = direction[d];
         lowest = neighbor.geo_water;
       }
-      WorldRegionSet (x + direction[d].x, y + direction[d].y, neighbor);
+      //WorldRegionSet (x + direction[d].x, y + direction[d].y, neighbor);
     }
     //If everthing around us is above us, we can't flow downhill
     if (!selected.x && !selected.y) //Let's just head for the edge of the map
@@ -378,15 +384,15 @@ static bool try_river (int start_x, int start_y, int id)
     r.river_id = id;
     r.moisture = max (r.moisture, 0.5f);
     r.river_segment = d;
-    //r.geo_detail = 8.0f + water_strength * 10.0f;
-    r.geo_detail = 28.0f - water_strength * 10.0f;
+    //Rivers get flatter as they go, travel from rocky streams to wide river plains
+    r.geo_detail = 28.0f - water_strength * 20.0f;
     r.river_width = min (water_strength, 1);
     r.climate = CLIMATE_RIVER;
     water_level = min (r.geo_water, water_level);
     //We need to flatten out this space, as well as all of its neighbors.
     r.geo_water = water_level;
-    for (xx = x - 2; xx <= x + 2; xx++) {
-      for (yy = y - 2; yy <= y + 2; yy++) {
+    for (xx = x - 1; xx <= x + 1; xx++) {
+      for (yy = y - 1; yy <= y + 1; yy++) {
         neighbor = WorldRegionGet (xx, yy);
         if (neighbor.climate != CLIMATE_INVALID) 
           continue;
@@ -821,17 +827,18 @@ void TerraformRivers (int count)
   int         rivers;
   int         cycles;
   int         x, y;
+  int         range;
 
   rivers = 0;
   cycles = 0;
+  range = WORLD_GRID_CENTER / 3;
   while (rivers < count && cycles < 100) {
-    x = WORLD_GRID_CENTER + (RandomVal () % 30) - 15;
-    y = WORLD_GRID_CENTER + (RandomVal () % 30) - 15;
+    x = WORLD_GRID_CENTER + (RandomVal () % range) - range / 2;
+    y = WORLD_GRID_CENTER + (RandomVal () % range) - range / 2;
     if (try_river (x, y, rivers)) 
       rivers++;
     cycles++;
   }
-  cycles = 0;
 
 }
 
@@ -996,7 +1003,7 @@ void TerraformPrepare ()
       r.geo_scale += (Entropy ((x + offset.x) * FREQUENCY, (y + offset.y) * FREQUENCY) - 0.2f);
       r.geo_scale = clamp (r.geo_scale, -1.0f, 1.0f);
       if (r.geo_scale > 0.0f)
-        r.geo_water = 1.0f + r.geo_scale;
+        r.geo_water = 1.0f + r.geo_scale * 16.0f;
       r.geo_bias = 0.0f;
       r.geo_detail = 0.0f;
       r.color_map = glRgba (0.0f);
