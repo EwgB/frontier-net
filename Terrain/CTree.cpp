@@ -99,7 +99,7 @@ void CTree::DoFoliage (GLmesh* m, GLvector pos, float fsize, float angle)
   GLuvbox   uv;
   int       base_index;
 
-  pos.z += 1.0f;
+  fsize *= _foliage_size;
   uv.Set (glVector (0.5f, 0.0f), glVector (1.0f, 1.0f));
   base_index = m->_vertex.size ();
 
@@ -282,7 +282,7 @@ void CTree::DoBranch (GLmesh* m, BranchAnchor anchor, float branch_angle, LOD lo
     }
   }
   //Make the triangles for the branch
-  for (segment= 0; segment< segment_count; segment++) {
+  for (segment = 0; segment< segment_count; segment++) {
     for (ring = 0; ring < radial_steps; ring++) {
       if (segment< segment_count - 1) {
         m->PushQuad (base_index + (ring + 0) + (segment+ 0) * (radial_edge),
@@ -291,8 +291,8 @@ void CTree::DoBranch (GLmesh* m, BranchAnchor anchor, float branch_angle, LOD lo
           base_index + (ring + 1) + (segment+ 0) * (radial_edge));
       } else {//this is the last segment. It ends in a single point
         m->PushTriangle (
-          base_index + (ring + 0) + segment* (radial_edge),
           base_index + (ring + 1) + segment* (radial_edge),
+          base_index + (ring + 0) + segment* (radial_edge),
           m->Vertices () - 1);
       }
     }
@@ -387,22 +387,25 @@ void CTree::DoTrunk (GLmesh* m, unsigned local_seed, LOD lod)
   
   //Make the triangles for the tip
   for (ring = 0; ring < radial_steps; ring++) {
-    m->PushTriangle ((ring + 0) + (segment_count - 1) * radial_edge, m->_vertex.size () - 1,
-      (ring + 1) + (segment_count - 1) * radial_edge);
+    m->PushTriangle ((ring + 1) + (segment_count - 1) * radial_edge, m->_vertex.size () - 1,
+      (ring + 0) + (segment_count - 1) * radial_edge);
   }
-  
-  //DoFoliage (TrunkPosition (vertical_pos, NULL), vertical_pos * _height, 0.0f);
-  if (_evergreen) { //just rings of foliage, like an evergreen
-    for (i = 0; i < (int)branch_list.size (); i++) {
-      angle = (float)i * ((360.0f / (float)branch_list.size ()));
-      DoFoliage (m, branch_list[i].root, branch_list[i].length, angle);
-    }
-  } else { //has branches
-    for (i = 0; i < (int)branch_list.size (); i++) {
-      angle = _current_angle_offset + (float)i * ((360.0f / (float)branch_list.size ()) + 180.0f);
-      DoBranch (m, branch_list[i], angle, lod);
-    }
-  } 
+  if (_canopy) {
+    DoFoliage (m, m->_vertex[m->_vertex.size () - 1] + glVector (0.0f, 0.0f, -2.0f), _current_height / 2, 0.0f);
+  } else {
+    //DoFoliage (TrunkPosition (vertical_pos, NULL), vertical_pos * _height, 0.0f);
+    if (_evergreen) { //just rings of foliage, like an evergreen
+      for (i = 0; i < (int)branch_list.size (); i++) {
+        angle = (float)i * ((360.0f / (float)branch_list.size ()));
+        DoFoliage (m, branch_list[i].root, branch_list[i].length, angle);
+      }
+    } else { //has branches
+      for (i = 0; i < (int)branch_list.size (); i++) {
+        angle = _current_angle_offset + (float)i * ((360.0f / (float)branch_list.size ()) + 180.0f);
+        DoBranch (m, branch_list[i], angle, lod);
+      }
+    } 
+  }
 
 }
 
@@ -432,7 +435,7 @@ void CTree::Build ()
 }
 
 
-void CTree::Create (float moisture, float temp_in, int seed_in)
+void CTree::Create (bool is_canopy, float moisture, float temp_in, int seed_in)
 {
   
   //Prepare, clear the tables, etc.
@@ -440,10 +443,12 @@ void CTree::Create (float moisture, float temp_in, int seed_in)
   _seed = seed_in;
   _seed_current = _seed;
   _moisture = moisture;
+  _canopy = is_canopy;
   _temperature = temp_in;
   _seed_current = _seed;
   //We want our height to fall on a bell curve
   _default_height = 8.0f + WorldNoisef (_seed_current++) * 8.0f + WorldNoisef (_seed_current++) * 8.0f;
+  _default_bend_frequency = 1.0f + WorldNoisef (_seed_current++) * 2.0f;
   _default_base_radius = 0.3f + WorldNoisef (_seed_current++) * 2.0f;
   _default_branches = 2 + WorldNoisei (_seed_current) % 2;
   //Keep branches away from the ground, since they don't have collision
@@ -475,28 +480,31 @@ void CTree::Create (float moisture, float temp_in, int seed_in)
     _foliage_style = TREE_FOLIAGE_UMBRELLA;
   if (_evergreen && _foliage_style == TREE_FOLIAGE_PANEL)
     _foliage_style = TREE_FOLIAGE_SAG;
+  if (_canopy) {
+    _foliage_style = TREE_FOLIAGE_UMBRELLA;
+    _default_height = max (_default_height, 16.0f);
+    _default_base_radius = 3.0f;
+    _foliage_size = 2.0f;
+    _trunk_style = TREE_TRUNK_NORMAL;
+  }
   DoLeaves ();
   DoTexture ();
   Build ();
 
 }
 
-void CTree::Render ()
+//Render a single tree. Very slow. Used for debugging. 
+void CTree::Render (GLvector pos, unsigned alt, LOD lod)
 {
 
   glEnable (GL_BLEND);
   glEnable (GL_TEXTURE_2D);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glBindTexture (GL_TEXTURE_2D, _texture);
-  //glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("tree.bmp"));
-  //glColorMask (false, false, false, false);
-  glPolygonMode (GL_BACK, GL_LINE);
-  //_vbo.Render ();
-  //glColorMask (true, true, true, true);
-  //glColor4f (1.0f, 1.0f, 1.0f, 0.0f);
-  //_vbo.Render ();
-
-
+  glPushMatrix ();
+  glTranslatef (pos.x, pos.y, pos.z);
+  _meshes[alt][lod].Render ();
+  glPopMatrix ();
 
 }
 

@@ -7,6 +7,22 @@
 
  TODO:
 
+ * day / night
+ * map rebuild
+ * rivers
+ * trees
+ * work in progress
+ * i'll show on my blog
+
+ 512 x 64 = 32km
+
+ 1,000 km2
+
+
+ 
+
+
+
  x Move player movement to Avatar.cpp
  x Migrate region building to Terraform.cpp
  * Make water only build needed polygons.
@@ -97,8 +113,8 @@ static void run ()
     RenderUpdate ();
     Render ();	
     remaining = stop - SdlTick ();
-    //if (remaining > 0) 
-      //Sleep (remaining);
+    if (remaining > 0) 
+      Sleep (remaining);
   }
 
 }

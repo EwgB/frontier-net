@@ -29,11 +29,11 @@
 #include "water.h"
 #include "world.h"
 
-#define FOREST_GRID     3
+#define FOREST_GRID     9
 #define FOREST_HALF     (FOREST_GRID / 2)
 #define GRASS_GRID      5
 #define GRASS_HALF      (GRASS_GRID / 2)
-#define RENDER_DISTANCE 8
+#define RENDER_DISTANCE 12
 #define TERRAIN_GRID    (WORLD_SIZE_METERS / TERRAIN_SIZE)
 
 static CTerrain*        terrain[TERRAIN_GRID][TERRAIN_GRID];
@@ -42,7 +42,7 @@ static CForest          forest[FOREST_GRID][FOREST_GRID];
 static GLcoord          forest_walk;
 static CGrass           grass[GRASS_GRID][GRASS_GRID];
 static GLcoord          grass_walk;
-static CTree            tree;
+static CTree            test_tree;
 static int              dist_table[RENDER_DISTANCE + 1][RENDER_DISTANCE + 1];
 static int              cached;
 static int              texture_bytes;
@@ -95,6 +95,16 @@ void SceneClear ()
       if (terrain[x][y]) 
         delete terrain[x][y];
       terrain[x][y] = NULL;
+    }
+  }
+  for (x = 0; x < GRASS_GRID; x++) {
+    for (y = 0; y < GRASS_GRID; y++) {
+      grass[x][y].Invalidate (); 
+    }
+  }
+  for (x = 0; x < FOREST_GRID; x++) {
+    for (y = 0; y < FOREST_GRID; y++) {
+      forest[x][y].Invalidate ();
     }
   }
 
@@ -161,6 +171,8 @@ CTerrain* SceneTerrainGet (int x, int y)
 }
 
 static GLvector last_tree;
+static int  seed;
+static bool draw_tree;
 
 void SceneInit ()
 {
@@ -176,10 +188,10 @@ void SceneInit ()
   SceneGenerate ();
   grass_walk.Clear ();
   last_tree = IniVector ("Treepos");
+  seed = IniInt ("TreeSeed");
 
 }
 
-static int  seed;
 
 void SceneUpdate (long stop)
 {
@@ -208,22 +220,40 @@ void SceneUpdate (long stop)
   tree = WorldTree (r->tree_type);
   tree->Info ();
   if (InputKeyPressed (SDLK_r)) {
+    if (draw_tree)
+      seed++;
+    IniVectorSet ("Treepos", last_tree);
+    IniIntSet ("TreeSeed", seed);
+    test_tree.Create (false, 0.5f, 0.5f, seed);
+    draw_tree = true;
+/*
     camera = CameraPosition ();
     grass_current.x = (int)(camera.x) / FOREST_SIZE;
     grass_current.y = (int)(camera.y) / FOREST_SIZE;
     //forest.Set (grass_current.x, grass_current.y);
     //tree.Build (last_tree, WorldNoisef (seed + 1), WorldNoisef (seed + 2), seed);
     seed++;
+    */
   }
-  /*
+  
   if (InputKeyPressed (SDLK_t)) {
     GLvector  apos = AvatarPosition ();
     apos.x -= 4.0f;
     apos.z = CacheElevation (apos.x, apos.y);
     //tree.Create (apos, 0.0f, 0.0f, 0);
     last_tree = apos;
+  }
+    
+  /*
+  {
+    GLvector  apos = AvatarPosition ();
+    apos.x -= 4.0f;
+    apos.z = CacheElevation (apos.x, apos.y);
+    //tree.Create (apos, 0.0f, 0.0f, 0);
+    last_tree = apos;
     //IniVectorSet ("Treepos", last_tree);
-  }*/
+  }
+  */
 
   
 
@@ -339,6 +369,9 @@ void SceneRender ()
   glEnable(GL_TEXTURE_2D);
   glColor3f (1,1,1);
 
+  if (draw_tree)
+    test_tree.Render (last_tree, 0, LOD_HIGH);
+
   for (x = start.x; x <= end.x; x++) {
     for (y = start.y; y <= end.y; y++) {
       dist = dist_table[abs (x - current.x)][abs (y - current.y)];
@@ -367,7 +400,7 @@ void SceneRender ()
   glDisable (GL_BLEND);
   t = TextureFromName ("tree.bmp", MASK_PINK);
   glBindTexture (GL_TEXTURE_2D, t->id);
-  tree.Render ();
+  //tree.Render ();
   /*
   return;
   

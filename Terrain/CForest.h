@@ -46,4 +46,5 @@ public:
   void              Render ();
   void              Update (long stop);
   bool              Ready ()  const { return _stage == FOREST_STAGE_DONE; };
+  void              Invalidate () { _valid = false; };
 };

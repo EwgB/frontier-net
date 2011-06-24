@@ -4,6 +4,7 @@ void    TerraformColors ();
 GLrgba  TerraformColorGenerate (SurfaceColor c, float moisture, float temperature, int seed);
 void    TerraformClimate ();
 void    TerraformFill ();
+void    TerraformFlora ();
 void    TerraformOceans ();
 void    TerraformPrepare ();
 void    TerraformRivers (int count);

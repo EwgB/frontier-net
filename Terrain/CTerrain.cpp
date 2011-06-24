@@ -47,6 +47,7 @@ static struct LayerAttributes
   {"dirt2.bmp",    1.0f,  1.0f,   1.4f,   SURFACE_DIRT,       SURFACE_COLOR_DIRT},
   {"dirt2.bmp",    0.6f,  1.0f,   1.6f,   SURFACE_DIRT_DARK,  SURFACE_COLOR_DIRT},
 
+  {"ground1.bmp",  1.0f,  1.0f,   1.6f,   SURFACE_FOREST,     SURFACE_COLOR_DIRT},
 
   {"grass3.bmp",   0.0f,  0.3f,   2.3f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
   {"grass3.bmp",   0.0f,  0.5f,   2.2f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},

@@ -23,7 +23,7 @@
 //The number of regions around the edge which should be ocean.
 #define OCEAN_BUFFER      (WORLD_GRID / 6) 
 //This affects the mapping of the coastline.  Higher = busier, more repetitive coast.
-#define FREQUENCY         3 
+#define FREQUENCY         1 
 //How many different colors of flowers are available
 #define FLOWER_PALETTE    (sizeof (flower_palette) / sizeof (GLrgba))
 
@@ -222,13 +222,17 @@ static void do_swamp (int x, int y, int size)
 
   Region  r;
   int     xx, yy;
+  float   water;
 
+  r = WorldRegionGet (x, y);
+  water = r.geo_water;
   for (xx = -size; xx <= size; xx++) {
     for (yy = -size; yy <= size; yy++) {
       r = WorldRegionGet (xx + x, yy + y);
       sprintf (r.title, "Swamp");
       r.climate = CLIMATE_SWAMP;
       r.color_atmosphere = glRgba (0.0f, 0.5f, 0.0f);
+      r.geo_water = water;
       r.moisture = 1.0f;
       r.geo_detail = 8.0f;
       r.has_flowers = false;
@@ -272,6 +276,30 @@ static void do_field (int x, int y, int size)
   }
 
 }
+
+
+//Place a field of flowers
+static void do_forest (int x, int y, int size)
+{
+
+  Region    r;
+  int       xx, yy;
+
+  for (xx = -size; xx <= size; xx++) {
+    for (yy = -size; yy <= size; yy++) {
+      r = WorldRegionGet (xx + x, yy + y);
+      sprintf (r.title, "Forest");
+      r.climate = CLIMATE_FOREST;
+      r.color_atmosphere = glRgba (0.1f, 0.6f, 0.3f);
+      r.geo_detail = 8.0f;
+      r.tree_threshold = 0.75f;
+      //r.flags_shape |= REGION_FLAG_NOBLEND;
+      WorldRegionSet (x + xx, y + yy, r);
+    }
+  }
+
+}
+
 
 
 static void do_canyon (int x, int y, int radius)
@@ -503,8 +531,28 @@ void TerraformClimate ()
     if (r.climate == CLIMATE_OCEAN) 
       temp = (temp + 0.5f) / 2.0f;
     r.temperature = temp;
-    r.tree_type =  WorldTreeType (r.moisture, r.temperature);
+    //r.moisture = min (1, r.moisture + WorldNoisef (walk.x + walk.y * WORLD_GRID) * 0.1f);
+    //r.temperature = min (1, r.temperature + WorldNoisef (walk.x + walk.y * WORLD_GRID) * 0.1f);
     WorldRegionSet (x, y, r);
+  } while (!walk.Walk (WORLD_GRID));
+
+}
+
+
+//Figure out what plant life should grow here.
+void TerraformFlora () 
+{
+
+  Region    r;
+  GLcoord   walk;
+
+  walk.Clear ();
+  do {
+    r = WorldRegionGet (walk.x, walk.y);
+    r.tree_type =  WorldTreeType (r.moisture, r.temperature);
+    if (r.climate == CLIMATE_FOREST)
+      r.tree_type = WorldCanopyTree ();
+    WorldRegionSet (walk.x, walk.y, r);
   } while (!walk.Walk (WORLD_GRID));
 
 }
@@ -608,7 +656,9 @@ void TerraformColors ()
       //Color the map
       switch (r.climate) {
       case CLIMATE_MOUNTAIN:
-        r.color_map = glRgba (0.9f, 0.9f, 1.0f);break;
+        r.color_map = glRgba (0.2f + (float)r.mountain_height / 4.0f);
+        r.color_map.Normalize ();
+        break;
       case CLIMATE_COAST:
         r.color_map = glRgba (0.9f, 0.7f, 0.4f);break;
       case CLIMATE_OCEAN:
@@ -625,12 +675,18 @@ void TerraformColors ()
         r.color_map = r.color_grass + glRgba (0.7f, 0.5f, 0.6f);
         r.color_map.Normalize ();
         break;
+      case CLIMATE_FOREST:
+        r.color_map = r.color_grass + glRgba (0.0f, 0.5f, 0.0f);
+        r.color_map *= 0.5f;
+        break;
       case CLIMATE_SWAMP:
         r.color_grass *= 0.5f;
         r.color_map = r.color_grass * 0.5f;
         break;
       case CLIMATE_ROCKY:
-        r.color_map = r.color_rock * 0.3f;
+        r.color_map = r.color_grass * 0.8f;
+        r.color_map += r.color_rock * 0.2f;
+        r.color_map.Normalize ();
         break;
       case CLIMATE_CANYON:
         r.color_map = r.color_rock * 0.3f;
@@ -709,7 +765,6 @@ void TerraformAverage ()
         else if (r.climate != CLIMATE_OCEAN) 
           r.moisture = moist[x][y];//No matter how arid it is, the OCEANS STAY WET!
         if (!(r.flags_shape & REGION_FLAG_NOBLEND)) {
-          //r.geo_water = elev[x][y];
           r.geo_detail = sm[x][y];
           r.geo_bias = bias[x][y];
         }
@@ -876,6 +931,8 @@ void TerraformZones ()
         climates.push_back (CLIMATE_ROCKY);
       if (radius > 1)
         climates.push_back (CLIMATE_CANYON);
+      if (r.temperature > TEMP_TEMPERATE && r.temperature < TEMP_HOT && r.moisture > 0.5f)
+        climates.push_back (CLIMATE_FOREST);
       if (climates.empty ())
         continue;
       c = climates[RandomVal () % climates.size ()];
@@ -894,6 +951,8 @@ void TerraformZones ()
         break;
       case CLIMATE_FIELD:
         do_field (x, y, radius);
+      case CLIMATE_FOREST:
+        do_forest (x, y, radius);
       }
       //leave a bit of a gap before the next one
       x += radius * 3;
@@ -989,6 +1048,7 @@ void TerraformPrepare ()
       r.mountain_height = 0;
       r.grid_pos.x = x;
       r.grid_pos.y = y;
+      r.tree_threshold = 0.15f;
       from_center.x = abs (x - WORLD_GRID_CENTER);
       from_center.y = abs (y - WORLD_GRID_CENTER);
       //Geo scale is a number from -1 to 1. -1 is lowest ovean. 0 is sea level. 

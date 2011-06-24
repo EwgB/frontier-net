@@ -37,7 +37,7 @@ static GLcoord      dithermap[DITHER_SIZE][DITHER_SIZE];
 static unsigned     map_id;
 static World        planet;//THE WHOLE THING!
 static CTree        tree[TREE_TYPES][TREE_TYPES];
-
+static unsigned     canopy;
 
 /*-----------------------------------------------------------------------------
 The following functions are used when generating elevation data
@@ -448,6 +448,7 @@ void    WorldGenerate ()
   int         x;
   unsigned    m, t;
   unsigned    seed;
+  bool        is_canopy;
 
   for (x = 0; x < NOISE_BUFFER; x++) {
     planet.noisei[x] = RandomVal ();
@@ -456,12 +457,17 @@ void    WorldGenerate ()
   seed = 0;
   for (m = 0; m < TREE_TYPES; m++) {
     for (t = 0; t < TREE_TYPES; t++) {
-      tree[m][t].Create ((float)m / TREE_TYPES, (float)t / TREE_TYPES, seed++);
+      if ((m == TREE_TYPES / 2) && (t == TREE_TYPES / 2)) {
+        is_canopy = true;
+        canopy = m + t * TREE_TYPES;
+      } else
+        is_canopy = false;
+      tree[m][t].Create (is_canopy, (float)m / TREE_TYPES, (float)t / TREE_TYPES, seed++);
     }
   }
   planet.wind_from_west = (RandomVal () % 2) ? true : false;
   planet.northern_hemisphere = (RandomVal () % 2) ? true : false;
-  planet.river_count = 3 + RandomVal () % 3;
+  planet.river_count = 5 + RandomVal () % 4;
   TerraformPrepare ();
   TerraformOceans ();
   TerraformCoast ();
@@ -469,9 +475,10 @@ void    WorldGenerate ()
   TerraformRivers (planet.river_count);
   TerraformClimate ();//Do climate a second time now that rivers are in
   TerraformZones ();
-  TerraformClimate ();//Now again, since we have added clime-modifying features (Mountains, etc.)
+  TerraformClimate ();//Now again, since we have added climate-modifying features (Mountains, etc.)
   TerraformFill ();
   TerraformAverage ();
+  TerraformFlora ();
   TerraformColors ();
   build_map_texture ();
   
@@ -560,6 +567,13 @@ GLrgba WorldColorGet (int world_x, int world_y, SurfaceColor c)
   result.blue  = MathInterpolateQuad (c0.blue, c1.blue, c2.blue, c3.blue, offset);
   return result;
   
+}
+
+unsigned WorldCanopyTree ()
+{
+
+  return canopy;
+
 }
 
 unsigned WorldMap ()

@@ -1,10 +1,3 @@
-#define REGION_SIZE             64
-#define REGION_HALF             (REGION_SIZE / 2)
-#define WORLD_GRID              128
-#define WORLD_GRID_EDGE         (WORLD_GRID + 1)
-#define WORLD_GRID_CENTER       (WORLD_GRID / 2)
-#define WORLD_SIZE_METERS       (REGION_SIZE * WORLD_GRID)
-
 #define REGION_FLAG_TEST        0x0001
 #define REGION_FLAG_MESAS       0x0002
 #define REGION_FLAG_CRATER      0x0004
@@ -29,7 +22,21 @@
 #define REGION_FLAG_RIVERSW     (REGION_FLAG_RIVERS | REGION_FLAG_RIVERW)
 #define REGION_FLAG_RIVER_ANY   (REGION_FLAG_RIVERNS | REGION_FLAG_RIVEREW)
 
-#define FLOWERS                 3
+#define REGION_SIZE             64
+#define REGION_HALF             (REGION_SIZE / 2)
+#define WORLD_GRID              512
+#define WORLD_GRID_EDGE         (WORLD_GRID + 1)
+#define WORLD_GRID_CENTER       (WORLD_GRID / 2)
+#define WORLD_SIZE_METERS       (REGION_SIZE * WORLD_GRID)
+
+#define FLOWERS           3
+//We keep a list of random numbers so we can have deterministic "randomness". 
+//This is the size of that list.
+#define NOISE_BUFFER      1024              
+//This is the size of the grid of trees.  The total number of tree species 
+//in the world is the square of this value, minus one. ("tree zero" is actually
+//"no trees at all".)
+#define TREE_TYPES        8
 
 enum Climate
 {
@@ -43,35 +50,29 @@ enum Climate
   CLIMATE_ROCKY,
   CLIMATE_FIELD,
   CLIMATE_CANYON,
+  CLIMATE_FOREST,
   CLIMATE_TYPES,
 };
 
-//We keep a list of random numbers so we can have deterministic "randomness". 
-//This is the size of that list.
-#define NOISE_BUFFER      1024              
-//This is the size of the grid of trees.  The total number of tree species 
-//in the world is the square of this value, minus one. ("tree zero" is actually
-//"no trees at all".)
-#define TREE_TYPES        5
 
 struct Region
 {
   char      title[50];
+  unsigned  tree_type;
+  unsigned  flags_shape;
+  Climate   climate;
   GLcoord   grid_pos;
   int       mountain_height;
   int       river_id;
   int       river_segment;
-  unsigned  tree_type;
+  float     tree_threshold;
   float     river_width;
   float     geo_scale; //Number from -1 to 1, lowest to highest elevation. 0 is sea level
   float     geo_water;
   float     geo_detail;
   float     geo_bias;
-  unsigned  flags_shape;
-  Climate   climate;
   float     temperature;
   float     moisture;
-  float     threshold;
   float     beach_threshold;
   GLrgba    color_map;
   GLrgba    color_rock;
@@ -104,6 +105,7 @@ Region        WorldRegionFromPosition (int world_x, int world_y);
 float         WorldWaterLevel (int world_x, int world_y);
 
 void          WorldGenerate ();
+unsigned      WorldCanopyTree ();
 void          WorldInit ();
 unsigned      WorldMap ();
 unsigned      WorldNoisei (int index);

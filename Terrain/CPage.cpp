@@ -156,7 +156,7 @@ void CPage::DoColor ()
   world_y = (_origin.y * PAGE_SIZE + _walk.y);
   if (_cell[_walk.x][_walk.y].surface == SURFACE_GRASS || _cell[_walk.x][_walk.y].surface == SURFACE_GRASS_EDGE)
     _cell[_walk.x][_walk.y].grass = WorldColorGet (world_x, world_y, SURFACE_COLOR_GRASS);
-  if (_cell[_walk.x][_walk.y].surface == SURFACE_DIRT || _cell[_walk.x][_walk.y].surface == SURFACE_DIRT_DARK)
+  if (_cell[_walk.x][_walk.y].surface == SURFACE_DIRT || _cell[_walk.x][_walk.y].surface == SURFACE_DIRT_DARK || _cell[_walk.x][_walk.y].surface == SURFACE_FOREST)
     _cell[_walk.x][_walk.y].dirt = WorldColorGet (world_x, world_y, SURFACE_COLOR_DIRT);
   _cell[_walk.x][_walk.y].rock = WorldColorGet (world_x, world_y, SURFACE_COLOR_ROCK);
   if (_walk.Walk (PAGE_SIZE))
@@ -196,21 +196,22 @@ void CPage::DoTrees ()
   int       x, y;
   GLcoord   plant;
   bool      valid;
-  float     lowest;
+  float     highest;
 
   worldpos.x = _origin.x * PAGE_SIZE + _walk.x;
   worldpos.y = _origin.y * PAGE_SIZE + _walk.y;
   region = WorldRegionFromPosition (worldpos.x, worldpos.y);
   valid = false;
-  lowest = 99999.9f;
-  for (x = 0; x < TREE_SPACING / 2; x++) {
-    for (y = 0; y < TREE_SPACING / 2; y++) {
+  highest = -99999.9f;
+  for (x = 0; x < TREE_SPACING - 2; x++) {
+    for (y = 0; y < TREE_SPACING - 2; y++) {
       c = &_cell[_walk.x * TREE_SPACING + x][_walk.y * TREE_SPACING + y];
-      if (c->surface != SURFACE_GRASS && c->surface != SURFACE_SNOW)
+      if (c->surface != SURFACE_GRASS && c->surface != SURFACE_SNOW && c->surface != SURFACE_FOREST)
         continue;
-      if (c->detail < 0.1f && c->pos.z < lowest) {
+      if ((c->detail + region.tree_threshold) > 1.0f && c->pos.z > highest) {
         plant.x = _walk.x * TREE_SPACING + x;
         plant.y = _walk.y * TREE_SPACING + y;
+        highest = c->pos.z;
         valid = true;
       }
     }
@@ -261,19 +262,19 @@ void CPage::DoSurface ()
       c->surface = SURFACE_GRASS;
     else //Too cold or dry
       c->surface = SURFACE_ROCK;
+
+
     //Sand is only for coastal regions
     if (low <= region.beach_threshold && (region.climate == CLIMATE_COAST))
       c->surface = SURFACE_SAND;
-
-    //if (high > 0 && low < 0 && (region.flags & REGION_FLAG_SWAMP))
-      //c->surface = SURFACE_GRASS_EDGE;
+    //Forests are for... forests?
+    if (c->detail < 0.75f && c->detail > 0.25f && (region.climate == CLIMATE_FOREST))
+      c->surface = SURFACE_FOREST;
     if (delta >= region.moisture * 6)
       c->surface = SURFACE_DIRT;
-    if (low <= region.geo_water + region.moisture)
+    if (low <= region.geo_water && region.climate != CLIMATE_SWAMP)
       c->surface = SURFACE_DIRT;
-    //if (low <= 0 && (region.climate == CLIMATE_RIVER))
-      //c->surface = SURFACE_DIRT_DARK;
-    if (low <= region.geo_water)
+    if (low <= region.geo_water && region.climate != CLIMATE_SWAMP)
       c->surface = SURFACE_DIRT_DARK;
     //The colder it is, the more surface becomes snow, beginning at the lowest points.
     if (region.temperature < FREEZING) {
@@ -294,12 +295,6 @@ void CPage::DoSurface ()
       c->surface = SURFACE_SAND;
     if (delta > 4.0f && region.temperature > 0.0f)
       c->surface = SURFACE_ROCK;
-    /*
-    if (c->detail > 0.5f)
-      c->surface = SURFACE_ROCK;
-    else 
-      c->surface = SURFACE_SNOW;
-      */
   } else {
     if (c->surface == SURFACE_GRASS
       && _walk.x > 0 && _walk.x < PAGE_SIZE - 1 && _walk.y > 0 && _walk.y < PAGE_SIZE - 1 &&
