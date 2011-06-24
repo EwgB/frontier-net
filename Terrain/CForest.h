@@ -21,12 +21,15 @@ struct TreeVBO
   GLbbox            _bbox;
 };
 
+#ifndef GRID
+#include "Grid.h"
+#endif
 
-class CForest
+class CForest : public GridData
 {
   LOD               _lod;
+  unsigned          _current_distance;
   bool              _swap;
-  GLcoord           _position;
   GLcoord           _origin;
   int               _stage;
   bool              _valid;
@@ -41,8 +44,9 @@ class CForest
 
 public:
   CForest ();
-  GLcoord           Position () const { return _position; };
-  void              Set (int x, int y, LOD lod);
+  virtual unsigned  Sizeof () { return sizeof (CForest); }; 
+  //GLcoord           GridPosition () const { return _grid_position; };
+  void              Set (int x, int y, int distance);
   void              Render ();
   void              Update (long stop);
   bool              Ready ()  const { return _stage == FOREST_STAGE_DONE; };

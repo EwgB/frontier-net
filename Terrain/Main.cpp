@@ -5,30 +5,9 @@
 
 -------------------------------------------------------------------------------
 
- TODO:
+TODO:
 
- * day / night
- * map rebuild
- * rivers
- * trees
- * work in progress
- * i'll show on my blog
-
- 512 x 64 = 32km
-
- 1,000 km2
-
-
- 
-
-
-
- x Move player movement to Avatar.cpp
- x Migrate region building to Terraform.cpp
- * Make water only build needed polygons.
- x Move normals to pages, use them on grass.
- * Move "world" stuff to new "cache.cpp".  Move world-generation stuf to world.cpp.
- * Fix potential wasted time in page update.
+* Small trees up, big trees down
 
 -----------------------------------------------------------------------------*/
 

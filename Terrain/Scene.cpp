@@ -29,11 +29,11 @@
 #include "water.h"
 #include "world.h"
 
-#define FOREST_GRID     9
+#define FOREST_GRID     7
 #define FOREST_HALF     (FOREST_GRID / 2)
-#define GRASS_GRID      5
+#define GRASS_GRID      7
 #define GRASS_HALF      (GRASS_GRID / 2)
-#define RENDER_DISTANCE 12
+#define RENDER_DISTANCE 15
 #define TERRAIN_GRID    (WORLD_SIZE_METERS / TERRAIN_SIZE)
 
 static CTerrain*        terrain[TERRAIN_GRID][TERRAIN_GRID];
@@ -49,6 +49,13 @@ static int              texture_bytes;
 static int              texture_bytes_counter;
 static int              polygons;
 static int              polygons_counter;
+
+/*                  *************************************************************/
+
+//static int              grid_offsets
+
+static GridManager        gm_forest;
+static vector<CForest>    il_forest;
 
 
 /* Static Functions *************************************************************/
@@ -130,6 +137,7 @@ void SceneGenerate ()
       grass[x][y].Set (current.x + x - GRASS_HALF, current.y + y - GRASS_HALF, 1);
     }
   }
+  /*
   current.x = (int)(camera.x) / FOREST_SIZE;
   current.y = (int)(camera.y) / FOREST_SIZE;
   for (y = 0; y < FOREST_GRID; y++) {
@@ -137,8 +145,13 @@ void SceneGenerate ()
       forest[x][y].Set (current.x + x - FOREST_HALF, current.y + y - FOREST_HALF, LOD_LOW);
     }
   }
+  */
   grass_walk.Clear ();
   forest_walk.Clear ();
+
+  il_forest.clear ();
+  il_forest.resize (FOREST_GRID * FOREST_GRID);//.resize (FOREST_GRID * FOREST_GRID);
+  gm_forest.Init (&il_forest[0], FOREST_GRID, FOREST_SIZE);
 
 }
 
@@ -198,7 +211,7 @@ void SceneUpdate (long stop)
 
   int           x, y;
   GLcoord       forest_current;
-  GLcoord       fpos;
+//  GLcoord       fpos;
   GLcoord       grass_current;
   GLcoord       gpos;
   GLvector      camera;
@@ -275,12 +288,12 @@ void SceneUpdate (long stop)
   if (grass[grass_walk.x][grass_walk.y].Ready ())
     grass_walk.Walk (GRASS_GRID);
 
-  LOD   lod;
-  int   dist;
-
+  //LOD   lod;
+  //int   dist;
+  /*
   forest_current.x = (int)(camera.x) / FOREST_SIZE;
   forest_current.y = (int)(camera.y) / FOREST_SIZE;
-  fpos = forest[forest_walk.x][forest_walk.y].Position ();
+  fpos = forest[forest_walk.x][forest_walk.y].GridPosition ();
   if (forest_current.x - fpos.x > FOREST_HALF)
     fpos.x += FOREST_GRID;
   if (fpos.x - forest_current.x > FOREST_HALF)
@@ -298,7 +311,8 @@ void SceneUpdate (long stop)
   forest[forest_walk.x][forest_walk.y].Update (stop);
   if (forest[forest_walk.x][forest_walk.y].Ready ())
     forest_walk.Walk (FOREST_GRID);
-
+    */
+  gm_forest.Update (stop);
 
 
   terrain_current.x = (int)(camera.x) / TERRAIN_SIZE;
@@ -389,11 +403,15 @@ void SceneRender ()
       grass[x][y].Render ();
     }
   }
+  /*
   for (x = 0; x < FOREST_GRID; x++) {
     for (y = 0; y < FOREST_GRID; y++) {
       forest[x][y].Render ();
     }
   }
+  */
+
+  gm_forest.Render ();
 
   //forest.Render ();
   WaterRender ();

@@ -5,12 +5,12 @@
 
 -------------------------------------------------------------------------------
 
-  This module is a set of worker functions for Region.cpp.  Really, everything
-  here could go in Region.cpp, except that region.cpp would be just too 
+  This module is a set of worker functions for World.cpp.  Really, everything
+  here could go in World.cpp, except that region.cpp would be just too 
   damn big and unmanageable. 
 
   Still, this system isn't connected to anything else and it's only used
-  when region.cpp is generating region data.
+  when World.cpp is generating region data.
  
 -----------------------------------------------------------------------------*/
 
@@ -23,7 +23,7 @@
 //The number of regions around the edge which should be ocean.
 #define OCEAN_BUFFER      (WORLD_GRID / 6) 
 //This affects the mapping of the coastline.  Higher = busier, more repetitive coast.
-#define FREQUENCY         1 
+#define FREQUENCY         3 
 //How many different colors of flowers are available
 #define FLOWER_PALETTE    (sizeof (flower_palette) / sizeof (GLrgba))
 
@@ -185,7 +185,7 @@ static void do_mountain (int x, int y, int mtn_size)
         sprintf (r.title, "Mountain");
       }
       r.mountain_height = 1 + (mtn_size - step);
-      r.geo_detail = 13.0f + r.mountain_height* 3.0f;
+      r.geo_detail = 13.0f + r.mountain_height* 7.0f;
       r.geo_bias = (WorldNoisef (xx + yy) * 0.5f + (float)r.mountain_height) * REGION_SIZE / 2;
       r.flags_shape = REGION_FLAG_NOBLEND;
       r.climate = CLIMATE_MOUNTAIN;
@@ -366,7 +366,7 @@ static bool try_river (int start_x, int start_y, int id)
       //Don't reverse course into ourselves
       if (last_move == (direction[d] * -1))
         continue;
-      //ALWAYS for for the ocean, if available
+      //ALWAYS go for the ocean, if available
       if (neighbor.climate == CLIMATE_OCEAN) {
         selected = direction[d];
         lowest = neighbor.geo_water;
@@ -375,7 +375,7 @@ static bool try_river (int start_x, int start_y, int id)
       if (direction[d] == to_coast * -1)
         continue;
       //Go whichever way is lowest
-      if (neighbor.geo_water <= lowest) {
+      if (neighbor.geo_water < lowest) {
         selected = direction[d];
         lowest = neighbor.geo_water;
       }

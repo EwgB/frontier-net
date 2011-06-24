@@ -99,6 +99,7 @@
     <ClCompile Include="glQuat.cpp" />
     <ClCompile Include="glRgba.cpp" />
     <ClCompile Include="glUvbox.cpp" />
+    <ClCompile Include="Grid.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="Region.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -133,6 +134,7 @@
     <ClInclude Include="Env.h" />
     <ClInclude Include="File.h" />
     <ClInclude Include="glTypes.h" />
+    <ClInclude Include="Grid.h" />
     <ClInclude Include="Ini.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Log.h" />

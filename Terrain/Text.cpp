@@ -192,7 +192,7 @@ void TextRender ()
   
 
   glColor3f (1, 1, 1);
-  //text_draw (buffer);
+  text_draw (buffer);
 
 
   glPopMatrix ();

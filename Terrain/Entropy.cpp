@@ -16,7 +16,7 @@
 #include "texture.h"
 
 #define ENTROPY_FILE      "entropy.raw"
-#define BLUR_RADIUS       2
+#define BLUR_RADIUS       3
 #define INDEX(x,y)        ((x % size.x) + (y % size.y) * size.x)
 
 static bool       loaded;

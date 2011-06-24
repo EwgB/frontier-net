@@ -15,8 +15,6 @@
 #include "sdl.h"
 #include "world.h"
 
-//static CTree      tree;
-
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/
@@ -25,6 +23,7 @@ CForest::CForest ()
 {
 
   _stage = FOREST_STAGE_BEGIN;
+  _current_distance = 0;
   _valid = false;
   _walk.Clear ();
   _mesh_list.clear ();
@@ -65,16 +64,18 @@ bool CForest::ZoneCheck ()
 
 }
 
-void CForest::Set (int x, int y, LOD lod)
+void CForest::Set (int x, int y, int distance)
 {
 
-  if (_origin.x == x * FOREST_SIZE && _origin.y == y * FOREST_SIZE && _lod == lod)
+  if (_grid_position.x == x && _grid_position.y == y && _current_distance == distance)
     return;
-  //if (_stage > FOREST_STAGE_BEGIN && _stage < FOREST_STAGE_DONE)
-    //return;
-  _lod = lod;
-  _position.x = x;
-  _position.y = y;
+  _current_distance = distance;
+  if (distance > 1)
+    _lod = LOD_LOW;
+  else
+    _lod = LOD_HIGH;
+  _grid_position.x = x;
+  _grid_position.y = y;
   _origin.x = x * FOREST_SIZE;
   _origin.y = y * FOREST_SIZE;
   _stage = FOREST_STAGE_BEGIN;
@@ -198,31 +199,13 @@ void CForest::Render ()
   if (!_valid)
     return;
   glEnable (GL_BLEND);
-
-  //glDisable (GL_LIGHTING);
-  //glDisable (GL_FOG);
-  //glBlendFunc (GL_ONE, GL_ONE);
-
-
-
-  glEnable (GL_LIGHTING);
+  //glEnable (GL_LIGHTING);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glDisable (GL_CULL_FACE);
   for (i = 0; i < _vbo_list.size (); i++) {
     glBindTexture (GL_TEXTURE_2D, _vbo_list[i]._texture_id);
     //_vbo_list[i]._vbo.Render ();
   }
-
-  //GLbbox    bb;
-  //GLrgba    c = glRgbaUnique (_origin.x + _origin.y * 5);
-
-  //glDisable (GL_LIGHTING);
-  //glBlendFunc (GL_ONE, GL_ONE);
-  //bb.Clear ();
-  //bb.ContainPoint (glVector ((float)_origin.x, (float)_origin.y, 0.0f));
-  //bb.ContainPoint (glVector ((float)_origin.x + FOREST_SIZE, (float)_origin.y + FOREST_SIZE,  + FOREST_SIZE));
-  //glColor3fv (&c.red);
-  //bb.Render ();
   for (i = 0; i < _vbo_list.size (); i++) {
     glBindTexture (GL_TEXTURE_2D, _vbo_list[i]._texture_id);
     _vbo_list[i]._vbo.Render ();

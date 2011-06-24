@@ -20,6 +20,14 @@ bool GLcoord::operator== (const GLcoord& c)
 
 }
 
+bool GLcoord::operator!= (const GLcoord& c)
+{
+  if (x == c.x && y == c.y)
+    return false;
+  return true;
+
+}
+
 GLcoord GLcoord::operator- (const GLcoord& c)
 {
   GLcoord result;

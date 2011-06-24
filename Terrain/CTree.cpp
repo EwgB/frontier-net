@@ -538,7 +538,7 @@ void CTree::DoLeaves ()
         l.position.y = TEXTURE_HALF + cos (rad) * l.size;
         l.angle = -MathAngle (TEXTURE_HALF, TEXTURE_HALF, l.position.x, l.position.y);
         //l.brightness = 1.0f - (current_steps / (float)total_steps) * WorldNoisef (_seed_current++) * 0.5f;
-        l.brightness = 1.0f - WorldNoisef (_seed_current++) * 0.5f;
+        l.brightness = 1.0f - WorldNoisef (_seed_current++) * 0.2f;
         _leaf_list.push_back (l);
       }
     }
@@ -567,7 +567,8 @@ void CTree::DoLeaves ()
       //Leaves get smaller as we move from the center of the texture
       l.size = (0.25f + ((TEXTURE_HALF - l.dist) / TEXTURE_HALF) * 0.75f) * leaf_size; 
       l.angle = 0.0f;
-      l.brightness = 0.4f + ((float)i / 50) * 0.6f;
+      //l.brightness = 0.7f + ((float)i / 50) * 0.3f;
+      l.brightness = 1.0f;
       _leaf_list.push_back (l);
     }
     //Sort our list of leaves, inward out
@@ -615,6 +616,7 @@ void CTree::DoTexture ()
 
   glDisable (GL_CULL_FACE);
   glDisable (GL_FOG);
+  glDisable (GL_LIGHTING);
   glEnable (GL_BLEND);
   glEnable (GL_TEXTURE_2D);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -661,10 +663,7 @@ void CTree::DoTexture ()
   if (_leaf_style == TREE_LEAF_SCATTER) {
     GLrgba c;
 
-    if (_bark_color2.Brighness () > _bark_color1.Brighness ())
-      c = _bark_color1;
-    else
-      c = _bark_color2;
+    c = _bark_color1;
     c *= 0.5f;
     glBindTexture (GL_TEXTURE_2D, 0);
     glLineWidth (3.0f);
@@ -700,6 +699,7 @@ void CTree::DoTexture ()
 
     color = _leaf_color * l.brightness;
     glColor3fv (&color.red);
+    glColor3f (1,1,1);
     glBegin (GL_QUADS);
     uv = uvframe.Corner (0); glTexCoord2fv (&uv.x); glVertex2f (l.position.x - l.size, l.position.y - l.size);
     uv = uvframe.Corner (1); glTexCoord2fv (&uv.x); glVertex2f (l.position.x + l.size, l.position.y - l.size);

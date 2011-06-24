@@ -33,6 +33,7 @@ enum
   type    operator/  (const float& c);\
   void    operator/= (const type& c);\
   void    operator/= (const float& c);\
+  bool    operator!= (const type& c);\
   bool    operator== (const type& c);
 
 struct GLcoord
@@ -44,6 +45,7 @@ struct GLcoord
   bool        Walk (int size);
   
   bool        operator== (const GLcoord& c);
+  bool        operator!= (const GLcoord& c);
   
   GLcoord     operator+  (const int& c);
   GLcoord     operator+  (const GLcoord& c);
