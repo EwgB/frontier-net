@@ -146,8 +146,8 @@ GLcoord GridManager::ViewPosition (GLvector eye)
 
   GLcoord   result;
 
-  result.x = (int)(eye.x - _item_size / 2) / _item_size;
-  result.y = (int)(eye.y - _item_size / 2) / _item_size;
+  result.x = (int)(eye.x + _item_size / 2) / _item_size;
+  result.y = (int)(eye.y + _item_size / 2) / _item_size;
   return result;
 
 }
@@ -188,13 +188,14 @@ void GridManager::Update (long stop)
     pos.y += _grid_size;
   if (pos.y - viewer.y > (int)_grid_half)
     pos.y -= _grid_size;
+  pos = viewer + distance_list[_list_pos].offset;
   dist = max (abs (pos.x - viewer.x), abs(pos.y - viewer.y));
   Item(grid_pos)->Set (pos.x, pos.y, dist);
   Item(grid_pos)->Update (stop);
-  if (Item(grid_pos)->Ready () && InputKeyPressed (SDLK_p)) {
+  if (Item(grid_pos)->Ready ()/* && InputKeyPressed (SDLK_p)*/) {
     _list_pos++;
     //If we reach the outer ring, move back to the center and begin again.
-    if (distance_list[_list_pos].distancei >= _grid_size)
+    if (distance_list[_list_pos].distancei > _grid_half)
       _list_pos = 0;
   }
 
