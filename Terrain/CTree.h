@@ -63,6 +63,7 @@ class CTree
   bool              _funnel_trunk;
   bool              _evergreen;
   bool              _canopy;
+  bool              _grows_high;
   
   int               _default_branches;
   float             _default_height;
@@ -104,10 +105,11 @@ class CTree
 public:
   void              Create (bool canopy, float moisture, float temperature, int seed);
   void              Render (GLvector pos, unsigned alt, LOD lod);
-  //int               Polygons () { return _polygons; };
   unsigned          Texture () { return _texture; };
+  void              TexturePurge ();
   GLmesh*           Mesh (unsigned alt, LOD lod);
   void              Info ();
+  bool              GrowsHigh () { return _grows_high; };
 
 
 };

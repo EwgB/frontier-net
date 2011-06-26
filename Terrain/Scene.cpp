@@ -97,6 +97,18 @@ void SceneGenerate ()
 void SceneTexturePurge ()
 {
 
+  SceneClear ();
+  il_grass.clear ();
+  il_grass.resize (GRASS_GRID * GRASS_GRID);
+  gm_grass.Init (&il_grass[0], GRASS_GRID, GRASS_SIZE);
+
+  il_forest.clear ();
+  il_forest.resize (FOREST_GRID * FOREST_GRID);
+  gm_forest.Init (&il_forest[0], FOREST_GRID, FOREST_SIZE);
+
+  il_terrain.clear ();
+  il_terrain.resize (TERRAIN_GRID * TERRAIN_GRID);
+  gm_terrain.Init (&il_terrain[0], TERRAIN_GRID, TERRAIN_SIZE);
 
 }
 
@@ -172,10 +184,6 @@ void SceneUpdate (long stop)
 void SceneRender ()
 {
 
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  glPolygonMode(GL_FRONT, GL_FILL);
-  glPolygonMode(GL_BACK, GL_LINE);
-  glDisable (GL_BLEND);
   glEnable(GL_TEXTURE_2D);
   glColor3f (1,1,1);
 

@@ -175,7 +175,7 @@ static void do_time (float delta)
 void    EnvInit ()
 {
 
-  hours = 9;
+  hours = 20;
   do_time (1);
   current = desired;
 

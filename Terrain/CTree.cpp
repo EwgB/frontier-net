@@ -464,7 +464,11 @@ void CTree::Create (bool is_canopy, float moisture, float temp_in, int seed_in)
   _lift_style = (TreeLiftStyle)(WorldNoisei (_seed_current++) % TREE_LIFT_STYLES);
   _leaf_style = (TreeLeafStyle)(WorldNoisei (_seed_current++) % TREE_LEAF_STYLES);
   _evergreen = _temperature + (WorldNoisef (_seed_current++) * 0.25f) < 0.5f;
-  
+  //Narrow trees can gorw on top of hills. (Big ones will stick out over cliffs, so we place them low.)
+  if (_default_base_radius <= 1.0f) 
+    _grows_high = true;
+  else 
+    _grows_high = false;
   _branch_reach = 1.0f + WorldNoisef (_seed_current++) * 0.5f;
   _branch_lift = 1.0f + WorldNoisef (_seed_current++);
   _foliage_size = 1.0f;
@@ -720,5 +724,12 @@ void CTree::Info ()
 {
 
   TextPrint ("TREE:\nSeed:%d Moisture: %f Temp: %f", _seed, _moisture, _temperature);
+
+}
+
+void CTree::TexturePurge ()
+{
+
+  DoTexture ();
 
 }

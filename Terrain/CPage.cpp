@@ -16,6 +16,7 @@
 
 #include "stdafx.h"
 #include "cpage.h"
+#include "ctree.h"
 #include "entropy.h"
 #include "sdl.h"
 #include "world.h"
@@ -196,23 +197,34 @@ void CPage::DoTrees ()
   int       x, y;
   GLcoord   plant;
   bool      valid;
-  float     highest;
+  float     best;
+  CTree*    tree;
 
   worldpos.x = _origin.x * PAGE_SIZE + _walk.x;
   worldpos.y = _origin.y * PAGE_SIZE + _walk.y;
   region = WorldRegionFromPosition (worldpos.x, worldpos.y);
   valid = false;
-  highest = -99999.9f;
+
+  tree = WorldTree (region.tree_type);
+  if (tree->GrowsHigh ())
+    best = -99999.9f;
+  else
+    best = 99999.9f;
   for (x = 0; x < TREE_SPACING - 2; x++) {
     for (y = 0; y < TREE_SPACING - 2; y++) {
       c = &_cell[_walk.x * TREE_SPACING + x][_walk.y * TREE_SPACING + y];
       if (c->surface != SURFACE_GRASS && c->surface != SURFACE_SNOW && c->surface != SURFACE_FOREST)
         continue;
-      if ((c->detail + region.tree_threshold) > 1.0f && c->pos.z > highest) {
-      //if ((c->detail + region.tree_threshold) > 0.1f && c->pos.z > highest) {/////////////////////////////////////////////////
+      if (tree->GrowsHigh() && (c->detail + region.tree_threshold) > 1.0f && c->pos.z > best) {
         plant.x = _walk.x * TREE_SPACING + x;
         plant.y = _walk.y * TREE_SPACING + y;
-        highest = c->pos.z;
+        best = c->pos.z;
+        valid = true;
+      }
+      if (!tree->GrowsHigh() && (c->detail - region.tree_threshold) < 0.0f && c->pos.z < best) {
+        plant.x = _walk.x * TREE_SPACING + x;
+        plant.y = _walk.y * TREE_SPACING + y;
+        best = c->pos.z;
         valid = true;
       }
     }

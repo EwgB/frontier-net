@@ -589,3 +589,17 @@ World* WorldPtr ()
   return &planet;
 
 }
+
+void          WorldTexturePurge ()
+{
+
+  unsigned    m, t;
+
+  for (m = 0; m < TREE_TYPES; m++) {
+    for (t = 0; t < TREE_TYPES; t++) {
+      tree[m][t].TexturePurge ();
+    }
+  }
+  build_map_texture ();
+
+}

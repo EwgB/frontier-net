@@ -48,35 +48,36 @@ static float          fog_max;
 
 
 /*** static Functions *******************************************************/
-/*
+
 static void draw_water (float tile)
 {
 
   int     edge;
 
-  return;
+  //return;
   edge = REGION_SIZE * WORLD_GRID;
-  glDisable (GL_CULL_FACE);
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  //glDisable (GL_CULL_FACE);
+  //glDisable (GL_BLEND);
+  //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glBegin (GL_QUADS);
   glNormal3f (0, 0, 1);
 
   glTexCoord2f (0, 0);
-  glVertex3i (0, edge, 0);
+  glVertex3i (edge, edge, 0);
 
   glTexCoord2f (0, -tile);
-  glVertex3i (0, 0, 0);
-
-  glTexCoord2f (tile, -tile);
   glVertex3i (edge, 0, 0);
 
+  glTexCoord2f (tile, -tile);
+  glVertex3i (0, 0, 0);
+
   glTexCoord2f (tile, 0);
-  glVertex3i (edge, edge, 0);
+  glVertex3i (0, edge, 0);
   glEnd ();
 
 
 }
-*/
+
 /*
 void  water_map (bool underwater)
 {
@@ -215,8 +216,9 @@ void RenderCreate (int width, int height, int bits, bool fullscreen)
     max_dimension = d;
     d *= 2;
   }
-  SceneTexturePurge ();
   TexturePurge ();
+  SceneTexturePurge ();
+  WorldTexturePurge ();
   TextCreate (width, height);  
 
 }
@@ -409,6 +411,7 @@ void Render (void)
   //
 
   //glMatrixMode (GL_MODELVIEW);
+
   //Move into our unique coordanate system
   glLoadIdentity();
   pos = CameraPosition ();
@@ -419,8 +422,55 @@ void Render (void)
   glRotatef (angle.z, 0.0f, 0.0f, 1.0f);
   glTranslatef (-pos.x, -pos.y, -pos.z);
   SkyRender ();
-  //if (world_debug) 
+  //glScalef (1, -1, 1);
+
+
+  if (0) { //water reflection effect.  Needs stencil buffer to work right
     glDisable (GL_FOG);
+    glPushMatrix ();
+    glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("water4.bmp"));
+    glColorMask (false, false, false, true);
+    draw_water (256);
+    glColorMask (true, true, true, false);
+    glLoadIdentity();
+    pos = CameraPosition ();
+    glScalef (1, -1, -1);
+    //pos *= -1;
+    angle = CameraAngle ();
+    glRotatef (angle.x, -1.0f, 0.0f, 0.0f);
+    glRotatef (angle.y, 0.0f, 1.0f, 0.0f);
+    glRotatef (angle.z, 0.0f, 0.0f, 1.0f);
+    glTranslatef (-pos.x, -pos.y, pos.z);
+    glDepthFunc (GL_GREATER);
+   // glScalef (1, -1, 1);
+    glFrontFace (GL_CW);
+    glPolygonMode(GL_BACK, GL_FILL);
+    //glPolygonMode(GL_FRONT, GL_POINT);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable (GL_CULL_FACE);
+    SceneRender ();
+    glDepthFunc (GL_LEQUAL);
+    glPopMatrix ();
+    glFrontFace (GL_CCW);
+    //glEnable (GL_BLEND);
+    //glBlendFunc (GL_ONE, GL_ONE);
+    //glDisable (GL_LIGHTING);
+    //glColor4f (1.0f, 1.0f, 1.0f, 0.5f);
+    glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("water4.bmp"));
+    glColorMask (false, false, false, false);
+    draw_water (256);
+    glColorMask (true, true, true, false);
+    //draw_water (256);
+    glEnable (GL_LIGHTING);
+    glPolygonMode(GL_FRONT, GL_FILL);
+    glPolygonMode(GL_BACK, GL_LINE);
+
+  }
+
+
+
+  //SkyRender ();
+  //if (world_debug) 
   SceneRender ();
   if (terrain_debug)
     SceneRenderDebug (terrain_debug);
