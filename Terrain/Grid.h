@@ -30,7 +30,6 @@ protected:
   unsigned              _item_size;
   unsigned              _item_count;
   unsigned              _item_bytes;
-  //GLcoord               _walk;
   GLcoord               _last_viewer;
   unsigned              _list_pos;
 

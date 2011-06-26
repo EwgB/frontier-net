@@ -69,6 +69,8 @@ void CForest::Set (int x, int y, int distance)
 
   if (_grid_position.x == x && _grid_position.y == y && _current_distance == distance)
     return;
+  if (_stage == FOREST_STAGE_BUILD)
+    return;
   _current_distance = distance;
   if (distance > 1)
     _lod = LOD_LOW;
@@ -178,6 +180,7 @@ void CForest::Update (long stop)
       if (!ZoneCheck ())
         return;
       _stage++;
+      //Fall through
     case FOREST_STAGE_BUILD:
       Build (stop);
       break;
@@ -199,13 +202,7 @@ void CForest::Render ()
   if (!_valid)
     return;
   glEnable (GL_BLEND);
-  //glEnable (GL_LIGHTING);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glDisable (GL_CULL_FACE);
-  for (i = 0; i < _vbo_list.size (); i++) {
-    glBindTexture (GL_TEXTURE_2D, _vbo_list[i]._texture_id);
-    //_vbo_list[i]._vbo.Render ();
-  }
   for (i = 0; i < _vbo_list.size (); i++) {
     glBindTexture (GL_TEXTURE_2D, _vbo_list[i]._texture_id);
     _vbo_list[i]._vbo.Render ();

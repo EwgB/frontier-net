@@ -8,12 +8,17 @@ enum
   GRASS_STAGE_DONE,
 };
 
-class CGrass
+
+#ifndef GRID
+#include "Grid.h"
+#endif
+
+class CGrass : public GridData
 {
-  GLcoord           _position;
+  GLcoord           _grid_position;
   GLcoord           _origin;
-  int               _density;
   GLcoord           _walk;
+  unsigned          _current_distance;
   vector<GLrgba>    _color;
   vector<GLvector>  _vertex;
   vector<GLvector>  _normal;
@@ -31,10 +36,10 @@ class CGrass
 
 public:
   CGrass ();
-  GLcoord           Position () const { return _position; }
-  void              Set (int origin_x, int origin_y, int density);
+  unsigned          Sizeof () { return sizeof (CGrass); }; 
+  void              Set (int origin_x, int origin_y, int distance);
   void              Render ();
   void              Update (long stop);
-  bool              Ready ()  const { return _stage == GRASS_STAGE_DONE; };
+  bool              Ready ()  { return _stage == GRASS_STAGE_DONE; };
   void              Invalidate () { _valid = false; };
 };

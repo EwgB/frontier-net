@@ -699,7 +699,6 @@ void CTree::DoTexture ()
 
     color = _leaf_color * l.brightness;
     glColor3fv (&color.red);
-    glColor3f (1,1,1);
     glBegin (GL_QUADS);
     uv = uvframe.Corner (0); glTexCoord2fv (&uv.x); glVertex2f (l.position.x - l.size, l.position.y - l.size);
     uv = uvframe.Corner (1); glTexCoord2fv (&uv.x); glVertex2f (l.position.x + l.size, l.position.y - l.size);

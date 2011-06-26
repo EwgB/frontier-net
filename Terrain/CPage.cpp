@@ -208,8 +208,8 @@ void CPage::DoTrees ()
       c = &_cell[_walk.x * TREE_SPACING + x][_walk.y * TREE_SPACING + y];
       if (c->surface != SURFACE_GRASS && c->surface != SURFACE_SNOW && c->surface != SURFACE_FOREST)
         continue;
-      //if ((c->detail + region.tree_threshold) > 1.0f && c->pos.z > highest) {
-      if ((c->detail + region.tree_threshold) > 0.1f && c->pos.z > highest) {/////////////////////////////////////////////////
+      if ((c->detail + region.tree_threshold) > 1.0f && c->pos.z > highest) {
+      //if ((c->detail + region.tree_threshold) > 0.1f && c->pos.z > highest) {/////////////////////////////////////////////////
         plant.x = _walk.x * TREE_SPACING + x;
         plant.y = _walk.y * TREE_SPACING + y;
         highest = c->pos.z;

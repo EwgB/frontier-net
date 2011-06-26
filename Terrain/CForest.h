@@ -44,11 +44,11 @@ class CForest : public GridData
 
 public:
   CForest ();
-  virtual unsigned  Sizeof () { return sizeof (CForest); }; 
+  unsigned          Sizeof () { return sizeof (CForest); }; 
   //GLcoord           GridPosition () const { return _grid_position; };
   void              Set (int x, int y, int distance);
   void              Render ();
   void              Update (long stop);
-  bool              Ready ()  const { return _stage == FOREST_STAGE_DONE; };
+  bool              Ready () { return _stage == FOREST_STAGE_DONE; };
   void              Invalidate () { _valid = false; };
 };

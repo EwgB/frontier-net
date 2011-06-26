@@ -171,7 +171,7 @@ void AvatarLook (int x, int y)
 
   angle.x += x;
   angle.z += y;
-  angle.x = clamp (angle.x, 5.0f, 175.0f);
+  angle.x = clamp (angle.x, 0.0f, 180.0f);
   angle.z = fmod (angle.z, 360.0f);
   if (angle.z < 0.0f)
     angle.z += 360.0f;

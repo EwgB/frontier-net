@@ -27,7 +27,7 @@
 #include "water.h"
 #include "world.h"
 
-#define RENDER_DISTANCE     1024
+#define RENDER_DISTANCE     2048
 #define FOV                 90
 #define MAP_SIZE            512
 
@@ -206,8 +206,8 @@ void RenderCreate (int width, int height, int bits, bool fullscreen)
   fovy = FOV;
   if (view_aspect > 1.0f) 
     fovy /= view_aspect; 
-  //gluPerspective (fovy, view_aspect, 0.1f, RENDER_DISTANCE);
-  gluPerspective (fovy, view_aspect, 0.1f, 400);
+  gluPerspective (fovy, view_aspect, 0.1f, RENDER_DISTANCE);
+  //gluPerspective (fovy, view_aspect, 0.1f, 400);
 	glMatrixMode (GL_MODELVIEW);
   size = min (width, height); 
   d = 128;
@@ -419,7 +419,7 @@ void Render (void)
   glRotatef (angle.z, 0.0f, 0.0f, 1.0f);
   glTranslatef (-pos.x, -pos.y, -pos.z);
   SkyRender ();
-  if (world_debug) 
+  //if (world_debug) 
     glDisable (GL_FOG);
   SceneRender ();
   if (terrain_debug)

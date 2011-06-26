@@ -117,7 +117,6 @@ GridData* GridManager::Item (unsigned index)
 void GridManager::Init (GridData* itemptr, unsigned grid_size, unsigned item_size)
 {
 
-  GLcoord     viewer;
   GridData*   gd;
   GLcoord     walk;
 
@@ -129,13 +128,13 @@ void GridManager::Init (GridData* itemptr, unsigned grid_size, unsigned item_siz
   _item_size = item_size;
   _item_bytes = _item[0].Sizeof ();
   _item_count = _grid_size * _grid_size;
-  viewer = ViewPosition (CameraPosition ());
-  _last_viewer = viewer;
+  _last_viewer = ViewPosition (CameraPosition ());
+  _list_pos = 0;
   walk.Clear ();
   do {
     gd = Item (walk);
     gd->Invalidate ();
-    gd->Set (viewer.x + walk.x - _grid_half, viewer.y + walk.y - _grid_half, 0);
+    //gd->Set ( _last_viewer.x + walk.x - _grid_half,  _last_viewer.y + walk.y - _grid_half, 0);
     //gd->Set (viewer.x + walk.x - _grid_half, viewer.y + walk.y - _grid_half, 0);
   } while (!walk.Walk (_grid_size));
 
@@ -146,8 +145,8 @@ GLcoord GridManager::ViewPosition (GLvector eye)
 
   GLcoord   result;
 
-  result.x = (int)(eye.x + _item_size / 2) / _item_size;
-  result.y = (int)(eye.y + _item_size / 2) / _item_size;
+  result.x = (int)(eye.x) / _item_size;
+  result.y = (int)(eye.y) / _item_size;
   return result;
 
 }
@@ -192,12 +191,13 @@ void GridManager::Update (long stop)
   dist = max (abs (pos.x - viewer.x), abs(pos.y - viewer.y));
   Item(grid_pos)->Set (pos.x, pos.y, dist);
   Item(grid_pos)->Update (stop);
-  if (Item(grid_pos)->Ready ()/* && InputKeyPressed (SDLK_p)*/) {
+  if (Item(grid_pos)->Ready ()) {
     _list_pos++;
     //If we reach the outer ring, move back to the center and begin again.
     if (distance_list[_list_pos].distancei > _grid_half)
       _list_pos = 0;
-  }
+  } 
+
 
 }
 
@@ -206,14 +206,8 @@ void GridManager::Render ()
 
   unsigned      i;
 
-  glDisable (GL_LIGHTING);
-  GLrgba c;
-
-  for (i = 0; i < _item_count; i++) {
-    c = glRgbaUnique (i);
-    glColor3fv (&c.red);
+  for (i = 0; i < _item_count; i++) 
     Item(i)->Render ();
-  }
 
 
 }

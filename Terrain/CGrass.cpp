@@ -58,10 +58,10 @@ CGrass::CGrass ()
 
   _origin.x = 0;
   _origin.y = 0;
-  _density = 0;
+  _current_distance = 0;
   _valid = false;
   _bbox.Clear ();
-  _position.Clear ();
+  _grid_position.Clear ();
   _walk.Clear ();
   _stage = GRASS_STAGE_BEGIN;
   if (uv_done) 
@@ -80,11 +80,11 @@ void CGrass::Set (int x, int y, int density)
 {
 
   density = max (density, 1); //detail 0 and 1 are the same level. (Maximum density.)
-  if (_origin.x == x * GRASS_SIZE && _origin.y == y * GRASS_SIZE && density == _density)
+  if (_origin.x == x * GRASS_SIZE && _origin.y == y * GRASS_SIZE && density == _current_distance)
     return;
-  _position.x = x;
-  _position.y = y;
-  _density = density;
+  _grid_position.x = x;
+  _grid_position.y = y;
+  _current_distance = density;
   _origin.x = x * GRASS_SIZE;
   _origin.y = y * GRASS_SIZE;
   _stage = GRASS_STAGE_BEGIN;
@@ -143,7 +143,7 @@ void CGrass::Build (long stop)
   world_x = _origin.x + _walk.x;
   world_y = _origin.y + _walk.y;
   do_grass = CacheSurface (world_x, world_y) == SURFACE_GRASS;
-  if (_walk.x % _density || _walk.y  % _density)
+  if (_walk.x % _current_distance || _walk.y  % _current_distance)
     do_grass = false;
   //if ((_walk.x + _walk.y) % 2)
     //do_grass = false;
@@ -273,6 +273,5 @@ void CGrass::Render ()
   }
   glEnable (GL_TEXTURE_2D);
   glEnable (GL_LIGHTING);
-  glEnable (GL_FOG);
 
 }

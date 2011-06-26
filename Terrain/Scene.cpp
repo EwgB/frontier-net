@@ -38,10 +38,7 @@
 
 static CTerrain*        terrain[TERRAIN_GRID][TERRAIN_GRID];
 static GLcoord          terrain_walk;
-static CForest          forest[FOREST_GRID][FOREST_GRID];
-static GLcoord          forest_walk;
-static CGrass           grass[GRASS_GRID][GRASS_GRID];
-static GLcoord          grass_walk;
+
 static CTree            test_tree;
 static int              dist_table[RENDER_DISTANCE + 1][RENDER_DISTANCE + 1];
 static int              cached;
@@ -56,6 +53,8 @@ static int              polygons_counter;
 
 static GridManager        gm_forest;
 static vector<CForest>    il_forest;
+static GridManager        gm_grass;
+static vector<CGrass>     il_grass;
 
 
 /* Static Functions *************************************************************/
@@ -104,16 +103,6 @@ void SceneClear ()
       terrain[x][y] = NULL;
     }
   }
-  for (x = 0; x < GRASS_GRID; x++) {
-    for (y = 0; y < GRASS_GRID; y++) {
-      grass[x][y].Invalidate (); 
-    }
-  }
-  for (x = 0; x < FOREST_GRID; x++) {
-    for (y = 0; y < FOREST_GRID; y++) {
-      forest[x][y].Invalidate ();
-    }
-  }
 
 
 }
@@ -123,34 +112,19 @@ void SceneGenerate ()
 
   GLvector    camera;
   GLcoord     current;
-  int         x, y;
 
   SceneClear ();
   WorldGenerate ();
   WaterBuild ();
   camera = CameraPosition ();
   current.x = (int)(camera.x) / GRASS_SIZE;
-  current.y = (int)(camera.y) / GRASS_SIZE;
-  for (y = 0; y < GRASS_GRID; y++) {
-    for (x = 0; x < GRASS_GRID; x++) {
-      grass[x][y].Invalidate (); 
-      grass[x][y].Set (current.x + x - GRASS_HALF, current.y + y - GRASS_HALF, 1);
-    }
-  }
-  /*
-  current.x = (int)(camera.x) / FOREST_SIZE;
-  current.y = (int)(camera.y) / FOREST_SIZE;
-  for (y = 0; y < FOREST_GRID; y++) {
-    for (x = 0; x < FOREST_GRID; x++) {
-      forest[x][y].Set (current.x + x - FOREST_HALF, current.y + y - FOREST_HALF, LOD_LOW);
-    }
-  }
-  */
-  grass_walk.Clear ();
-  forest_walk.Clear ();
+
+  il_grass.clear ();
+  il_grass.resize (GRASS_GRID * GRASS_GRID);
+  gm_grass.Init (&il_grass[0], GRASS_GRID, GRASS_SIZE);
 
   il_forest.clear ();
-  il_forest.resize (FOREST_GRID * FOREST_GRID);//.resize (FOREST_GRID * FOREST_GRID);
+  il_forest.resize (FOREST_GRID * FOREST_GRID);
   gm_forest.Init (&il_forest[0], FOREST_GRID, FOREST_SIZE);
 
 }
@@ -199,7 +173,6 @@ void SceneInit ()
     }
   }
   SceneGenerate ();
-  grass_walk.Clear ();
   last_tree = IniVector ("Treepos");
   seed = IniInt ("TreeSeed");
 
@@ -210,15 +183,13 @@ void SceneUpdate (long stop)
 {
 
   int           x, y;
-  GLcoord       forest_current;
-//  GLcoord       fpos;
-  GLcoord       grass_current;
-  GLcoord       gpos;
+//  GLcoord       grass_current;
+//  GLcoord       gpos;
   GLvector      camera;
   GLcoord       terrain_current;
   int           offset;
   int           size;
-  int           density;
+//  int           density;
   Region*       r;
   CTree*        tree;
 
@@ -239,41 +210,18 @@ void SceneUpdate (long stop)
     IniIntSet ("TreeSeed", seed);
     test_tree.Create (false, 0.5f, 0.5f, seed);
     draw_tree = true;
-/*
-    camera = CameraPosition ();
-    grass_current.x = (int)(camera.x) / FOREST_SIZE;
-    grass_current.y = (int)(camera.y) / FOREST_SIZE;
-    //forest.Set (grass_current.x, grass_current.y);
-    //tree.Build (last_tree, WorldNoisef (seed + 1), WorldNoisef (seed + 2), seed);
-    seed++;
-    */
   }
   
   if (InputKeyPressed (SDLK_t)) {
     GLvector  apos = AvatarPosition ();
     apos.x -= 4.0f;
     apos.z = CacheElevation (apos.x, apos.y);
-    //tree.Create (apos, 0.0f, 0.0f, 0);
     last_tree = apos;
   }
-    
-  /*
-  {
-    GLvector  apos = AvatarPosition ();
-    apos.x -= 4.0f;
-    apos.z = CacheElevation (apos.x, apos.y);
-    //tree.Create (apos, 0.0f, 0.0f, 0);
-    last_tree = apos;
-    //IniVectorSet ("Treepos", last_tree);
-  }
-  */
-
-  
-
-
+/*  
   grass_current.x = (int)(camera.x) / GRASS_SIZE;
   grass_current.y = (int)(camera.y) / GRASS_SIZE;
-  gpos = grass[grass_walk.x][grass_walk.y].Position ();
+  gpos = grass[grass_walk.x][grass_walk.y].GridPosition ();
   density = max (abs (gpos.x - grass_current.x), abs (gpos.y - grass_current.y));
   if (grass_current.x - gpos.x > GRASS_HALF)
     gpos.x += GRASS_GRID;
@@ -287,31 +235,8 @@ void SceneUpdate (long stop)
   grass[grass_walk.x][grass_walk.y].Update (stop);
   if (grass[grass_walk.x][grass_walk.y].Ready ())
     grass_walk.Walk (GRASS_GRID);
-
-  //LOD   lod;
-  //int   dist;
-  /*
-  forest_current.x = (int)(camera.x) / FOREST_SIZE;
-  forest_current.y = (int)(camera.y) / FOREST_SIZE;
-  fpos = forest[forest_walk.x][forest_walk.y].GridPosition ();
-  if (forest_current.x - fpos.x > FOREST_HALF)
-    fpos.x += FOREST_GRID;
-  if (fpos.x - forest_current.x > FOREST_HALF)
-    fpos.x -= FOREST_GRID;
-  if (forest_current.y - fpos.y > FOREST_HALF)
-    fpos.y += FOREST_GRID;
-  if (fpos.y - forest_current.y > FOREST_HALF)
-    fpos.y -= FOREST_GRID;
-  dist = max (abs (fpos.x - forest_current.x), abs (fpos.y - forest_current.y));
-  if (dist <= 1) 
-    lod = LOD_HIGH;
-  else
-    lod = LOD_LOW;
-  forest[forest_walk.x][forest_walk.y].Set (fpos.x, fpos.y, lod);
-  forest[forest_walk.x][forest_walk.y].Update (stop);
-  if (forest[forest_walk.x][forest_walk.y].Ready ())
-    forest_walk.Walk (FOREST_GRID);
-    */
+  */
+  gm_grass.Update (stop);
   gm_forest.Update (stop);
 
 
@@ -394,70 +319,15 @@ void SceneRender ()
       }
     }
   }
+
   GLtexture*    t;
 
   t = TextureFromName ("g3.bmp", MASK_PINK);
   glBindTexture (GL_TEXTURE_2D, t->id);
-  for (x = 0; x < GRASS_GRID; x++) {
-    for (y = 0; y < GRASS_GRID; y++) {
-      grass[x][y].Render ();
-    }
-  }
-  /*
-  for (x = 0; x < FOREST_GRID; x++) {
-    for (y = 0; y < FOREST_GRID; y++) {
-      forest[x][y].Render ();
-    }
-  }
-  */
-
+  gm_grass.Render ();
   gm_forest.Render ();
-
-  //forest.Render ();
   WaterRender ();
-  glDisable (GL_BLEND);
-  t = TextureFromName ("tree.bmp", MASK_PINK);
-  glBindTexture (GL_TEXTURE_2D, t->id);
-  //tree.Render ();
-  /*
-  return;
-  
-  glColor3f (0.4f, 0.7f, 1.0f);
-  glNormal3f (0, 0, 1);
-  glDisable (GL_BLEND);
-  glBindTexture (GL_TEXTURE_2D, 0);
-  for (y = 0; y < WORLD_GRID - 2; y++) {
-    glBegin (GL_QUAD_STRIP);
-    for (x = 0; x < WORLD_GRID - 1; x++) {
-      glVertex3fv (&water[x][y].x);
-      glVertex3fv (&water[x][y + 1].x);
-    }
-    glEnd ();
-  }
 
-
-  return;
-
-  GLrgba    col;
-
-  //glEnable (GL_BLEND);
-  glDisable(GL_TEXTURE_2D);
-  glDisable (GL_LIGHTING);
-  //glBlendFunc (GL_ONE, GL_ONE);
-  glPolygonMode(GL_FRONT, GL_LINE);
-  for (x = 0; x < WORLD_GRID; x++) {
-    for (y = 0; y < WORLD_GRID; y++) {
-      if (terrain[x][y]) {
-        col = glRgbaUnique (x + y * 33);
-        glColor3fv (&col.red);
-        //glColor3f (1,0,1);
-        terrain[x][y]->Render ();
-      }
-    }
-  }
-  glPolygonMode(GL_FRONT, GL_FILL);
-
-  */
 
 
 }
