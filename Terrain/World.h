@@ -36,7 +36,7 @@
 //This is the size of the grid of trees.  The total number of tree species 
 //in the world is the square of this value, minus one. ("tree zero" is actually
 //"no trees at all".)
-#define TREE_TYPES        10
+#define TREE_TYPES        4
 
 enum Climate
 {

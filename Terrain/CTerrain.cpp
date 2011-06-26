@@ -19,9 +19,12 @@
 
 
 //Lower values make the terrain more precise at the expense of more polygons
-#define TOLERANCE         0.01f
+#define TOLERANCE         0.1f
 //Nower numbers make the normals more extreme, exaggerate the lighting
 #define NORMAL_SCALING    0.6f
+
+#define COMPILE_GRID      4
+#define COMPILE_SIZE      (TERRAIN_SIZE / COMPILE_GRID)
 
 static struct LayerAttributes
 {
@@ -102,6 +105,16 @@ static int Boundary (int val)
 
 -----------------------------------------------------------------------------*/
 
+CTerrain::CTerrain ()
+{
+  _vertex_list = NULL;
+  _normal_list = NULL;
+  _uv_list = NULL;
+  _index_buffer = NULL;
+
+}
+
+
 void CTerrain::DoPatch (int patch_z, int patch_y)
 {
 
@@ -141,8 +154,8 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
   for (y = start.y; y < end.y - 1; y++) {
     glBegin (GL_QUAD_STRIP);
     for (x = start.x; x < end.x; x++) {
-      world_x = _origin.x * TERRAIN_SIZE + x;
-      world_y = _origin.y * TERRAIN_SIZE + y;
+      world_x = _origin.x + x;
+      world_y = _origin.y + y;
       glTexCoord2f ((float)x / 8, (float)y / 8);
       surface_color = CacheSurfaceColor (world_x, world_y, SURFACE_COLOR_ROCK);
       glColor3fv (&surface_color.red);
@@ -166,8 +179,8 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
 
     for (y = start.y; y < end.y - 1; y++) {
       for (x = start.x; x < end.x; x++) {
-        world_x = _origin.x * TERRAIN_SIZE + x;
-        world_y = _origin.y * TERRAIN_SIZE + y;
+        world_x = _origin.x + x;
+        world_y = _origin.y + y;
         surface = CacheSurface (world_x, world_y);
         if (surface != layers[stage].surface)
           continue;
@@ -229,12 +242,12 @@ void CTerrain::DoHeightmap ()
   GLvector        pos;
   GLvector2       delta;
 
-  world.x = _origin.x * TERRAIN_SIZE + _walk.x;
-  world.y = _origin.y * TERRAIN_SIZE + _walk.y;
+  world.x = _origin.x + _walk.x;
+  world.y = _origin.y + _walk.y;
   _surface_used[CacheSurface (world.x, world.y)] = true;
   pos.x = (float)world.x;
   pos.y = (float)world.y;
-  pos.z = CacheElevation (_origin.x * TERRAIN_SIZE + _walk.x, _origin.y * TERRAIN_SIZE + _walk.y);
+  pos.z = CacheElevation (world.x, world.y);
   _pos[_walk.x][_walk.y] = pos;
   _uv[_walk.x][_walk.y] = glVector ((float)_walk.x / TERRAIN_SIZE, (float)_walk.y / TERRAIN_SIZE);
   if (!_walk.x)
@@ -252,7 +265,7 @@ void CTerrain::DoHeightmap ()
     _contour[_walk.x][_walk.y].y = _contour[_walk.x][_walk.y - 1].y + glVectorLength (delta);
     _contour[_walk.x][_walk.y].y = _contour[_walk.x][_walk.y - 1].y + 1;
   }
-  _normal[_walk.x][_walk.y] = CacheNormal (_origin.x * TERRAIN_SIZE + _walk.x, _origin.y * TERRAIN_SIZE + _walk.y); 
+  _normal[_walk.x][_walk.y] = CacheNormal (world.x, world.y); 
   if (_walk.Walk (TERRAIN_EDGE))
     _stage++;
 
@@ -276,10 +289,10 @@ void CTerrain::DoStitch ()
   CTerrain*    n;
   int          b;
 
-  w = SceneTerrainGet (_origin.x - 1, _origin.y);
-  e = SceneTerrainGet (_origin.x + 1, _origin.y);
-  s = SceneTerrainGet (_origin.x, _origin.y + 1);
-  n = SceneTerrainGet (_origin.x, _origin.y - 1);
+  w = SceneTerrainGet (_grid_position.x - 1, _grid_position.y);
+  e = SceneTerrainGet (_grid_position.x + 1, _grid_position.y);
+  s = SceneTerrainGet (_grid_position.x, _grid_position.y + 1);
+  n = SceneTerrainGet (_grid_position.x, _grid_position.y - 1);
   for (ii = 0; ii < TERRAIN_EDGE; ii++) {
     b = Boundary (ii);
     if (w && w->Point (TERRAIN_SIZE, ii)) {
@@ -330,10 +343,10 @@ bool CTerrain::DoCheckNeighbors ()
   CTerrain*    w;
   CTerrain*    n;
 
-  w = SceneTerrainGet (_origin.x - 1, _origin.y);
-  e = SceneTerrainGet (_origin.x + 1, _origin.y);
-  s = SceneTerrainGet (_origin.x, _origin.y + 1);
-  n = SceneTerrainGet (_origin.x, _origin.y - 1);
+  w = SceneTerrainGet (_grid_position.x - 1, _grid_position.y);
+  e = SceneTerrainGet (_grid_position.x + 1, _grid_position.y);
+  s = SceneTerrainGet (_grid_position.x, _grid_position.y + 1);
+  n = SceneTerrainGet (_grid_position.x, _grid_position.y - 1);
   if (w && w->Points () != _neighbors[NEIGHBOR_WEST])
     return true;
   if (s && s->Points () != _neighbors[NEIGHBOR_SOUTH])
@@ -620,20 +633,20 @@ bool CTerrain::ZoneCheck (long stop)
 {
 
   //If we're waiting on a zone, give it our update allotment
-  if (!CachePointAvailable (_origin.x * TERRAIN_SIZE, _origin.y * TERRAIN_SIZE)) {
-    CacheUpdatePage (_origin.x * TERRAIN_SIZE, _origin.y * TERRAIN_SIZE, stop);
+  if (!CachePointAvailable (_origin.x, _origin.y)) {
+    CacheUpdatePage (_origin.x, _origin.y, stop);
     return false;
   }
-  if (!CachePointAvailable (_origin.x * TERRAIN_SIZE + TERRAIN_EDGE, _origin.y * TERRAIN_SIZE + TERRAIN_EDGE)) {
-    CacheUpdatePage (_origin.x * TERRAIN_SIZE + TERRAIN_EDGE, _origin.y * TERRAIN_SIZE + TERRAIN_EDGE, stop);
+  if (!CachePointAvailable (_origin.x + TERRAIN_EDGE, _origin.y + TERRAIN_EDGE)) {
+    CacheUpdatePage (_origin.x + TERRAIN_EDGE, _origin.y + TERRAIN_EDGE, stop);
     return false;
   }
-  if (!CachePointAvailable (_origin.x * TERRAIN_SIZE + TERRAIN_EDGE, _origin.y * TERRAIN_SIZE)) {
-    CacheUpdatePage (_origin.x * TERRAIN_SIZE + TERRAIN_EDGE, _origin.y * TERRAIN_SIZE, stop);
+  if (!CachePointAvailable (_origin.x + TERRAIN_EDGE, _origin.y)) {
+    CacheUpdatePage (_origin.x + TERRAIN_EDGE, _origin.y, stop);
     return false;
   }
-  if (!CachePointAvailable (_origin.x * TERRAIN_SIZE, _origin.y * TERRAIN_SIZE + TERRAIN_EDGE)) {
-    CacheUpdatePage (_origin.x * TERRAIN_SIZE, _origin.y * TERRAIN_SIZE + TERRAIN_EDGE, stop);
+  if (!CachePointAvailable (_origin.x, _origin.y + TERRAIN_EDGE)) {
+    CacheUpdatePage (_origin.x, _origin.y + TERRAIN_EDGE, stop);
     return false;
   }
   return true;
@@ -649,25 +662,25 @@ void CTerrain::Update (long stop)
     case STAGE_BEGIN: 
       if (!ZoneCheck (stop)) 
         break;
-      _walk.Clear ();
-      _rebuild = SdlTick ();
-      _stage++;
-      break;
-    case STAGE_CLEAR: 
-      do {
-        _point[_walk.x][_walk.y] = false;
-        _index_map[_walk.x][_walk.y] = -1;
-      } while (!_walk.Walk (TERRAIN_EDGE));
-      PointActivate (0, 0);
-      PointActivate (0, TERRAIN_SIZE);
-      PointActivate (TERRAIN_SIZE, 0);
-      PointActivate (TERRAIN_SIZE, TERRAIN_SIZE);
       for (int i =0; i < SURFACE_TYPES; i++)
         _surface_used[i] = false;
       for (int i =0; i < NEIGHBOR_COUNT; i++)
         _neighbors[i] = 0;
       _list_size = 0;
+      _walk.Clear ();
+      _rebuild = SdlTick ();
       _stage++;
+      break;
+    case STAGE_CLEAR: 
+      _point[_walk.x][_walk.y] = false;
+      _index_map[_walk.x][_walk.y] = -1;
+      if (_walk.Walk (TERRAIN_EDGE))
+        _stage++;
+      break;
+    case STAGE_DO_COMPILE_GRID: 
+      PointActivate (_walk.x * COMPILE_SIZE, _walk.y * COMPILE_SIZE);
+      if (_walk.Walk (COMPILE_GRID + 1))
+        _stage++;
       break;
     case STAGE_HEIGHTMAP: 
       DoHeightmap ();
@@ -688,7 +701,7 @@ void CTerrain::Update (long stop)
       DoStitch ();
       _stage++;
       break;
-    case STAGE_INVENTORY:
+    case STAGE_INVENTORY_PREPARE:
       _list_size = 0;
       if (_vertex_list)
         delete _vertex_list;
@@ -698,38 +711,41 @@ void CTerrain::Update (long stop)
         delete _uv_list;
       if (_index_buffer)
         delete _index_buffer;
+      _index_buffer_size = 0;
       _index_buffer = NULL;
       _vertex_list = NULL;
       _normal_list = NULL;
       _uv_list = NULL;
-      do {
-        if (Point (_walk.x, _walk.y)) 
-          _list_size++;
-      } while (!_walk.Walk (TERRAIN_EDGE));
-      _vertex_list = new GLvector [_list_size];
-      _normal_list = new GLvector [_list_size];
-      _uv_list = new GLvector2 [_list_size];
-      _list_pos = 0;
       _stage++;
       break;  
+    case STAGE_INVENTORY:
+      if (Point (_walk.x, _walk.y)) 
+        _list_size++;
+      if (_walk.Walk (TERRAIN_EDGE)) {
+        _vertex_list = new GLvector [_list_size];
+        _normal_list = new GLvector [_list_size];
+        _uv_list = new GLvector2 [_list_size];
+        _list_pos = 0;
+        _stage++;
+      }
+      break;  
     case STAGE_BUFFER_LOAD: 
-      do {
-        if (Point (_walk.x, _walk.y)) {
-          _vertex_list[_list_pos] = _pos[_walk.x][_walk.y];
-          _normal_list[_list_pos] = _normal[_walk.x][_walk.y];
-          _uv_list[_list_pos] = glVector ((float)_walk.x / TERRAIN_SIZE, (float)_walk.y / TERRAIN_SIZE);
-          _index_map[_walk.x][_walk.y] = _list_pos;
-          _list_pos++;
-        }
-      } while (!_walk.Walk (TERRAIN_EDGE));
-      _stage++;
+      if (Point (_walk.x, _walk.y)) {
+        _vertex_list[_list_pos] = _pos[_walk.x][_walk.y];
+        _normal_list[_list_pos] = _normal[_walk.x][_walk.y];
+        _uv_list[_list_pos] = glVector ((float)_walk.x / TERRAIN_SIZE, (float)_walk.y / TERRAIN_SIZE);
+        _index_map[_walk.x][_walk.y] = _list_pos;
+        _list_pos++;
+      }
+      if (_walk.Walk (TERRAIN_EDGE))
+        _stage++;
       break; 
     case STAGE_COMPILE:
-      if (_index_buffer)
-        free (_index_buffer);
-      _index_buffer_size = 0;
-      _index_buffer = NULL;
-      CompileBlock (0, 0, TERRAIN_SIZE);
+      CompileBlock (_walk.x * COMPILE_SIZE, _walk.y * COMPILE_SIZE, COMPILE_SIZE);
+      if (_walk.Walk (COMPILE_GRID))
+        _stage++;
+      break;
+    case STAGE_VBO:
       if (_vbo.Ready ())
         _vbo.Clear ();
       _vbo.Create (GL_TRIANGLES, _index_buffer_size, _list_size, _index_buffer, _vertex_list, _normal_list, NULL, _uv_list);
@@ -750,6 +766,7 @@ void CTerrain::Update (long stop)
       _stage++;
       break;
     case STAGE_DONE:
+      _valid = true;
       if (SdlTick () < _rebuild) 
         return;
       ZoneCheck (stop);//touch the zones to keep them in memory
@@ -789,7 +806,12 @@ void CTerrain::Clear ()
     delete _uv_list;
   if (_index_buffer)
     delete _index_buffer;
+  _index_buffer = NULL;
+  _vertex_list = NULL;
+  _normal_list = NULL;
+  _uv_list = NULL;
   _stage = STAGE_BEGIN;
+  _texture_current_size = 0;
   _walk.Clear ();
 
 
@@ -813,11 +835,7 @@ void CTerrain::TextureSize (int size)
 GLcoord CTerrain::Origin ()
 {
 
-  GLcoord   world;
-
-  world.x = _origin.x * TERRAIN_SIZE;
-  world.y = _origin.y * TERRAIN_SIZE;
-  return world;
+  return _origin;
 
 }
 
@@ -845,32 +863,29 @@ void CTerrain::TexturePurge ()
 
 }
 
-void CTerrain::Set (int origin_x, int origin_y, int texture_size)
+void CTerrain::Set (int grid_x, int grid_y, int distance)
 {
 
-  int   x, y;
+  unsigned  sup;
 
-  _origin.x = origin_x;
-  _origin.y = origin_y;
-  _front_texture = 0;
-  _back_texture = 0;
-  _texture_desired_size = texture_size;
-  _texture_current_size = 0;
+  if (distance > 0)
+    distance--;
+  distance = min (distance, 4);
+  if (grid_x == _grid_position.x && grid_y == _grid_position.y && _current_distance == distance)
+    return;
+  //If this terrain is now in a new location, we have to kill it entirely
+  if (grid_x != _grid_position.x || grid_y != _grid_position.y)
+    Clear ();
+  _grid_position.x = grid_x;
+  _grid_position.y = grid_y;
+  _current_distance = distance;
+  _origin.x = grid_x * TERRAIN_SIZE;
+  _origin.y = grid_y * TERRAIN_SIZE;
+  _color = glRgbaUnique (_grid_position.x + _grid_position.y * 16);
+  sup = (unsigned)pow (2.0f, (float)distance);
+  _texture_desired_size = 2048 / sup;
   _walk.Clear ();
-  _index_buffer = NULL;
-  _vertex_list = NULL;
-  _normal_list = NULL;
-  _uv_list = NULL;
   _list_size = 0;
-  for (y = 0; y < TERRAIN_EDGE; y ++) {
-    for (x = 0; x < TERRAIN_EDGE; x++) {
-      _point[x][y] = false;
-      _index_map[x][y] = -1;
-    }
-  }
-  for (int i = 0; i < SURFACE_TYPES; i++)
-    _surface_used[i] = false;
-
   _stage = STAGE_BEGIN;
 
 }
@@ -878,7 +893,8 @@ void CTerrain::Set (int origin_x, int origin_y, int texture_size)
 void CTerrain::Render ()
 {
 
-  if (_front_texture) {
+  if (_front_texture && _valid) {
+    glColor3fv (&_color.red);
     glBindTexture (GL_TEXTURE_2D, _front_texture);
     _vbo.Render ();
   }
