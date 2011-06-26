@@ -92,7 +92,6 @@ class CTree
   GLrgba            _bark_color2;
   GLrgba            _leaf_color;
   vector<Leaf>      _leaf_list;
-  //VBO               _vbo;
   GLmesh            _meshes[TREE_ALTS][LOD_LEVELS];
 
   void              DoFoliage (GLmesh* m, GLvector pos, float size, float angle);

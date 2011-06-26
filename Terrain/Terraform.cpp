@@ -906,22 +906,21 @@ void TerraformZones ()
   Region          r;
   int             radius;
   Climate         c;
+  GLcoord         walk;
 
-  for (y = 0; y < WORLD_GRID; y++) {
-    for (x = 0; x < WORLD_GRID; x++) {
-      if ((x + y) % 2)
-        radius = 1;
-      else
-        radius = 2;
-      if (!is_free (x, y, 2))
-        continue;
+  walk.Clear ();
+  do {
+    x = walk.x;
+    y = walk.y + WorldNoisei (walk.x + walk.y * WORLD_GRID) % 4;
+    radius = 1 + WorldNoisei (10 + walk.x + walk.y * WORLD_GRID) % 3;
+    if (is_free (x, y, radius)) {
       r = WorldRegionGet (x, y);
       climates.clear ();
       //swamps only appear in wet areas that aren't cold.
       if (r.moisture > 0.9f && r.temperature > TEMP_TEMPERATE)
         climates.push_back (CLIMATE_SWAMP);
       //mountains only appear in the middle
-      if (abs (x - WORLD_GRID_CENTER) < 10)
+      if (abs (x - WORLD_GRID_CENTER) < 10 && radius > 1)
         climates.push_back (CLIMATE_MOUNTAIN);
       //fields should be not too hot or cold.
       if (r.temperature > TEMP_TEMPERATE && r.temperature < TEMP_HOT && r.moisture > 0.5f)
@@ -955,9 +954,9 @@ void TerraformZones ()
         do_forest (x, y, radius);
       }
       //leave a bit of a gap before the next one
-      x += radius * 3;
+      walk.x += radius * 3;
     }
-  }
+  } while (!walk.Walk (WORLD_GRID));
 
 }
 

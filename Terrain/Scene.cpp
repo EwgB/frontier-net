@@ -194,6 +194,7 @@ void SceneRender ()
   t = TextureFromName ("g3.bmp", MASK_PINK);
   glBindTexture (GL_TEXTURE_2D, t->id);
   gm_grass.Render ();
+  glEnable(GL_CULL_FACE);
   gm_forest.Render ();
   gm_terrain.Render ();
   WaterRender ();

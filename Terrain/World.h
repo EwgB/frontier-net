@@ -24,7 +24,7 @@
 
 #define REGION_SIZE             64
 #define REGION_HALF             (REGION_SIZE / 2)
-#define WORLD_GRID              128
+#define WORLD_GRID              256
 #define WORLD_GRID_EDGE         (WORLD_GRID + 1)
 #define WORLD_GRID_CENTER       (WORLD_GRID / 2)
 #define WORLD_SIZE_METERS       (REGION_SIZE * WORLD_GRID)
@@ -49,6 +49,7 @@ enum Climate
   CLIMATE_SWAMP,
   CLIMATE_ROCKY,
   CLIMATE_FIELD,
+  CLIMATE_PLAINS,
   CLIMATE_CANYON,
   CLIMATE_FOREST,
   CLIMATE_TYPES,

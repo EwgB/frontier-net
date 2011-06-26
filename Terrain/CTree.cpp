@@ -167,31 +167,43 @@ void CTree::DoFoliage (GLmesh* m, GLvector pos, float fsize, float angle)
     m->PushVertex (glVector (fsize, -fsize, -tip_height), glVector ( 0.5f, -0.5f, 0.0f), uv.Corner (1));
     m->PushVertex (glVector (fsize, fsize, -tip_height), glVector ( 0.5f, 0.5f, 0.0f), uv.Corner (2));
     m->PushVertex (glVector (-fsize, fsize, -tip_height), glVector ( -0.5f, 0.5f, 0.0f), uv.Corner (3));
+    m->PushVertex (glVector (0.0f, 0.0f, tip_height / 2), glVector (0.0f, 0.0f, 1.0f), uv.Center ());
     m->PushTriangle (base_index, base_index + 1, base_index + 2);
     m->PushTriangle (base_index, base_index + 2, base_index + 3);
     m->PushTriangle (base_index, base_index + 3, base_index + 4);
     m->PushTriangle (base_index, base_index + 4, base_index + 1);
-    m->PushQuad (base_index + 1, base_index + 4, base_index + 3, base_index + 2);
+/*
+    m->PushTriangle (base_index, base_index + 1, base_index + 2);
+    m->PushTriangle (base_index, base_index + 2, base_index + 3);
+    m->PushTriangle (base_index, base_index + 3, base_index + 4);
+    m->PushTriangle (base_index, base_index + 4, base_index + 1);
+    */
+    m->PushTriangle (base_index + 5, base_index + 2, base_index + 1);
+    m->PushTriangle (base_index + 5, base_index + 3, base_index + 2);
+    m->PushTriangle (base_index + 5, base_index + 4, base_index + 3);
+    m->PushTriangle (base_index + 5, base_index + 1, base_index + 4);
+
+    //m->PushQuad (base_index + 1, base_index + 4, base_index + 3, base_index + 2);
   } else if (_foliage_style == TREE_FOLIAGE_UMBRELLA) {
     float  tip_height;
 
     tip_height = fsize / 4.0f;
-    if (_foliage_style == TREE_FOLIAGE_BOWL)
-      tip_height *= -1.0f;
     m->PushVertex (glVector (0.0f, 0.0f, tip_height), glVector (0.0f, 0.0f, 1.0f), uv.Center ());
     m->PushVertex (glVector (-fsize, -fsize, -tip_height), glVector (-0.5f, -0.5f, 0.0f), uv.Corner (0));
     m->PushVertex (glVector (fsize, -fsize, -tip_height), glVector ( 0.5f, -0.5f, 0.0f), uv.Corner (1));
     m->PushVertex (glVector (fsize, fsize, -tip_height), glVector ( 0.5f, 0.5f, 0.0f), uv.Corner (2));
     m->PushVertex (glVector (-fsize, fsize, -tip_height), glVector ( -0.5f, 0.5f, 0.0f), uv.Corner (3));
+    m->PushVertex (glVector (0.0f, 0.0f, tip_height / 2), glVector (0.0f, 0.0f, 1.0f), uv.Center ());
+    //Top
     m->PushTriangle (base_index, base_index + 2, base_index + 1);
     m->PushTriangle (base_index, base_index + 3, base_index + 2);
     m->PushTriangle (base_index, base_index + 4, base_index + 3);
     m->PushTriangle (base_index, base_index + 1, base_index + 4);
-    m->PushTriangle (base_index, base_index + 1, base_index + 2);
-    m->PushTriangle (base_index, base_index + 2, base_index + 3);
-    m->PushTriangle (base_index, base_index + 3, base_index + 4);
-    m->PushTriangle (base_index, base_index + 4, base_index + 1);
-    //m->PushQuad (base_index + 1, base_index + 2, base_index + 3, base_index + 4);
+    //Underside
+    m->PushTriangle (base_index + 5, base_index + 1, base_index + 2);
+    m->PushTriangle (base_index + 5, base_index + 2, base_index + 3);
+    m->PushTriangle (base_index + 5, base_index + 3, base_index + 4);
+    m->PushTriangle (base_index + 5, base_index + 4, base_index + 1);
   }   
   GLmatrix  mat;
   unsigned  i;
@@ -711,6 +723,26 @@ void CTree::DoTexture ()
     glEnd ();
     glPopMatrix ();
   }
+  /*
+  glBlendFunc (GL_DST_COLOR, GL_SRC_COLOR);
+  for (i = 0; i < _leaf_list.size (); i++) {
+    l = _leaf_list[i];
+    glPushMatrix ();
+    glTranslatef (l.position.x, l.position.y, 0);
+    glRotatef (l.angle, 0.0f, 0.0f, 1.0f);
+    glTranslatef (-l.position.x, -l.position.y, 0);
+
+    color = _leaf_color * l.brightness;
+    glColor3fv (&color.red);
+    glBegin (GL_QUADS);
+    uv = uvframe.Corner (0); glTexCoord2fv (&uv.x); glVertex2f (l.position.x - l.size, l.position.y - l.size);
+    uv = uvframe.Corner (1); glTexCoord2fv (&uv.x); glVertex2f (l.position.x + l.size, l.position.y - l.size);
+    uv = uvframe.Corner (2); glTexCoord2fv (&uv.x); glVertex2f (l.position.x + l.size, l.position.y + l.size);
+    uv = uvframe.Corner (3); glTexCoord2fv (&uv.x); glVertex2f (l.position.x - l.size, l.position.y + l.size);
+    glEnd ();
+    glPopMatrix ();
+  }
+  */
   glBindTexture(GL_TEXTURE_2D, _texture);
  	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
   glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
