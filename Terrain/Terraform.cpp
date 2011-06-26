@@ -160,9 +160,32 @@ static bool find_plot (int radius, GLcoord* result)
 
 }
 
+//Gives a 1 in 'odds' chance of adding flowers to the given region
+void add_flowers (Region* r, unsigned odds)
+{
+
+  GLrgba    c;
+  int       shape;
+
+  r->has_flowers = RandomVal () % odds == 0;
+  shape = RandomVal ();
+  c = flower_palette[RandomVal () % FLOWER_PALETTE];
+  for (int i = 0; i < FLOWERS; i++) {
+    r->color_flowers[i] = c;
+    r->flower_shape[i] = shape;
+    if ((RandomVal () % 15) == 0) {
+      shape = RandomVal ();
+      c = flower_palette[RandomVal () % FLOWER_PALETTE];
+    }
+  }
+
+
+}
+
 /*-----------------------------------------------------------------------------
 Functions to place individual climates
 -----------------------------------------------------------------------------*/
+
 
 
 //Place one mountain
@@ -216,6 +239,35 @@ static void do_rocky (int x, int y, int size)
 }
 
 
+//Place some plains
+static void do_plains (int x, int y, int size)
+{
+
+  Region  r;
+  int     xx, yy;
+  float   water;
+
+  r = WorldRegionGet (x, y);
+  water = r.geo_water;
+  for (xx = -size; xx <= size; xx++) {
+    for (yy = -size; yy <= size; yy++) {
+      r = WorldRegionGet (xx + x, yy + y);
+      sprintf (r.title, "Plains");
+      r.climate = CLIMATE_PLAINS;
+      r.color_atmosphere = glRgba (0.0f, 0.5f, 0.0f);
+      r.geo_water = water;
+      r.geo_bias = 0.0f;
+      r.moisture = 1.0f;
+      r.geo_detail = 1.0f;
+      add_flowers (&r, 8);
+      r.flags_shape |= REGION_FLAG_NOBLEND;
+      WorldRegionSet (x + xx, y + yy, r);
+    }
+  }
+
+}
+
+
 //Place a swamp
 static void do_swamp (int x, int y, int size)
 {
@@ -249,14 +301,14 @@ static void do_field (int x, int y, int size)
 
   Region    r;
   int       xx, yy;
-  GLrgba    c;
-  int       shape;
 
   for (xx = -size; xx <= size; xx++) {
     for (yy = -size; yy <= size; yy++) {
       r = WorldRegionGet (xx + x, yy + y);
       sprintf (r.title, "Field");
       r.climate = CLIMATE_FIELD;
+      add_flowers (&r, 4);
+      /*
       r.has_flowers = RandomVal () % 4 == 0;
       shape = RandomVal ();
       c = flower_palette[RandomVal () % FLOWER_PALETTE];
@@ -268,6 +320,7 @@ static void do_field (int x, int y, int size)
           c = flower_palette[RandomVal () % FLOWER_PALETTE];
         }
       }
+      */
       r.color_atmosphere = glRgba (0.7f, 0.6f, 0.4f);
       r.geo_detail = 8.0f;
       r.flags_shape |= REGION_FLAG_NOBLEND;
@@ -675,6 +728,10 @@ void TerraformColors ()
         r.color_map = r.color_grass + glRgba (0.7f, 0.5f, 0.6f);
         r.color_map.Normalize ();
         break;
+      case CLIMATE_PLAINS:
+        r.color_map = r.color_grass + glRgba (0.5f, 0.5f, 0.5f);
+        r.color_map.Normalize ();
+        break;
       case CLIMATE_FOREST:
         r.color_map = r.color_grass + glRgba (0.0f, 0.5f, 0.0f);
         r.color_map *= 0.5f;
@@ -912,7 +969,7 @@ void TerraformZones ()
   do {
     x = walk.x;
     y = walk.y + WorldNoisei (walk.x + walk.y * WORLD_GRID) % 4;
-    radius = 1 + WorldNoisei (10 + walk.x + walk.y * WORLD_GRID) % 3;
+    radius = 1 + WorldNoisei (10 + walk.x + walk.y * WORLD_GRID) % 4;
     if (is_free (x, y, radius)) {
       r = WorldRegionGet (x, y);
       climates.clear ();
@@ -925,6 +982,8 @@ void TerraformZones ()
       //fields should be not too hot or cold.
       if (r.temperature > TEMP_TEMPERATE && r.temperature < TEMP_HOT && r.moisture > 0.5f)
         climates.push_back (CLIMATE_FIELD);
+      if (r.temperature > TEMP_TEMPERATE && r.temperature < TEMP_HOT && r.moisture > 0.25f)
+        climates.push_back (CLIMATE_PLAINS);
       //Rocky wastelands favor cold areas
       if (r.temperature < TEMP_TEMPERATE)
         climates.push_back (CLIMATE_ROCKY);
@@ -950,8 +1009,13 @@ void TerraformZones ()
         break;
       case CLIMATE_FIELD:
         do_field (x, y, radius);
+        break;
+      case CLIMATE_PLAINS:
+        do_plains (x, y, radius);
+        break;
       case CLIMATE_FOREST:
         do_forest (x, y, radius);
+        break;
       }
       //leave a bit of a gap before the next one
       walk.x += radius * 3;

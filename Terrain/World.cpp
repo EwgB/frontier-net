@@ -192,11 +192,8 @@ static float do_height (Region r, GLvector2 offset, float water, float detail, f
   }
   if (r.flags_shape & REGION_FLAG_CANYON_NS) {
     float    x = abs (offset.x - 0.5f) * 2.0f;;
-
     if (x + detail < 0.5f)
-      val = water + (val - water) / 2.0f;
-    else 
-      val += r.geo_water;
+      val -= min (r.geo_detail, 10.0f);
   }
   if ((r.flags_shape & REGION_FLAG_BEACH) && val < r.beach_threshold && val > 0.0f) {
     val /= r.beach_threshold;
