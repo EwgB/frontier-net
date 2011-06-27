@@ -22,6 +22,7 @@
 #include "ini.h"
 #include "input.h"
 #include "math.h"
+#include "render.h"
 #include "scene.h"
 #include "sdl.h"
 #include "text.h"
@@ -29,7 +30,7 @@
 #include "water.h"
 #include "world.h"
 
-#define FOREST_GRID     7
+#define FOREST_GRID     11
 #define FOREST_HALF     (FOREST_GRID / 2)
 #define GRASS_GRID      7
 #define GRASS_HALF      (GRASS_GRID / 2)
@@ -184,20 +185,31 @@ void SceneUpdate (long stop)
 void SceneRender ()
 {
 
-  glEnable(GL_TEXTURE_2D);
-  glColor3f (1,1,1);
-
-  if (draw_tree)
-    test_tree.Render (last_tree, 0, LOD_HIGH);
   GLtexture*    t;
 
+  glEnable(GL_TEXTURE_2D);
+  glColor3f (1,1,1);
+  if (draw_tree)
+    test_tree.Render (last_tree, 0, LOD_HIGH);
   t = TextureFromName ("g3.bmp", MASK_PINK);
   glBindTexture (GL_TEXTURE_2D, t->id);
   gm_grass.Render ();
-  glEnable(GL_CULL_FACE);
+  glDisable(GL_CULL_FACE);
   gm_forest.Render ();
+  glEnable(GL_CULL_FACE);
   gm_terrain.Render ();
   WaterRender ();
+  if (0) { //Show tree texture
+    GLvector      camera;
+    Region*       r;
+    CTree*        tree;
+
+    glDisable (GL_BLEND);
+    camera = CameraPosition ();
+    r = (Region*)CameraRegion ();
+    tree = WorldTree (r->tree_type);
+    RenderTexture (tree->_texture);
+  }
 
 }
 

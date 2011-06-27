@@ -64,6 +64,7 @@ class CTree
   bool              _evergreen;
   bool              _canopy;
   bool              _grows_high;
+  bool              _has_vines;
   
   int               _default_branches;
   float             _default_height;
@@ -87,13 +88,16 @@ class CTree
   float             _branch_reach;
   float             _foliage_size;
   float             _leaf_size;
-  unsigned          _texture;
   GLrgba            _bark_color1;
   GLrgba            _bark_color2;
   GLrgba            _leaf_color;
   vector<Leaf>      _leaf_list;
   GLmesh            _meshes[TREE_ALTS][LOD_LEVELS];
 
+  void              DrawBark ();
+  void              DrawLeaves ();
+  void              DrawVines ();
+  void              DoVines (GLmesh* m, GLvector* points, unsigned segments);
   void              DoFoliage (GLmesh* m, GLvector pos, float size, float angle);
   void              DoBranch (GLmesh* m, BranchAnchor anchor, float angle, LOD lod);
   void              DoTrunk (GLmesh* m, unsigned local_seed, LOD lod);
@@ -102,6 +106,7 @@ class CTree
   GLvector          TrunkPosition (float delta, float* radius);
   void              Build ();
 public:
+  unsigned          _texture;
   void              Create (bool canopy, float moisture, float temperature, int seed);
   void              Render (GLvector pos, unsigned alt, LOD lod);
   unsigned          Texture () { return _texture; };

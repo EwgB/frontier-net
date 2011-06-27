@@ -64,7 +64,7 @@ void WaterRender ()
 
   glDisable (GL_BLEND);
   glDepthMask (false);
-  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("water4.bmp"));
+  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("water1.bmp"));
   glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
   water.Render ();  
   glDepthMask (true);

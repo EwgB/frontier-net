@@ -20,6 +20,7 @@
 
 #define SEGMENTS_PER_METER    0.25f
 #define MIN_SEGMENTS          3
+//#define TEXTURE_SIZE          512
 #define TEXTURE_SIZE          256
 #define TEXTURE_HALF          (TEXTURE_SIZE / 2)
 #define MIN_RADIUS            0.3f
@@ -100,7 +101,7 @@ void CTree::DoFoliage (GLmesh* m, GLvector pos, float fsize, float angle)
   int       base_index;
 
   fsize *= _foliage_size;
-  uv.Set (glVector (0.5f, 0.0f), glVector (1.0f, 1.0f));
+  uv.Set (glVector (0.25f, 0.0f), glVector (0.5f, 1.0f));
   base_index = m->_vertex.size ();
 
   //don't let the foliage get so big it touches the ground.
@@ -132,20 +133,23 @@ void CTree::DoFoliage (GLmesh* m, GLvector pos, float fsize, float angle)
            \/   */
     float level1   = fsize * -0.4f;
     float level2   = fsize * -1.2f;
+    GLuvbox   uv_inner;
+
+    uv_inner.Set (glVector (0.25f + 1.25f, 0.125f), glVector (0.5f - 0.125f, 1.0f - 0.125f));
     //Center
-    m->PushVertex (glVector ( 0.0f, 0.0f, 0.0f), UP, glVector ( 0.75f, 0.5f));
+    m->PushVertex (glVector ( 0.0f, 0.0f, 0.0f), UP, uv.Center ());
     //First ring
-    m->PushVertex (glVector (-fsize / 2, -fsize / 2, level1), UP, glVector ( 0.5f, 0.5f));//1
-    m->PushVertex (glVector ( fsize / 2, -fsize / 2, level1), UP, glVector (0.75f, 0.0f));//2
-    m->PushVertex (glVector ( fsize / 2,  fsize / 2, level1), UP, glVector ( 1.0f, 0.5f));//3
-    m->PushVertex (glVector (-fsize / 2,  fsize / 2, level1), UP, glVector (0.75f, 1.0f));//4
+    m->PushVertex (glVector (-fsize / 2, -fsize / 2, level1), UP, uv.Corner (GLUV_TOP_EDGE));//1
+    m->PushVertex (glVector ( fsize / 2, -fsize / 2, level1), UP, uv.Corner (GLUV_RIGHT_EDGE));//2
+    m->PushVertex (glVector ( fsize / 2,  fsize / 2, level1), UP, uv.Corner (GLUV_BOTTOM_EDGE));//3
+    m->PushVertex (glVector (-fsize / 2,  fsize / 2, level1), UP, uv.Corner (GLUV_LEFT_EDGE));//4
     //Tips
-    m->PushVertex (glVector (0.0f, -fsize, level2), UP, glVector ( 0.5f, 0.0f));//5
-    m->PushVertex (glVector (fsize,  0.0f, level2), UP, glVector ( 1.0f, 0.0f));//6
-    m->PushVertex (glVector (0.0f,  fsize, level2), UP, glVector ( 1.0f, 1.0f));//7
-    m->PushVertex (glVector (-fsize, 0.0f, level2), UP, glVector ( 0.5f, 1.0f));//8
+    m->PushVertex (glVector (0.0f, -fsize, level2), UP, uv.Corner (1));//5
+    m->PushVertex (glVector (fsize,  0.0f, level2), UP, uv.Corner (2));//6
+    m->PushVertex (glVector (0.0f,  fsize, level2), UP, uv.Corner (3));//7
+    m->PushVertex (glVector (-fsize, 0.0f, level2), UP, uv.Corner (0));//8
     //Center, but lower
-    m->PushVertex (glVector ( 0.0f, 0.0f, level1 / 8), UP, glVector ( 0.75f, 0.5f));
+    m->PushVertex (glVector ( 0.0f, 0.0f, level1 / 16), UP, uv.Center ());
     
     //Cap
     m->PushTriangle (base_index, base_index + 2, base_index + 1);
@@ -157,15 +161,6 @@ void CTree::DoFoliage (GLmesh* m, GLvector pos, float fsize, float angle)
     m->PushTriangle (base_index + 6, base_index + 2, base_index + 3);
     m->PushTriangle (base_index + 7, base_index + 3, base_index + 4);
     m->PushTriangle (base_index + 8, base_index + 4, base_index + 1);
-    
-    //Inside of the code, to make it 2-sided
-    m->PushTriangle (base_index + 9, base_index + 5, base_index + 6);
-    m->PushTriangle (base_index + 9, base_index + 6, base_index + 7);
-    m->PushTriangle (base_index + 9, base_index + 7, base_index + 8);
-    m->PushTriangle (base_index + 9, base_index + 8, base_index + 5);
-
-
-
   } else if (_foliage_style == TREE_FOLIAGE_BOWL) {
     float  tip_height;
 
@@ -182,12 +177,7 @@ void CTree::DoFoliage (GLmesh* m, GLvector pos, float fsize, float angle)
     m->PushTriangle (base_index, base_index + 2, base_index + 3);
     m->PushTriangle (base_index, base_index + 3, base_index + 4);
     m->PushTriangle (base_index, base_index + 4, base_index + 1);
-/*
-    m->PushTriangle (base_index, base_index + 1, base_index + 2);
-    m->PushTriangle (base_index, base_index + 2, base_index + 3);
-    m->PushTriangle (base_index, base_index + 3, base_index + 4);
-    m->PushTriangle (base_index, base_index + 4, base_index + 1);
-    */
+
     m->PushTriangle (base_index + 5, base_index + 2, base_index + 1);
     m->PushTriangle (base_index + 5, base_index + 3, base_index + 2);
     m->PushTriangle (base_index + 5, base_index + 4, base_index + 3);
@@ -209,11 +199,6 @@ void CTree::DoFoliage (GLmesh* m, GLvector pos, float fsize, float angle)
     m->PushTriangle (base_index, base_index + 3, base_index + 2);
     m->PushTriangle (base_index, base_index + 4, base_index + 3);
     m->PushTriangle (base_index, base_index + 1, base_index + 4);
-    //Underside
-    m->PushTriangle (base_index + 5, base_index + 1, base_index + 2);
-    m->PushTriangle (base_index + 5, base_index + 2, base_index + 3);
-    m->PushTriangle (base_index + 5, base_index + 3, base_index + 4);
-    m->PushTriangle (base_index + 5, base_index + 4, base_index + 1);
   }   
   GLmatrix  mat;
   unsigned  i;
@@ -228,21 +213,51 @@ void CTree::DoFoliage (GLmesh* m, GLvector pos, float fsize, float angle)
 
 }
 
+void CTree::DoVines (GLmesh* m, GLvector* points, unsigned segments)
+{
+
+  unsigned          base_index;
+  unsigned          segment;
+
+
+  if (!_has_vines)
+    return;
+  base_index = m->_vertex.size ();
+  for (segment = 0; segment < segments; segment++) {
+    float  v = (float)segment;
+    m->PushVertex (points[segment], UP, glVector (0.5f, v));
+    m->PushVertex (points[segment] + glVector (0.0f, 0.0f, -3.5f), UP, glVector (0.75f, v));
+  }
+  for (segment = 0; segment < segments - 1; segment++) {
+    m->PushTriangle (
+          base_index + segment * 2,
+          base_index + segment * 2 + 1,
+          base_index + (segment + 1) * 2 + 1);
+    m->PushTriangle (
+          base_index + segment * 2,
+          base_index + (segment + 1) * 2 + 1,
+          base_index + (segment + 1) * 2);
+  }
+
+}
+    
+
+
 void CTree::DoBranch (GLmesh* m, BranchAnchor anchor, float branch_angle, LOD lod)
 {
   
-  int           ring, segment, segment_count;
-  int           radial_steps, radial_edge;
-//  float         circumference;
-  float         radius;
-  float         angle;
-  float         horz_pos;
-  float         curve;
-  GLvector      core;
-  GLvector      pos;
-  unsigned      base_index;
-  GLmatrix      mat;
-  GLvector2     uv;  
+  unsigned          ring, segment, segment_count;
+  unsigned          radial_steps, radial_edge;
+  float             radius;
+  float             angle;
+  float             horz_pos;
+  float             curve;
+  GLvector          core;
+  GLvector          pos;
+  unsigned          base_index;
+  GLmatrix          mat;
+  GLvector2         uv;  
+  vector<GLvector>  underside;
 
   if (anchor.length < 2.0f)
     return;
@@ -296,12 +311,13 @@ void CTree::DoBranch (GLmesh* m, BranchAnchor anchor, float branch_angle, LOD lo
       else
         angle = (float)ring * (360.0f / (float)radial_steps);
       angle *= DEGREES_TO_RADIANS;
-      pos.x = sin (angle) * radius;
+      pos.x = -sin (angle) * radius;
       pos.y = anchor.length * horz_pos;
-      pos.z = cos (angle) * radius;
+      pos.z = -cos (angle) * radius;
       pos = glMatrixTransformPoint (mat, pos);
-      m->PushVertex (pos + core, glVector (pos.x, 0.0f, pos.z), glVector (((float)ring / (float) radial_steps) * 0.5f, pos.y * _texture_tile));
+      m->PushVertex (pos + core, glVector (pos.x, 0.0f, pos.z), glVector (((float)ring / (float) radial_steps) * 0.25f, pos.y * _texture_tile));
     }
+    underside.push_back (pos + core);
   }
   //Make the triangles for the branch
   for (segment = 0; segment< segment_count; segment++) {
@@ -322,8 +338,11 @@ void CTree::DoBranch (GLmesh* m, BranchAnchor anchor, float branch_angle, LOD lo
   //Grap the last point and use it as the origin for the foliage
   pos = m->_vertex[m->Vertices () - 1];
   DoFoliage (m, pos, anchor.length * 0.56f, branch_angle);
+  //We saved the points on the underside of the branch.
+  //Use these to hang vines on the branch
+  if (lod == LOD_HIGH)
+    DoVines (m, &underside[0], underside.size ());
 
-    
 }
 
 void CTree::DoTrunk (GLmesh* m, unsigned local_seed, LOD lod)
@@ -389,7 +408,7 @@ void CTree::DoTrunk (GLmesh* m, unsigned local_seed, LOD lod)
       y = cos (angle);
       m->PushVertex (core + glVector (x * radius, y * radius, 0.0f),
         glVector (x, y, 0.0f),
-        glVector (((float)ring / (float) radial_steps) * 0.5f, core.z * _texture_tile));
+        glVector (((float)ring / (float) radial_steps) * 0.25f, core.z * _texture_tile));
 
     }
     segment_count++;
@@ -456,7 +475,6 @@ void CTree::Build ()
 
 }
 
-
 void CTree::Create (bool is_canopy, float moisture, float temp_in, int seed_in)
 {
   
@@ -486,6 +504,7 @@ void CTree::Create (bool is_canopy, float moisture, float temp_in, int seed_in)
   _lift_style = (TreeLiftStyle)(WorldNoisei (_seed_current++) % TREE_LIFT_STYLES);
   _leaf_style = (TreeLeafStyle)(WorldNoisei (_seed_current++) % TREE_LEAF_STYLES);
   _evergreen = _temperature + (WorldNoisef (_seed_current++) * 0.25f) < 0.5f;
+  _has_vines = _moisture > 0.7f && _temperature > 0.7f;
   //Narrow trees can gorw on top of hills. (Big ones will stick out over cliffs, so we place them low.)
   if (_default_base_radius <= 1.0f) 
     _grows_high = true;
@@ -498,8 +517,8 @@ void CTree::Create (bool is_canopy, float moisture, float temp_in, int seed_in)
   _leaf_color = TerraformColorGenerate (SURFACE_COLOR_GRASS, moisture, _temperature, _seed_current++);
   _bark_color2 = TerraformColorGenerate (SURFACE_COLOR_DIRT, moisture, _temperature, _seed_current++);
   _bark_color1 = _bark_color2 * 0.5f;
-  //1 in 8 trees has white bark
-  if (!(WorldNoisei (_seed_current++) % 8))
+  //1 in 8 non-tropical trees has white bark
+  if (!_has_vines && !(WorldNoisei (_seed_current++) % 8))
     _bark_color2 = glRgba (1.0f);
   //These two foliage styles don't look right on evergreens.
   if (_evergreen && _foliage_style == TREE_FOLIAGE_BOWL)
@@ -554,7 +573,7 @@ void CTree::DoLeaves ()
     current_steps = (float)total_steps;
     for (current_steps = (float)total_steps; current_steps >= 1.0f; current_steps -= 1.0f) {
       size = (TEXTURE_HALF / 2) / (1.0f + ((float)total_steps - current_steps));
-      radius = (TEXTURE_SIZE - size * 2.0f);
+      radius = (TEXTURE_HALF - size * 2.0f);
       circ = (float)PI * radius * 2;
       step_size = 360.0f / current_steps;
       for (x = 0.0f; x < 360.0f; x += step_size) {
@@ -624,12 +643,44 @@ void CTree::DoLeaves ()
     }
   }
 
-  for (i = 0; i < _leaf_list.size (); i++) 
-    _leaf_list[i].position.x += TEXTURE_SIZE;//Move to the right side of our texture
+}
+
+
+void CTree::DrawVines ()
+{
+
+  GLtexture*  t;
+  GLuvbox     uvframe;
+  int         frames;
+  int         frame;
+  float       frame_size;
+  GLvector2   uv;
+  GLrgba      color;
+
+  glColor3fv (&_bark_color1.red);
+  glBindTexture (GL_TEXTURE_2D, 0);
+  t = TextureFromName ("vines.bmp", MASK_PINK);
+	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
+  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
+  frames = max (t->height / t->width, 1);
+  frame_size = 1.0f / (float)frames;
+  frame = WorldNoisei (_seed_current++) % frames;
+  uvframe.Set (glVector (0.0f, (float)frame * frame_size), glVector (1.0f, (float)(frame + 1) * frame_size));
+  glBindTexture (GL_TEXTURE_2D, t->id);
+  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  color = _leaf_color * 0.75f;
+  glColor3fv (&_leaf_color.red);
+  glBegin (GL_QUADS);
+  uv = uvframe.Corner (3); glTexCoord2fv (&uv.x); glVertex2i (0, 0);
+  uv = uvframe.Corner (0); glTexCoord2fv (&uv.x); glVertex2i (TEXTURE_SIZE, 0);
+  uv = uvframe.Corner (1); glTexCoord2fv (&uv.x); glVertex2i (TEXTURE_SIZE, TEXTURE_SIZE);
+  uv = uvframe.Corner (2); glTexCoord2fv (&uv.x); glVertex2i (0, TEXTURE_SIZE);
+  glEnd ();
+
 
 }
 
-void CTree::DoTexture ()
+void CTree::DrawLeaves ()
 {
 
   GLtexture*  t;
@@ -639,52 +690,6 @@ void CTree::DoTexture ()
   float       frame_size;
   GLvector2   uv;
   unsigned    i;
-
-  glDisable (GL_CULL_FACE);
-  glDisable (GL_FOG);
-  glDisable (GL_LIGHTING);
-  glEnable (GL_BLEND);
-  glEnable (GL_TEXTURE_2D);
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  if (_texture)
-    glDeleteTextures (1, &_texture); 
-  glGenTextures (1, &_texture); 
-  glBindTexture(GL_TEXTURE_2D, _texture);
-  glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, TEXTURE_SIZE * 2, TEXTURE_SIZE, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-  RenderCanvasBegin (0, TEXTURE_SIZE * 2, 0, TEXTURE_SIZE * 2, TEXTURE_SIZE * 2);
-  glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
-  glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
-  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
-
-  glColor3fv (&_bark_color1.red);
-  glBindTexture (GL_TEXTURE_2D, 0);
-  glBegin (GL_QUADS);
-  glTexCoord2f (0, 0); glVertex2i (0, 0);
-  glTexCoord2f (1, 0); glVertex2i (TEXTURE_SIZE, 0);
-  glTexCoord2f (1, 1); glVertex2i (TEXTURE_SIZE, TEXTURE_SIZE);
-  glTexCoord2f (0, 1); glVertex2i (0, TEXTURE_SIZE);
-  glEnd ();
-  
-  t = TextureFromName ("bark1.bmp", MASK_LUMINANCE);
-	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
-  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
-  frames = max (t->height / t->width, 1);
-  frame_size = 1.0f / (float)frames;
-  frame = WorldNoisei (_seed_current++) % frames;
-  uvframe.Set (glVector (0.0f, (float)frame * frame_size), glVector (1.0f, (float)(frame + 1) * frame_size));
-  glBindTexture (GL_TEXTURE_2D, t->id);
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glColorMask (true, true, true, false);
-  glColor3fv (&_bark_color2.red);
-  glBegin (GL_QUADS);
-  uv = uvframe.Corner (0); glTexCoord2fv (&uv.x); glVertex2i (0, 0);
-  uv = uvframe.Corner (1); glTexCoord2fv (&uv.x); glVertex2i (TEXTURE_SIZE, 0);
-  uv = uvframe.Corner (2); glTexCoord2fv (&uv.x); glVertex2i (TEXTURE_SIZE, TEXTURE_SIZE);
-  uv = uvframe.Corner (3); glTexCoord2fv (&uv.x); glVertex2i (0, TEXTURE_SIZE);
-  glEnd ();
-  glColorMask (true, true, true, true);
 
   if (_leaf_style == TREE_LEAF_SCATTER) {
     GLrgba c;
@@ -733,33 +738,92 @@ void CTree::DoTexture ()
     glEnd ();
     glPopMatrix ();
   }
-  /*
-  glBlendFunc (GL_DST_COLOR, GL_SRC_COLOR);
-  for (i = 0; i < _leaf_list.size (); i++) {
-    l = _leaf_list[i];
-    glPushMatrix ();
-    glTranslatef (l.position.x, l.position.y, 0);
-    glRotatef (l.angle, 0.0f, 0.0f, 1.0f);
-    glTranslatef (-l.position.x, -l.position.y, 0);
 
-    color = _leaf_color * l.brightness;
-    glColor3fv (&color.red);
-    glBegin (GL_QUADS);
-    uv = uvframe.Corner (0); glTexCoord2fv (&uv.x); glVertex2f (l.position.x - l.size, l.position.y - l.size);
-    uv = uvframe.Corner (1); glTexCoord2fv (&uv.x); glVertex2f (l.position.x + l.size, l.position.y - l.size);
-    uv = uvframe.Corner (2); glTexCoord2fv (&uv.x); glVertex2f (l.position.x + l.size, l.position.y + l.size);
-    uv = uvframe.Corner (3); glTexCoord2fv (&uv.x); glVertex2f (l.position.x - l.size, l.position.y + l.size);
-    glEnd ();
-    glPopMatrix ();
-  }
-  */
-  glBindTexture(GL_TEXTURE_2D, _texture);
- 	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
+
+
+}
+
+
+void CTree::DrawBark ()
+{
+
+  GLtexture*  t;
+  GLuvbox     uvframe;
+  int         frames;
+  int         frame;
+  float       frame_size;
+  GLvector2   uv;
+
+  glColor3fv (&_bark_color1.red);
+  glBindTexture (GL_TEXTURE_2D, 0);
+  glBegin (GL_QUADS);
+  glTexCoord2f (0, 0); glVertex2i (0, 0);
+  glTexCoord2f (1, 0); glVertex2i (TEXTURE_SIZE, 0);
+  glTexCoord2f (1, 1); glVertex2i (TEXTURE_SIZE, TEXTURE_SIZE);
+  glTexCoord2f (0, 1); glVertex2i (0, TEXTURE_SIZE);
+  glEnd ();
+  
+  t = TextureFromName ("bark1.bmp", MASK_LUMINANCE);
+	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
   glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
-  glCopyTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, 0, 0, TEXTURE_SIZE * 2, TEXTURE_SIZE);
+  frames = max (t->height / t->width, 1);
+  frame_size = 1.0f / (float)frames;
+  frame = WorldNoisei (_seed_current++) % frames;
+  uvframe.Set (glVector (0.0f, (float)frame * frame_size), glVector (1.0f, (float)(frame + 1) * frame_size));
+  glBindTexture (GL_TEXTURE_2D, t->id);
+  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glColorMask (true, true, true, false);
+  glColor3fv (&_bark_color2.red);
+  glBegin (GL_QUADS);
+  uv = uvframe.Corner (0); glTexCoord2fv (&uv.x); glVertex2i (0, 0);
+  uv = uvframe.Corner (1); glTexCoord2fv (&uv.x); glVertex2i (TEXTURE_SIZE, 0);
+  uv = uvframe.Corner (2); glTexCoord2fv (&uv.x); glVertex2i (TEXTURE_SIZE, TEXTURE_SIZE);
+  uv = uvframe.Corner (3); glTexCoord2fv (&uv.x); glVertex2i (0, TEXTURE_SIZE);
+  glEnd ();
+  glColorMask (true, true, true, true);
+
+
+}
+
+void CTree::DoTexture ()
+{
+
+  unsigned  i;
+
+  glDisable (GL_CULL_FACE);
+  glDisable (GL_FOG);
+  glDisable (GL_LIGHTING);
+  glEnable (GL_BLEND);
+  glEnable (GL_TEXTURE_2D);
+  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  if (_texture)
+    glDeleteTextures (1, &_texture); 
+  glGenTextures (1, &_texture); 
+  glBindTexture(GL_TEXTURE_2D, _texture);
+  glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, TEXTURE_SIZE * 4, TEXTURE_SIZE, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+  RenderCanvasBegin (0, TEXTURE_SIZE, 0, TEXTURE_SIZE, TEXTURE_SIZE);
+
+  for (i = 0; i < 4; i++) {
+    glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
+    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
+    glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
+    if (i == 0)       
+      DrawBark ();
+    else if (i == 1)
+      DrawLeaves ();
+    else if (i == 2)
+      DrawVines ();
+    
+    glBindTexture(GL_TEXTURE_2D, _texture);
+ 	  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
+    glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
+    glCopyTexSubImage2D (GL_TEXTURE_2D, 0, TEXTURE_SIZE * i, 0, 0, 0, TEXTURE_SIZE, TEXTURE_SIZE);
+  }
+
   RenderCanvasEnd ();
-
-
+  
 }
 
 void CTree::Info ()

@@ -222,7 +222,7 @@ static void do_mountain (int x, int y, int mtn_size)
 
 }
 
-//Place one mountain
+//Place a rocky wasteland
 static void do_rocky (int x, int y, int size)
 {
 
@@ -432,7 +432,7 @@ static bool try_lake (int try_x, int try_y, int id)
     for (yy = -size; yy <= size; yy++) {
       to_center = glVector ((float)xx, (float)yy);
       depth = to_center.Length ();
-      if (depth > (float)size)
+      if (depth >= (float)size)
         continue;
       depth = (float)size - depth;
       r = WorldRegionGet (xx + try_x, yy + try_y);

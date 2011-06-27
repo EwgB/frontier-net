@@ -407,7 +407,7 @@ void Render (void)
   glEnable (GL_ALPHA_TEST);
   glAlphaFunc (GL_GREATER, 0.0f);
 
-  glLineWidth (7.0f);
+  glLineWidth (2.0f);
   //
 
   //glMatrixMode (GL_MODELVIEW);

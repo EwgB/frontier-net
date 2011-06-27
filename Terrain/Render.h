@@ -6,3 +6,4 @@ int  RenderMaxDimension ();
 void RenderCanvasBegin (int left, int right, int bottom, int top, int size);
 void RenderCanvasEnd ();
 void RenderClick (int x, int y);
+void RenderTexture (unsigned id);
