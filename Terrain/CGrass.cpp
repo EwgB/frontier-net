@@ -38,20 +38,6 @@ static bool           uv_done;
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/
- /*(
-static GLvector random_normal ()
-{
-
-  GLvector  normal;
-
-  normal = glVector (RandomFloat () - 0.5f, RandomFloat () - 0.5f, 0.5f); 
-  return glVectorNormalize (normal);
-
-}*/
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 CGrass::CGrass () 
 {
@@ -145,8 +131,6 @@ void CGrass::Build (long stop)
   do_grass = CacheSurface (world_x, world_y) == SURFACE_GRASS;
   if (_walk.x % _current_distance || _walk.y  % _current_distance)
     do_grass = false;
-  //if ((_walk.x + _walk.y) % 2)
-    //do_grass = false;
   if (do_grass) {
     GLvector    vb0, vb1, vb2, vb3;
     GLvector    vt0, vt1, vt2, vt3;
@@ -166,7 +150,7 @@ void CGrass::Build (long stop)
     root.x = (float)world_x + (WorldNoisef (world_x + world_y * GRASS_SIZE) -0.5f) * 2.0f;
     root.y = (float)world_y + (WorldNoisef (world_x + world_y * GRASS_SIZE) -0.5f) * 2.0f;
     root.z = CacheElevation (root.x, root.y);
-    height = 0.1f + r.moisture * r.temperature;
+    height = 0.05f + r.moisture * r.temperature;
     size.x = 0.2f + WorldNoisef (world_x - world_y * GRASS_SIZE) * 0.5f;
     size.y = WorldNoisef (world_x + world_y * GRASS_SIZE) * height + height;
     do_flower = r.has_flowers;

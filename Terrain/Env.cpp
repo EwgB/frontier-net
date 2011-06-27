@@ -127,7 +127,7 @@ static void do_cycle ()
     desired.fog_min = 1;
     desired.fog_max = NIGHT_FOG;
     desired.star_fade = 1.0f;
-    desired.color[ENV_COLOR_LIGHT] = glRgba (0.5f, 0.7f, 1.0f);
+    desired.color[ENV_COLOR_LIGHT] = glRgba (0.1f, 0.5f, 1.0f);
     desired.light = VECTOR_NIGHT;
     desired.sun_angle = -90.0f;
     desired.draw_sun = false;

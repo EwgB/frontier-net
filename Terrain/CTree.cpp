@@ -144,17 +144,27 @@ void CTree::DoFoliage (GLmesh* m, GLvector pos, float fsize, float angle)
     m->PushVertex (glVector (fsize,  0.0f, level2), UP, glVector ( 1.0f, 0.0f));//6
     m->PushVertex (glVector (0.0f,  fsize, level2), UP, glVector ( 1.0f, 1.0f));//7
     m->PushVertex (glVector (-fsize, 0.0f, level2), UP, glVector ( 0.5f, 1.0f));//8
-
+    //Center, but lower
+    m->PushVertex (glVector ( 0.0f, 0.0f, level1 / 8), UP, glVector ( 0.75f, 0.5f));
+    
     //Cap
-    m->PushTriangle (base_index, base_index + 1, base_index + 2);
-    m->PushTriangle (base_index, base_index + 2, base_index + 3);
-    m->PushTriangle (base_index, base_index + 3, base_index + 4);
-    m->PushTriangle (base_index, base_index + 4, base_index + 1);
+    m->PushTriangle (base_index, base_index + 2, base_index + 1);
+    m->PushTriangle (base_index, base_index + 3, base_index + 2);
+    m->PushTriangle (base_index, base_index + 4, base_index + 3);
+    m->PushTriangle (base_index, base_index + 1, base_index + 4);
     //Outer triangles
-    m->PushTriangle (base_index + 5, base_index + 2, base_index + 1);
-    m->PushTriangle (base_index + 6, base_index + 3, base_index + 2);
-    m->PushTriangle (base_index + 7, base_index + 4, base_index + 3);
-    m->PushTriangle (base_index + 8, base_index + 1, base_index + 4);
+    m->PushTriangle (base_index + 5, base_index + 1, base_index + 2);
+    m->PushTriangle (base_index + 6, base_index + 2, base_index + 3);
+    m->PushTriangle (base_index + 7, base_index + 3, base_index + 4);
+    m->PushTriangle (base_index + 8, base_index + 4, base_index + 1);
+    
+    //Inside of the code, to make it 2-sided
+    m->PushTriangle (base_index + 9, base_index + 5, base_index + 6);
+    m->PushTriangle (base_index + 9, base_index + 6, base_index + 7);
+    m->PushTriangle (base_index + 9, base_index + 7, base_index + 8);
+    m->PushTriangle (base_index + 9, base_index + 8, base_index + 5);
+
+
 
   } else if (_foliage_style == TREE_FOLIAGE_BOWL) {
     float  tip_height;

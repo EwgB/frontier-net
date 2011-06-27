@@ -8,6 +8,7 @@
 TODO:
 
 * Small trees up, big trees down
+http://opengameart.org/content/very-low-poly-human
 
 -----------------------------------------------------------------------------*/
 

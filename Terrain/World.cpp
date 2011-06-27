@@ -465,11 +465,13 @@ void    WorldGenerate ()
   planet.wind_from_west = (RandomVal () % 2) ? true : false;
   planet.northern_hemisphere = (RandomVal () % 2) ? true : false;
   planet.river_count = 5 + RandomVal () % 4;
+  planet.lake_count = 5 + RandomVal () % 4;
   TerraformPrepare ();
   TerraformOceans ();
   TerraformCoast ();
   TerraformClimate ();
   TerraformRivers (planet.river_count);
+  TerraformLakes (planet.lake_count);
   TerraformClimate ();//Do climate a second time now that rivers are in
   TerraformZones ();
   TerraformClimate ();//Now again, since we have added climate-modifying features (Mountains, etc.)

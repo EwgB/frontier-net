@@ -128,6 +128,10 @@ static bool is_free (int x, int y, int radius)
 
   for (xx = -radius; xx <= radius; xx++) {
     for (yy = -radius; yy <= radius; yy++) {
+      if (x + xx < 0 || x + xx >= WORLD_GRID)
+        return false;
+      if (y + yy < 0 || y + yy >= WORLD_GRID)
+        return false;
       r = WorldRegionGet (x + xx, y + yy);
       if (r.climate != CLIMATE_INVALID)
         return false;
@@ -256,7 +260,7 @@ static void do_plains (int x, int y, int size)
       r.climate = CLIMATE_PLAINS;
       r.color_atmosphere = glRgba (0.0f, 0.5f, 0.0f);
       r.geo_water = water;
-      r.geo_bias = 0.0f;
+      r.geo_bias = 8.0f;
       r.moisture = 1.0f;
       r.geo_detail = 1.0f;
       add_flowers (&r, 8);
@@ -354,6 +358,29 @@ static void do_forest (int x, int y, int size)
 }
 
 
+//Place a desert
+static void do_desert (int x, int y, int size)
+{
+
+  Region    r;
+  int       xx, yy;
+
+  for (xx = -size; xx <= size; xx++) {
+    for (yy = -size; yy <= size; yy++) {
+      r = WorldRegionGet (xx + x, yy + y);
+      sprintf (r.title, "Desert");
+      r.climate = CLIMATE_DESERT;
+      r.color_atmosphere = glRgba (0.6f, 0.3f, 0.1f);
+      r.geo_detail = 8.0f;
+      r.geo_bias = 4.0f;
+      r.tree_threshold = 0.0f;
+      WorldRegionSet (x + xx, y + yy, r);
+    }
+  }
+
+}
+
+
 
 static void do_canyon (int x, int y, int radius)
 {
@@ -376,7 +403,51 @@ static void do_canyon (int x, int y, int radius)
 
 }
 
+static bool try_lake (int try_x, int try_y, int id)
+{
 
+  Region    r;
+  int       xx, yy;
+  int       size;
+  float     depth;
+  float     water_level;
+  GLvector2 to_center;
+
+  size = 4;
+  //if (!is_free (try_x, try_y, size)) 
+    //return false;
+  //Find the lowest water level in our lake
+  water_level = 9999.9f;
+  for (xx = -size; xx <= size; xx++) {
+    for (yy = -size; yy <= size; yy++) {
+      r = WorldRegionGet (xx + try_x, yy + try_y);
+      if (r.climate != CLIMATE_INVALID && r.climate != CLIMATE_RIVER && r.climate != CLIMATE_RIVER_BANK)
+        return false;
+      if (r.moisture < 0.5f)
+        return false;
+      water_level = min (water_level, r.geo_water);
+    }
+  }
+  for (xx = -size; xx <= size; xx++) {
+    for (yy = -size; yy <= size; yy++) {
+      to_center = glVector ((float)xx, (float)yy);
+      depth = to_center.Length ();
+      if (depth > (float)size)
+        continue;
+      depth = (float)size - depth;
+      r = WorldRegionGet (xx + try_x, yy + try_y);
+      sprintf (r.title, "Lake%d", id);
+      r.geo_water = water_level;
+      r.geo_detail = 2.0f;
+      r.geo_bias = -4.0f * depth;
+      r.climate = CLIMATE_LAKE;
+      r.flags_shape |= REGION_FLAG_NOBLEND;
+      WorldRegionSet (xx + try_x, yy + try_y, r);
+    }
+  }
+  return true;
+
+}
 
 static bool try_river (int start_x, int start_y, int id)
 {
@@ -564,14 +635,8 @@ void TerraformClimate ()
     //Oceans are ALWAYS WET.
     if (r.climate == CLIMATE_OCEAN)
       rainfall = 1.0f;
-    //Rivers always give some moisture
-    if (r.climate == CLIMATE_RIVER) {
-      r.moisture = max (r.moisture, 0.75f);
-      rainfall += 0.2f;
-      rainfall = min (rainfall, 1);
-    }
     //We lose rainfall as we move inland.
-    rain_loss = 1.0f / WORLD_GRID_CENTER;
+    rain_loss = 1.5f / WORLD_GRID_CENTER;
     //We lose rainfall more slowly as it gets colder.
     if (temp < 0.5f)
       rain_loss *= temp * 2.0f;
@@ -580,6 +645,12 @@ void TerraformClimate ()
     if (r.climate == CLIMATE_MOUNTAIN) 
       rainfall -= 0.1f * r.mountain_height;
     r.moisture = max (rainfall, 0);
+    //Rivers always give some moisture
+    if (r.climate == CLIMATE_RIVER || r.climate == CLIMATE_RIVER_BANK) {
+      r.moisture = max (r.moisture, 0.75f);
+      rainfall += 0.05f;
+      rainfall = min (rainfall, 1);
+    }
     //oceans have a moderating effect on climate
     if (r.climate == CLIMATE_OCEAN) 
       temp = (temp + 0.5f) / 2.0f;
@@ -712,13 +783,16 @@ void TerraformColors ()
         r.color_map = glRgba (0.2f + (float)r.mountain_height / 4.0f);
         r.color_map.Normalize ();
         break;
+      case CLIMATE_DESERT:
       case CLIMATE_COAST:
-        r.color_map = glRgba (0.9f, 0.7f, 0.4f);break;
+        r.color_map = glRgba (0.9f, 0.7f, 0.4f);
+        break;
       case CLIMATE_OCEAN:
         r.color_map = glRgba (0.0f, 1.0f + r.geo_scale * 2.0f, 1.0f + r.geo_scale);
         r.color_map.Clamp ();
         break;
       case CLIMATE_RIVER:
+      case CLIMATE_LAKE:
         r.color_map = glRgba (0.0f, 0.0f, 0.6f);
         break;
       case CLIMATE_RIVER_BANK:
@@ -733,7 +807,7 @@ void TerraformColors ()
         r.color_map.Normalize ();
         break;
       case CLIMATE_FOREST:
-        r.color_map = r.color_grass + glRgba (0.0f, 0.5f, 0.0f);
+        r.color_map = r.color_grass + glRgba (0.0f, 0.3f, 0.0f);
         r.color_map *= 0.5f;
         break;
       case CLIMATE_SWAMP:
@@ -954,6 +1028,33 @@ void TerraformRivers (int count)
 
 }
 
+//Search around for places to put lakes
+void TerraformLakes (int count)
+{
+
+  int         lakes;
+  int         cycles;
+  int         x, y;
+  int         range;
+  GLcoord     shove;
+
+  lakes = 0;
+  cycles = 0;
+  range = WORLD_GRID_CENTER / 4;
+  while (lakes < count && cycles < 100) {
+    //Pick a random spot in the middle of the map
+    x = WORLD_GRID_CENTER + (WorldNoisei (cycles) % range) - range / 2;
+    y = WORLD_GRID_CENTER + (WorldNoisei (cycles * 2) % range) - range / 2;
+    //Now push that point away from the middle
+    shove = get_map_side (x, y);
+    shove *= range;
+    if (try_lake (x + shove.x, y + shove.y, lakes)) 
+      lakes++;
+    cycles++;
+  }
+
+}
+
 //Create zones of different climates.
 void TerraformZones ()
 {
@@ -968,8 +1069,8 @@ void TerraformZones ()
   walk.Clear ();
   do {
     x = walk.x;
-    y = walk.y + WorldNoisei (walk.x + walk.y * WORLD_GRID) % 4;
-    radius = 1 + WorldNoisei (10 + walk.x + walk.y * WORLD_GRID) % 4;
+    y = walk.y;// + WorldNoisei (walk.x + walk.y * WORLD_GRID) % 4;
+    radius = 2 + WorldNoisei (10 + walk.x + walk.y * WORLD_GRID) % 9;
     if (is_free (x, y, radius)) {
       r = WorldRegionGet (x, y);
       climates.clear ();
@@ -979,10 +1080,13 @@ void TerraformZones ()
       //mountains only appear in the middle
       if (abs (x - WORLD_GRID_CENTER) < 10 && radius > 1)
         climates.push_back (CLIMATE_MOUNTAIN);
+      //Deserts are HOT and DRY. Duh.
+      if (r.temperature > TEMP_HOT && r.moisture < 0.05f && radius > 1)
+        climates.push_back (CLIMATE_DESERT);
       //fields should be not too hot or cold.
-      if (r.temperature > TEMP_TEMPERATE && r.temperature < TEMP_HOT && r.moisture > 0.5f)
+      if (r.temperature > TEMP_TEMPERATE && r.temperature < TEMP_HOT && r.moisture > 0.5f && radius == 1)
         climates.push_back (CLIMATE_FIELD);
-      if (r.temperature > TEMP_TEMPERATE && r.temperature < TEMP_HOT && r.moisture > 0.25f)
+      if (r.temperature > TEMP_TEMPERATE && r.temperature < TEMP_HOT && r.moisture > 0.25f && radius > 1)
         climates.push_back (CLIMATE_PLAINS);
       //Rocky wastelands favor cold areas
       if (r.temperature < TEMP_TEMPERATE)
@@ -991,8 +1095,10 @@ void TerraformZones ()
         climates.push_back (CLIMATE_CANYON);
       if (r.temperature > TEMP_TEMPERATE && r.temperature < TEMP_HOT && r.moisture > 0.5f)
         climates.push_back (CLIMATE_FOREST);
-      if (climates.empty ())
+      if (climates.empty ()) {
+        walk.Walk (WORLD_GRID);
         continue;
+      }              
       c = climates[RandomVal () % climates.size ()];
       switch (c) {
       case CLIMATE_ROCKY:
@@ -1010,6 +1116,9 @@ void TerraformZones ()
       case CLIMATE_FIELD:
         do_field (x, y, radius);
         break;
+      case CLIMATE_DESERT:
+        do_desert (x, y, radius);
+        break;
       case CLIMATE_PLAINS:
         do_plains (x, y, radius);
         break;
@@ -1017,8 +1126,6 @@ void TerraformZones ()
         do_forest (x, y, radius);
         break;
       }
-      //leave a bit of a gap before the next one
-      walk.x += radius * 3;
     }
   } while (!walk.Walk (WORLD_GRID));
 

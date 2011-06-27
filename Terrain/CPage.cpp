@@ -275,8 +275,8 @@ void CPage::DoSurface ()
       c->surface = SURFACE_GRASS;
     else //Too cold or dry
       c->surface = SURFACE_ROCK;
-
-
+    if (region.climate == CLIMATE_DESERT)
+      c->surface = SURFACE_SAND;
     //Sand is only for coastal regions
     if (low <= region.beach_threshold && (region.climate == CLIMATE_COAST))
       c->surface = SURFACE_SAND;

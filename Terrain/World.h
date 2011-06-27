@@ -36,7 +36,7 @@
 //This is the size of the grid of trees.  The total number of tree species 
 //in the world is the square of this value, minus one. ("tree zero" is actually
 //"no trees at all".)
-#define TREE_TYPES        4
+#define TREE_TYPES        9
 
 enum Climate
 {
@@ -48,6 +48,8 @@ enum Climate
   CLIMATE_RIVER_BANK,
   CLIMATE_SWAMP,
   CLIMATE_ROCKY,
+  CLIMATE_LAKE,
+  CLIMATE_DESERT,
   CLIMATE_FIELD,
   CLIMATE_PLAINS,
   CLIMATE_CANYON,
@@ -92,6 +94,7 @@ struct World
   bool         wind_from_west;
   bool         northern_hemisphere;
   unsigned     river_count;
+  unsigned     lake_count;
   float        noisef[NOISE_BUFFER];
   unsigned     noisei[NOISE_BUFFER];
   Region       map[WORLD_GRID][WORLD_GRID];
