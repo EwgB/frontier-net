@@ -135,9 +135,11 @@ struct GLbbox
   GLvector3   pmin;
   GLvector3   pmax;
 
+  GLvector    Center ();
   void        ContainPoint (GLvector point);
   void        Clear ();
   void        Render ();
+  GLvector    Size ();
 };
 
 struct GLvertex
@@ -206,6 +208,7 @@ struct GLmesh
   void              PushTriangle (UINT i1, UINT i2, UINT i3);
   void              PushQuad (UINT i1, UINT i2, UINT i3, UINT i4);
   void              PushVertex (GLvector vert, GLvector normal, GLvector2 uv);
+  void              RecalculateBoundingBox  ();
   void              Render ();
   unsigned          Triangles () { return _index.size () / 3; };
   unsigned          Vertices () { return _vertex.size (); };

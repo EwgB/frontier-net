@@ -65,6 +65,16 @@ void GLmesh::Render ()
 
 }
 
+void GLmesh::RecalculateBoundingBox ()
+{
+
+  _bbox.Clear ();
+  for (unsigned i = 0; i < Vertices (); i++)
+    _bbox.ContainPoint (_vertex[i]);
+
+
+}
+
 void GLmesh::CalculateNormals ()
 {
   GLvector    edge[3];

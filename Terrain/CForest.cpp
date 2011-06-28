@@ -72,10 +72,11 @@ void CForest::Set (int x, int y, int distance)
   if (_stage == FOREST_STAGE_BUILD)
     return;
   _current_distance = distance;
-  if (distance > 1)
+  _lod = LOD_HIGH;
+  if (distance > 4)
     _lod = LOD_LOW;
-  else
-    _lod = LOD_HIGH;
+  else if (distance > 2)
+    _lod = LOD_MED;
   _grid_position.x = x;
   _grid_position.y = y;
   _origin.x = x * FOREST_SIZE;
@@ -114,6 +115,7 @@ void CForest::Build (long stop)
     origin = CachePosition (world_x, world_y);
     tree = WorldTree (tree_id);
     tm = tree->Mesh (alt, _lod);
+    //tm = tree->Mesh (alt, LOD_LOW);///////////////
     texture_id = tree->Texture ();
     mesh_index = MeshFromTexture (texture_id);
     base_index = _mesh_list[mesh_index]._mesh.Vertices ();

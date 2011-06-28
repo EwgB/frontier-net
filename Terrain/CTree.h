@@ -97,6 +97,7 @@ class CTree
   void              DrawBark ();
   void              DrawLeaves ();
   void              DrawVines ();
+  void              DrawFacer ();
   void              DoVines (GLmesh* m, GLvector* points, unsigned segments);
   void              DoFoliage (GLmesh* m, GLvector pos, float size, float angle);
   void              DoBranch (GLmesh* m, BranchAnchor anchor, float angle, LOD lod);

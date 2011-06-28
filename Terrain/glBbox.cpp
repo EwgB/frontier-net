@@ -16,6 +16,20 @@
 
 #define MAX_VALUE               999999999999999.9f
 
+GLvector GLbbox::Center ()
+{
+
+  return (pmin + pmax) / 2.0f;
+
+}
+
+GLvector GLbbox::Size ()
+{
+
+  return pmax - pmin;
+
+}
+
 void GLbbox::ContainPoint (GLvector point)
 {
 

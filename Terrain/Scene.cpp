@@ -30,7 +30,7 @@
 #include "water.h"
 #include "world.h"
 
-#define FOREST_GRID     11
+#define FOREST_GRID     15
 #define FOREST_HALF     (FOREST_GRID / 2)
 #define GRASS_GRID      7
 #define GRASS_HALF      (GRASS_GRID / 2)

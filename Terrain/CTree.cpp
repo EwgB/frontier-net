@@ -240,8 +240,6 @@ void CTree::DoVines (GLmesh* m, GLvector* points, unsigned segments)
   }
 
 }
-    
-
 
 void CTree::DoBranch (GLmesh* m, BranchAnchor anchor, float branch_angle, LOD lod)
 {
@@ -371,15 +369,37 @@ void CTree::DoTrunk (GLmesh* m, unsigned local_seed, LOD lod)
     branch.lift = (branch.length) / 2;
     branch_list.push_back (branch);
   }
+  //Just make a 2-panel facer
+  if (lod == LOD_LOW) {
+    GLuvbox   uv;
+    float     width, height;
+
+    //Use the fourth frame of our texture
+    uv.Set (glVector (0.75f, 0.0f), glVector (1.0f, 1.0f));
+    height = _current_height;
+    width = _current_height / 2.0f;
+    //First panel
+    m->PushVertex (glVector (-width, -width, 0.0f),   glVector (-width, -width, 0.0f), uv.Corner (0));
+    m->PushVertex (glVector ( width,  width, 0.0f),   glVector ( width,  width, 0.0f), uv.Corner (1));
+    m->PushVertex (glVector ( width,  width, height), glVector ( width,  width, height), uv.Corner (2));
+    m->PushVertex (glVector (-width, -width, height), glVector (-width, -width, height), uv.Corner (3));
+    //Second Panel
+    m->PushVertex (glVector (-width,  width, 0.0f),   glVector (-width,  width, 0.0f), uv.Corner (0));
+    m->PushVertex (glVector ( width, -width, 0.0f),   glVector ( width, -width, 0.0f), uv.Corner (1));
+    m->PushVertex (glVector ( width, -width, height), glVector ( width, -width, height), uv.Corner (2));
+    m->PushVertex (glVector (-width,  width, height), glVector (-width,  width, height), uv.Corner (3));
+    for (i = 0; i < (int)m->_normal.size (); i++) 
+      m->_normal[i].Normalize ();
+    m->PushQuad (0, 1, 2, 3);
+    m->PushQuad (4, 5, 6, 7);
+    return;
+  }
   //Work out the circumference of the BASE of the tree
   circumference = _current_base_radius * _current_base_radius * (float)PI;
   //The texture will repeat ONCE horizontally around the tree.  Set the vertical to repeat in the same distance.
   _texture_tile = 1.0f / circumference; 
-  if (lod == LOD_LOW) 
-    radial_steps = 3;
-  else if (lod == LOD_MED)
-    radial_steps = 5;
-  else
+  radial_steps = 3;
+  if (lod == LOD_HIGH)
     radial_steps = 7;
   radial_edge = radial_steps + 1;
   segment_count = 0;
@@ -465,7 +485,9 @@ void CTree::Build ()
     for (lod = 0; lod < LOD_LEVELS; lod++) {
       _meshes[alt][lod].Clear ();
       DoTrunk (&_meshes[alt][lod], _seed_current + alt, (LOD)lod);
-      _meshes[alt][lod].CalculateNormalsSeamless ();
+      //The facers use hand-made normals, so don't recalculate them.
+      if (lod != LOD_LOW)
+        _meshes[alt][lod].CalculateNormalsSeamless ();
     }
   }
 
@@ -528,9 +550,9 @@ void CTree::Create (bool is_canopy, float moisture, float temp_in, int seed_in)
     _foliage_size = 2.0f;
     _trunk_style = TREE_TRUNK_NORMAL;
   }
+  Build ();
   DoLeaves ();
   DoTexture ();
-  Build ();
 
 }
 
@@ -641,6 +663,30 @@ void CTree::DoLeaves ()
 
 }
 
+void CTree::DrawFacer ()
+{
+
+  GLbbox    box;
+  GLvector  size, center;
+
+  glDisable (GL_BLEND);
+  //We get the bounding box for the high-res tree, but we cut off the roots.  No reason to 
+  //waste texture pixels on that.
+  _meshes[0][LOD_HIGH].RecalculateBoundingBox ();
+  box = _meshes[0][LOD_HIGH]._bbox;
+  box.pmin.z = 0.0f;//Cuts off roots
+  center = box.Center ();
+  size = box.Size ();
+  //Move our viewpoint to the middle of the texture frame 
+  glTranslatef (TEXTURE_HALF, TEXTURE_HALF, 0.0f);
+  glRotatef (-90.0f, 1.0f, 0.0f, 0.0f);
+  //Scale so that the tree will exactly fill the rectangle
+  glScalef ((1.0f / size.x) * TEXTURE_SIZE, 1.0f, (1.0f / size.z) * TEXTURE_SIZE);
+  glTranslatef (-center.x, 0.0f, -center.z);
+  glColor3f (1,1,1);
+  Render (glVector (0.0f, 0.0f, 0.0f), 0, LOD_HIGH);
+
+}
 
 void CTree::DrawVines ()
 {
@@ -739,7 +785,6 @@ void CTree::DrawLeaves ()
 
 }
 
-
 void CTree::DrawBark ()
 {
 
@@ -811,7 +856,8 @@ void CTree::DoTexture ()
       DrawLeaves ();
     else if (i == 2)
       DrawVines ();
-    
+    else
+      DrawFacer ();    
     glBindTexture(GL_TEXTURE_2D, _texture);
  	  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
     glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
@@ -832,6 +878,7 @@ void CTree::Info ()
 void CTree::TexturePurge ()
 {
 
-  DoTexture ();
+  if (_texture)
+    DoTexture ();
 
 }

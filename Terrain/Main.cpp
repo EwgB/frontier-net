@@ -14,7 +14,6 @@ http://opengameart.org/content/very-low-poly-human
 * Lighting
 * Culling
 * Pathing
-
 * Saving development costs
 * Dynamic content & replayability
 
