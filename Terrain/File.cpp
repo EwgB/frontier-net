@@ -110,6 +110,32 @@ char* FileLoad (char* name, long* size)
 
 }
 
+
+char* FileBinaryLoad (char* name, long* size)
+{
+  FILE*     f;
+  char*     buffer;
+  int       h;
+  int       len;
+
+  buffer = NULL;
+  len = 0;
+  h = _open (name, _O_RDONLY | O_BINARY);
+  if (h != -1) {
+    //set file size
+    len = _filelength (h);
+    _close (h);
+    buffer = (char*)malloc (len);
+    f = fopen (name, "rb");
+    fread (buffer, 1, len, f);
+    fclose (f);
+  }
+  if (size)
+    *size = len;
+  return buffer;
+
+}
+
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/

@@ -13,6 +13,7 @@ enum
   PAGE_STAGE_SURFACE2,
   PAGE_STAGE_COLOR,
   PAGE_STAGE_TREES,
+  PAGE_STAGE_SAVE,
   PAGE_STAGE_DONE
 };
 
@@ -54,6 +55,7 @@ public:
   GLrgba          ColorDirt (int x, int y);
   GLrgba          ColorRock (int x, int y);
   SurfaceType     Surface (int x, int y);
+  void            Save ();
   void            Build (int stop);
   void            Render ();
   bool            Ready ();

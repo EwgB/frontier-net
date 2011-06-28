@@ -219,6 +219,7 @@ void CachePurge ()
     for (x = 0; x < PAGE_GRID; x++) {
       if (page[x][y]) {
         page_count--;
+        page[walk.x][walk.y]->Save ();
         delete page[x][y];
       }
       page[x][y] = NULL;
@@ -248,6 +249,7 @@ void CacheUpdate (long stop)
   //Pass over the table a bit at a time and do garbage collection
   for (int i = 0; i < PAGE_GRID / 2; i++) {
     if (page[walk.x][walk.y] && page[walk.x][walk.y]->Expired ()) {
+      page[walk.x][walk.y]->Save ();
       delete page[walk.x][walk.y];
       page[walk.x][walk.y] = NULL;
       page_count--;

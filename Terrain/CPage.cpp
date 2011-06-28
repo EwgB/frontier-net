@@ -18,11 +18,31 @@
 #include "cpage.h"
 #include "ctree.h"
 #include "entropy.h"
+#include "file.h"
 #include "sdl.h"
 #include "world.h"
 
 //Lower numbers make the normals more extreme, exaggerate the lighting
 #define NORMAL_SCALING    0.7f
+
+/*-----------------------------------------------------------------------------
+ 
+-----------------------------------------------------------------------------*/
+
+static char* page_file_name (GLcoord p)
+{
+
+  static char     name[20];
+
+  sprintf (name, "cache//cache%d-%d.pag", p.x, p.y);
+  return name;
+
+}
+
+
+/*-----------------------------------------------------------------------------
+ 
+-----------------------------------------------------------------------------*/
 
 SurfaceType CPage::Surface (int x, int y)
 {
@@ -359,6 +379,10 @@ void CPage::Build (int stop)
     case PAGE_STAGE_TREES:
       DoTrees ();
       break;
+    case PAGE_STAGE_SAVE:
+      _stage++;
+      Save ();
+      break;
     }
   }
 
@@ -371,7 +395,28 @@ void CPage::Cache (int origin_x, int origin_y)
   _origin.y = origin_y;
   _stage = PAGE_STAGE_BEGIN;
   _bbox.Clear ();
+  if (FileExists (page_file_name (_origin))) {
+    char*   buf;
+    long    size;
+    long    my_size;
+
+    my_size = sizeof (CPage);
+    buf = NULL;
+    buf = FileBinaryLoad (page_file_name (_origin), &size);
+    if (buf && size == my_size) 
+      memcpy (this, buf, size);
+    if (buf)  
+      free (buf);
+  }  
   _walk.Clear ();
   _last_touched = SdlTick ();
  
+}
+
+void CPage::Save ()
+{
+
+  if (_stage == PAGE_STAGE_DONE)
+    FileSave (page_file_name (_origin), (char*)this, sizeof (CPage));
+
 }

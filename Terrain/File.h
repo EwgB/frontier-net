@@ -1,3 +1,4 @@
+char* FileBinaryLoad (char* name, long* size);
 int   FileCopy (char *from, char *to);
 bool  FileDelete (char* name);
 int   FileExists (char *name);
