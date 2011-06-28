@@ -38,11 +38,7 @@
 //#define TERRAIN_GRID    (WORLD_SIZE_METERS / TERRAIN_SIZE)
 #define TERRAIN_GRID    21
 
-//static CTerrain*        terrain[TERRAIN_GRID][TERRAIN_GRID];
-//static GLcoord          terrain_walk;
-
 static CTree            test_tree;
-//static int              dist_table[RENDER_DISTANCE + 1][RENDER_DISTANCE + 1];
 static int              cached;
 static int              texture_bytes;
 static int              texture_bytes_counter;

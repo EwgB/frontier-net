@@ -245,15 +245,19 @@ void CacheRenderDebug ()
 void CacheUpdate (long stop)
 {
 
+  int   count;
+
   TextPrint ("%d pages. (%s)", page_count, TextBytes (sizeof (CPage) * page_count));
+  count = 0;
   //Pass over the table a bit at a time and do garbage collection
-  for (int i = 0; i < PAGE_GRID / 2; i++) {
+  while (count < (PAGE_GRID / 4) && SdlTick () < stop) {
     if (page[walk.x][walk.y] && page[walk.x][walk.y]->Expired ()) {
       page[walk.x][walk.y]->Save ();
       delete page[walk.x][walk.y];
       page[walk.x][walk.y] = NULL;
       page_count--;
     }
+    count++;
     walk.Walk (PAGE_GRID);
   }  
 

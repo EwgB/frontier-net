@@ -10,6 +10,18 @@ TODO:
 * Small trees up, big trees down
 http://opengameart.org/content/very-low-poly-human
 
+
+* Lighting
+* Culling
+* Pathing
+
+* Saving development costs
+* Dynamic content & replayability
+
+* FUEL and Minecraft
+
+http://www.youtube.com/watch?v=-d2-PtK4F6Y
+
 -----------------------------------------------------------------------------*/
 
 #include "stdafx.h"

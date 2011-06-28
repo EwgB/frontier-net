@@ -273,7 +273,7 @@ void CTree::DoBranch (GLmesh* m, BranchAnchor anchor, float branch_angle, LOD lo
     segment_count = 2;
     radial_steps = 2;
   } else if (lod == LOD_MED) {
-    radial_steps = 3;
+    radial_steps = 2;
     segment_count = 3;
   } else {
     segment_count = 5;
@@ -350,15 +350,12 @@ void CTree::DoTrunk (GLmesh* m, unsigned local_seed, LOD lod)
 
   int                   ring, segment, segment_count;
   int                   radial_steps, radial_edge;
-  //int                   branch_count;
   float                 branch_spacing;
   float                 angle;
   float                 radius;
   float                 x, y;
   float                 vertical_pos;
   float                 circumference;
-  //float                 angle_offset;
- 
   GLvector              core;
   vector<BranchAnchor>  branch_list;
   BranchAnchor          branch;
@@ -431,9 +428,8 @@ void CTree::DoTrunk (GLmesh* m, unsigned local_seed, LOD lod)
     m->PushTriangle ((ring + 1) + (segment_count - 1) * radial_edge, m->_vertex.size () - 1,
       (ring + 0) + (segment_count - 1) * radial_edge);
   }
-  if (_canopy) {
-    DoFoliage (m, m->_vertex[m->_vertex.size () - 1] + glVector (0.0f, 0.0f, -2.0f), _current_height / 2, 0.0f);
-  } else {
+  DoFoliage (m, m->_vertex[m->_vertex.size () - 1] + glVector (0.0f, 0.0f, -2.0f), _current_height / 2, 0.0f);
+  if (!_canopy) {
     //DoFoliage (TrunkPosition (vertical_pos, NULL), vertical_pos * _height, 0.0f);
     if (_evergreen) { //just rings of foliage, like an evergreen
       for (i = 0; i < (int)branch_list.size (); i++) {
