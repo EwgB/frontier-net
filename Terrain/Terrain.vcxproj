@@ -90,6 +90,7 @@
     <ClCompile Include="CTree.cpp" />
     <ClCompile Include="Entropy.cpp" />
     <ClCompile Include="Env.cpp" />
+    <ClCompile Include="Figure.cpp" />
     <ClCompile Include="File.cpp" />
     <ClCompile Include="glBbox.cpp" />
     <ClCompile Include="glCoord.cpp" />
@@ -132,6 +133,7 @@
     <ClInclude Include="CTree.h" />
     <ClInclude Include="Entropy.h" />
     <ClInclude Include="Env.h" />
+    <ClInclude Include="Figure.h" />
     <ClInclude Include="File.h" />
     <ClInclude Include="glTypes.h" />
     <ClInclude Include="Grid.h" />

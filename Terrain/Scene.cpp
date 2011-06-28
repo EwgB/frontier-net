@@ -18,7 +18,6 @@
 #include "cforest.h"
 #include "cgrass.h"
 #include "cterrain.h"
-#include "ctree.h"
 #include "ini.h"
 #include "input.h"
 #include "math.h"
@@ -29,6 +28,9 @@
 #include "texture.h"
 #include "water.h"
 #include "world.h"
+
+#include "ctree.h"
+#include "figure.h"
 
 #define FOREST_GRID     15
 #define FOREST_HALF     (FOREST_GRID / 2)
@@ -87,6 +89,8 @@ void SceneGenerate ()
   il_terrain.clear ();
   il_terrain.resize (TERRAIN_GRID * TERRAIN_GRID);
   gm_terrain.Init (&il_terrain[0], TERRAIN_GRID, TERRAIN_SIZE);
+
+  FigureInit ();
 
 }
 
@@ -206,6 +210,7 @@ void SceneRender ()
     tree = WorldTree (r->tree_type);
     RenderTexture (tree->_texture);
   }
+  FigureRender ();
 
 }
 
