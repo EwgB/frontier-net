@@ -65,16 +65,17 @@ void LogInit (char* log_file_name)
 {
 
   char*     c;
+  FILE*     logfile;
 
   strcpy (prefix, log_file_name);
   strcpy (filename, log_file_name);
   if (c = strchr (prefix, '.'))
     c[0] = 0;
-  LogFile ("\n\n");
-  LogFile ("");
-  LogFile ("*");
-  LogFile ("* Begin Logging");
-  LogFile ("*");
+  logfile = fopen (filename, "w+b");
+  if (!logfile) 
+    return;
+  fprintf (logfile, "\n\nBEGIN LOGGING\r\n");
+  fclose (logfile);
 
 }
 
@@ -107,10 +108,8 @@ void LogFile (char *message, ...)
   va_end (marker);
   time (&now);
   logfile = fopen (filename, "a+b");
-  if (!logfile) {
-    //ConsoleMessage (0,L"Cannot open %s", filename);
+  if (!logfile) 
     return;
-  }
   strcpy (time_text, ctime (&now));
   while (cr = strchr (time_text, 10))
     cr[0] = 0;

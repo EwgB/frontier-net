@@ -13,7 +13,7 @@
 #include "cfigure.h"
 
 
-Figure::Figure ()
+CFigure::CFigure ()
 {
 
   unsigned    i;
@@ -24,14 +24,65 @@ Figure::Figure ()
 
 }
 
-void Figure::RotateBone (unsigned id, GLvector angle)
+char* CFigure::BoneName (BoneId id)
+{
+  switch (id) {
+  case BONE_ORIGIN:
+    return "Origin";
+  case BONE_PELVIS:
+    return "Pelvis";
+  case BONE_RHIP:
+    return "Right Hip";
+  case BONE_LHIP:
+    return "Left Hip";
+  case BONE_RKNEE:
+    return "Right Knee";
+  case BONE_LKNEE:
+    return "Left Knee";
+  case BONE_RANKLE:
+    return "Right Ankle";
+  case BONE_LANKLE:
+    return "Left Ankle";
+  case BONE_RTOE:
+  case BONE_LTOE:
+    return "Toe";
+  case BONE_SPINE1:
+  case BONE_SPINE2:
+  case BONE_SPINE3:
+    return "Spine";
+  case BONE_RSHOULDER:
+    return "Right Shoulder";
+  case BONE_LSHOULDER:
+    return "Left Shoulder";
+  case BONE_RELBOW:
+    return "Right Elbow";
+  case BONE_LELBOW:
+    return "Left Elbow";
+  case BONE_RWRIST:
+    return "Right Wrist";
+  case BONE_LWRIST:
+    return "Left Wrist";
+  case BONE_NECK:
+    return "Neck";
+  case BONE_HEAD:
+    return "Head";
+  case BONE_FACE:
+  case BONE_CROWN:
+  case BONE_INVALID:
+    return "Bone Invalid";
+  }
+  return "Unknown";
+
+}
+
+void CFigure::RotateBone (unsigned id, GLvector angle)
 {
 
   _bone[_bone_index[id]]._rotation = angle;
 
 }
 
-void Figure::RotatePoints (unsigned id, GLvector offset, GLmatrix m)
+void CFigure::RotatePoints (unsigned id, GLvector offset, GLmatrix m)
 {
 
   Bone*       b;
@@ -46,7 +97,7 @@ void Figure::RotatePoints (unsigned id, GLvector offset, GLmatrix m)
 
 }
 
-void Figure::RotateHierarchy (unsigned id, GLvector offset, GLmatrix m)
+void CFigure::RotateHierarchy (unsigned id, GLvector offset, GLmatrix m)
 {
 
   Bone*       b;
@@ -62,7 +113,7 @@ void Figure::RotateHierarchy (unsigned id, GLvector offset, GLmatrix m)
 
 }
 
-void Figure::Update ()
+void CFigure::Update ()
 {
 
   unsigned    i;
@@ -79,8 +130,8 @@ void Figure::Update ()
       continue;
     m.Identity ();
     m.Rotate (b->_rotation.x, 1.0f, 0.0f, 0.0f);
-    m.Rotate (b->_rotation.y, 0.0f, 1.0f, 0.0f);
     m.Rotate (b->_rotation.z, 0.0f, 0.0f, 1.0f);
+    m.Rotate (b->_rotation.y, 0.0f, 1.0f, 0.0f);
     RotatePoints (b->_id, b->_position, m);
     for (c = 0; c < b->_children.size (); c++) 
       RotateHierarchy (b->_children[c], b->_position, m);
@@ -88,7 +139,7 @@ void Figure::Update ()
   
 }
 
-void Figure::PushWeight (unsigned id, unsigned index, float weight)
+void CFigure::PushWeight (unsigned id, unsigned index, float weight)
 {
 
   BWeight   bw;
@@ -99,7 +150,7 @@ void Figure::PushWeight (unsigned id, unsigned index, float weight)
 
 }
 
-void Figure::PushBone (unsigned id, unsigned parent, GLvector pos)
+void CFigure::PushBone (unsigned id, unsigned parent, GLvector pos)
 {
 
   Bone    b;
@@ -118,13 +169,14 @@ void Figure::PushBone (unsigned id, unsigned parent, GLvector pos)
 
 }
 
-void Figure::Render ()
+void CFigure::Render ()
 {
 
   unsigned    i;
   unsigned    parent;
 
   glLineWidth (17.0f);
+  glColor3f (1,1,1);
   glPushMatrix ();
   //glTranslatef (-_position.x, -_position.y, -_position.z); 
   glTranslatef (_position.x, _position.y, _position.z); 
@@ -138,6 +190,8 @@ void Figure::Render ()
     glVertex3fv (&_bone[parent]._position.x);
   }
   glEnd ();
+  glLineWidth (1.0f);
+  glColor3f (1,1,1);
   _skin.Render ();
   glPopMatrix ();
   
