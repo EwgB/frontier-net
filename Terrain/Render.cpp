@@ -44,7 +44,7 @@ static GLrgba         current_diffuse;
 static GLrgba         current_fog;
 static float          fog_min;
 static float          fog_max;
-
+static bool           draw_console;
 
 
 /*** static Functions *******************************************************/
@@ -54,11 +54,7 @@ static void draw_water (float tile)
 
   int     edge;
 
-  //return;
   edge = REGION_SIZE * WORLD_GRID;
-  //glDisable (GL_CULL_FACE);
-  //glDisable (GL_BLEND);
-  //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glBegin (GL_QUADS);
   glNormal3f (0, 0, 1);
 
@@ -130,6 +126,13 @@ void RenderClick (int x, int y)
   p.y *= WORLD_GRID * REGION_SIZE;
   p.z = REGION_SIZE;
   AvatarPositionSet (p);
+
+}
+
+bool RenderConsole ()
+{
+
+  return draw_console;
 
 }
 
@@ -326,6 +329,8 @@ void RenderUpdate (void)
   current_fog = e->color[ENV_COLOR_FOG];
   fog_min = e->fog_min;
   fog_max = e->fog_max;
+  if (InputKeyPressed (SDLK_BACKQUOTE)) 
+    draw_console = !draw_console;
   if (InputKeyPressed (SDLK_F3)) {
     terrain_debug++;
     terrain_debug %= DEBUG_RENDER_TYPES;

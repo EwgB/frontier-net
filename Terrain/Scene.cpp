@@ -32,12 +32,10 @@
 #include "ctree.h"
 #include "figure.h"
 
-#define FOREST_GRID     13
+#define FOREST_GRID     7
 #define FOREST_HALF     (FOREST_GRID / 2)
 #define GRASS_GRID      7
 #define GRASS_HALF      (GRASS_GRID / 2)
-#define RENDER_DISTANCE 15
-//#define TERRAIN_GRID    (WORLD_SIZE_METERS / TERRAIN_SIZE)
 #define TERRAIN_GRID    15
 
 static CTree            test_tree;
@@ -48,7 +46,6 @@ static int              polygons;
 static int              polygons_counter;
 
 /*                  *************************************************************/
-
 
 static GridManager        gm_terrain;
 static vector<CTerrain>   il_terrain;

@@ -11,6 +11,7 @@
 -----------------------------------------------------------------------------*/
 
 #include "stdafx.h"
+#include "render.h"
 #include "text.h"
 #include "texture.h"
 
@@ -69,50 +70,6 @@ static void text_draw (char* text)
   }
   glEnd ();
 
-
-
-
-
-/*
-  int       p;
-  int       len;
-  unsigned  ch;
-  GLcoord   cursor;
-
-  GLtexture*  t;
-
-  t = TextureFromName ("font.bmp", MASK_LUMINANCE);
-  glBindTexture (GL_TEXTURE_2D, t->id);
-  len = strlen (text);
-	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	
-  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
-
-  cursor.x = 0;
-  cursor.y = 0;
-  glBegin (GL_QUADS);
-  for (p = 0; p < len; p++) {
-    ch = (unsigned char)text[p];
-    if (ch == '\n') {
-      cursor.x = 0;
-      cursor.y++;
-      continue;
-    }
-    glTexCoord2f (glyph[ch].x, glyph[ch].y);
-    glVertex2i (cursor.x, cursor.y + 1);
-    glTexCoord2f (glyph[ch].x + GLYPH, glyph[ch].y);
-    glVertex2i (cursor.x + 1, cursor.y + 1);
-    glTexCoord2f (glyph[ch].x + GLYPH, glyph[ch].y + GLYPH);
-    glVertex2i (cursor.x + 1, cursor.y);
-    glTexCoord2f (glyph[ch].x, glyph[ch].y + GLYPH);
-    glVertex2i (cursor.x, cursor.y);
-    cursor.x++;
-    if (cursor.x >= view_size.x) {
-      cursor.x = 0;
-      cursor.y++;
-    }
-  }
-  glEnd ();
-  */
 }
 
 /*-----------------------------------------------------------------------------
@@ -150,8 +107,6 @@ void TextInit ()
     y = 255 - (i / FONT_GRID);
     glyph[i] = glVector ((float)x * GLYPH, (float)y * GLYPH);
   }
-  //view_size.x = 80;
-  //view_size.y = 50;
 
 }
 
@@ -189,11 +144,10 @@ void TextRender ()
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable (GL_TEXTURE_2D);
-  
 
   glColor3f (1, 1, 1);
-  //text_draw (buffer);
-
+  if (RenderConsole ())
+    text_draw (buffer);
 
   glPopMatrix ();
   glMatrixMode (GL_PROJECTION);

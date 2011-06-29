@@ -104,8 +104,8 @@ static void run ()
     RenderUpdate ();
     Render ();	
     remaining = stop - SdlTick ();
-    if (remaining > 0) 
-      Sleep (remaining);
+    //if (remaining > 0) 
+      //Sleep (remaining);
   }
 
 }

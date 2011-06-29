@@ -138,6 +138,7 @@ void FigureRender ()
     //if (anim._frame[frame].joint[i].id > BONE_PELVIS)
       fig.RotateBone (anim._frame[frame].joint[i].id, anim._frame[frame].joint[i].rotation);
   }
+
   frame++;
   frame %= anim._frame.size ();
   

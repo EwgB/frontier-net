@@ -476,7 +476,7 @@ void CTree::Build ()
   _seed_current = _seed;
   for (alt = 0; alt < TREE_ALTS; alt++) {
     _current_angle_offset = WorldNoisef (_seed_current++) * 360.0f;
-    _current_height = _default_height + WorldNoisef (_seed_current++) * 8.0f;
+    _current_height = _default_height * ( 0.5f + WorldNoisef (_seed_current++));
     _current_base_radius = _default_base_radius * (0.5f + WorldNoisef (_seed_current++));
     _current_branches = _default_branches + WorldNoisei (_seed_current++) % 3;
     _current_bend_frequency = _default_bend_frequency + WorldNoisef (_seed_current++);
@@ -504,7 +504,7 @@ void CTree::Create (bool is_canopy, float moisture, float temp_in, int seed_in)
   _temperature = temp_in;
   _seed_current = _seed;
   //We want our height to fall on a bell curve
-  _default_height = 8.0f + WorldNoisef (_seed_current++) * 8.0f + WorldNoisef (_seed_current++) * 8.0f;
+  _default_height = 5.0f + WorldNoisef (_seed_current++) * 4.0f + WorldNoisef (_seed_current++) * 4.0f;
   _default_bend_frequency = 1.0f + WorldNoisef (_seed_current++) * 2.0f;
   _default_base_radius = 0.3f + WorldNoisef (_seed_current++) * 2.0f;
   _default_branches = 2 + WorldNoisei (_seed_current) % 2;
@@ -600,7 +600,8 @@ void CTree::DoLeaves ()
         l.position.y = TEXTURE_HALF + cos (rad) * l.size;
         l.angle = -MathAngle (TEXTURE_HALF, TEXTURE_HALF, l.position.x, l.position.y);
         //l.brightness = 1.0f - (current_steps / (float)total_steps) * WorldNoisef (_seed_current++) * 0.5f;
-        l.brightness = 1.0f - WorldNoisef (_seed_current++) * 0.2f;
+        //l.brightness = 1.0f - WorldNoisef (_seed_current++) * 0.2f;
+        //l.color = glRgbaInterpolate (_leaf_color, glRgba (0.0f, 0.5f, 0.0f), WorldNoisef (_seed_current++) * 0.25f);
         _leaf_list.push_back (l);
       }
     }
@@ -617,7 +618,8 @@ void CTree::DoLeaves ()
     l.position.x = TEXTURE_HALF;
     l.position.y = TEXTURE_HALF;
     l.angle = 0.0f;
-    l.brightness = 1.0f;
+//    l.color = glRgbaInterpolate (_leaf_color, glRgba (0.0f, 0.5f, 0.0f), WorldNoisef (_seed_current++) * 0.25f);
+    //l.brightness = 1.0f;
     _leaf_list.push_back (l);
     //now scatter other leaves around
     for (i = 0; i < 50; i++) {
@@ -630,7 +632,7 @@ void CTree::DoLeaves ()
       l.size = (0.25f + ((TEXTURE_HALF - l.dist) / TEXTURE_HALF) * 0.75f) * leaf_size; 
       l.angle = 0.0f;
       //l.brightness = 0.7f + ((float)i / 50) * 0.3f;
-      l.brightness = 1.0f;
+      //l.color = 
       _leaf_list.push_back (l);
     }
     //Sort our list of leaves, inward out
@@ -659,6 +661,8 @@ void CTree::DoLeaves ()
       _leaf_list[i].angle = -MathAngle (_leaf_list[j].position.x, _leaf_list[j].position.y, _leaf_list[i].position.x, _leaf_list[i].position.y);
     }
   }
+  for (i = 0; i < _leaf_list.size (); i++) 
+    _leaf_list[i].color = glRgbaInterpolate (_leaf_color, glRgba (0.0f, 0.5f, 0.0f), WorldNoisef (_seed_current++) * 0.33f);
 
 }
 
@@ -751,7 +755,7 @@ void CTree::DrawLeaves ()
   }
   
   Leaf              l;
-  GLrgba            color;
+  //GLrgba            color;
     
   t = TextureFromName ("foliage1.bmp", MASK_PINK);
   frames = max (t->height / t->width, 1);
@@ -771,8 +775,8 @@ void CTree::DrawLeaves ()
     glRotatef (l.angle, 0.0f, 0.0f, 1.0f);
     glTranslatef (-l.position.x, -l.position.y, 0);
 
-    color = _leaf_color * l.brightness;
-    glColor3fv (&color.red);
+    //color = _leaf_color * l.brightness;
+    glColor3fv (&l.color.red);
     glBegin (GL_QUADS);
     uv = uvframe.Corner (0); glTexCoord2fv (&uv.x); glVertex2f (l.position.x - l.size, l.position.y - l.size);
     uv = uvframe.Corner (1); glTexCoord2fv (&uv.x); glVertex2f (l.position.x + l.size, l.position.y - l.size);

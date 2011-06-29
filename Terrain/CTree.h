@@ -46,7 +46,8 @@ struct Leaf
   GLvector2     position;
   float         angle;
   float         size;
-  float         brightness;
+  //float         brightness;
+  GLrgba        color;
   float         dist;
   unsigned      neighbor;
 };

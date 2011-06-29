@@ -73,9 +73,9 @@ void CForest::Set (int x, int y, int distance)
     return;
   _current_distance = distance;
   _lod = LOD_HIGH;
-  if (distance > 4)
+  if (distance > 3)
     _lod = LOD_LOW;
-  else if (distance > 2)
+  else if (distance > 1)
     _lod = LOD_MED;
   _grid_position.x = x;
   _grid_position.y = y;
