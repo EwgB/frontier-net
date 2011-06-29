@@ -20,7 +20,7 @@
 #include "world.h"
 
 #define TIME_SCALE          300  //how many milliseconds per in-game minute
-#define MAX_DISTANCE        650
+#define MAX_DISTANCE        900
 #define NIGHT_FOG           (MAX_DISTANCE / 5)
 #define ENV_TRANSITION      0.02f
 #define UPDATE_INTERVAL     50 //milliseconds

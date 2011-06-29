@@ -22,9 +22,6 @@
 #include "sdl.h"
 #include "world.h"
 
-//Lower numbers make the normals more extreme, exaggerate the lighting
-#define NORMAL_SCALING    0.7f
-
 /*-----------------------------------------------------------------------------
  
 -----------------------------------------------------------------------------*/

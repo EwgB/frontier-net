@@ -1,4 +1,4 @@
-#define FOREST_SIZE        64
+#define FOREST_SIZE        128
 
 enum
 {

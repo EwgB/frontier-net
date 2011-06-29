@@ -219,7 +219,6 @@ void CTree::DoVines (GLmesh* m, GLvector* points, unsigned segments)
   unsigned          base_index;
   unsigned          segment;
 
-
   if (!_has_vines)
     return;
   base_index = m->_vertex.size ();
@@ -333,7 +332,7 @@ void CTree::DoBranch (GLmesh* m, BranchAnchor anchor, float branch_angle, LOD lo
       }
     }
   }
-  //Grap the last point and use it as the origin for the foliage
+  //Grab the last point and use it as the origin for the foliage
   pos = m->_vertex[m->Vertices () - 1];
   DoFoliage (m, pos, anchor.length * 0.56f, branch_angle);
   //We saved the points on the underside of the branch.
@@ -754,15 +753,17 @@ void CTree::DrawLeaves ()
   Leaf              l;
   GLrgba            color;
     
-  t = TextureFromName ("foliage1.bmp");
+  t = TextureFromName ("foliage1.bmp", MASK_PINK);
   frames = max (t->height / t->width, 1);
   frame_size = 1.0f / (float)frames;
   frame = WorldNoisei (_seed_current++) % frames;
   uvframe.Set (glVector (0.0f, (float)frame * frame_size), glVector (1.0f, (float)(frame + 1) * frame_size));
   glBindTexture (GL_TEXTURE_2D, t->id);
+  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
   glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+ 	//glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	
+  //glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
   for (i = 0; i < _leaf_list.size (); i++) {
     l = _leaf_list[i];
     glPushMatrix ();
@@ -837,19 +838,19 @@ void CTree::DoTexture ()
   glEnable (GL_BLEND);
   glEnable (GL_TEXTURE_2D);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+ 	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
+  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
   if (_texture)
     glDeleteTextures (1, &_texture); 
   glGenTextures (1, &_texture); 
   glBindTexture(GL_TEXTURE_2D, _texture);
   glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, TEXTURE_SIZE * 4, TEXTURE_SIZE, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-
   RenderCanvasBegin (0, TEXTURE_SIZE, 0, TEXTURE_SIZE, TEXTURE_SIZE);
-
+ 	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
+  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
   for (i = 0; i < 4; i++) {
     glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
-    glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
     if (i == 0)       
       DrawBark ();
     else if (i == 1)

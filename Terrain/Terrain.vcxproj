@@ -83,6 +83,7 @@
     <ClCompile Include="BmpFile.cpp" />
     <ClCompile Include="Cache.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CAnim.cpp" />
     <ClCompile Include="CFigure.cpp" />
     <ClCompile Include="CForest.cpp" />
     <ClCompile Include="CGrass.cpp" />
@@ -127,6 +128,7 @@
     <ClInclude Include="BmpFile.h" />
     <ClInclude Include="Cache.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Canim.h" />
     <ClInclude Include="CFigure.h" />
     <ClInclude Include="CForest.h" />
     <ClInclude Include="CGrass.h" />

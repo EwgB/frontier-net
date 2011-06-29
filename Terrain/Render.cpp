@@ -277,7 +277,7 @@ void RenderTexture (unsigned id)
   glTexCoord2f (1, 0);
   glVertex3f (MAP_SIZE, (float)view_height, 0);
   glEnd ();
-  {
+  if (1) {
     static int    r;
     GLrgba        c;
     GLvector      pos;
