@@ -21,6 +21,11 @@
 #define PI                        (3.1415926535f)
 #define GRAVITY                   9.5f
 
+//This is used to scale the z value of normals
+//Nower numbers make the normals more extreme, exaggerate the lighting
+#define NORMAL_SCALING    0.6f
+
+
 #include <vector>
 using namespace std;
 #include <windows.h>

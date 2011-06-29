@@ -201,6 +201,7 @@ void GLmesh::CalculateNormalsSeamless ()
   //Re-normalize. Done.
   for (i = 0; i < _normal.size (); i++) {
     _normal[i] = normals_merged[merge_index[i]];
+    _normal[i].z *= NORMAL_SCALING;
     _normal[i].Normalize ();
   }
 
