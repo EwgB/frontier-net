@@ -35,7 +35,7 @@ CFigure::CFigure ()
 
   for (i = 0; i < BONE_COUNT; i++) 
     _bone_index[i] = BONE_INVALID;
-  PushBone (BONE_ORIGIN, BONE_ORIGIN, glVector (0.0f, 0.0f, 0.0f));
+  PushBone (BONE_ROOT, BONE_ROOT, glVector (0.0f, 0.0f, 0.0f));
 
 }
 
@@ -154,21 +154,22 @@ void CFigure::Render ()
   glLineWidth (17.0f);
   glColor3f (1,1,1);
   glPushMatrix ();
-  //glTranslatef (-_position.x, -_position.y, -_position.z); 
   glTranslatef (_position.x, _position.y, _position.z); 
-  glBegin (GL_LINES);
-  for (i = 1; i < _bone.size (); i++) {
+  _skin.Render ();
+  glDisable (GL_DEPTH_TEST);
+  glColor3f (1,0,0);
+  for (i = 0; i < _bone.size (); i++) {
     parent = _bone_index[_bone[i]._id_parent];
     if (!parent)
       continue;
     glColor3fv (&_bone[i]._color.red);
+    glBegin (GL_LINES);
     glVertex3fv (&_bone[i]._position.x);
     glVertex3fv (&_bone[parent]._position.x);
+    glEnd ();
   }
-  glEnd ();
   glLineWidth (1.0f);
-  glColor3f (1,1,1);
-  _skin.Render ();
+  glEnable (GL_DEPTH_TEST);
   glPopMatrix ();
   
 }
@@ -187,6 +188,11 @@ bool CFigure::LoadX (char* filename)
   GLvector        pos;
   int             i1, i2, i3, i4;
   int             poly;
+  vector<BoneId>  hierarchy;
+  bool            skel_done;
+  BoneId          bone;
+  BoneId          parent_id;
+  unsigned        frame_depth;
 
   buffer = FileLoad (filename, &size);
   if (!buffer)
@@ -194,7 +200,58 @@ bool CFigure::LoadX (char* filename)
   _strupr (buffer);
   token = strtok (buffer, NEWLINE);
   done = false;
+  skel_done = false;
   while (!done) {
+    //Read the skeleton
+    if ((!skel_done) && (find = strstr (token, "FRAME "))) {
+      GLvector pusher = glVector (0.0f, 0.0f, 0.0f);
+      frame_depth = 0;
+      while (!skel_done) {
+        if (find = strstr (token, "}")) {
+          frame_depth--;
+          hierarchy.pop_back ();
+        }
+        if (find = strstr (token, "FRAMETRANSFORMMATRIX ")) {
+          //We don't care about the rotational data
+          token = strtok (NULL, NEWLINE);
+          token = strtok (NULL, NEWLINE);
+          token = strtok (NULL, NEWLINE);
+          //Grab the positional data
+          token = strtok (NULL, NEWLINE);
+          clean_chars (token, ";,");
+          sscanf (token, "%f %f %f", &pos.x, &pos.z, &pos.y);
+          pos.z *= -1.0f;
+          //only add this to our model if it's actually a known bone
+          bone = hierarchy.back ();
+          if (bone != BONE_INVALID) {
+            //Find the last valid bone in the chain.
+            vector<BoneId>::reverse_iterator rit;
+            parent_id = BONE_ROOT;
+            for (rit = hierarchy.rbegin(); rit < hierarchy.rend(); ++rit) {
+              if (*rit != BONE_INVALID && *rit != bone) {
+                  parent_id = *rit;
+                  break;
+              }
+            }
+            pos += pusher;
+            pusher += glVector (0.0f, 0.1f, 0.0f);
+            pos += _bone[_bone_index[parent_id]]._position ;
+            PushBone (bone, parent_id, pos);
+          }
+          //Now plow through until we find the closing brace
+          while (!(find = strstr (token, "}"))) 
+            token = strtok (NULL, NEWLINE);
+        }
+        if (find = strstr (token, "FRAME ")) {
+          frame_depth++;
+          bone = CAnim::BoneFromString (find + 6);
+          hierarchy.push_back (bone);
+        }
+        token = strtok (NULL, NEWLINE);
+        if (find = strstr (token, "MESH ")) 
+          skel_done = true;
+      }
+    }
     //We begin reading the vertex positions
     if (find = strstr (token, "MESH ")) {
       token = strtok (NULL, NEWLINE);
@@ -214,15 +271,15 @@ bool CFigure::LoadX (char* filename)
         poly = atoi (token);
         if (poly == 3) {
           sscanf (token + 2, "%d %d %d", &i1, &i2, &i3);
-          _skin_static.PushTriangle (i1, i2, i3);
+          _skin_static.PushTriangle (i3, i2, i1);
         } else if (poly == 4) {
           sscanf (token + 2, "%d %d %d %d", &i1, &i2, &i3, &i4);
-          _skin_static.PushQuad (i1, i2, i3, i4);
+          _skin_static.PushQuad (i4, i3, i2, i1);
         }
       }
     }
     //Reading the Normals
-    if (find = strstr (token, "MeshNormals ")) {
+    if (find = strstr (token, "MESHNORMALS ")) {
       token = strtok (NULL, NEWLINE);
       clean_chars (token, ";,");
       count = atoi (token);
@@ -233,7 +290,7 @@ bool CFigure::LoadX (char* filename)
       }
     }
     //Reading the UV values
-    if (find = strstr (token, "MeshTextureCoords ")) {
+    if (find = strstr (token, "MESHTEXTURECOORDS ")) {
       token = strtok (NULL, NEWLINE);
       clean_chars (token, ";,");
       count = atoi (token);

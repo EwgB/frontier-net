@@ -2,7 +2,7 @@
 
 enum BoneId
 {
-  BONE_ORIGIN,
+  BONE_ROOT,
   BONE_PELVIS,
   BONE_RHIP,
   BONE_LHIP,

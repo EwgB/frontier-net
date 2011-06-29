@@ -31,7 +31,7 @@ struct BoneList
 
 static BoneList  bl[] =
 {
-  0.0f, 0.0f, 1.1f,     BONE_PELVIS,    BONE_ORIGIN,
+  0.0f, 0.0f, 1.1f,     BONE_PELVIS,    BONE_ROOT,
   0.1f, 0.0f, 1.0f,     BONE_RHIP,      BONE_PELVIS,
   0.1f, 0.0f, 0.5f,     BONE_RKNEE,     BONE_RHIP,
   0.1f, 0.0f, 0.0f,     BONE_RANKLE,    BONE_RKNEE,
@@ -189,8 +189,8 @@ void FigureRender ()
   glBindTexture (GL_TEXTURE_2D, 0);
   glDisable (GL_LIGHTING);
   fig.Render ();
-  glEnable (GL_LIGHTING);
   fig2.Render ();
+  glEnable (GL_LIGHTING);
   
 
 }

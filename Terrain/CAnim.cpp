@@ -20,8 +20,8 @@
 char* CAnim::NameFromBone (BoneId id)
 {
   switch (id) {
-  case BONE_ORIGIN:
-    return "Origin";
+  case BONE_ROOT:
+    return "Root";
   case BONE_PELVIS:
     return "Pelvis";
   case BONE_RHIP:
@@ -73,6 +73,8 @@ char* CAnim::NameFromBone (BoneId id)
 BoneId CAnim::BoneFromString (char* name)
 {
 
+  if (strstr (name, "ROOT")) 
+    return BONE_ROOT;
   if (strstr (name, "PELVIS")) 
     return BONE_PELVIS;
   if (strstr (name, "HIP")) {

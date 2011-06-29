@@ -131,7 +131,7 @@ void SkyInit ()
 
   build_sky ();
   
-  tip = glVector (0.0f, 0.0f, 0.2f);
+  tip = glVector (0.0f, 0.0f, 0.7f);
   for (int i = 0; i < DISC; i++) {
     angle = 22.5f + (((float)i / DISC) * 360.0f) * DEGREES_TO_RADIANS; 
     sky[i].x = sin (angle) * 6.0f;
