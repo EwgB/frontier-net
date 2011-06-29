@@ -11,7 +11,22 @@
 #include "stdafx.h"
 
 #include "cfigure.h"
+#include "file.h"
 
+#define NEWLINE   "\n"
+
+static void clean_chars (char* target, char* chars)
+{
+
+  unsigned    i;
+  char*       c;
+
+  for (i = 0; i < strlen (chars); i++) {
+    while (c = strchr (target, chars[i]))
+      *c = ' ';
+  }
+
+}
 
 CFigure::CFigure ()
 {
@@ -24,54 +39,15 @@ CFigure::CFigure ()
 
 }
 
-char* CFigure::BoneName (BoneId id)
+void CFigure::Animate (CAnim* anim, float delta)
 {
-  switch (id) {
-  case BONE_ORIGIN:
-    return "Origin";
-  case BONE_PELVIS:
-    return "Pelvis";
-  case BONE_RHIP:
-    return "Right Hip";
-  case BONE_LHIP:
-    return "Left Hip";
-  case BONE_RKNEE:
-    return "Right Knee";
-  case BONE_LKNEE:
-    return "Left Knee";
-  case BONE_RANKLE:
-    return "Right Ankle";
-  case BONE_LANKLE:
-    return "Left Ankle";
-  case BONE_RTOE:
-  case BONE_LTOE:
-    return "Toe";
-  case BONE_SPINE1:
-  case BONE_SPINE2:
-  case BONE_SPINE3:
-    return "Spine";
-  case BONE_RSHOULDER:
-    return "Right Shoulder";
-  case BONE_LSHOULDER:
-    return "Left Shoulder";
-  case BONE_RELBOW:
-    return "Right Elbow";
-  case BONE_LELBOW:
-    return "Left Elbow";
-  case BONE_RWRIST:
-    return "Right Wrist";
-  case BONE_LWRIST:
-    return "Left Wrist";
-  case BONE_NECK:
-    return "Neck";
-  case BONE_HEAD:
-    return "Head";
-  case BONE_FACE:
-  case BONE_CROWN:
-  case BONE_INVALID:
-    return "Bone Invalid";
-  }
-  return "Unknown";
+
+  unsigned      frame;
+
+  frame = (unsigned)(delta * (float)anim->Frames ());
+  frame %= anim->Frames ();
+  for (unsigned i = 0; i < anim->Joints (); i++) 
+     RotateBone (anim->Id (frame, i), anim->Rotation (frame, i));
 
 }
 
@@ -195,4 +171,83 @@ void CFigure::Render ()
   _skin.Render ();
   glPopMatrix ();
   
+}
+
+
+bool CFigure::LoadX (char* filename)
+{
+
+  char*           buffer;
+  char*           token;
+  char*           find;
+  bool            done;
+  long            size;
+  unsigned        count;
+  unsigned        i;
+  GLvector        pos;
+  int             i1, i2, i3, i4;
+  int             poly;
+
+  buffer = FileLoad (filename, &size);
+  if (!buffer)
+    return false;
+  _strupr (buffer);
+  token = strtok (buffer, NEWLINE);
+  done = false;
+  while (!done) {
+    //We begin reading the vertex positions
+    if (find = strstr (token, "MESH ")) {
+      token = strtok (NULL, NEWLINE);
+      count = atoi (token);
+      for (i = 0; i < count; i++) {
+        token = strtok (NULL, NEWLINE);
+        clean_chars (token, ";,");
+        sscanf (token, "%f %f %f", &pos.x, &pos.y, &pos.z);
+        _skin_static.PushVertex (pos, glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f));
+      }
+      //Directly after the verts are the polys
+      token = strtok (NULL, NEWLINE);
+      count = atoi (token);
+      for (i = 0; i < count; i++) {
+        token = strtok (NULL, NEWLINE);
+        clean_chars (token, ";,");
+        poly = atoi (token);
+        if (poly == 3) {
+          sscanf (token + 2, "%d %d %d", &i1, &i2, &i3);
+          _skin_static.PushTriangle (i1, i2, i3);
+        } else if (poly == 4) {
+          sscanf (token + 2, "%d %d %d %d", &i1, &i2, &i3, &i4);
+          _skin_static.PushQuad (i1, i2, i3, i4);
+        }
+      }
+    }
+    //Reading the Normals
+    if (find = strstr (token, "MeshNormals ")) {
+      token = strtok (NULL, NEWLINE);
+      clean_chars (token, ";,");
+      count = atoi (token);
+      for (i = 0; i < count; i++) {
+        token = strtok (NULL, NEWLINE);
+        sscanf (token, "%f %f %f", &pos.x, &pos.y, &pos.z);
+        _skin_static._normal[i] = pos;
+      }
+    }
+    //Reading the UV values
+    if (find = strstr (token, "MeshTextureCoords ")) {
+      token = strtok (NULL, NEWLINE);
+      clean_chars (token, ";,");
+      count = atoi (token);
+      for (i = 0; i < count; i++) {
+        token = strtok (NULL, NEWLINE);
+        sscanf (token, "%f %f %f", &pos.x, &pos.y, &pos.z);
+        _skin_static._normal[i] = pos;
+      }
+    }
+    token = strtok (NULL, NEWLINE);
+    if (!token)
+      done = true;
+  }
+  free (buffer);
+  return true;
+
 }

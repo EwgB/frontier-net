@@ -16,9 +16,65 @@
 
 #define NEWLINE     "\n"
 
+
+char* CAnim::NameFromBone (BoneId id)
+{
+  switch (id) {
+  case BONE_ORIGIN:
+    return "Origin";
+  case BONE_PELVIS:
+    return "Pelvis";
+  case BONE_RHIP:
+    return "Hip Right";
+  case BONE_LHIP:
+    return "Hip Left";
+  case BONE_RKNEE:
+    return "Knee Right";
+  case BONE_LKNEE:
+    return "Knee Left";
+  case BONE_RANKLE:
+    return "Ankle Right";
+  case BONE_LANKLE:
+    return "Ankle Left";
+  case BONE_RTOE:
+    return "Toe Right";
+  case BONE_LTOE:
+    return "Toe Left";
+  case BONE_SPINE1:
+  case BONE_SPINE2:
+  case BONE_SPINE3:
+    return "Spine";
+  case BONE_RSHOULDER:
+    return "Shoulder Right";
+  case BONE_LSHOULDER:
+    return "Shoulder Left";
+  case BONE_RELBOW:
+    return "Elbow Right";
+  case BONE_LELBOW:
+    return "Elbow Left";
+  case BONE_RWRIST:
+    return "Wrist Right";
+  case BONE_LWRIST:
+    return "Wrist Left";
+  case BONE_NECK:
+    return "Neck";
+  case BONE_HEAD:
+    return "Head";
+  case BONE_FACE:
+  case BONE_CROWN:
+  case BONE_INVALID:
+    return "Bone Invalid";
+  }
+  return "Unknown";
+
+}
+
+
 BoneId CAnim::BoneFromString (char* name)
 {
 
+  if (strstr (name, "PELVIS")) 
+    return BONE_PELVIS;
   if (strstr (name, "HIP")) {
     if (strchr (name, 'L'))
       return BONE_LHIP;
@@ -43,6 +99,14 @@ BoneId CAnim::BoneFromString (char* name)
     //Not left or right.  
     return BONE_INVALID;
   }
+  if (strstr (name, "KNEE")) {
+    if (strchr (name + 4, 'L'))
+      return BONE_LKNEE;
+    if (strchr (name + 4, 'R'))
+      return BONE_RKNEE;
+    //Not left or right.  
+    return BONE_INVALID;
+  }
   if (strstr (name, "FOOT")) {
     if (strchr (name + 4, 'L'))
       return BONE_LANKLE;
@@ -51,13 +115,22 @@ BoneId CAnim::BoneFromString (char* name)
     //Not left or right.  
     return BONE_INVALID;
   }
+  if (strstr (name, "ANKLE")) {
+    if (strchr (name + 5, 'L'))
+      return BONE_LANKLE;
+    if (strchr (name + 5, 'R'))
+      return BONE_RANKLE;
+    //Not left or right.  
+    return BONE_INVALID;
+  }
   if (strstr (name, "BACK")) 
+    return BONE_SPINE1;
+  if (strstr (name, "SPINE")) 
     return BONE_SPINE1;
   if (strstr (name, "NECK")) 
     return BONE_NECK;
   if (strstr (name, "HEAD")) 
     return BONE_HEAD;
-  /*
   if (strstr (name, "SHOULDER")) {
     if (strchr (name + 8, 'L'))
       return BONE_LSHOULDER;
@@ -66,7 +139,6 @@ BoneId CAnim::BoneFromString (char* name)
     //Not left or right? That can't be right.
     return BONE_INVALID;
   }
-  */
   if (strstr (name, "UPPERARM")) {
     if (strchr (name + 8, 'L'))
       return BONE_LSHOULDER;
@@ -75,7 +147,14 @@ BoneId CAnim::BoneFromString (char* name)
     //Not left or right? That can't be right.
     return BONE_INVALID;
   }
-  
+  if (strstr (name, "ELBOW")) {
+    if (strchr (name + 7, 'L'))
+      return BONE_LELBOW;
+    if (strchr (name + 7, 'R'))
+      return BONE_RELBOW;
+    //Not left or right? That can't be right.
+    return BONE_INVALID;
+  }
   if (strstr (name, "FOREARM")) {
     if (strchr (name + 7, 'L'))
       return BONE_LELBOW;
@@ -127,7 +206,7 @@ bool CAnim::LoadBvh (char* filename)
     }
     if (find = strstr (token, "MOTION")) {//we've reached the final section of the file
       for (unsigned i = 0; i < dem_bones.size (); i++) 
-        Log ("%s", CFigure::BoneName (dem_bones[i]));
+        Log ("%s", NameFromBone (dem_bones[i]));
 
       token = strtok (NULL, NEWLINE);
       frames = 0;
@@ -144,9 +223,9 @@ bool CAnim::LoadBvh (char* filename)
           joint.id = dem_bones[bone];
           joint.rotation.x = (float)atof (find);
           find = strchr (find, 32) + 1;
-          joint.rotation.z = -(float)atof (find);
+          joint.rotation.y = -(float)atof (find);
           find = strchr (find, 32) + 1;
-          joint.rotation.y = (float)atof (find);
+          joint.rotation.z = -(float)atof (find);
           find = strchr (find, 32) + 1;
           if (joint.id != BONE_INVALID) {
             _frame[frame].joint.push_back (joint);

@@ -45,12 +45,12 @@ static BoneList  bl[] =
   0.0f, 0.0f, 1.55f,    BONE_SPINE1,    BONE_PELVIS,
 
   0.2f, 0.0f, 1.5f,     BONE_RSHOULDER, BONE_SPINE1,
-  0.2f, 0.0f, 1.2f,     BONE_RELBOW,    BONE_RSHOULDER, 
-  0.2f, 0.0f, 0.9f,     BONE_RWRIST,    BONE_RELBOW,
+  0.5f, 0.0f, 1.5f,     BONE_RELBOW,    BONE_RSHOULDER, 
+  0.8f, 0.0f, 1.5f,     BONE_RWRIST,    BONE_RELBOW,
 
  -0.2f, 0.0f, 1.5f,     BONE_LSHOULDER, BONE_SPINE1,
- -0.2f, 0.0f, 1.2f,     BONE_LELBOW,    BONE_LSHOULDER, 
- -0.2f, 0.0f, 0.9f,     BONE_LWRIST,    BONE_LELBOW,
+ -0.5f, 0.0f, 1.5f,     BONE_LELBOW,    BONE_LSHOULDER, 
+ -0.8f, 0.0f, 1.5f,     BONE_LWRIST,    BONE_LELBOW,
 
   0.0f, 0.0f, 1.6f,     BONE_NECK,      BONE_SPINE1,
   0.0f, 0.0f, 1.65f,    BONE_HEAD,      BONE_NECK,    
@@ -65,7 +65,9 @@ static BoneList  bl[] =
 
 
 static CFigure      fig;
+static CFigure      fig2;
 static CAnim        anim;
+static CAnim        anim_stand;
 
 void add_hull (CFigure* f, GLvector p, float d, float h, BoneId id)
 {
@@ -104,26 +106,53 @@ void FigureInit ()
   add_hull (&fig, glVector ( 0.1f, 0.05f, 1.0f), -0.1f, -0.5f, BONE_RHIP);
   add_hull (&fig, glVector (-0.1f, 0.05f, 1.0f), -0.1f, -0.5f, BONE_LHIP);
 
-  add_hull (&fig, glVector ( 0.2f, 0.05f, 1.5f), -0.1f, -0.3f, BONE_RSHOULDER);
-  add_hull (&fig, glVector ( 0.2f, 0.05f, 1.2f), -0.1f, -0.3f, BONE_RELBOW);
+  add_hull (&fig, glVector ( 0.2f, 0.05f, 1.5f), -0.1f, -0.1f, BONE_RSHOULDER);
+  add_hull (&fig, glVector ( 0.5f, 0.05f, 1.5f), -0.1f, -0.1f, BONE_RELBOW);
 
-  add_hull (&fig, glVector (-0.2f, 0.05f, 1.5f), -0.1f, -0.3f, BONE_LSHOULDER);
-  add_hull (&fig, glVector (-0.2f, 0.05f, 1.2f), -0.1f, -0.3f, BONE_LELBOW);
+  add_hull (&fig, glVector (-0.2f, 0.05f, 1.5f), -0.1f, -0.1f, BONE_LSHOULDER);
+  add_hull (&fig, glVector (-0.5f, 0.05f, 1.5f), -0.1f, -0.1f, BONE_LELBOW);
 
 
   anim.LoadBvh ("Anims//run.bvh");
+  anim_stand.LoadBvh ("Anims//stand.bvh");
+
+  fig2.LoadX ("models//male.x");
+  /*
+  {
+
+    FILE*             file;
+    file = fopen ("stand.bvh", "w+b");
+    if (!file) 
+      return;
+    for (i = 0; i < fig._bone.size (); i++) {
+      fprintf (file, "Joint %s\n", CAnim::NameFromBone (fig._bone[i]._id));
+      fprintf (file, "CHANNELS 3\n");
+    }
+    fprintf (file, "Motion\n");
+    fprintf (file, "Frames: 1\n");
+    fprintf (file, "Frame Time: 1.0\n");
+    for (i = 0; i < fig._bone.size (); i++) 
+      fprintf (file, "0.0 0.0 0.0 ");
+    fprintf (file, "\n");
+    fclose (file);
+  }
+  */
+
+
 
 }
 
 static unsigned   frame;
-
+static bool       moveit;
+static bool       stand;
 
 void FigureRender ()
 {
 
   static float nn;
 
-  nn += 0.05f;
+  if (moveit)
+    nn += 0.01f;
   /*
   fig.RotateBone (BONE_SPINE1, glVector (0.0f, 0.0f, sin (nn * 3) * 25.0f));
   fig.RotateBone (BONE_RSHOULDER, glVector (0.0f, abs (sin (nn * 1)) * -80.0f, 0.0f));
@@ -134,21 +163,34 @@ void FigureRender ()
   fig.RotateBone (BONE_RKNEE, glVector (-abs (cos (nn * 2) * 45.0f), 0.0f,  0.0f));
   */
   
+  /*
   for (unsigned i = 0; i < anim._frame[frame].joint.size (); i++) {
     //if (anim._frame[frame].joint[i].id > BONE_PELVIS)
       fig.RotateBone (anim._frame[frame].joint[i].id, anim._frame[frame].joint[i].rotation);
   }
-
+  */
+  if (stand)
+    fig.Animate (&anim_stand, nn);
+  else
+    fig.Animate (&anim, nn);
   frame++;
   frame %= anim._frame.size ();
-  
-  
   fig.Update ();
-  if (InputKeyPressed (SDLK_f))
+  fig2.Update ();
+  if (InputKeyPressed (SDLK_f)) {
     fig.PositionSet (AvatarPosition () + glVector (0.0f, -2.0f, 0.0f));
+    fig2.PositionSet (AvatarPosition () + glVector (0.0f, 2.0f, 0.0f));
+  }
+  if (InputKeyPressed (SDLK_g))
+    moveit = !moveit;
+  if (InputKeyPressed (SDLK_h))
+    stand = !stand;
+
   glBindTexture (GL_TEXTURE_2D, 0);
   glDisable (GL_LIGHTING);
   fig.Render ();
+  glEnable (GL_LIGHTING);
+  fig2.Render ();
   
 
 }

@@ -46,8 +46,14 @@ class CAnim
 
 public:
   vector<AnimFrame> _frame;
+  unsigned          Frames () { return _frame.size (); };
+  unsigned          Joints () { return _frame[0].joint.size (); };
+  unsigned          Id (unsigned frame, unsigned index) { return _frame[frame].joint[index].id; };
+  GLvector          Rotation (unsigned frame, unsigned index) { return _frame[frame].joint[index].rotation; };
   bool              LoadBvh (char* filename);
-  BoneId            BoneFromString (char* string);
+  static BoneId     BoneFromString (char* string);
+  static char*      NameFromBone (BoneId id);
+
   
 };
 
