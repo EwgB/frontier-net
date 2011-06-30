@@ -94,6 +94,7 @@
     <ClCompile Include="Env.cpp" />
     <ClCompile Include="Figure.cpp" />
     <ClCompile Include="File.cpp" />
+    <ClCompile Include="FileX.cpp" />
     <ClCompile Include="glBbox.cpp" />
     <ClCompile Include="glCoord.cpp" />
     <ClCompile Include="glFont.cpp" />

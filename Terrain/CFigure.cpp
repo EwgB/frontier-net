@@ -35,7 +35,7 @@ CFigure::CFigure ()
 
   for (i = 0; i < BONE_COUNT; i++) 
     _bone_index[i] = BONE_INVALID;
-  PushBone (BONE_ROOT, BONE_ROOT, glVector (0.0f, 0.0f, 0.0f));
+  //PushBone (BONE_ROOT, BONE_ROOT, glVector (0.0f, 0.0f, 0.0f));
   _unknown_count = 0;
 
 }
@@ -169,7 +169,7 @@ void CFigure::Render ()
   unsigned    i;
   unsigned    parent;
 
-  glLineWidth (17.0f);
+  glLineWidth (5.0f);
   glColor3f (1,1,1);
   glPushMatrix ();
   glTranslatef (_position.x, _position.y, _position.z); 
@@ -216,6 +216,9 @@ bool CFigure::LoadX (char* filename)
   unsigned          frame_depth;
   GLmatrix          matrix;
   vector<GLmatrix>  matrix_stack;
+  BoneId            queued_bone;
+  BoneId            queued_parent;
+
 
   buffer = FileLoad (filename, &size);
   if (!buffer)
@@ -229,14 +232,17 @@ bool CFigure::LoadX (char* filename)
     if ((!skel_done) && (find = strstr (token, "FRAME "))) {
       GLvector pusher = glVector (0.0f, 0.0f, 0.0f);
       frame_depth = 0;
-      _bone[_bone_index[BONE_ROOT]]._matrix.Identity ();
+      //_bone[_bone_index[BONE_ROOT]]._matrix.Identity ();
+      matrix.Identity ();
+      matrix_stack.push_back (matrix);
+      _bone.clear ();
       while (!skel_done) {
         if (find = strstr (token, "}")) {
           frame_depth--;
           hierarchy.pop_back ();
+          matrix_stack.pop_back ();
         }
         if (find = strstr (token, "FRAMETRANSFORMMATRIX ")) {
-          //We don't care about the rotational data
           matrix.Identity ();
           token = strtok (NULL, NEWLINE);
           clean_chars (token, ";,");
@@ -251,60 +257,50 @@ bool CFigure::LoadX (char* filename)
           token = strtok (NULL, NEWLINE);
           clean_chars (token, ";,");
           sscanf (token, "%f %f %f", &matrix.elements[3][0], &matrix.elements[3][1], &matrix.elements[3][2], &matrix.elements[3][3]);
-          sscanf (token, "%f %f %f", &pos.x, &pos.y, &pos.z);
-          //only add this to our model if it's actually a known bone
-          bone = hierarchy.back ();
-          if (bone != BONE_INVALID) {
-            //Find the last valid bone in the chain.
-            vector<BoneId>::reverse_iterator rit;
-            parent_id = BONE_ROOT;
-            for (rit = hierarchy.rbegin(); rit < hierarchy.rend(); ++rit) {
-              if (*rit != BONE_INVALID && *rit != bone) {
-                  parent_id = *rit;
-                  break;
-              }
-            }
-            
-            pos = glVector (0.0f, 0.0f, 0.0f);
-            //pos.x = matrix.elements[3][0];
-            //pos.y = matrix.elements[3][1];
-            //pos.z = matrix.elements[3][2];
-            
-            //pos = glMatrixTransformPoint (matrix, pos);
-            /*
-            for (rit = hierarchy.rbegin(); rit < hierarchy.rend(); ++rit) {
-              if (*rit != BONE_INVALID && *rit != bone) {
-                pos = glMatrixTransformPoint (_bone[_bone_index[*rit]]._matrix, pos);
-                break;
-              }
-            }
-            */
-            if (bone != BONE_ROOT) {
-              matrix = glMatrixMultiply (_bone[_bone_index[parent_id]]._matrix, matrix);
-              //pos = pos - _bone[_bone_index[parent_id]]._position;
-              pos = glMatrixTransformPoint (_bone[_bone_index[parent_id]]._matrix, pos);
-              //pos = glMatrixTransformPoint (matrix, _bone[_bone_index[parent_id]]._position);
-              //pos = glMatrixTransformPoint (matrix, pos) + _bone[_bone_index[parent_id]]._position;
-              //pos += _bone[_bone_index[parent_id]]._position;
-            }
 
-            //matrix = glMatrixMultiply (matrix,  _bone[_bone_index[parent_id]]._matrix);
-            
-            pos += pusher;
-            //pusher += glVector (0.0f, 0.0f, 0.01f);
-            //pos += _bone[_bone_index[parent_id]]._position ;
-            PushBone (bone, parent_id, pos);
-            _bone[_bone_index[bone]]._matrix = matrix;
-          }
+          //matrix = glMatrixMultiply (matrix,  matrix_stack.back ());
+          matrix_stack.push_back (matrix);
           //Now plow through until we find the closing brace
+
+
+          matrix.Identity ();
+          for (i = 0; i < matrix_stack.size (); i++)           
+            matrix = glMatrixMultiply (matrix,  matrix_stack[i]);
+          pos = glMatrixTransformPoint (matrix, glVector (0.0f, 0.0f, 0.0f));
+          pos.x = -pos.x;
+          PushBone (queued_bone, queued_parent, pos);
+
+
           while (!(find = strstr (token, "}"))) 
             token = strtok (NULL, NEWLINE);
         }
         if (find = strstr (token, "FRAME ")) {
           frame_depth++;
           bone = IdentifyBone (find + 6);
-          //bone = CAnim::BoneFromString (find + 6);
           hierarchy.push_back (bone);
+          //pos = glMatrixTransformPoint (matrix_stack.back (), glVector (0.0f, 0.0f, 0.0f));
+          
+          pos = glVector (0.0f, 0.0f, 0.0f);
+          for (i = 0; i < matrix_stack.size (); i++)           
+            pos = glMatrixTransformPoint (matrix_stack[i], pos);
+
+          matrix.Identity ();
+          for (i = 0; i < matrix_stack.size (); i++)           
+            matrix = glMatrixMultiply (matrix,  matrix_stack[i]);
+          pos = glMatrixTransformPoint (matrix, glVector (0.0f, 0.0f, 0.0f));
+
+          //Find the last valid bone in the chain.
+          vector<BoneId>::reverse_iterator rit;
+          parent_id = BONE_ROOT;
+          for (rit = hierarchy.rbegin(); rit < hierarchy.rend(); ++rit) {
+            if (*rit != BONE_INVALID && *rit != bone) {
+                parent_id = *rit;
+                break;
+            }
+          }
+          queued_bone = bone;
+          queued_parent = parent_id;
+          //PushBone (bone, parent_id, pos);
         }
         token = strtok (NULL, NEWLINE);
         if (find = strstr (token, "MESH ")) 
@@ -363,6 +359,7 @@ bool CFigure::LoadX (char* filename)
     if (!token)
       done = true;
   }
+  _skin_static.CalculateNormalsSeamless ();
   free (buffer);
   return true;
 

@@ -31,6 +31,7 @@ struct BoneList
 
 static BoneList  bl[] =
 {
+  0.0f, 0.0f, 0.0f,     BONE_ROOT,      BONE_ROOT,
   0.0f, 0.0f, 1.1f,     BONE_PELVIS,    BONE_ROOT,
   0.1f, 0.0f, 1.0f,     BONE_RHIP,      BONE_PELVIS,
   0.1f, 0.0f, 0.5f,     BONE_RKNEE,     BONE_RHIP,
@@ -119,7 +120,7 @@ void FigureInit ()
   anim_stand.LoadBvh ("Anims//stand.bvh");
 
   fig2.LoadX ("models//male.x");
-  /*
+  
   {
 
     FILE*             file;
@@ -138,7 +139,7 @@ void FigureInit ()
     fprintf (file, "\n");
     fclose (file);
   }
-  */
+  
 
 
 
@@ -155,15 +156,15 @@ void FigureRender ()
 
   if (moveit)
     nn += 0.01f;
-  /*
-  fig.RotateBone (BONE_SPINE1, glVector (0.0f, 0.0f, sin (nn * 3) * 25.0f));
-  fig.RotateBone (BONE_RSHOULDER, glVector (0.0f, abs (sin (nn * 1)) * -80.0f, 0.0f));
-  fig.RotateBone (BONE_RELBOW, glVector (abs (cos (nn * 1)) * 45.0f, 0.0f, 0.0f));
-  fig.RotateBone (BONE_LSHOULDER, glVector (0.0f, abs (sin (nn * 3)) * 80.0f, 0.0f));
-  fig.RotateBone (BONE_LELBOW, glVector (abs (cos (nn * 2)) * 90.0f, 0.0f, 0.0f));
-  fig.RotateBone (BONE_RHIP, glVector (sin (nn) * 25.0f, 0.0f,  0.0f));
-  fig.RotateBone (BONE_RKNEE, glVector (-abs (cos (nn * 2) * 45.0f), 0.0f,  0.0f));
-  */
+  
+  //fig2.RotateBone (BONE_SPINE1, glVector (0.0f, 0.0f, sin (nn * 3) * 25.0f));
+  //fig2.RotateBone (BONE_RSHOULDER, glVector (0.0f, abs (sin (nn * 1)) * -80.0f, 0.0f));
+  //fig2.RotateBone (BONE_RELBOW, glVector (abs (cos (nn * 1)) * 45.0f, 0.0f, 0.0f));
+  //fig2.RotateBone (BONE_LSHOULDER, glVector (0.0f, abs (sin (nn * 3)) * 80.0f, 0.0f));
+  //fig2.RotateBone (BONE_LELBOW, glVector (abs (cos (nn * 2)) * 90.0f, 0.0f, 0.0f));
+  //fig2.RotateBone (BONE_RHIP, glVector (sin (nn) * 25.0f, 0.0f,  0.0f));
+  fig2.RotateBone (BONE_RKNEE, glVector (-abs (cos (nn * 2) * 45.0f), 0.0f,  0.0f));
+  
   
   /*
   for (unsigned i = 0; i < anim._frame[frame].joint.size (); i++) {
@@ -171,10 +172,13 @@ void FigureRender ()
       fig.RotateBone (anim._frame[frame].joint[i].id, anim._frame[frame].joint[i].rotation);
   }
   */
-  if (stand)
+  if (stand) {
     fig.Animate (&anim_stand, nn);
-  else
+    fig2.Animate (&anim_stand, nn);
+  } else {
     fig.Animate (&anim, nn);
+    fig2.Animate (&anim, nn);
+  }
   frame++;
   frame %= anim._frame.size ();
   fig.Update ();

@@ -21,9 +21,14 @@ struct Bone
   GLmatrix          _matrix;
 };
 
-class CFigure
+struct Skeleton
 {
   vector<Bone>      _bone;
+  unsigned          _unknown_count;
+};
+
+class CFigure
+{
   GLvector          _position;
   unsigned          _bone_index[BONE_COUNT];
   unsigned          _unknown_count;
@@ -32,6 +37,7 @@ class CFigure
   void              RotateHierarchy (unsigned id, GLvector offset, GLmatrix m);
   void              RotatePoints (unsigned id, GLvector offset, GLmatrix m);
 public:
+  vector<Bone>      _bone;
   
 
   CFigure ();
