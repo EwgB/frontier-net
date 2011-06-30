@@ -155,15 +155,15 @@ void FigureRender ()
   static float nn;
 
   if (moveit)
-    nn += 0.01f;
+    nn += 0.03f;
   
-  //fig2.RotateBone (BONE_SPINE1, glVector (0.0f, 0.0f, sin (nn * 3) * 25.0f));
-  //fig2.RotateBone (BONE_RSHOULDER, glVector (0.0f, abs (sin (nn * 1)) * -80.0f, 0.0f));
+  fig2.RotateBone (BONE_SPINE1, glVector (0.0f, 0.0f, sin (nn * 3) * 25.0f));
+  fig2.RotateBone (BONE_RSHOULDER, glVector (0.0f, abs (sin (nn * 1)) * -80.0f, 0.0f));
   //fig2.RotateBone (BONE_RELBOW, glVector (abs (cos (nn * 1)) * 45.0f, 0.0f, 0.0f));
   //fig2.RotateBone (BONE_LSHOULDER, glVector (0.0f, abs (sin (nn * 3)) * 80.0f, 0.0f));
-  //fig2.RotateBone (BONE_LELBOW, glVector (abs (cos (nn * 2)) * 90.0f, 0.0f, 0.0f));
+  fig2.RotateBone (BONE_LELBOW, glVector (abs (cos (nn * 2)) * 90.0f, 0.0f, 0.0f));
   //fig2.RotateBone (BONE_RHIP, glVector (sin (nn) * 25.0f, 0.0f,  0.0f));
-  fig2.RotateBone (BONE_RKNEE, glVector (-abs (cos (nn * 2) * 45.0f), 0.0f,  0.0f));
+  //fig2.RotateBone (BONE_RKNEE, glVector (-abs (cos (nn * 2) * 45.0f), 0.0f,  0.0f));
   
   
   /*
@@ -177,7 +177,7 @@ void FigureRender ()
     fig2.Animate (&anim_stand, nn);
   } else {
     fig.Animate (&anim, nn);
-    fig2.Animate (&anim, nn);
+    //fig2.Animate (&anim, nn);
   }
   frame++;
   frame %= anim._frame.size ();

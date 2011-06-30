@@ -11,6 +11,7 @@
 #include "stdafx.h"
 
 #include "cfigure.h"
+#include "log.h"
 #include "file.h"
 
 #define NEWLINE   "\n"
@@ -61,6 +62,7 @@ BoneId CFigure::IdentifyBone (char* name)
   bid = CAnim::BoneFromString (name);
   //If CAnim couldn't make sense of the name, or if that id is already in use...
   if (bid == BONE_INVALID || _bone_index[bid] != BONE_INVALID) {
+    Log ("Couldn't id Bone '%s'.", name);
     bid = (BoneId)(BONE_UNKNOWN0 + _unknown_count);
     _unknown_count++;
   }
@@ -82,11 +84,18 @@ void CFigure::RotatePoints (unsigned id, GLvector offset, GLmatrix m)
   Bone*       b;
   unsigned    i;
   unsigned    index;
+  GLvector    from;
+  GLvector    to;
+
   
   b = &_bone[_bone_index[id]];
   for (i = 0; i < b->_vertex_weights.size (); i++) {
     index = b->_vertex_weights[i]._index;
-    _skin._vertex[index] = glMatrixTransformPoint (m, _skin._vertex[index] - offset) + offset;
+    //_skin._vertex[index] = glMatrixTransformPoint (m, _skin._vertex[index] - offset) + offset;
+    from = _skin._vertex[index] - offset;
+    to = glMatrixTransformPoint (m, from);
+    //movement = movement - _skin_static._vertex[index]; 
+    _skin._vertex[index] = glVectorInterpolate (from, to, b->_vertex_weights[i]._weight) + offset;
   }
 
 }
@@ -183,6 +192,7 @@ void CFigure::Render ()
       continue;
     glColor3fv (&_bone[i]._color.red);
     glBegin (GL_LINES);
+    GLvector p = _bone[i]._position;
     glVertex3fv (&_bone[i]._position.x);
     glVertex3fv (&_bone[parent]._position.x);
     glEnd ();
@@ -199,6 +209,11 @@ void CFigure::Render ()
 bool CFigure::LoadX (char* filename)
 {
 
+  FileXLoad (filename, this);
+  return true;
+
+
+  /*
   char*             buffer;
   char*             token;
   char*             find;
@@ -218,6 +233,7 @@ bool CFigure::LoadX (char* filename)
   vector<GLmatrix>  matrix_stack;
   BoneId            queued_bone;
   BoneId            queued_parent;
+
 
 
   buffer = FileLoad (filename, &size);
@@ -362,5 +378,5 @@ bool CFigure::LoadX (char* filename)
   _skin_static.CalculateNormalsSeamless ();
   free (buffer);
   return true;
-
+  */
 }

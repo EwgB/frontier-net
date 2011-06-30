@@ -107,6 +107,7 @@ BoneId CAnim::BoneFromString (char* name)
     //Not left or right.  
     return BONE_INVALID;
   }
+  /*
   if (strstr (name, "KNEE")) {
     if (strchr (name + 4, 'L'))
       return BONE_LKNEE;
@@ -115,6 +116,8 @@ BoneId CAnim::BoneFromString (char* name)
     //Not left or right.  
     return BONE_INVALID;
   }
+  */
+  
   if (strstr (name, "FOOT")) {
     if (strchr (name + 4, 'L'))
       return BONE_LANKLE;
@@ -123,6 +126,8 @@ BoneId CAnim::BoneFromString (char* name)
     //Not left or right.  
     return BONE_INVALID;
   }
+  
+  /*
   if (strstr (name, "ANKLE")) {
     if (strchr (name + 5, 'L'))
       return BONE_LANKLE;
@@ -131,6 +136,7 @@ BoneId CAnim::BoneFromString (char* name)
     //Not left or right.  
     return BONE_INVALID;
   }
+  */
   if (strstr (name, "BACK")) 
     return BONE_SPINE1;
   if (strstr (name, "SPINE")) 
@@ -155,19 +161,69 @@ BoneId CAnim::BoneFromString (char* name)
     //Not left or right? That can't be right.
     return BONE_INVALID;
   }
-  if (test = strstr (name, "ARM")) {
-    if (strchr (test + 3, 'L'))
+  if (test = strstr (name, "UPPERARM")) {
+    if (strchr (test + 8, 'L'))
       return BONE_LARM;
-    if (strchr (test + 3, 'R'))
+    if (strchr (test + 8, 'R'))
       return BONE_RARM;
     //Not left or right? That can't be right.
     return BONE_INVALID;
   }
+  /*
   if (strstr (name, "ELBOW")) {
     if (strchr (name + 7, 'L'))
       return BONE_LELBOW;
     if (strchr (name + 7, 'R'))
       return BONE_RELBOW;
+    //Not left or right? That can't be right.
+    return BONE_INVALID;
+  }
+  */
+  if (strstr (name, "TOE")) {
+    if (strchr (name, 'L'))
+      return BONE_LTOE;
+    if (strchr (name, 'R'))
+      return BONE_RTOE;
+    //Not left or right? That can't be right.
+    return BONE_INVALID;
+  }
+  if (strstr (name, "HAND")) {
+    if (strchr (name, 'L'))
+      return BONE_LWRIST;
+    if (strchr (name, 'R'))
+      return BONE_RWRIST;
+    //Not left or right? That can't be right.
+    return BONE_INVALID;
+  }
+  if (strstr (name, "FINGERS1")) {
+    if (strchr (name + 7, 'L'))
+      return BONE_LFINGERS1;
+    if (strchr (name + 7, 'R'))
+      return BONE_RFINGERS1;
+    //Not left or right? That can't be right.
+    return BONE_INVALID;
+  }
+  if (strstr (name, "FINGERS2")) {
+    if (strchr (name + 7, 'L'))
+      return BONE_LFINGERS2;
+    if (strchr (name + 7, 'R'))
+      return BONE_RFINGERS2;
+    //Not left or right? That can't be right.
+    return BONE_INVALID;
+  }
+  if (strstr (name, "THUMB1")) {
+    if (strchr (name, 'L'))
+      return BONE_LTHUMB1;
+    if (strchr (name, 'R'))
+      return BONE_RTHUMB1;
+    //Not left or right? That can't be right.
+    return BONE_INVALID;
+  }
+  if (strstr (name, "THUMB2")) {
+    if (strchr (name, 'L'))
+      return BONE_LTHUMB2;
+    if (strchr (name, 'R'))
+      return BONE_RTHUMB2;
     //Not left or right? That can't be right.
     return BONE_INVALID;
   }

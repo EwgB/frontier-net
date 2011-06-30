@@ -21,23 +21,17 @@ struct Bone
   GLmatrix          _matrix;
 };
 
-struct Skeleton
-{
-  vector<Bone>      _bone;
-  unsigned          _unknown_count;
-};
-
 class CFigure
 {
+  void              RotateHierarchy (unsigned id, GLvector offset, GLmatrix m);
+  void              RotatePoints (unsigned id, GLvector offset, GLmatrix m);
+public:
+  vector<Bone>      _bone;
   GLvector          _position;
   unsigned          _bone_index[BONE_COUNT];
   unsigned          _unknown_count;
   GLmesh            _skin;
   GLmesh            _skin_static;
-  void              RotateHierarchy (unsigned id, GLvector offset, GLmatrix m);
-  void              RotatePoints (unsigned id, GLvector offset, GLmatrix m);
-public:
-  vector<Bone>      _bone;
   
 
   CFigure ();
