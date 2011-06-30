@@ -26,6 +26,7 @@ class CFigure
   vector<Bone>      _bone;
   GLvector          _position;
   unsigned          _bone_index[BONE_COUNT];
+  unsigned          _unknown_count;
   GLmesh            _skin;
   GLmesh            _skin_static;
   void              RotateHierarchy (unsigned id, GLvector offset, GLmatrix m);
@@ -36,6 +37,7 @@ public:
   CFigure ();
   void              Animate (CAnim* anim, float delta);
   bool              LoadX (char* filename);
+  BoneId            IdentifyBone (char* name);
   void              PositionSet (GLvector pos) { _position = pos; };
   void              RotateBone (BoneId id, GLvector angle);
   void              PushBone (BoneId id, unsigned parent, GLvector pos);

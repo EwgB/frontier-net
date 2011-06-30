@@ -36,6 +36,7 @@ CFigure::CFigure ()
   for (i = 0; i < BONE_COUNT; i++) 
     _bone_index[i] = BONE_INVALID;
   PushBone (BONE_ROOT, BONE_ROOT, glVector (0.0f, 0.0f, 0.0f));
+  _unknown_count = 0;
 
 }
 
@@ -48,6 +49,22 @@ void CFigure::Animate (CAnim* anim, float delta)
   frame %= anim->Frames ();
   for (unsigned i = 0; i < anim->Joints (); i++) 
      RotateBone ((BoneId)anim->Id (frame, i), anim->Rotation (frame, i));
+
+}
+
+//We take a string and turn it into a BoneId, using unknowns as needed
+BoneId CFigure::IdentifyBone (char* name)
+{
+  
+  BoneId    bid;
+
+  bid = CAnim::BoneFromString (name);
+  //If CAnim couldn't make sense of the name, or if that id is already in use...
+  if (bid == BONE_INVALID || _bone_index[bid] != BONE_INVALID) {
+    bid = (BoneId)(BONE_UNKNOWN0 + _unknown_count);
+    _unknown_count++;
+  }
+  return bid;
 
 }
 
@@ -158,7 +175,8 @@ void CFigure::Render ()
   glTranslatef (_position.x, _position.y, _position.z); 
   _skin.Render ();
   glDisable (GL_DEPTH_TEST);
-  glColor3f (1,0,0);
+  glDisable (GL_TEXTURE_2D);
+  glDisable (GL_LIGHTING);
   for (i = 0; i < _bone.size (); i++) {
     parent = _bone_index[_bone[i]._id_parent];
     if (!parent)
@@ -170,6 +188,8 @@ void CFigure::Render ()
     glEnd ();
   }
   glLineWidth (1.0f);
+  glEnable (GL_LIGHTING);
+  glEnable (GL_TEXTURE_2D);
   glEnable (GL_DEPTH_TEST);
   glPopMatrix ();
   
@@ -209,6 +229,7 @@ bool CFigure::LoadX (char* filename)
     if ((!skel_done) && (find = strstr (token, "FRAME "))) {
       GLvector pusher = glVector (0.0f, 0.0f, 0.0f);
       frame_depth = 0;
+      _bone[_bone_index[BONE_ROOT]]._matrix.Identity ();
       while (!skel_done) {
         if (find = strstr (token, "}")) {
           frame_depth--;
@@ -264,7 +285,7 @@ bool CFigure::LoadX (char* filename)
               pos = glMatrixTransformPoint (_bone[_bone_index[parent_id]]._matrix, pos);
               //pos = glMatrixTransformPoint (matrix, _bone[_bone_index[parent_id]]._position);
               //pos = glMatrixTransformPoint (matrix, pos) + _bone[_bone_index[parent_id]]._position;
-              pos += _bone[_bone_index[parent_id]]._position;
+              //pos += _bone[_bone_index[parent_id]]._position;
             }
 
             //matrix = glMatrixMultiply (matrix,  _bone[_bone_index[parent_id]]._matrix);
@@ -281,7 +302,8 @@ bool CFigure::LoadX (char* filename)
         }
         if (find = strstr (token, "FRAME ")) {
           frame_depth++;
-          bone = CAnim::BoneFromString (find + 6);
+          bone = IdentifyBone (find + 6);
+          //bone = CAnim::BoneFromString (find + 6);
           hierarchy.push_back (bone);
         }
         token = strtok (NULL, NEWLINE);

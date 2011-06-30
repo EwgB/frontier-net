@@ -189,10 +189,10 @@ void FigureRender ()
     stand = !stand;
 
   glBindTexture (GL_TEXTURE_2D, 0);
-  glDisable (GL_LIGHTING);
+  //glDisable (GL_LIGHTING);
   fig.Render ();
   fig2.Render ();
-  glEnable (GL_LIGHTING);
+  //glEnable (GL_LIGHTING);
   
 
 }
