@@ -48,6 +48,10 @@ char* CAnim::NameFromBone (BoneId id)
     return "Shoulder Right";
   case BONE_LSHOULDER:
     return "Shoulder Left";
+  case BONE_RARM:
+    return "Arm Right";
+  case BONE_LARM:
+    return "Arm Left";
   case BONE_RELBOW:
     return "Elbow Right";
   case BONE_LELBOW:
@@ -72,6 +76,8 @@ char* CAnim::NameFromBone (BoneId id)
 
 BoneId CAnim::BoneFromString (char* name)
 {
+
+  char*   test;
 
   if (strstr (name, "ROOT")) 
     return BONE_ROOT;
@@ -141,15 +147,7 @@ BoneId CAnim::BoneFromString (char* name)
     //Not left or right? That can't be right.
     return BONE_INVALID;
   }
-  if (strstr (name, "UPPERARM")) {
-    if (strchr (name + 8, 'L'))
-      return BONE_LSHOULDER;
-    if (strchr (name + 8, 'R'))
-      return BONE_RSHOULDER;
-    //Not left or right? That can't be right.
-    return BONE_INVALID;
-  }
-  if (strstr (name, "ELBOW")) {
+  if (strstr (name, "FOREARM")) {
     if (strchr (name + 7, 'L'))
       return BONE_LELBOW;
     if (strchr (name + 7, 'R'))
@@ -157,7 +155,15 @@ BoneId CAnim::BoneFromString (char* name)
     //Not left or right? That can't be right.
     return BONE_INVALID;
   }
-  if (strstr (name, "FOREARM")) {
+  if (test = strstr (name, "ARM")) {
+    if (strchr (test + 3, 'L'))
+      return BONE_LARM;
+    if (strchr (test + 3, 'R'))
+      return BONE_RARM;
+    //Not left or right? That can't be right.
+    return BONE_INVALID;
+  }
+  if (strstr (name, "ELBOW")) {
     if (strchr (name + 7, 'L'))
       return BONE_LELBOW;
     if (strchr (name + 7, 'R'))

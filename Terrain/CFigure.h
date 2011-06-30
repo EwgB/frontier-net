@@ -18,6 +18,7 @@ struct Bone
   GLrgba            _color;
   vector<unsigned>  _children;
   vector<BWeight>   _vertex_weights;
+  GLmatrix          _matrix;
 };
 
 class CFigure
@@ -36,8 +37,8 @@ public:
   void              Animate (CAnim* anim, float delta);
   bool              LoadX (char* filename);
   void              PositionSet (GLvector pos) { _position = pos; };
-  void              RotateBone (unsigned id, GLvector angle);
-  void              PushBone (unsigned id, unsigned parent, GLvector pos);
+  void              RotateBone (BoneId id, GLvector angle);
+  void              PushBone (BoneId id, unsigned parent, GLvector pos);
   void              PushWeight (unsigned id, unsigned index, float weight);
   void              Render ();
   GLmesh*           Skin () { return &_skin_static; };

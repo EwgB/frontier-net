@@ -24,7 +24,7 @@
 
 #define REGION_SIZE             64
 #define REGION_HALF             (REGION_SIZE / 2)
-#define WORLD_GRID              128
+#define WORLD_GRID              64
 #define WORLD_GRID_EDGE         (WORLD_GRID + 1)
 #define WORLD_GRID_CENTER       (WORLD_GRID / 2)
 #define WORLD_SIZE_METERS       (REGION_SIZE * WORLD_GRID)
@@ -36,7 +36,7 @@
 //This is the size of the grid of trees.  The total number of tree species 
 //in the world is the square of this value, minus one. ("tree zero" is actually
 //"no trees at all".)
-#define TREE_TYPES        7
+#define TREE_TYPES        3
 
 enum Climate
 {

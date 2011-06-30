@@ -84,9 +84,9 @@
 
 static float      identity_matrix[4][4] = 
 {
-  {1.0f, 0.0f, 0.0f, 1.0f},
-  {0.0f, 1.0f, 0.0f, 1.0f},
-  {0.0f, 0.0f, 1.0f, 1.0f},
+  {1.0f, 0.0f, 0.0f, 0.0f},
+  {0.0f, 1.0f, 0.0f, 0.0f},
+  {0.0f, 0.0f, 1.0f, 0.0f},
   {0.0f, 0.0f, 0.0f, 1.0f},
 };
 
@@ -197,12 +197,12 @@ GLvector glMatrixTransformPoint (GLmatrix m, GLvector in)
 
   GLvector              out;
 
-  //out.x = (M(m,0,0) * in.x + M(m,1,0) * in.y + M(m,2,0) * in.z + M(m,3,0)) * M(m,0,3);
-  //out.y = (M(m,0,1) * in.x + M(m,1,1) * in.y + M(m,2,1) * in.z + M(m,3,1)) * M(m,1,3);
-  //out.z = (M(m,0,2) * in.x + M(m,1,2) * in.y + M(m,2,2) * in.z + M(m,3,2)) * M(m,2,3);
-  out.x = (M(m,0,0) * in.x + M(m,1,0) * in.y + M(m,2,0) * in.z + M(m,3,0)); //* M(m,0,3);
-  out.y = (M(m,0,1) * in.x + M(m,1,1) * in.y + M(m,2,1) * in.z + M(m,3,1)); //* M(m,1,3);
-  out.z = (M(m,0,2) * in.x + M(m,1,2) * in.y + M(m,2,2) * in.z + M(m,3,2));// * M(m,2,3);
+  out.x = (M(m,0,0) * in.x + M(m,1,0) * in.y + M(m,2,0) * in.z + M(m,3,0));
+  out.y = (M(m,0,1) * in.x + M(m,1,1) * in.y + M(m,2,1) * in.z + M(m,3,1));
+  out.z = (M(m,0,2) * in.x + M(m,1,2) * in.y + M(m,2,2) * in.z + M(m,3,2));
+  //out.x = (M(m,0,0) * in.x + M(m,1,0) * in.y + M(m,2,0) * in.z + M(m,0,3));
+  //out.y = (M(m,0,1) * in.x + M(m,1,1) * in.y + M(m,2,1) * in.z + M(m,1,3));
+  //out.z = (M(m,0,2) * in.x + M(m,1,2) * in.y + M(m,2,2) * in.z + M(m,2,3));
   return out;
 
 }

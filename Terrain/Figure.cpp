@@ -44,12 +44,14 @@ static BoneList  bl[] =
   
   0.0f, 0.0f, 1.55f,    BONE_SPINE1,    BONE_PELVIS,
 
-  0.2f, 0.0f, 1.5f,     BONE_RSHOULDER, BONE_SPINE1,
-  0.5f, 0.0f, 1.5f,     BONE_RELBOW,    BONE_RSHOULDER, 
+  0.1f, 0.0f, 1.5f,     BONE_RSHOULDER, BONE_SPINE1,
+  0.2f, 0.0f, 1.5f,     BONE_RARM,      BONE_RSHOULDER,
+  0.4f, 0.0f, 1.5f,     BONE_RELBOW,    BONE_RARM, 
   0.8f, 0.0f, 1.5f,     BONE_RWRIST,    BONE_RELBOW,
 
- -0.2f, 0.0f, 1.5f,     BONE_LSHOULDER, BONE_SPINE1,
- -0.5f, 0.0f, 1.5f,     BONE_LELBOW,    BONE_LSHOULDER, 
+ -0.1f, 0.0f, 1.5f,     BONE_LSHOULDER, BONE_SPINE1,
+ -0.2f, 0.0f, 1.5f,     BONE_LARM,      BONE_LSHOULDER,
+ -0.4f, 0.0f, 1.5f,     BONE_LELBOW,    BONE_LARM, 
  -0.8f, 0.0f, 1.5f,     BONE_LWRIST,    BONE_LELBOW,
 
   0.0f, 0.0f, 1.6f,     BONE_NECK,      BONE_SPINE1,
@@ -143,7 +145,7 @@ void FigureInit ()
 }
 
 static unsigned   frame;
-static bool       moveit;
+static bool       moveit = true;
 static bool       stand;
 
 void FigureRender ()

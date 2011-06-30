@@ -47,14 +47,15 @@ void CFigure::Animate (CAnim* anim, float delta)
   frame = (unsigned)(delta * (float)anim->Frames ());
   frame %= anim->Frames ();
   for (unsigned i = 0; i < anim->Joints (); i++) 
-     RotateBone (anim->Id (frame, i), anim->Rotation (frame, i));
+     RotateBone ((BoneId)anim->Id (frame, i), anim->Rotation (frame, i));
 
 }
 
-void CFigure::RotateBone (unsigned id, GLvector angle)
+void CFigure::RotateBone (BoneId id, GLvector angle)
 {
 
-  _bone[_bone_index[id]]._rotation = angle;
+  if (_bone_index[id] != BONE_INVALID)
+    _bone[_bone_index[id]]._rotation = angle;
 
 }
 
@@ -126,7 +127,7 @@ void CFigure::PushWeight (unsigned id, unsigned index, float weight)
 
 }
 
-void CFigure::PushBone (unsigned id, unsigned parent, GLvector pos)
+void CFigure::PushBone (BoneId id, unsigned parent, GLvector pos)
 {
 
   Bone    b;
@@ -178,21 +179,23 @@ void CFigure::Render ()
 bool CFigure::LoadX (char* filename)
 {
 
-  char*           buffer;
-  char*           token;
-  char*           find;
-  bool            done;
-  long            size;
-  unsigned        count;
-  unsigned        i;
-  GLvector        pos;
-  int             i1, i2, i3, i4;
-  int             poly;
-  vector<BoneId>  hierarchy;
-  bool            skel_done;
-  BoneId          bone;
-  BoneId          parent_id;
-  unsigned        frame_depth;
+  char*             buffer;
+  char*             token;
+  char*             find;
+  bool              done;
+  long              size;
+  unsigned          count;
+  unsigned          i;
+  GLvector          pos;
+  int               i1, i2, i3, i4;
+  int               poly;
+  vector<BoneId>    hierarchy;
+  bool              skel_done;
+  BoneId            bone;
+  BoneId            parent_id;
+  unsigned          frame_depth;
+  GLmatrix          matrix;
+  vector<GLmatrix>  matrix_stack;
 
   buffer = FileLoad (filename, &size);
   if (!buffer)
@@ -213,14 +216,21 @@ bool CFigure::LoadX (char* filename)
         }
         if (find = strstr (token, "FRAMETRANSFORMMATRIX ")) {
           //We don't care about the rotational data
+          matrix.Identity ();
           token = strtok (NULL, NEWLINE);
+          clean_chars (token, ";,");
+          sscanf (token, "%f %f %f", &matrix.elements[0][0], &matrix.elements[0][1], &matrix.elements[0][2], &matrix.elements[0][3]);
           token = strtok (NULL, NEWLINE);
+          clean_chars (token, ";,");
+          sscanf (token, "%f %f %f", &matrix.elements[1][0], &matrix.elements[1][1], &matrix.elements[1][2], &matrix.elements[1][3]);
           token = strtok (NULL, NEWLINE);
+          clean_chars (token, ";,");
+          sscanf (token, "%f %f %f", &matrix.elements[2][0], &matrix.elements[2][1], &matrix.elements[2][2], &matrix.elements[2][3]);
           //Grab the positional data
           token = strtok (NULL, NEWLINE);
           clean_chars (token, ";,");
-          sscanf (token, "%f %f %f", &pos.x, &pos.z, &pos.y);
-          pos.z *= -1.0f;
+          sscanf (token, "%f %f %f", &matrix.elements[3][0], &matrix.elements[3][1], &matrix.elements[3][2], &matrix.elements[3][3]);
+          sscanf (token, "%f %f %f", &pos.x, &pos.y, &pos.z);
           //only add this to our model if it's actually a known bone
           bone = hierarchy.back ();
           if (bone != BONE_INVALID) {
@@ -233,10 +243,37 @@ bool CFigure::LoadX (char* filename)
                   break;
               }
             }
+            
+            pos = glVector (0.0f, 0.0f, 0.0f);
+            //pos.x = matrix.elements[3][0];
+            //pos.y = matrix.elements[3][1];
+            //pos.z = matrix.elements[3][2];
+            
+            //pos = glMatrixTransformPoint (matrix, pos);
+            /*
+            for (rit = hierarchy.rbegin(); rit < hierarchy.rend(); ++rit) {
+              if (*rit != BONE_INVALID && *rit != bone) {
+                pos = glMatrixTransformPoint (_bone[_bone_index[*rit]]._matrix, pos);
+                break;
+              }
+            }
+            */
+            if (bone != BONE_ROOT) {
+              matrix = glMatrixMultiply (_bone[_bone_index[parent_id]]._matrix, matrix);
+              //pos = pos - _bone[_bone_index[parent_id]]._position;
+              pos = glMatrixTransformPoint (_bone[_bone_index[parent_id]]._matrix, pos);
+              //pos = glMatrixTransformPoint (matrix, _bone[_bone_index[parent_id]]._position);
+              //pos = glMatrixTransformPoint (matrix, pos) + _bone[_bone_index[parent_id]]._position;
+              pos += _bone[_bone_index[parent_id]]._position;
+            }
+
+            //matrix = glMatrixMultiply (matrix,  _bone[_bone_index[parent_id]]._matrix);
+            
             pos += pusher;
-            pusher += glVector (0.0f, 0.1f, 0.0f);
-            pos += _bone[_bone_index[parent_id]]._position ;
+            //pusher += glVector (0.0f, 0.0f, 0.01f);
+            //pos += _bone[_bone_index[parent_id]]._position ;
             PushBone (bone, parent_id, pos);
+            _bone[_bone_index[bone]]._matrix = matrix;
           }
           //Now plow through until we find the closing brace
           while (!(find = strstr (token, "}"))) 
