@@ -127,10 +127,18 @@ void CFigure::Update ()
   _skin_render = _skin_deform;
   for (i = 1; i < _bone.size (); i++) 
     _bone[i]._position = _bone[i]._origin;
-  for (i = _bone.size () - 1; i > 0; i--) {
-    b = &_bone[i];
+
+  vector<Bone>::reverse_iterator rit;
+  for (rit = _bone.rbegin(); rit < _bone.rend(); ++rit) {
+    b = &(*rit);
+  //for (i = _bone.size () - 1; i > 0; i--) {
+  //for (i = 0; i < _bone.size () - 1; i++) {
+    //b = &_bone[i];
     if (b->_rotation == glVector (0.0f, 0.0f, 0.0f))
       continue;
+    if (b->_id == BONE_ROOT)
+      m.Identity ();
+
     m.Identity ();
     m.Rotate (b->_rotation.x, 1.0f, 0.0f, 0.0f);
     m.Rotate (b->_rotation.z, 0.0f, 0.0f, 1.0f);
@@ -167,16 +175,16 @@ void CFigure::PushBone (BoneId id, unsigned parent, GLvector pos)
   b._children.clear ();
   b._color = glRgbaUnique (id + 1);
   _bone.push_back (b);
-  if (parent) 
-    _bone[_bone_index[parent]]._children.push_back (id);
+  _bone[_bone_index[parent]]._children.push_back (id);
 
 }
 
-void CFigure::BoneInflate (BoneId id, float distance)
+void CFigure::BoneInflate (BoneId id, float distance, bool do_children)
 {
 
   Bone*       b;
   unsigned    i;
+  unsigned    c;
   unsigned    index;
 
   b = &_bone[_bone_index[id]];
@@ -184,15 +192,30 @@ void CFigure::BoneInflate (BoneId id, float distance)
     index = b->_vertex_weights[i]._index;
     _skin_deform._vertex[index] = _skin_static._vertex[index] + _skin_static._normal[index] * distance;
   }
+  if (!do_children)
+    return;
+  for (c = 0; c < b->_children.size (); c++) 
+    BoneInflate ((BoneId)b->_children[c], distance, do_children);
+
 
 }
 
+void CFigure::RotationSet (GLvector rot)
+{
+
+  _bone[_bone_index[BONE_ROOT]]._rotation = rot;
+
+}
 
 void CFigure::Render ()
 {
   
   glColor3f (1,1,1);
   glPushMatrix ();
+  //glRotatef (_rotation.x, 1.0f, 0.0f, 0.0f);
+  //glRotatef (_rotation.y, 0.0f, 1.0f, 0.0f);
+  //glRotatef (_rotation.z, 0.0f, 0.0f, 1.0f);
+
   glTranslatef (_position.x, _position.y, _position.z); 
   _skin_render.Render ();
   glPopMatrix ();

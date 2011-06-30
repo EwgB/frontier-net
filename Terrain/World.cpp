@@ -602,3 +602,30 @@ void          WorldTexturePurge ()
   build_map_texture ();
 
 }
+
+char* WorldDirectionFromAngle (float angle)
+{
+
+  char*   direction;
+
+  direction = "North";
+  if (angle < 22.5f)
+    direction = "North";
+  else if (angle < 67.5f)
+    direction = "Northwest";
+  else if (angle < 112.5f)
+    direction = "West";
+  else if (angle < 157.5f)
+    direction = "Southwest";
+  else if (angle < 202.5f)
+    direction = "South";
+  else if (angle < 247.5f)
+    direction = "Southeast";
+  else if (angle < 292.5f)
+    direction = "East";
+  else if (angle < 337.5f)
+    direction = "Northeast";
+  return direction;
+
+}
+

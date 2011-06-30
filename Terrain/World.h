@@ -110,6 +110,7 @@ float         WorldWaterLevel (int world_x, int world_y);
 
 void          WorldGenerate ();
 unsigned      WorldCanopyTree ();
+char*         WorldDirectionFromAngle (float angle);
 void          WorldInit ();
 unsigned      WorldMap ();
 unsigned      WorldNoisei (int index);

@@ -120,7 +120,7 @@ void FigureInit ()
   anim_stand.LoadBvh ("Anims//stand.bvh");
 
   fig2.LoadX ("models//male.x");
-  fig2.BoneInflate (BONE_HEAD, 0.01f);
+//  fig2.BoneInflate (BONE_HEAD, 0.01f);
   /*
   {
 

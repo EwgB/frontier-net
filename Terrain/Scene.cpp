@@ -195,6 +195,7 @@ void SceneRender ()
   gm_forest.Render ();
   glEnable(GL_CULL_FACE);
   gm_terrain.Render ();
+  AvatarRender ();
   WaterRender ();
   if (0) { //Show tree texture
     GLvector      camera;

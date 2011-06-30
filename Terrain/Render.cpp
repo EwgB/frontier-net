@@ -180,6 +180,7 @@ void RenderInit  (void)
   current_fog = glRgba (1.0f);
   fog_max = 1000;
   fog_min = 1;
+  draw_console = true;
   
 
 }

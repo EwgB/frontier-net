@@ -35,6 +35,7 @@ class CFigure
 public:
   vector<Bone>      _bone;
   GLvector          _position;
+  GLvector          _rotation;
   unsigned          _bone_index[BONE_COUNT];
   unsigned          _unknown_count;
   GLmesh            _skin_static;//The original, "read only"
@@ -47,11 +48,12 @@ public:
   bool              LoadX (char* filename);
   BoneId            IdentifyBone (char* name);
   void              PositionSet (GLvector pos) { _position = pos; };
+  void              RotationSet (GLvector rot);
   void              RotateBone (BoneId id, GLvector angle);
   void              PushBone (BoneId id, unsigned parent, GLvector pos);
   void              PushWeight (unsigned id, unsigned index, float weight);
   void              Prepare ();
-  void              BoneInflate (BoneId id, float distance);
+  void              BoneInflate (BoneId id, float distance, bool do_children);
 
   void              Render ();
   void              RenderSkeleton ();
