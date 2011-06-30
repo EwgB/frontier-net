@@ -84,18 +84,18 @@ void CFigure::RotatePoints (unsigned id, GLvector offset, GLmatrix m)
   Bone*       b;
   unsigned    i;
   unsigned    index;
-  GLvector    from;
-  GLvector    to;
 
   
   b = &_bone[_bone_index[id]];
   for (i = 0; i < b->_vertex_weights.size (); i++) {
     index = b->_vertex_weights[i]._index;
-    //_skin._vertex[index] = glMatrixTransformPoint (m, _skin._vertex[index] - offset) + offset;
-    from = _skin._vertex[index] - offset;
+    _skin_render._vertex[index] = glMatrixTransformPoint (m, _skin_render._vertex[index] - offset) + offset;
+    /*
+    from = _skin_render._vertex[index] - offset;
     to = glMatrixTransformPoint (m, from);
     //movement = movement - _skin_static._vertex[index]; 
-    _skin._vertex[index] = glVectorInterpolate (from, to, b->_vertex_weights[i]._weight) + offset;
+    _skin_render._vertex[index] = glVectorInterpolate (from, to, b->_vertex_weights[i]._weight) + offset;
+    */
   }
 
 }
@@ -124,7 +124,7 @@ void CFigure::Update ()
   GLmatrix    m;
   Bone*       b;
 
-  _skin = _skin_static;
+  _skin_render = _skin_deform;
   for (i = 1; i < _bone.size (); i++) 
     _bone[i]._position = _bone[i]._origin;
   for (i = _bone.size () - 1; i > 0; i--) {
@@ -172,17 +172,42 @@ void CFigure::PushBone (BoneId id, unsigned parent, GLvector pos)
 
 }
 
+void CFigure::BoneInflate (BoneId id, float distance)
+{
+
+  Bone*       b;
+  unsigned    i;
+  unsigned    index;
+
+  b = &_bone[_bone_index[id]];
+  for (i = 0; i < b->_vertex_weights.size (); i++) {
+    index = b->_vertex_weights[i]._index;
+    _skin_deform._vertex[index] = _skin_static._vertex[index] + _skin_static._normal[index] * distance;
+  }
+
+}
+
+
 void CFigure::Render ()
+{
+  
+  glColor3f (1,1,1);
+  glPushMatrix ();
+  glTranslatef (_position.x, _position.y, _position.z); 
+  _skin_render.Render ();
+  glPopMatrix ();
+  
+}
+
+void CFigure::RenderSkeleton ()
 {
 
   unsigned    i;
   unsigned    parent;
 
   glLineWidth (5.0f);
-  glColor3f (1,1,1);
   glPushMatrix ();
   glTranslatef (_position.x, _position.y, _position.z); 
-  _skin.Render ();
   glDisable (GL_DEPTH_TEST);
   glDisable (GL_TEXTURE_2D);
   glDisable (GL_LIGHTING);
@@ -202,181 +227,21 @@ void CFigure::Render ()
   glEnable (GL_TEXTURE_2D);
   glEnable (GL_DEPTH_TEST);
   glPopMatrix ();
-  
+
 }
 
+void CFigure::Prepare ()
+{
+
+  _skin_deform = _skin_static;
+
+}
 
 bool CFigure::LoadX (char* filename)
 {
 
   FileXLoad (filename, this);
+  Prepare ();
   return true;
 
-
-  /*
-  char*             buffer;
-  char*             token;
-  char*             find;
-  bool              done;
-  long              size;
-  unsigned          count;
-  unsigned          i;
-  GLvector          pos;
-  int               i1, i2, i3, i4;
-  int               poly;
-  vector<BoneId>    hierarchy;
-  bool              skel_done;
-  BoneId            bone;
-  BoneId            parent_id;
-  unsigned          frame_depth;
-  GLmatrix          matrix;
-  vector<GLmatrix>  matrix_stack;
-  BoneId            queued_bone;
-  BoneId            queued_parent;
-
-
-
-  buffer = FileLoad (filename, &size);
-  if (!buffer)
-    return false;
-  _strupr (buffer);
-  token = strtok (buffer, NEWLINE);
-  done = false;
-  skel_done = false;
-  while (!done) {
-    //Read the skeleton
-    if ((!skel_done) && (find = strstr (token, "FRAME "))) {
-      GLvector pusher = glVector (0.0f, 0.0f, 0.0f);
-      frame_depth = 0;
-      //_bone[_bone_index[BONE_ROOT]]._matrix.Identity ();
-      matrix.Identity ();
-      matrix_stack.push_back (matrix);
-      _bone.clear ();
-      while (!skel_done) {
-        if (find = strstr (token, "}")) {
-          frame_depth--;
-          hierarchy.pop_back ();
-          matrix_stack.pop_back ();
-        }
-        if (find = strstr (token, "FRAMETRANSFORMMATRIX ")) {
-          matrix.Identity ();
-          token = strtok (NULL, NEWLINE);
-          clean_chars (token, ";,");
-          sscanf (token, "%f %f %f", &matrix.elements[0][0], &matrix.elements[0][1], &matrix.elements[0][2], &matrix.elements[0][3]);
-          token = strtok (NULL, NEWLINE);
-          clean_chars (token, ";,");
-          sscanf (token, "%f %f %f", &matrix.elements[1][0], &matrix.elements[1][1], &matrix.elements[1][2], &matrix.elements[1][3]);
-          token = strtok (NULL, NEWLINE);
-          clean_chars (token, ";,");
-          sscanf (token, "%f %f %f", &matrix.elements[2][0], &matrix.elements[2][1], &matrix.elements[2][2], &matrix.elements[2][3]);
-          //Grab the positional data
-          token = strtok (NULL, NEWLINE);
-          clean_chars (token, ";,");
-          sscanf (token, "%f %f %f", &matrix.elements[3][0], &matrix.elements[3][1], &matrix.elements[3][2], &matrix.elements[3][3]);
-
-          //matrix = glMatrixMultiply (matrix,  matrix_stack.back ());
-          matrix_stack.push_back (matrix);
-          //Now plow through until we find the closing brace
-
-
-          matrix.Identity ();
-          for (i = 0; i < matrix_stack.size (); i++)           
-            matrix = glMatrixMultiply (matrix,  matrix_stack[i]);
-          pos = glMatrixTransformPoint (matrix, glVector (0.0f, 0.0f, 0.0f));
-          pos.x = -pos.x;
-          PushBone (queued_bone, queued_parent, pos);
-
-
-          while (!(find = strstr (token, "}"))) 
-            token = strtok (NULL, NEWLINE);
-        }
-        if (find = strstr (token, "FRAME ")) {
-          frame_depth++;
-          bone = IdentifyBone (find + 6);
-          hierarchy.push_back (bone);
-          //pos = glMatrixTransformPoint (matrix_stack.back (), glVector (0.0f, 0.0f, 0.0f));
-          
-          pos = glVector (0.0f, 0.0f, 0.0f);
-          for (i = 0; i < matrix_stack.size (); i++)           
-            pos = glMatrixTransformPoint (matrix_stack[i], pos);
-
-          matrix.Identity ();
-          for (i = 0; i < matrix_stack.size (); i++)           
-            matrix = glMatrixMultiply (matrix,  matrix_stack[i]);
-          pos = glMatrixTransformPoint (matrix, glVector (0.0f, 0.0f, 0.0f));
-
-          //Find the last valid bone in the chain.
-          vector<BoneId>::reverse_iterator rit;
-          parent_id = BONE_ROOT;
-          for (rit = hierarchy.rbegin(); rit < hierarchy.rend(); ++rit) {
-            if (*rit != BONE_INVALID && *rit != bone) {
-                parent_id = *rit;
-                break;
-            }
-          }
-          queued_bone = bone;
-          queued_parent = parent_id;
-          //PushBone (bone, parent_id, pos);
-        }
-        token = strtok (NULL, NEWLINE);
-        if (find = strstr (token, "MESH ")) 
-          skel_done = true;
-      }
-    }
-    //We begin reading the vertex positions
-    if (find = strstr (token, "MESH ")) {
-      token = strtok (NULL, NEWLINE);
-      count = atoi (token);
-      for (i = 0; i < count; i++) {
-        token = strtok (NULL, NEWLINE);
-        clean_chars (token, ";,");
-        sscanf (token, "%f %f %f", &pos.x, &pos.y, &pos.z);
-        _skin_static.PushVertex (pos, glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f));
-      }
-      //Directly after the verts are the polys
-      token = strtok (NULL, NEWLINE);
-      count = atoi (token);
-      for (i = 0; i < count; i++) {
-        token = strtok (NULL, NEWLINE);
-        clean_chars (token, ";,");
-        poly = atoi (token);
-        if (poly == 3) {
-          sscanf (token + 2, "%d %d %d", &i1, &i2, &i3);
-          _skin_static.PushTriangle (i3, i2, i1);
-        } else if (poly == 4) {
-          sscanf (token + 2, "%d %d %d %d", &i1, &i2, &i3, &i4);
-          _skin_static.PushQuad (i4, i3, i2, i1);
-        }
-      }
-    }
-    //Reading the Normals
-    if (find = strstr (token, "MESHNORMALS ")) {
-      token = strtok (NULL, NEWLINE);
-      clean_chars (token, ";,");
-      count = atoi (token);
-      for (i = 0; i < count; i++) {
-        token = strtok (NULL, NEWLINE);
-        sscanf (token, "%f %f %f", &pos.x, &pos.y, &pos.z);
-        _skin_static._normal[i] = pos;
-      }
-    }
-    //Reading the UV values
-    if (find = strstr (token, "MESHTEXTURECOORDS ")) {
-      token = strtok (NULL, NEWLINE);
-      clean_chars (token, ";,");
-      count = atoi (token);
-      for (i = 0; i < count; i++) {
-        token = strtok (NULL, NEWLINE);
-        sscanf (token, "%f %f %f", &pos.x, &pos.y, &pos.z);
-        _skin_static._normal[i] = pos;
-      }
-    }
-    token = strtok (NULL, NEWLINE);
-    if (!token)
-      done = true;
-  }
-  _skin_static.CalculateNormalsSeamless ();
-  free (buffer);
-  return true;
-  */
 }

@@ -8,6 +8,13 @@ struct BWeight
   float             _weight;
 };
 
+
+struct PWeight
+{
+  BoneId            _bone;
+  float             _weight;
+};
+
 struct Bone
 {
   BoneId            _id;
@@ -30,8 +37,9 @@ public:
   GLvector          _position;
   unsigned          _bone_index[BONE_COUNT];
   unsigned          _unknown_count;
-  GLmesh            _skin;
-  GLmesh            _skin_static;
+  GLmesh            _skin_static;//The original, "read only"
+  GLmesh            _skin_deform;//Altered
+  GLmesh            _skin_render;//Updated every frame
   
 
   CFigure ();
@@ -42,7 +50,11 @@ public:
   void              RotateBone (BoneId id, GLvector angle);
   void              PushBone (BoneId id, unsigned parent, GLvector pos);
   void              PushWeight (unsigned id, unsigned index, float weight);
+  void              Prepare ();
+  void              BoneInflate (BoneId id, float distance);
+
   void              Render ();
+  void              RenderSkeleton ();
   GLmesh*           Skin () { return &_skin_static; };
   void              Update ();
 };

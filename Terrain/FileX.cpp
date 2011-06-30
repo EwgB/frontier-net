@@ -228,19 +228,30 @@ static void do_weights (char* buffer, CFigure* fig)
 {
 
   char*             token;
+  unsigned          index;
   int               count;
   int               i;
   BoneId            bid;
   vector<BWeight>   bw_list;
   BWeight           bw;
+  vector<PWeight>   weights;
 
+  weights.resize (fig->_skin_static._vertex.size ());
+  for (i = 0; i < (int)weights.size (); i++) {
+    PWeight   pw;
+    pw._bone = BONE_ROOT;
+    pw._weight = 0.0f;
+    weights[i] = pw;
+  }
   while (true) {
     token = strtok (NULL, DELIMIT);
     while (strcmp (token, "SKINWEIGHTS")) {
       token = strtok (NULL, DELIMIT);
       if (token == NULL)
-        return;
+        break;
     }
+    if (token == NULL)
+      break;
     //eat the open brace
     token = strtok (NULL, DELIMIT);
     //get the name of this bone
@@ -263,15 +274,39 @@ static void do_weights (char* buffer, CFigure* fig)
       token = strtok (NULL, DELIMIT);
       bw_list[i]._weight = (float)atof (token);
     }
+      /*    
     //Store them
     for (i = 0; i < count; i++) {
       //if (bw_list[i]._weight < 0.9f)
         //continue;
-      if (bw_list[i]._weight < 0.001f)
+      
+      //if (bw_list[i]._weight < 0.001f)
+        //continue;
+      //fig->_bone[fig->_bone_index[bid]]._vertex_weights.push_back (bw_list[i]);
+      if (bw_list[i]._weight < 0.5f)
         continue;
+      bw_list[i]._weight = 1.0f;
       fig->_bone[fig->_bone_index[bid]]._vertex_weights.push_back (bw_list[i]);
     }
+    */
+    //Now we have a list of all weights for this joint. Find the highest values for each point.
+    for (i = 0; i < count; i++) {
+      index = bw_list[i]._index;
+      if (bw_list[i]._weight > weights[index]._weight) {
+        weights[index]._weight = bw_list[i]._weight;
+        weights[index]._bone = bid;
+      }
+    }
   }
+  //Now we have a list which links each vert to its joint of strongest influence
+  for (i = 0; i < (int)weights.size (); i++) {
+    bid = weights[i]._bone;
+    bw._index = i;
+    bw._weight = 1.0f;
+    fig->_bone[fig->_bone_index[bid]]._vertex_weights.push_back (bw);
+  }
+
+
 }
 
 
