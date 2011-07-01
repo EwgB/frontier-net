@@ -73,7 +73,8 @@ class CAnim
 public:
   vector<AnimFrame> _frame;
   AnimFrame         _current;
-  AnimJoint*        GetFrame (float frame);       
+  AnimJoint*        GetFrame (float frame);  
+  void              SetDefaultAnimation ();
   unsigned          Frames () { return _frame.size (); };
   unsigned          Joints () { return _frame[0].joint.size (); };
   unsigned          Id (unsigned frame, unsigned index) { return _frame[frame].joint[index].id; };

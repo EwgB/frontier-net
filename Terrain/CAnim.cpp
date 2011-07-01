@@ -232,6 +232,20 @@ BoneId CAnim::BoneFromString (char* name)
 
 }
 
+//This makes a one-frame do-nothing animating, so we don't crash when an animating if missing.
+void CAnim::SetDefaultAnimation ()
+{
+
+  AnimJoint       joint;
+
+  _frame.clear ();
+  _frame.resize (1);
+  joint.id = BONE_PELVIS;
+  joint.rotation = glVector (0.0f, 0.0f, 0.0f);
+  _frame[0].joint.push_back (joint);
+
+}
+
 bool CAnim::LoadBvh (char* filename)
 {
 
@@ -254,8 +268,11 @@ bool CAnim::LoadBvh (char* filename)
   if (!strchr (filename, '.'))
     path.append (".bvh");
   buffer = FileLoad ((char*)path.c_str (), &size);
-  if (!buffer)
+  if (!buffer) {
+    Log ("CAnim::LoadBvh: Can't find %s", (char*)path.c_str ());
+    SetDefaultAnimation ();
     return false;
+  }
   _strupr (buffer);
   done = false;
   channels = 3;
@@ -264,7 +281,7 @@ bool CAnim::LoadBvh (char* filename)
   while (!done) {
     if (find = strstr (token, "CHANNEL")) {
       channels = atoi (find + 8);
-      //Six channels means first 3 are position.  Ignore
+      //Six channels means first 3 are position.  Ignore.
       if (channels == 6)
         dem_bones.push_back (BONE_INVALID);
       dem_bones.push_back (current_id);
@@ -274,9 +291,6 @@ bool CAnim::LoadBvh (char* filename)
       current_id = BoneFromString (find);
     }
     if (find = strstr (token, "MOTION")) {//we've reached the final section of the file
-      for (unsigned i = 0; i < dem_bones.size (); i++) 
-        Log ("%s", NameFromBone (dem_bones[i]));
-
       token = strtok (NULL, NEWLINE);
       frames = 0;
       if (find = strstr (token, "FRAMES"))
@@ -285,7 +299,6 @@ bool CAnim::LoadBvh (char* filename)
       _frame.resize (frames);
       token = strtok (NULL, NEWLINE);//throw away "frame time" line.
       for (frame = 0; frame < frames; frame++) {
-        Log ("Frame #%d", frame); 
         token = strtok (NULL, NEWLINE);
         find = token;
         for (bone = 0; bone < dem_bones.size (); bone++) {
@@ -298,7 +311,6 @@ bool CAnim::LoadBvh (char* filename)
           find = strchr (find, 32) + 1;
           if (joint.id != BONE_INVALID) {
             _frame[frame].joint.push_back (joint);
-            //Log ("%s: %1.1f %1.1f %1.1f", CFigure::BoneName (joint.id), joint.rotation.x, joint.rotation.y, joint.rotation.z); 
           }
         }
       }

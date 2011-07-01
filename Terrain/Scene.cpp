@@ -87,7 +87,7 @@ void SceneGenerate ()
   il_terrain.resize (TERRAIN_GRID * TERRAIN_GRID);
   gm_terrain.Init (&il_terrain[0], TERRAIN_GRID, TERRAIN_SIZE);
 
-  FigureInit ();
+  //FigureInit ();
 
 }
 
@@ -208,7 +208,7 @@ void SceneRender ()
     tree = WorldTree (r->tree_type);
     RenderTexture (tree->_texture);
   }
-  FigureRender ();
+  //FigureRender ();
 
 }
 

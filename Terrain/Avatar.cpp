@@ -39,10 +39,25 @@ enum
 {
   ANIM_IDLE,
   ANIM_RUN,
+  ANIM_SPRINT,
+  ANIM_FLYING,
   ANIM_FALL,
   ANIM_JUMP,
   ANIM_SWIM,
+  ANIM_FLOAT,
   ANIM_COUNT
+};
+
+static char*      anim_names[] =
+{
+  "Idle",
+  "Running",
+  "Sprinting",
+  "Flying",
+  "Falling",
+  "Jumping",
+  "Swimming",
+  "Floating",
 };
 
 static GLvector         angle;
@@ -53,8 +68,10 @@ static GLvector2        desired_movement;
 static float            cam_distance;
 static float            desired_cam_distance;
 static float            velocity;
-static bool             fly;
+static bool             flying;
 static bool             on_ground;
+static bool             swimming;
+static bool             sprinting;
 static unsigned         last_update;
 static Region           region;
 static CFigure          avatar;
@@ -71,7 +88,7 @@ static void do_move (GLvector delta)
   GLvector    movement;
   float       forward;
   
-  if (fly) {
+  if (flying) {
     forward = sin (angle.x * DEGREES_TO_RADIANS);
     movement.x = cos (angle.z * DEGREES_TO_RADIANS) * delta.x +  sin (angle.z * DEGREES_TO_RADIANS) * delta.y * forward;
     movement.y = -sin (angle.z * DEGREES_TO_RADIANS) * delta.x +  cos (angle.z * DEGREES_TO_RADIANS) * delta.y * forward;
@@ -137,10 +154,11 @@ void AvatarUpdate (void)
 
   float     ground;
   float     water;
-  Cell      cell;
   float     speed;
   float     elapsed;
   float     steps;
+  int       anim_id;
+  float     movement_animation;
   GLvector  old;
 
   elapsed = SdlElapsedSeconds ();
@@ -148,7 +166,7 @@ void AvatarUpdate (void)
   old = position;
   desired_movement = glVector (0.0f, 0.0f);
   if (InputKeyPressed (SDLK_F2))
-    fly = !fly;
+    flying = !flying;
   if (InputKeyPressed (SDLK_SPACE) && on_ground) {
     velocity = JUMP_SPEED;
     on_ground = false;
@@ -173,18 +191,20 @@ void AvatarUpdate (void)
     do_move (glVector (InputJoystickGet (0), InputJoystickGet (1), 0.0f));
   }
   speed = elapsed * MOVE_SPEED;
-  if (fly) 
+  if (flying) 
     velocity = 0.0f;
   else {
     position.z += velocity * elapsed;
     velocity -= elapsed * GRAVITY;
   }
   if (InputKeyState (SDLK_LSHIFT)) {
-    if (!fly)
+    sprinting = true;
+    if (!flying)
       speed *= 2.5f;
     else 
       speed *= 25;
-  }
+  } else 
+    sprinting = false;
   if (desired_movement.Length () > 1.0f)
     desired_movement.Normalize ();
   desired_movement *= speed;
@@ -197,28 +217,50 @@ void AvatarUpdate (void)
   desired_cam_distance = clamp (desired_cam_distance, CAM_MIN, CAM_MAX);
   cam_distance = MathInterpolate (cam_distance, desired_cam_distance, elapsed);
   ground = CacheElevation (position.x, position.y);
-  //water = C
-  if (!fly) {
+  water = WorldWaterLevel ((int)position.x, (int)position.y);
+  if (!flying) {
     if (position.z <= ground) {
       on_ground = true;
+      swimming = false;
       position.z = ground;
       velocity = 0.0f;
     } else if (position.z > ground + GRAVITY * 0.1f)
       on_ground = false;
+    if (position.z + SWIM_DEPTH < water) {
+      swimming = true;
+      velocity = 0.0f;
+    }
   }
+  movement_animation = distance_walked / 4.0f;
   if (on_ground)
     distance_walked += steps;
   if (current_movement.x != 0.0f && current_movement.y != 0.0f)
     avatar_facing.z = -MathAngle (0.0f, 0.0f, current_movement.x, current_movement.y) / 2.0f;
-  if (steps == 0 || !on_ground)
-    avatar.Animate (&anim[ANIM_FALL], velocity);
-  else 
-    avatar.Animate (&anim[ANIM_RUN], distance_walked / 4.0f);
+  if (flying)
+    anim_id = ANIM_FLYING;
+  else if (swimming) {
+    if (steps == 0.0f)
+      anim_id = ANIM_FLOAT;
+    else
+      anim_id = ANIM_SWIM;
+  } else if (!on_ground) {
+  if (velocity > 0.0f) 
+      anim_id = ANIM_JUMP;
+    else 
+      anim_id = ANIM_FALL;
+  } else if (steps == 0.0f) 
+    anim_id = ANIM_IDLE;
+  else if (sprinting)
+    anim_id = ANIM_SPRINT;
+  else
+    anim_id = ANIM_RUN;
+  avatar.Animate (&anim[anim_id], movement_animation);
   avatar.PositionSet (position);
   avatar.RotationSet (avatar_facing);
   avatar.Update ();
   region = WorldRegionGet ((int)(position.x + REGION_HALF) / REGION_SIZE, (int)(position.y + REGION_HALF) / REGION_SIZE);
   //TextPrint ("Temp:%1.1f%c Moisture:%1.0f%%\nGeo Scale: %1.2f Water Level: %1.2f Topography Detail:%1.2f Topography Bias:%1.2f", region.temperature * 100.0f, 186, region.moisture * 100.0f, region.geo_scale, region.geo_water, region.geo_detail, region.geo_bias);
+  TextPrint ("%s", anim_names[anim_id]);
   do_camera ();
   do_location ();
 
@@ -228,10 +270,10 @@ void AvatarUpdate (void)
 void AvatarInit (void)		
 {
 
-  angle = IniVector ("AvatarAngle");
-  position = IniVector ("AvatarPosition");
-  desired_cam_distance = IniFloat ("AvatarCameraDistance");
-  fly = IniInt ("AvatarFlying") != 0;
+  angle = IniVector ("Avatar", "Angle");
+  position = IniVector ("Avatar", "Position");
+  desired_cam_distance = IniFloat ("Avatar", "CameraDistance");
+  flying = IniInt ("Avatar", "Flying") != 0;
   avatar.LoadX ("models//male.x");
   avatar.BoneInflate (BONE_PELVIS, 0.02f, true);
   avatar.BoneInflate (BONE_HEAD, 0.025f, true);
@@ -239,13 +281,16 @@ void AvatarInit (void)
   avatar.BoneInflate (BONE_RWRIST, 0.03f, true);
   avatar.BoneInflate (BONE_RANKLE, 0.05f, true);
   avatar.BoneInflate (BONE_LANKLE, 0.05f, true);
-  anim[ANIM_IDLE].LoadBvh (IniString ("Animations", "Idle"));
+  for (int i = 0; i < ANIM_COUNT; i++) 
+    anim[i].LoadBvh (IniString ("Animations", anim_names[i]));
+  /*
   anim[ANIM_RUN].LoadBvh (IniString ("Animations", "Run"));
+  anim[ANIM_SPRINT].LoadBvh (IniString ("Animations", "Sprint"));
   anim[ANIM_FALL].LoadBvh (IniString ("Animations", "Fall"));
   anim[ANIM_JUMP].LoadBvh (IniString ("Animations", "Jump"));
   anim[ANIM_SWIM].LoadBvh (IniString ("Animations", "Swim"));
   //anim.LoadBvh ("Anims//walk.bvh");
-
+  */
 }
 
 void AvatarTerm (void)		
@@ -255,7 +300,7 @@ void AvatarTerm (void)
   IniVectorSet ("Avatar", "Angle", angle);
   IniFloatSet ("Avatar", "CameraDistance", cam_distance);
   IniVectorSet ("Avatar", "Position", position);
-  IniIntSet ("Avatar", "Flying", fly ? 1 : 0);
+  IniIntSet ("Avatar", "Flying", flying ? 1 : 0);
  
 }
 
