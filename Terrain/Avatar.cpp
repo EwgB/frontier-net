@@ -33,6 +33,7 @@
 #define CAM_MAX         12
 #define STOP_SPEED      0.02f
 #define SWIM_DEPTH      1.4f
+#define DEFAULT_SENSE   1.0f
 
 
 enum
@@ -77,6 +78,8 @@ static Region           region;
 static CFigure          avatar;
 static CAnim            anim[ANIM_COUNT];
 static float            distance_walked;
+static bool             invert_y;
+static float            mouse_sense;
 
 /*-----------------------------------------------------------------------------
 
@@ -274,13 +277,21 @@ void AvatarInit (void)
   position = IniVector ("Avatar", "Position");
   desired_cam_distance = IniFloat ("Avatar", "CameraDistance");
   flying = IniInt ("Avatar", "Flying") != 0;
+  invert_y = IniInt ("Avatar", "InvertY") != 0;
+  mouse_sense = IniFloat ("Avatar", "MouseSensitivity");
+  if (mouse_sense == 0) {
+    mouse_sense = DEFAULT_SENSE;
+    IniFloatSet ("Avatar", "MouseSensitivity", mouse_sense);
+  }
   avatar.LoadX ("models//male.x");
+  
   avatar.BoneInflate (BONE_PELVIS, 0.02f, true);
   avatar.BoneInflate (BONE_HEAD, 0.025f, true);
   avatar.BoneInflate (BONE_LWRIST, 0.03f, true);
   avatar.BoneInflate (BONE_RWRIST, 0.03f, true);
   avatar.BoneInflate (BONE_RANKLE, 0.05f, true);
   avatar.BoneInflate (BONE_LANKLE, 0.05f, true);
+  
   for (int i = 0; i < ANIM_COUNT; i++) 
     anim[i].LoadBvh (IniString ("Animations", anim_names[i]));
   /*
@@ -307,8 +318,10 @@ void AvatarTerm (void)
 void AvatarLook (int x, int y)
 {
 
-  angle.x += x;
-  angle.z += y;
+  if (invert_y)
+    x = -x;
+  angle.x -= (float)x * mouse_sense;
+  angle.z += (float)y * mouse_sense;
   angle.x = clamp (angle.x, 0.0f, 180.0f);
   angle.z = fmod (angle.z, 360.0f);
   if (angle.z < 0.0f)

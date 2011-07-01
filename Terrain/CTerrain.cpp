@@ -145,7 +145,7 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
     start.x = start.y = -2;
     end.x = end.y = TERRAIN_EDGE + 2;
   }
-  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("rock3.bmp"));
+  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("rockface.bmp"));
   for (y = start.y; y < end.y - 1; y++) {
     glBegin (GL_QUAD_STRIP);
     for (x = start.x; x < end.x; x++) {

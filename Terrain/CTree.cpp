@@ -110,14 +110,14 @@ void CTree::DoFoliage (GLmesh* m, GLvector pos, float fsize, float angle)
     return;
   if (_foliage_style == TREE_FOLIAGE_PANEL) {
     m->PushVertex (glVector (-0.0f, -fsize, -fsize), UP, uv.Corner (0));
-    m->PushVertex (glVector (-0.0f,  fsize, -fsize), UP, uv.Corner (1));
+    m->PushVertex (glVector (-1.0f,  fsize, -fsize), UP, uv.Corner (1));
     m->PushVertex (glVector (-1.0f,  fsize,  fsize), UP, uv.Corner (2));
-    m->PushVertex (glVector (-1.0f, -fsize,  fsize), UP, uv.Corner (3));
+    m->PushVertex (glVector (-0.0f, -fsize,  fsize), UP, uv.Corner (3));
 
     m->PushVertex (glVector ( 0.0f, -fsize, -fsize), UP, uv.Corner (1));
-    m->PushVertex (glVector ( 0.0f,  fsize, -fsize), UP, uv.Corner (2));
+    m->PushVertex (glVector ( 1.0f,  fsize, -fsize), UP, uv.Corner (2));
     m->PushVertex (glVector ( 1.0f,  fsize,  fsize), UP, uv.Corner (3));
-    m->PushVertex (glVector ( 1.0f, -fsize,  fsize), UP, uv.Corner (0));
+    m->PushVertex (glVector ( 0.0f, -fsize,  fsize), UP, uv.Corner (0));
 
     m->PushQuad (base_index + 0, base_index + 1, base_index + 2, base_index + 3);
     m->PushQuad (base_index + 7, base_index + 6, base_index + 5, base_index + 4);
