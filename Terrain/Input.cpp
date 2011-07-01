@@ -13,11 +13,13 @@
 #include "sdl.h"
 
 #define MAX_KEYS      512
+#define MAX_AXIS      6
 
 static bool   down[MAX_KEYS];
 static bool   pressed[MAX_KEYS];
 static bool   mouselook;
 static bool   fly;
+static float  jstick[MAX_AXIS];
 
 /*-----------------------------------------------------------------------------
 
@@ -70,6 +72,26 @@ bool InputKeyPressed (int id)
   val = pressed[id];
   pressed[id] = false;
   return val;
+
+}
+
+void InputJoystickSet (int axis, int value)
+{
+
+  if (axis < 0 || axis >= MAX_AXIS)
+    return;
+  jstick[axis] = (float)value / 32768.0f;
+  if (abs (jstick[axis]) < 0.15f)//"dead zone"
+    jstick[axis] = 0.0f;
+
+}
+
+float InputJoystickGet (int axis)
+{
+
+  if (axis < 0 || axis >= MAX_AXIS)
+    return 0.0f;
+  return jstick[axis];
 
 }
 

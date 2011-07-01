@@ -11,11 +11,14 @@
 
 
 #include "stdafx.h"
+#include <sstream>
+#include "avatar.h"
 #include "cache.h"
 #include "camera.h"
 #include "cfigure.h"
 #include "ini.h"
 #include "input.h"
+#include "main.h"
 #include "math.h"
 #include "render.h"
 #include "sdl.h"
@@ -29,6 +32,7 @@
 #define CAM_MIN         1
 #define CAM_MAX         12
 #define STOP_SPEED      0.02f
+#define SWIM_DEPTH      1.4f
 
 
 enum
@@ -36,6 +40,8 @@ enum
   ANIM_IDLE,
   ANIM_RUN,
   ANIM_FALL,
+  ANIM_JUMP,
+  ANIM_SWIM,
   ANIM_COUNT
 };
 
@@ -109,6 +115,19 @@ void do_camera ()
 
 
 
+void do_location ()
+{
+
+  ostringstream   oss(ostringstream::in);
+
+  oss << APP << " ";
+  //oss << WorldLocationName (region.grid_pos.x, region.grid_pos.y) << " (" << region.title << ") ";
+  oss << WorldLocationName ((int)position.x, (int)position.y) << " (" << region.title << ") ";
+  oss << "Looking " << WorldDirectionFromAngle (angle.z);
+  SdlSetCaption (oss.str ().c_str ());
+
+}
+
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/
@@ -116,11 +135,12 @@ void do_camera ()
 void AvatarUpdate (void)
 {
 
-  float     e;
+  float     ground;
+  float     water;
+  Cell      cell;
   float     speed;
   float     elapsed;
   float     steps;
-  char*     direction;
   GLvector  old;
 
   elapsed = SdlElapsedSeconds ();
@@ -133,6 +153,10 @@ void AvatarUpdate (void)
     velocity = JUMP_SPEED;
     on_ground = false;
   }
+  //Jotstick movement
+  AvatarLook ((int)(InputJoystickGet (3) * 5.0f), (int)(InputJoystickGet (4) * -5.0f));
+  do_move (glVector (InputJoystickGet (0), InputJoystickGet (1), 0.0f));
+  TextPrint ("%1.4f %1.4f", InputJoystickGet (4), InputJoystickGet (3));
   if (InputMouselook ()) {
     if (InputKeyPressed (INPUT_MWHEEL_UP))
       desired_cam_distance -= 1.0f;
@@ -146,6 +170,7 @@ void AvatarUpdate (void)
       do_move (glVector (-1, 0, 0));
     if (InputKeyState (SDLK_d))
       do_move (glVector (1, 0, 0));
+    do_move (glVector (InputJoystickGet (0), InputJoystickGet (1), 0.0f));
   }
   speed = elapsed * MOVE_SPEED;
   if (fly) 
@@ -160,7 +185,8 @@ void AvatarUpdate (void)
     else 
       speed *= 25;
   }
-  desired_movement.Normalize ();
+  if (desired_movement.Length () > 1.0f)
+    desired_movement.Normalize ();
   desired_movement *= speed;
   current_movement = glVectorInterpolate (current_movement, desired_movement, elapsed * 4.0f);
   steps = current_movement.Length ();
@@ -170,20 +196,20 @@ void AvatarUpdate (void)
   position.y += current_movement.y;
   desired_cam_distance = clamp (desired_cam_distance, CAM_MIN, CAM_MAX);
   cam_distance = MathInterpolate (cam_distance, desired_cam_distance, elapsed);
-  e = CacheElevation (position.x, position.y);
+  ground = CacheElevation (position.x, position.y);
+  //water = C
   if (!fly) {
-    if (position.z <= e) {
+    if (position.z <= ground) {
       on_ground = true;
-      position.z = e;
+      position.z = ground;
       velocity = 0.0f;
-    } else if (position.z > e + GRAVITY * 0.1f)
+    } else if (position.z > ground + GRAVITY * 0.1f)
       on_ground = false;
   }
   if (on_ground)
     distance_walked += steps;
   if (current_movement.x != 0.0f && current_movement.y != 0.0f)
     avatar_facing.z = -MathAngle (0.0f, 0.0f, current_movement.x, current_movement.y) / 2.0f;
-  //avatar_facing.x = avatar_facing.z;
   if (steps == 0 || !on_ground)
     avatar.Animate (&anim[ANIM_FALL], velocity);
   else 
@@ -192,11 +218,9 @@ void AvatarUpdate (void)
   avatar.RotationSet (avatar_facing);
   avatar.Update ();
   region = WorldRegionGet ((int)(position.x + REGION_HALF) / REGION_SIZE, (int)(position.y + REGION_HALF) / REGION_SIZE);
-  direction = WorldDirectionFromAngle (angle.z);
-
-  TextPrint ("%s @%s - Facing %s %f", region.title, WorldLocationName (region.grid_pos.x, region.grid_pos.y), direction, avatar_facing.z);
   //TextPrint ("Temp:%1.1f%c Moisture:%1.0f%%\nGeo Scale: %1.2f Water Level: %1.2f Topography Detail:%1.2f Topography Bias:%1.2f", region.temperature * 100.0f, 186, region.moisture * 100.0f, region.geo_scale, region.geo_water, region.geo_detail, region.geo_bias);
   do_camera ();
+  do_location ();
 
 }
 
@@ -215,9 +239,11 @@ void AvatarInit (void)
   avatar.BoneInflate (BONE_RWRIST, 0.03f, true);
   avatar.BoneInflate (BONE_RANKLE, 0.05f, true);
   avatar.BoneInflate (BONE_LANKLE, 0.05f, true);
-  anim[ANIM_IDLE].LoadBvh (IniString ("AnimIdle"));
-  anim[ANIM_RUN].LoadBvh (IniString ("AnimRun"));
-  anim[ANIM_FALL].LoadBvh (IniString ("AnimFall"));
+  anim[ANIM_IDLE].LoadBvh (IniString ("Animations", "Idle"));
+  anim[ANIM_RUN].LoadBvh (IniString ("Animations", "Run"));
+  anim[ANIM_FALL].LoadBvh (IniString ("Animations", "Fall"));
+  anim[ANIM_JUMP].LoadBvh (IniString ("Animations", "Jump"));
+  anim[ANIM_SWIM].LoadBvh (IniString ("Animations", "Swim"));
   //anim.LoadBvh ("Anims//walk.bvh");
 
 }
@@ -226,10 +252,10 @@ void AvatarTerm (void)
 {
 
   //just store our most recent position in the ini
-  IniVectorSet ("AvatarAngle", angle);
-  IniFloatSet ("AvatarCameraDistance", cam_distance);
-  IniVectorSet ("AvatarPosition", position);
-  IniIntSet ("AvatarFlying", fly ? 1 : 0);
+  IniVectorSet ("Avatar", "Angle", angle);
+  IniFloatSet ("Avatar", "CameraDistance", cam_distance);
+  IniVectorSet ("Avatar", "Position", position);
+  IniIntSet ("Avatar", "Flying", fly ? 1 : 0);
  
 }
 

@@ -33,11 +33,12 @@ static float          elapsed_seconds;
 void SdlInit ()
 {
 
-  if (SDL_Init (SDL_INIT_EVERYTHING) != 0) {
+  if (SDL_Init (SDL_INIT_EVERYTHING | SDL_INIT_JOYSTICK) != 0) {
     Log ("Unable to initialize SDL: %s\n", SDL_GetError());
     return;
   }
-  SDL_WM_SetIcon(SDL_LoadBMP("/textures/blob.bmp"), NULL);
+  SDL_WM_SetIcon (SDL_LoadBMP("/textures/arrow.bmp"), NULL);
+  SDL_WM_SetCaption ("", "");
   RenderCreate (1280, 768, 32, false);
   //RenderCreate (1920, 1200, 32, true);
   //Here we initialize SDL as we would do with any SDL application.
@@ -55,6 +56,12 @@ void SdlInit ()
   return true;
   */
   last_update = SDL_GetTicks ();
+  Log("SDLInit: %i joysticks found.", SDL_NumJoysticks());
+  for (int i = 0; i < SDL_NumJoysticks(); i++) {
+    SDL_JoystickEventState(SDL_ENABLE);
+    //joystick = 
+    SDL_JoystickOpen(i);
+  }
 
 }
 
@@ -72,6 +79,13 @@ void SdlTerm ()
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/
+
+void SdlSetCaption (const char* caption)
+{
+
+  SDL_WM_SetCaption (caption, "");
+
+}
 
 void SdlSwapBuffers ()
 {
@@ -99,6 +113,9 @@ void SdlUpdate ()
       if (event.key.keysym.sym == SDLK_ESCAPE)
         MainQuit ();
       InputKeyDown (event.key.keysym.sym);
+      break;
+    case SDL_JOYAXISMOTION:
+      InputJoystickSet (event.jaxis.axis, event.jaxis.value);
       break;
     case SDL_KEYUP:
       InputKeyUp (event.key.keysym.sym);
