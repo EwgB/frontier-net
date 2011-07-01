@@ -119,7 +119,6 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
   float       tile;
   int         x, y;
   int         world_x, world_y;
-  GLtexture*  t;
   GLvector    pos;
   int         stage ;
   GLrgba      col;
@@ -146,9 +145,7 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
     start.x = start.y = -2;
     end.x = end.y = TERRAIN_EDGE + 2;
   }
-  
-  t = TextureFromName ("rock3.bmp");
-  glBindTexture (GL_TEXTURE_2D, t->id);
+  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("rock3.bmp"));
   for (y = start.y; y < end.y - 1; y++) {
     glBegin (GL_QUAD_STRIP);
     for (x = start.x; x < end.x; x++) {
@@ -166,11 +163,29 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
     glEnd ();
   }
   for (stage = 0; stage < LAYERS; stage++) {
+
+    //Special layer to give the sand & rock some more depth
+    if (stage == 3) {
+      glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glColor4f (1,1,1, 0.5f);
+      glColor3f (1,1,1);
+      glBlendFunc (GL_DST_COLOR, GL_SRC_COLOR);
+      glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("wave.bmp"));
+	    glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	
+      glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
+      glBegin (GL_QUADS);
+      glTexCoord2f (0, 0); glVertex2i (0, 0);
+      glTexCoord2f (0, 2); glVertex2i (TERRAIN_SIZE, 0);
+      glTexCoord2f (2, 2); glVertex2i (TERRAIN_SIZE, TERRAIN_SIZE);
+      glTexCoord2f (2, 0); glVertex2i (0, TERRAIN_SIZE);
+      glEnd ();
+      glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
     if (!_surface_used[layers[stage].surface])
       continue;
-    t = TextureFromName (layers[stage].texture);
-    glBindTexture (GL_TEXTURE_2D, t->id);
-	  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
+    //t = TextureFromName (layers[stage].texture);
+    glBindTexture (GL_TEXTURE_2D, TextureIdFromName (layers[stage].texture));
+	  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	
     glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
 
     for (y = start.y; y < end.y - 1; y++) {
@@ -205,8 +220,9 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
         glPopMatrix ();
       }
     }
-    
   }
+
+
 
 
 }
@@ -216,6 +232,8 @@ void CTerrain::DoTexture ()
  if (!_back_texture) {
     glGenTextures (1, &_back_texture); 
     glBindTexture(GL_TEXTURE_2D, _back_texture);
+ 	  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	
+    glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
     _patch_size = min (RenderMaxDimension (), _texture_desired_size);
     _patch_steps = _texture_desired_size / _patch_size;
     _patch_steps = max (_patch_steps, 1);//Avoid div by zero. Trust me, it's bad.

@@ -109,6 +109,20 @@ void CTree::DoFoliage (GLmesh* m, GLvector pos, float fsize, float angle)
   if (fsize < 0.1f)
     return;
   if (_foliage_style == TREE_FOLIAGE_PANEL) {
+    m->PushVertex (glVector (-0.0f, -fsize, -fsize), UP, uv.Corner (0));
+    m->PushVertex (glVector (-0.0f,  fsize, -fsize), UP, uv.Corner (1));
+    m->PushVertex (glVector (-1.0f,  fsize,  fsize), UP, uv.Corner (2));
+    m->PushVertex (glVector (-1.0f, -fsize,  fsize), UP, uv.Corner (3));
+
+    m->PushVertex (glVector ( 0.0f, -fsize, -fsize), UP, uv.Corner (1));
+    m->PushVertex (glVector ( 0.0f,  fsize, -fsize), UP, uv.Corner (2));
+    m->PushVertex (glVector ( 1.0f,  fsize,  fsize), UP, uv.Corner (3));
+    m->PushVertex (glVector ( 1.0f, -fsize,  fsize), UP, uv.Corner (0));
+
+    m->PushQuad (base_index + 0, base_index + 1, base_index + 2, base_index + 3);
+    m->PushQuad (base_index + 7, base_index + 6, base_index + 5, base_index + 4);
+
+  } else if (_foliage_style == TREE_FOLIAGE_SHIELD) {
     m->PushVertex (glVector ( fsize / 2, 0.0f,  0.0f), UP, uv.Center ());
     m->PushVertex (glVector (0.0f, -fsize, 0.0f), UP, uv.Corner (0));
     m->PushVertex (glVector (0.0f,  0.0f,  fsize), UP, uv.Corner (1));
@@ -506,14 +520,14 @@ void CTree::Create (bool is_canopy, float moisture, float temp_in, int seed_in)
   //We want our height to fall on a bell curve
   _default_height = 5.0f + WorldNoisef (_seed_current++) * 4.0f + WorldNoisef (_seed_current++) * 4.0f;
   _default_bend_frequency = 1.0f + WorldNoisef (_seed_current++) * 2.0f;
-  _default_base_radius = 0.3f + WorldNoisef (_seed_current++) * 2.0f;
+  _default_base_radius = 0.2f + (_default_height / 20.0f) * WorldNoisef (_seed_current++);
   _default_branches = 2 + WorldNoisei (_seed_current) % 2;
   //Keep branches away from the ground, since they don't have collision
   _default_lowest_branch = (3.0f / _default_height);
   //Funnel trunk trees taper off quickly at the base.
   _funnel_trunk = (WorldNoisei (_seed_current++) % 6) == 0;
   if (_funnel_trunk) {//Funnel trees need to be bigger and taller to look right
-    _default_base_radius *= 2.0f;
+    _default_base_radius *= 1.2f;
     _default_height *= 1.5f;
   }
   _trunk_style = (TreeTrunkStyle)(WorldNoisei (_seed_current) % TREE_TRUNK_STYLES); 
@@ -539,6 +553,8 @@ void CTree::Create (bool is_canopy, float moisture, float temp_in, int seed_in)
     _bark_color2 = glRgba (1.0f);
   //These two foliage styles don't look right on evergreens.
   if (_evergreen && _foliage_style == TREE_FOLIAGE_BOWL)
+    _foliage_style = TREE_FOLIAGE_UMBRELLA;
+  if (_evergreen && _foliage_style == TREE_FOLIAGE_SHIELD)
     _foliage_style = TREE_FOLIAGE_UMBRELLA;
   if (_evergreen && _foliage_style == TREE_FOLIAGE_PANEL)
     _foliage_style = TREE_FOLIAGE_SAG;
@@ -618,8 +634,6 @@ void CTree::DoLeaves ()
     l.position.x = TEXTURE_HALF;
     l.position.y = TEXTURE_HALF;
     l.angle = 0.0f;
-//    l.color = glRgbaInterpolate (_leaf_color, glRgba (0.0f, 0.5f, 0.0f), WorldNoisef (_seed_current++) * 0.25f);
-    //l.brightness = 1.0f;
     _leaf_list.push_back (l);
     //now scatter other leaves around
     for (i = 0; i < 50; i++) {

@@ -53,7 +53,7 @@ static GridManager        gm_forest;
 static vector<CForest>    il_forest;
 static GridManager        gm_grass;
 static vector<CGrass>     il_grass;
-static unsigned           world_seed = 1;
+static unsigned           world_seed = 2;
 
 /* Module Functions *************************************************************/
 

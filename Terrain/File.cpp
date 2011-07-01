@@ -218,14 +218,6 @@ void FileCreateFolder (char* folder)
 
   errcode = 0;
   _mkdir (folder);
-  /*
-  if (mkdir (folder))
-    errcode = errno;
-  if (!errcode) {
-    SetFileAttributes (folder, FILE_ATTRIBUTE_NOT_CONTENT_INDEXED);
-    SetFileAttributes (folder, FILE_ATTRIBUTE_TEMPORARY);
-  }
-  */
 
 }
 
