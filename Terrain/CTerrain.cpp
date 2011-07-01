@@ -19,7 +19,7 @@
 
 
 //Lower values make the terrain more precise at the expense of more polygons
-#define TOLERANCE         0.1f
+#define TOLERANCE         0.08f
 
 #define COMPILE_GRID      4
 #define COMPILE_SIZE      (TERRAIN_SIZE / COMPILE_GRID)

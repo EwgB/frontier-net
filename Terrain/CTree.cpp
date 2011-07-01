@@ -518,7 +518,7 @@ void CTree::Create (bool is_canopy, float moisture, float temp_in, int seed_in)
   _temperature = temp_in;
   _seed_current = _seed;
   //We want our height to fall on a bell curve
-  _default_height = 5.0f + WorldNoisef (_seed_current++) * 4.0f + WorldNoisef (_seed_current++) * 4.0f;
+  _default_height = 8.0f + WorldNoisef (_seed_current++) * 4.0f + WorldNoisef (_seed_current++) * 4.0f;
   _default_bend_frequency = 1.0f + WorldNoisef (_seed_current++) * 2.0f;
   _default_base_radius = 0.2f + (_default_height / 20.0f) * WorldNoisef (_seed_current++);
   _default_branches = 2 + WorldNoisei (_seed_current) % 2;
