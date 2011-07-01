@@ -227,3 +227,16 @@ float GLvector2::Length ()
   return (float)sqrt (x * x + y * y);
 
 }
+
+void GLvector2::Normalize ()
+{
+
+  float length = Length ();
+
+  if (length != 0) {
+    length = 1.0f / length;
+    x *= length;
+    y *= length;
+  }
+
+}

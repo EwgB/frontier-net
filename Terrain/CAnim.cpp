@@ -13,6 +13,7 @@
 #include "cfigure.h"
 #include "file.h"
 #include "log.h"
+#include "math.h"
 
 #define NEWLINE     "\n"
 
@@ -310,5 +311,27 @@ bool CAnim::LoadBvh (char* filename)
 
 }
 
+AnimJoint* CAnim::GetFrame (float delta)
+{
+
+  unsigned    i;
+  unsigned    frame;
+  unsigned    next_frame;
+  AnimJoint   aj;
+
+  delta *= (float)Frames ();
+  frame = (unsigned)delta % Frames ();
+  next_frame = (frame + 1) % Frames ();
+  delta -= (float)frame;
+  _current.joint.clear ();
+  for (i = 0; i < Joints (); i++) {
+    aj.id = _frame[frame].joint[i].id;
+    aj.rotation = glVectorInterpolate (_frame[frame].joint[i].rotation, _frame[next_frame].joint[i].rotation, delta);
+    _current.joint.push_back (aj);
+  }
+  return &_current.joint[0];
+
+}
+    
 
 

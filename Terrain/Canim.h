@@ -72,6 +72,8 @@ class CAnim
 
 public:
   vector<AnimFrame> _frame;
+  AnimFrame         _current;
+  AnimJoint*        GetFrame (float frame);       
   unsigned          Frames () { return _frame.size (); };
   unsigned          Joints () { return _frame[0].joint.size (); };
   unsigned          Id (unsigned frame, unsigned index) { return _frame[frame].joint[index].id; };
@@ -79,7 +81,6 @@ public:
   bool              LoadBvh (char* filename);
   static BoneId     BoneFromString (char* string);
   static char*      NameFromBone (BoneId id);
-
   
 };
 

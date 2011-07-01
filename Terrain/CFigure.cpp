@@ -43,13 +43,23 @@ CFigure::CFigure ()
 
 void CFigure::Animate (CAnim* anim, float delta)
 {
-
+  /*
   unsigned      frame;
 
   frame = (unsigned)(delta * (float)anim->Frames ());
   frame %= anim->Frames ();
   for (unsigned i = 0; i < anim->Joints (); i++) 
      RotateBone ((BoneId)anim->Id (frame, i), anim->Rotation (frame, i));
+     */
+  AnimJoint*    aj;
+  
+  if (delta > 1.0f)
+    delta -= (float)((int)delta);
+  aj = anim->GetFrame (delta);
+  for (unsigned i = 0; i < anim->Joints (); i++) 
+     RotateBone (aj[i].id, aj[i].rotation);
+
+
 
 }
 
@@ -131,9 +141,6 @@ void CFigure::Update ()
   vector<Bone>::reverse_iterator rit;
   for (rit = _bone.rbegin(); rit < _bone.rend(); ++rit) {
     b = &(*rit);
-  //for (i = _bone.size () - 1; i > 0; i--) {
-  //for (i = 0; i < _bone.size () - 1; i++) {
-    //b = &_bone[i];
     if (b->_rotation == glVector (0.0f, 0.0f, 0.0f))
       continue;
     if (b->_id == BONE_ROOT)

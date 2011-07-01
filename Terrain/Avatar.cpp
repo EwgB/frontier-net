@@ -28,7 +28,7 @@
 #define EYE_HEIGHT      1.75f
 #define CAM_MIN         1
 #define CAM_MAX         12
-#define STOP_SPEED      0.05f
+#define STOP_SPEED      0.02f
 
 
 enum
@@ -117,47 +117,52 @@ void AvatarUpdate (void)
 {
 
   float     e;
-  float     move;
+  float     speed;
   float     elapsed;
   float     steps;
   char*     direction;
   GLvector  old;
 
   elapsed = SdlElapsedSeconds ();
+  elapsed = min (elapsed, 0.25f);
   old = position;
   desired_movement = glVector (0.0f, 0.0f);
   if (InputKeyPressed (SDLK_F2))
     fly = !fly;
-  if (InputKeyPressed (SDLK_SPACE) && on_ground) 
+  if (InputKeyPressed (SDLK_SPACE) && on_ground) {
     velocity = JUMP_SPEED;
-  move = elapsed * MOVE_SPEED;
+    on_ground = false;
+  }
   if (InputMouselook ()) {
-    if (fly) 
-      velocity = 0.0f;
-    else {
-      position.z += velocity * elapsed;
-      velocity -= elapsed * GRAVITY;
-    }
-    if (InputKeyState (SDLK_LSHIFT)) {
-      if (!fly)
-        move *= 2.5f;
-      else 
-        move *= 25;
-    }
     if (InputKeyPressed (INPUT_MWHEEL_UP))
       desired_cam_distance -= 1.0f;
     if (InputKeyPressed (INPUT_MWHEEL_DOWN))
       desired_cam_distance += 1.0f;
     if (InputKeyState (SDLK_w))
-      do_move (glVector (0, -move, 0));
+      do_move (glVector (0, -1, 0));
     if (InputKeyState (SDLK_s))
-      do_move (glVector (0, move, 0));
+      do_move (glVector (0, 1, 0));
     if (InputKeyState (SDLK_a))
-      do_move (glVector (-move, 0, 0));
+      do_move (glVector (-1, 0, 0));
     if (InputKeyState (SDLK_d))
-      do_move (glVector (move, 0, 0));
+      do_move (glVector (1, 0, 0));
   }
-  current_movement = glVectorInterpolate (current_movement, desired_movement, elapsed * 2.0f);
+  speed = elapsed * MOVE_SPEED;
+  if (fly) 
+    velocity = 0.0f;
+  else {
+    position.z += velocity * elapsed;
+    velocity -= elapsed * GRAVITY;
+  }
+  if (InputKeyState (SDLK_LSHIFT)) {
+    if (!fly)
+      speed *= 2.5f;
+    else 
+      speed *= 25;
+  }
+  desired_movement.Normalize ();
+  desired_movement *= speed;
+  current_movement = glVectorInterpolate (current_movement, desired_movement, elapsed * 4.0f);
   steps = current_movement.Length ();
   if (desired_movement.x == 0.0f && desired_movement.y == 0.0f && steps < STOP_SPEED) 
     current_movement = glVector (0.0f, 0.0f);

@@ -91,6 +91,7 @@ struct GLvector2
   float       x;
   float       y;
   float       Length ();
+  void        Normalize ();
   OPERATORS(GLvector2);
 };
 
