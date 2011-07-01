@@ -6,5 +6,5 @@ bool InputMouselook ();
 void InputMouselookSet (bool val);
 bool InputKeyPressed (int id);
 
-#define SDL_MWHEEL_UP   510
-#define SDL_MWHEEL_DOWN 511
+#define INPUT_MWHEEL_UP   510
+#define INPUT_MWHEEL_DOWN 511

@@ -23,23 +23,29 @@
 #include "Texture.h"
 #include "world.h"
 
+#define JUMP_SPEED      4.0f
+#define MOVE_SPEED      4.5f
+#define EYE_HEIGHT      1.75f
+#define CAM_MIN         1
+#define CAM_MAX         12
+#define STOP_SPEED      0.05f
+
+
 enum
 {
   ANIM_IDLE,
   ANIM_RUN,
-  ANIM_JUMP,
+  ANIM_FALL,
   ANIM_COUNT
 };
-
-#define JUMP_SPEED      4.0f
-#define MOVE_SPEED      3.5f
-#define EYE_HEIGHT      1.75f
 
 static GLvector         angle;
 static GLvector         avatar_facing;
 static GLvector         position;
-static GLvector2        movement;
+static GLvector2        current_movement;
 static GLvector2        desired_movement;
+static float            cam_distance;
+static float            desired_cam_distance;
 static float            velocity;
 static bool             fly;
 static bool             on_ground;
@@ -57,18 +63,18 @@ static void do_move (GLvector delta)
 {
 
   GLvector    movement;
-  float       vert_delta;
   float       forward;
   
-  if (fly) 
+  if (fly) {
     forward = sin (angle.x * DEGREES_TO_RADIANS);
-  else
-    forward = 1.0f;
-  vert_delta = cos (angle.x * DEGREES_TO_RADIANS) * delta.y;
-  movement.x = cos (angle.z * DEGREES_TO_RADIANS) * delta.x +  sin (angle.z * DEGREES_TO_RADIANS) * delta.y * forward;
-  movement.y = -sin (angle.z * DEGREES_TO_RADIANS) * delta.x +  cos (angle.z * DEGREES_TO_RADIANS) * delta.y * forward;
-  movement.z = vert_delta;
-  position += movement;
+    movement.x = cos (angle.z * DEGREES_TO_RADIANS) * delta.x +  sin (angle.z * DEGREES_TO_RADIANS) * delta.y * forward;
+    movement.y = -sin (angle.z * DEGREES_TO_RADIANS) * delta.x +  cos (angle.z * DEGREES_TO_RADIANS) * delta.y * forward;
+    movement.z = cos (angle.x * DEGREES_TO_RADIANS) * delta.y;
+    position += movement;
+  } else {
+    desired_movement.x += cos (angle.z * DEGREES_TO_RADIANS) * delta.x +  sin (angle.z * DEGREES_TO_RADIANS) * delta.y;
+    desired_movement.y += -sin (angle.z * DEGREES_TO_RADIANS) * delta.x +  cos (angle.z * DEGREES_TO_RADIANS) * delta.y;
+  }
 
 }
 
@@ -83,15 +89,15 @@ void do_camera ()
 
   
   rads.x = angle.x * DEGREES_TO_RADIANS;
-  vert_delta = cos (rads.x) * 6;
+  vert_delta = cos (rads.x) * cam_distance;
   horz_delta = sin (rads.x);
 
 
   cam = position;
   cam.z += EYE_HEIGHT;
   
-  cam.x += sin (angle.z * DEGREES_TO_RADIANS) * 6 * horz_delta;
-  cam.y += cos (angle.z * DEGREES_TO_RADIANS) * 6 * horz_delta;
+  cam.x += sin (angle.z * DEGREES_TO_RADIANS) * cam_distance * horz_delta;
+  cam.y += cos (angle.z * DEGREES_TO_RADIANS) * cam_distance * horz_delta;
   cam.z += vert_delta;
 
   ground = CacheElevation (cam.x, cam.y) + 0.2f;
@@ -116,7 +122,6 @@ void AvatarUpdate (void)
   float     steps;
   char*     direction;
   GLvector  old;
-  GLvector  delta;
 
   elapsed = SdlElapsedSeconds ();
   old = position;
@@ -139,6 +144,10 @@ void AvatarUpdate (void)
       else 
         move *= 25;
     }
+    if (InputKeyPressed (INPUT_MWHEEL_UP))
+      desired_cam_distance -= 1.0f;
+    if (InputKeyPressed (INPUT_MWHEEL_DOWN))
+      desired_cam_distance += 1.0f;
     if (InputKeyState (SDLK_w))
       do_move (glVector (0, -move, 0));
     if (InputKeyState (SDLK_s))
@@ -148,25 +157,30 @@ void AvatarUpdate (void)
     if (InputKeyState (SDLK_d))
       do_move (glVector (move, 0, 0));
   }
+  current_movement = glVectorInterpolate (current_movement, desired_movement, elapsed * 2.0f);
+  steps = current_movement.Length ();
+  if (desired_movement.x == 0.0f && desired_movement.y == 0.0f && steps < STOP_SPEED) 
+    current_movement = glVector (0.0f, 0.0f);
+  position.x += current_movement.x;
+  position.y += current_movement.y;
+  desired_cam_distance = clamp (desired_cam_distance, CAM_MIN, CAM_MAX);
+  cam_distance = MathInterpolate (cam_distance, desired_cam_distance, elapsed);
   e = CacheElevation (position.x, position.y);
   if (!fly) {
     if (position.z <= e) {
       on_ground = true;
       position.z = e;
       velocity = 0.0f;
-    } else
+    } else if (position.z > e + GRAVITY * 0.1f)
       on_ground = false;
   }
-
-  delta = position - old;
-  delta.z = 0.0f;
-  steps = delta.Length ();
-  distance_walked += steps;
-  if (steps > 0.0f) 
-    avatar_facing.z = -MathAngle (0.0f, 0.0f, delta.x, delta.y) / 2.0f;
+  if (on_ground)
+    distance_walked += steps;
+  if (current_movement.x != 0.0f && current_movement.y != 0.0f)
+    avatar_facing.z = -MathAngle (0.0f, 0.0f, current_movement.x, current_movement.y) / 2.0f;
   //avatar_facing.x = avatar_facing.z;
-  if (steps == 0)
-    avatar.Animate (&anim[ANIM_IDLE], 0.0f);
+  if (steps == 0 || !on_ground)
+    avatar.Animate (&anim[ANIM_FALL], velocity);
   else 
     avatar.Animate (&anim[ANIM_RUN], distance_walked / 4.0f);
   avatar.PositionSet (position);
@@ -187,16 +201,18 @@ void AvatarInit (void)
 
   angle = IniVector ("AvatarAngle");
   position = IniVector ("AvatarPosition");
+  desired_cam_distance = IniFloat ("AvatarCameraDistance");
   fly = IniInt ("AvatarFlying") != 0;
   avatar.LoadX ("models//male.x");
   avatar.BoneInflate (BONE_PELVIS, 0.02f, true);
   avatar.BoneInflate (BONE_HEAD, 0.025f, true);
-  avatar.BoneInflate (BONE_LWRIST, 0.05f, true);
-  avatar.BoneInflate (BONE_RWRIST, 0.05f, true);
+  avatar.BoneInflate (BONE_LWRIST, 0.03f, true);
+  avatar.BoneInflate (BONE_RWRIST, 0.03f, true);
   avatar.BoneInflate (BONE_RANKLE, 0.05f, true);
   avatar.BoneInflate (BONE_LANKLE, 0.05f, true);
   anim[ANIM_IDLE].LoadBvh (IniString ("AnimIdle"));
   anim[ANIM_RUN].LoadBvh (IniString ("AnimRun"));
+  anim[ANIM_FALL].LoadBvh (IniString ("AnimFall"));
   //anim.LoadBvh ("Anims//walk.bvh");
 
 }
@@ -206,6 +222,7 @@ void AvatarTerm (void)
 
   //just store our most recent position in the ini
   IniVectorSet ("AvatarAngle", angle);
+  IniFloatSet ("AvatarCameraDistance", cam_distance);
   IniVectorSet ("AvatarPosition", position);
   IniIntSet ("AvatarFlying", fly ? 1 : 0);
  

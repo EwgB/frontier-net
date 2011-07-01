@@ -219,7 +219,7 @@ void CachePurge ()
     for (x = 0; x < PAGE_GRID; x++) {
       if (page[x][y]) {
         page_count--;
-        page[walk.x][walk.y]->Save ();
+        page[x][y]->Save ();
         delete page[x][y];
       }
       page[x][y] = NULL;

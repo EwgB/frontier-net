@@ -212,7 +212,7 @@ static void do_uvs (char* buffer, CFigure* fig)
     token = strtok (NULL, DELIMIT);
     pos.x = (float)atof (token);
     token = strtok (NULL, DELIMIT);
-    pos.y = (float)atof (token);
+    pos.y = -(float)atof (token);
     fig->_skin_static._uv[i] = pos;
   }
 

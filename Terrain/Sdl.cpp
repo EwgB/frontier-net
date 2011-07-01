@@ -109,6 +109,10 @@ void SdlUpdate ()
         SDL_ShowCursor (false);
         SDL_WM_GrabInput (SDL_GRAB_ON);
       }
+      if(event.button.button == SDL_BUTTON_WHEELUP)
+        InputKeyDown (INPUT_MWHEEL_UP);
+      if(event.button.button == SDL_BUTTON_WHEELDOWN)
+        InputKeyDown (INPUT_MWHEEL_DOWN);
       if (event.button.button == SDL_BUTTON_LEFT && !InputMouselook ())
         RenderClick (event.motion.x, event.motion.y);        
       break;
@@ -123,6 +127,10 @@ void SdlUpdate ()
         SDL_ShowCursor (true);
         SDL_WM_GrabInput (SDL_GRAB_OFF);
       }
+      if(event.button.button == SDL_BUTTON_WHEELUP)
+        InputKeyUp (INPUT_MWHEEL_UP);
+      if(event.button.button == SDL_BUTTON_WHEELDOWN)
+        InputKeyUp (INPUT_MWHEEL_DOWN);
       break;
     case SDL_MOUSEMOTION:
       if (InputMouselook ()) 
