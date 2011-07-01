@@ -228,3 +228,37 @@ void FileCreateFolder (char* folder)
   */
 
 }
+
+
+void FileMakeDirectory (char* folder)
+{
+
+  char*   dir;
+  char*   p;
+  char*   p1;
+  int     errcode;
+
+  dir = (char*)malloc (strlen (folder) + 1);
+  strcpy (dir, folder);
+  if (!(p = strchr (dir, '\\')))
+    p = strchr (dir, '/');
+  p1 = p;
+  while (p && p1) {
+    *p = '\0';
+    _mkdir (dir);
+    *p = '\\';
+    p1++;
+    if (p == NULL || p1 == NULL ||  *p == 0x0 || *p1 == 0x0)
+      break;
+    if (!(p = strchr (p1, '\\')))    
+      if (!(p = strchr (p1, '/')))
+        break;
+    p1 = p;
+  }
+
+  errcode = 0;
+  if (_mkdir (folder))
+    errcode = errno;
+  free (dir);
+
+}

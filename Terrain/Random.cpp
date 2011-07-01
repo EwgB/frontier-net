@@ -94,6 +94,8 @@ float RandomFloat ()
 void RandomInit (unsigned long seed)
 {
 
+  mag01[0] = 0;
+  mag01[1] = MATRIX_A;
   ptgfsr[0] = seed;
   for (k = 1; k < N; k++)
     ptgfsr[k] = 69069 * ptgfsr[k - 1];

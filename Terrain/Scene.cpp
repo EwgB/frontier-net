@@ -53,6 +53,7 @@ static GridManager        gm_forest;
 static vector<CForest>    il_forest;
 static GridManager        gm_grass;
 static vector<CGrass>     il_grass;
+static unsigned           world_seed = 1;
 
 /* Module Functions *************************************************************/
 
@@ -70,7 +71,7 @@ void SceneGenerate ()
   GLcoord     current;
 
   SceneClear ();
-  WorldGenerate ();
+  WorldGenerate (world_seed++);
   WaterBuild ();
   camera = CameraPosition ();
   current.x = (int)(camera.x) / GRASS_SIZE;

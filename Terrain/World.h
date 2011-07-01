@@ -91,13 +91,14 @@ struct Region
 //Using only this, the entire world can be re-created.
 struct World
 {
-  bool         wind_from_west;
-  bool         northern_hemisphere;
-  unsigned     river_count;
-  unsigned     lake_count;
-  float        noisef[NOISE_BUFFER];
-  unsigned     noisei[NOISE_BUFFER];
-  Region       map[WORLD_GRID][WORLD_GRID];
+  unsigned      seed;
+  bool          wind_from_west;
+  bool          northern_hemisphere;
+  unsigned      river_count;
+  unsigned      lake_count;
+  float         noisef[NOISE_BUFFER];
+  unsigned      noisei[NOISE_BUFFER];
+  Region        map[WORLD_GRID][WORLD_GRID];
 };
 
 
@@ -108,9 +109,10 @@ Region        WorldRegionFromPosition (int world_x, int world_y);
 Region        WorldRegionFromPosition (int world_x, int world_y);
 float         WorldWaterLevel (int world_x, int world_y);
 
-void          WorldGenerate ();
+void          WorldGenerate (unsigned seed);
 unsigned      WorldCanopyTree ();
 char*         WorldDirectionFromAngle (float angle);
+char*         WorldDirectory ();
 void          WorldInit ();
 unsigned      WorldMap ();
 unsigned      WorldNoisei (int index);

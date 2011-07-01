@@ -31,7 +31,8 @@ static char* page_file_name (GLcoord p)
 
   static char     name[20];
 
-  sprintf (name, "cache//cache%d-%d.pag", p.x, p.y);
+  
+  sprintf (name, "%s//cache%d-%d.pag", WorldDirectory (), p.x, p.y);
   return name;
 
 }

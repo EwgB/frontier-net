@@ -20,6 +20,7 @@
 #include "stdafx.h"
 #include "ctree.h"
 #include "entropy.h"
+#include "file.h"
 #include "math.h"
 #include "random.h"
 #include "terraform.h"
@@ -439,19 +440,22 @@ unsigned WorldNoisei (int index)
 
 }
 
-void    WorldGenerate ()
+void    WorldGenerate (unsigned seed_in)
 {
 
   int         x;
   unsigned    m, t;
-  unsigned    seed;
   bool        is_canopy;
+  int         rotator;
 
+  RandomInit (seed_in);
+  planet.seed = seed_in;
+  FileMakeDirectory (WorldDirectory ());
   for (x = 0; x < NOISE_BUFFER; x++) {
     planet.noisei[x] = RandomVal ();
     planet.noisef[x] = RandomFloat ();
   }
-  seed = 0;
+  rotator = 0;
   for (m = 0; m < TREE_TYPES; m++) {
     for (t = 0; t < TREE_TYPES; t++) {
       if ((m == TREE_TYPES / 2) && (t == TREE_TYPES / 2)) {
@@ -459,7 +463,7 @@ void    WorldGenerate ()
         canopy = m + t * TREE_TYPES;
       } else
         is_canopy = false;
-      tree[m][t].Create (is_canopy, (float)m / TREE_TYPES, (float)t / TREE_TYPES, seed++);
+      tree[m][t].Create (is_canopy, (float)m / TREE_TYPES, (float)t / TREE_TYPES, rotator++);
     }
   }
   planet.wind_from_west = (RandomVal () % 2) ? true : false;
@@ -629,3 +633,12 @@ char* WorldDirectionFromAngle (float angle)
 
 }
 
+char* WorldDirectory ()
+{
+
+  static char     dir[32];
+
+  sprintf (dir, "cache//seed%d//", planet.seed);
+  return dir;
+
+}
