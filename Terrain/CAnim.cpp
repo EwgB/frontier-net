@@ -246,9 +246,13 @@ bool CAnim::LoadBvh (char* filename)
   unsigned        bone;
   BoneId          current_id;
   AnimJoint       joint;
+  string          path;
 
-
-  buffer = FileLoad (filename, &size);
+  path.assign ("anims//");
+  path.append (filename);
+  if (!strchr (filename, '.'))
+    path.append (".bvh");
+  buffer = FileLoad ((char*)path.c_str (), &size);
   if (!buffer)
     return false;
   _strupr (buffer);

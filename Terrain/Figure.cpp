@@ -176,16 +176,16 @@ void FigureRender ()
   }
   */
   if (stand) {
-    fig.Animate (&anim_stand, nn);
-    fig2.Animate (&anim_stand, nn);
+    //fig.Animate (&anim_stand, nn);
+    //fig2.Animate (&anim_stand, nn);
   } else {
-    fig.Animate (&anim, nn);
-    fig2.Animate (&anim, nn);
+    //fig.Animate (&anim, nn);
+    //fig2.Animate (&anim, nn);
   }
   frame++;
-  frame %= anim._frame.size ();
-  fig.Update ();
-  fig2.Update ();
+  //frame %= anim._frame.size ();
+  //fig.Update ();
+  //fig2.Update ();
   if (InputKeyPressed (SDLK_f)) {
     fig.PositionSet (AvatarPosition () + glVector (0.0f, -2.0f, 0.0f));
     fig2.PositionSet (AvatarPosition () + glVector (0.0f, 2.0f, 0.0f));
@@ -198,7 +198,7 @@ void FigureRender ()
   glBindTexture (GL_TEXTURE_2D, 0);
   //glDisable (GL_LIGHTING);
   //fig.Render ();
-  fig2.Render ();
+  //fig2.Render ();
   //glEnable (GL_LIGHTING);
   
 

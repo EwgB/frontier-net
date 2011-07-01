@@ -20,22 +20,33 @@
 #include "render.h"
 #include "sdl.h"
 #include "Text.h"
+#include "Texture.h"
 #include "world.h"
 
+enum
+{
+  ANIM_IDLE,
+  ANIM_RUN,
+  ANIM_JUMP,
+  ANIM_COUNT
+};
+
 #define JUMP_SPEED      4.0f
-#define MOVE_SPEED      6.0f
+#define MOVE_SPEED      3.5f
 #define EYE_HEIGHT      1.75f
 
 static GLvector         angle;
 static GLvector         avatar_facing;
 static GLvector         position;
+static GLvector2        movement;
+static GLvector2        desired_movement;
+static float            velocity;
 static bool             fly;
 static bool             on_ground;
 static unsigned         last_update;
 static Region           region;
-static float            velocity;
 static CFigure          avatar;
-static CAnim            anim;
+static CAnim            anim[ANIM_COUNT];
 static float            distance_walked;
 
 /*-----------------------------------------------------------------------------
@@ -109,17 +120,16 @@ void AvatarUpdate (void)
 
   elapsed = SdlElapsedSeconds ();
   old = position;
+  desired_movement = glVector (0.0f, 0.0f);
   if (InputKeyPressed (SDLK_F2))
     fly = !fly;
-  if (InputKeyPressed (SDLK_SPACE)) {
-    if (on_ground)
-      velocity = JUMP_SPEED;
-  }
+  if (InputKeyPressed (SDLK_SPACE) && on_ground) 
+    velocity = JUMP_SPEED;
   move = elapsed * MOVE_SPEED;
   if (InputMouselook ()) {
-    if (fly) {
+    if (fly) 
       velocity = 0.0f;
-    } else {
+    else {
       position.z += velocity * elapsed;
       velocity -= elapsed * GRAVITY;
     }
@@ -129,7 +139,6 @@ void AvatarUpdate (void)
       else 
         move *= 25;
     }
-
     if (InputKeyState (SDLK_w))
       do_move (glVector (0, -move, 0));
     if (InputKeyState (SDLK_s))
@@ -156,7 +165,10 @@ void AvatarUpdate (void)
   if (steps > 0.0f) 
     avatar_facing.z = -MathAngle (0.0f, 0.0f, delta.x, delta.y) / 2.0f;
   //avatar_facing.x = avatar_facing.z;
-  avatar.Animate (&anim, distance_walked / 5.0f);
+  if (steps == 0)
+    avatar.Animate (&anim[ANIM_IDLE], 0.0f);
+  else 
+    avatar.Animate (&anim[ANIM_RUN], distance_walked / 4.0f);
   avatar.PositionSet (position);
   avatar.RotationSet (avatar_facing);
   avatar.Update ();
@@ -183,7 +195,9 @@ void AvatarInit (void)
   avatar.BoneInflate (BONE_RWRIST, 0.05f, true);
   avatar.BoneInflate (BONE_RANKLE, 0.05f, true);
   avatar.BoneInflate (BONE_LANKLE, 0.05f, true);
-  anim.LoadBvh ("Anims//run.bvh");
+  anim[ANIM_IDLE].LoadBvh (IniString ("AnimIdle"));
+  anim[ANIM_RUN].LoadBvh (IniString ("AnimRun"));
+  //anim.LoadBvh ("Anims//walk.bvh");
 
 }
 
@@ -234,6 +248,7 @@ void AvatarPositionSet (GLvector new_pos)
 void AvatarRender ()
 {
 
+  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("check.bmp"));
   avatar.Render ();
   if (RenderConsole ())
     avatar.RenderSkeleton ();
