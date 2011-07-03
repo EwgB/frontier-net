@@ -174,8 +174,8 @@ void SceneUpdate (long stop)
     last_tree = apos;
   }
   gm_terrain.Update (stop);
-  //gm_grass.Update (stop);
-  //gm_forest.Update (stop);
+  gm_grass.Update (stop);
+  gm_forest.Update (stop);
 
 }
 

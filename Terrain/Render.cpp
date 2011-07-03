@@ -38,7 +38,7 @@ static float          view_aspect;
 static SDL_Surface*   screen;
 static int            max_dimension;
 static int            terrain_debug;
-static bool           world_debug = true;
+static bool           world_debug;
 static bool           show_map;
 static GLrgba         current_ambient;
 static GLrgba         current_diffuse;
@@ -474,6 +474,7 @@ void Render (void)
 
   }
 
+  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
   //SkyRender ();

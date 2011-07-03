@@ -63,7 +63,6 @@ static struct LayerAttributes
   {2,    0.8f,  0.8f,   1.55f,  SURFACE_SNOW,       SURFACE_COLOR_SNOW},
   {2,    1.0f,  1.0f,   1.5f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW}
 
-
 };
 
 static bool   bound_ready;
