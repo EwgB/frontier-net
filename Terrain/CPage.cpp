@@ -299,7 +299,7 @@ void CPage::DoSurface ()
     if (region.climate == CLIMATE_DESERT)
       c->surface = SURFACE_SAND;
     //Sand is only for coastal regions
-    if (low <= region.beach_threshold && (region.climate == CLIMATE_COAST))
+    if (low <= 2.0f && (region.climate == CLIMATE_COAST))
       c->surface = SURFACE_SAND;
     //Forests are for... forests?
     if (c->detail < 0.75f && c->detail > 0.25f && (region.climate == CLIMATE_FOREST))
@@ -412,6 +412,7 @@ void CPage::Cache (int origin_x, int origin_y)
 void CPage::Save ()
 {
 
+  return;
   if (_stage == PAGE_STAGE_DONE)
     FileSave (page_file_name (_origin), (char*)this, sizeof (CPage));
 

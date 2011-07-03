@@ -37,7 +37,7 @@ void SdlInit ()
     Log ("Unable to initialize SDL: %s\n", SDL_GetError());
     return;
   }
-  SDL_WM_SetIcon (SDL_LoadBMP("/textures/arrow.bmp"), NULL);
+  SDL_WM_SetIcon (SDL_LoadBMP("textures/arrow.bmp"), NULL);
   SDL_WM_SetCaption ("", "");
   RenderCreate (1280, 768, 32, false);
   //RenderCreate (1920, 1200, 32, true);
@@ -83,7 +83,7 @@ void SdlTerm ()
 void SdlSetCaption (const char* caption)
 {
 
-  SDL_WM_SetCaption (caption, "");
+  SDL_WM_SetCaption (caption, "Frontier");
 
 }
 

@@ -36,21 +36,13 @@ CFigure::CFigure ()
 
   for (i = 0; i < BONE_COUNT; i++) 
     _bone_index[i] = BONE_INVALID;
-  //PushBone (BONE_ROOT, BONE_ROOT, glVector (0.0f, 0.0f, 0.0f));
   _unknown_count = 0;
 
 }
 
 void CFigure::Animate (CAnim* anim, float delta)
 {
-  /*
-  unsigned      frame;
 
-  frame = (unsigned)(delta * (float)anim->Frames ());
-  frame %= anim->Frames ();
-  for (unsigned i = 0; i < anim->Joints (); i++) 
-     RotateBone ((BoneId)anim->Id (frame, i), anim->Rotation (frame, i));
-     */
   AnimJoint*    aj;
   
   if (delta > 1.0f)
@@ -235,7 +227,7 @@ void CFigure::RenderSkeleton ()
   unsigned    i;
   unsigned    parent;
 
-  glLineWidth (5.0f);
+  glLineWidth (12.0f);
   glPushMatrix ();
   glTranslatef (_position.x, _position.y, _position.z); 
   glDisable (GL_DEPTH_TEST);

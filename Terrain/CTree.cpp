@@ -718,7 +718,7 @@ void CTree::DrawVines ()
 
   glColor3fv (&_bark_color1.red);
   glBindTexture (GL_TEXTURE_2D, 0);
-  t = TextureFromName ("vines.bmp");
+  t = TextureFromName ("vines.png");
 	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
   glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
   frames = max (t->height / t->width, 1);

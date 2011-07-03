@@ -784,8 +784,12 @@ void TerraformColors ()
         r.color_map.Normalize ();
         break;
       case CLIMATE_DESERT:
-      case CLIMATE_COAST:
         r.color_map = glRgba (0.9f, 0.7f, 0.4f);
+      case CLIMATE_COAST:
+        if (r.flags_shape & REGION_FLAG_BEACH_CLIFF)
+          r.color_map = glRgba (0.3f, 0.3f, 0.3f);
+        else
+          r.color_map = glRgba (0.9f, 0.7f, 0.4f);
         break;
       case CLIMATE_OCEAN:
         r.color_map = glRgba (0.0f, 1.0f + r.geo_scale * 2.0f, 1.0f + r.geo_scale);
@@ -951,10 +955,13 @@ void TerraformCoast ()
   Region          r;
   int             pass;
   unsigned        i;
+  unsigned        cliff_grid;
   bool            is_coast;
+  bool            is_cliff;
   vector<GLcoord> queue;
   GLcoord         current;
 
+  cliff_grid = WORLD_GRID / 8;
   //now define the coast 
   for (pass = 0; pass < 2; pass++) {
     queue.clear ();
@@ -982,26 +989,30 @@ void TerraformCoast ()
     for (i = 0; i < queue.size (); i++) {
       current = queue[i];
       r = WorldRegionGet (current.x, current.y);
+      is_cliff = (((current.x / cliff_grid) + (current.y / cliff_grid)) % 2) != 0;
       if (!pass) 
         sprintf (r.title, "%s beach", get_direction_name (current.x, current.y));
       else
         sprintf (r.title, "%s coast", get_direction_name (current.x, current.y));
-      r.geo_bias = 0.0f;
       //beaches are low and partially submerged
       if (!pass) {
-        r.geo_water = -2.0f;
-        r.geo_detail = 4.0f;
-      } else {
-        r.geo_water = 0.5f;
-        r.geo_detail = 14.5f;
-      }
+        r.geo_bias = -1.0f;
+        if (is_cliff)
+          r.flags_shape |= REGION_FLAG_BEACH_CLIFF;
+        else
+          r.flags_shape |= REGION_FLAG_BEACH;
+      } else 
+        r.geo_bias = 0.0f;
+      r.geo_detail = 5.0f + Entropy (current.x, current.y) * 10.0f;
+      r.cliff_threshold = r.geo_detail * 0.5f;
       r.moisture = 1.0f;
-      r.flags_shape |= REGION_FLAG_NOBLEND | REGION_FLAG_BEACH;
-      r.beach_threshold = 3.0f + RandomFloat () * 5.0f;
+      r.geo_water = 0.0f;
+      r.flags_shape |= REGION_FLAG_NOBLEND;
       r.climate = CLIMATE_COAST;
       WorldRegionSet (current.x, current.y, r);
     }
   }
+
 
 }
 

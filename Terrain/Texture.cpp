@@ -36,8 +36,7 @@ static GLtexture* LoadTexture (char* name)
   t = new GLtexture;
   strcpy (t->name, name);
   sprintf (filename, "textures/%s", name);
-  
-  glGenTextures (1, &t->id);// Create The Texture
+  glGenTextures (1, &t->id);
 	glBindTexture (GL_TEXTURE_2D, t->id);
   buffer = FileImageLoad (filename, &size);
   t->width = size.x;

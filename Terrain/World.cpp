@@ -196,16 +196,14 @@ static float do_height (Region r, GLvector2 offset, float water, float detail, f
     if (x + detail < 0.5f)
       val -= min (r.geo_detail, 10.0f);
   }
-  if ((r.flags_shape & REGION_FLAG_BEACH) && val < r.beach_threshold && val > 0.0f) {
-    val /= r.beach_threshold;
-    val = 1 - val;
-    val *= val * val;
-    val = 1 - val;
-    val *= r.beach_threshold;
-    val -= 0.2f;
+  if ((r.flags_shape & REGION_FLAG_BEACH) && val < r.cliff_threshold && val > 0.0f) {
+    val /= r.cliff_threshold;
+    val *= val;
+    val *= r.cliff_threshold;
+    val += 0.2f;
   }
-  if ((r.flags_shape & REGION_FLAG_BEACH_CLIFF) && val < r.beach_threshold && val > -0.1f) {
-    val -= r.beach_threshold;
+  if ((r.flags_shape & REGION_FLAG_BEACH_CLIFF) && val < r.cliff_threshold && val > -0.1f) {
+    val -= min (r.cliff_threshold, 10.0f);
   }
   //if a point dips below the water table, make sure it's not too close to the water,
   //to avoid ugly z-fighting
