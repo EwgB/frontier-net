@@ -40,9 +40,13 @@ http://www.youtube.com/watch?v=-d2-PtK4F6Y
 #include "texture.h"
 #include "world.h"
 
+#include "il\il.h"
+
 #pragma comment (lib, "opengl32.lib")
 #pragma comment (lib, "sdl.lib")
 #pragma comment (lib, "glu32.lib")
+#pragma comment (lib, "DevIL.lib")
+
 
 static bool       quit;
 
@@ -54,6 +58,7 @@ static void init ()
 {
 
   LogInit (APP ".log");
+  ilInit ();
   RandomInit (11);
   SdlInit ();
   RenderInit ();
@@ -121,6 +126,30 @@ void MainQuit ()
   quit = true;
 
 }
+/*
+void do_thing ()
+{
+
+  ILubyte *Lump;
+  ILuint Size;
+  FILE *fff;
+
+
+  fff = fopen("textures//terrain.png", "rb");
+  fseek(fff, 0, SEEK_END);
+  Size = ftell(fff);
+
+  Lump = (ILubyte*)malloc(Size);
+  fseek(fff, 0, SEEK_SET);
+  fread(Lump, 1, Size, fff);
+  fclose(fff);
+  unsigned img;
+  ilGenImages (1, &img);
+  ilBindImage (img);
+  free(Lump);
+
+}
+*/
 
 /*-----------------------------------------------------------------------------
 
@@ -130,6 +159,7 @@ int PASCAL WinMain (HINSTANCE instance_in, HINSTANCE previous_instance, LPSTR co
 {
 
   init ();
+  //do_thing ();
   run ();
   term ();
   return 0;

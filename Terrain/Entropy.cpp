@@ -11,7 +11,6 @@
 
 #include "stdafx.h"
 #include <stdio.h>
-#include "bmpfile.h"
 #include "file.h"
 #include "texture.h"
 
@@ -159,13 +158,13 @@ static void entropy_erode ()
 static void entropy_create (char* filename)
 {
 
-  FILE*     file;
-  BMPFile*  b;
-  int       x, y;
-  int       elements;
-  byte      red;
-  GLvector2 offset;
-  GLcoord   scan;
+  FILE*           file;
+  char*           buffer;
+  int             x, y;
+  int             elements;
+  byte            red;
+  GLvector2       offset;
+  GLcoord         scan;
   
   if (!filename) 
 		return;
@@ -173,18 +172,16 @@ static void entropy_create (char* filename)
   if (!file)	
     return;
 	fclose (file);
-	b = ImageLoad (filename);		
-  size.x = b->sizeX - 4;
-  size.y = b->sizeY - 4;
+  buffer = FileImageLoad (filename, &size);
   elements = size.x * size.y;
   map = new float [elements];
   for (y = 0; y < size.y; y++) {
     for (x = 0; x < size.x; x++) {
       offset.x = (float)x / (float)size.x;
       offset.y = (float)y / (float)size.y;
-      scan.x = (int)(offset.x * (float)b->sizeX);
-      scan.y = (int)(offset.y * (float)b->sizeY);
-      red = b->data[(scan.x + scan.y * b->sizeX) * 3];
+      scan.x = (int)(offset.x * (float)size.x);
+      scan.y = (int)(offset.y * (float)size.y);
+      red = buffer[(scan.x + scan.y * size.x) * 4];
       map[x + y * size.x] = (float)red / 255;
     }
   }
@@ -196,7 +193,7 @@ static void entropy_create (char* filename)
     fwrite (map, sizeof (float), size.x * size.y, file);
     fclose (file);
   }
-  delete b;
+  delete buffer;
   loaded = true;
 
 }

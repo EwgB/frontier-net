@@ -292,8 +292,10 @@ void AvatarInit (void)
   avatar.BoneInflate (BONE_RANKLE, 0.05f, true);
   avatar.BoneInflate (BONE_LANKLE, 0.05f, true);
   
-  for (int i = 0; i < ANIM_COUNT; i++) 
+  for (int i = 0; i < ANIM_COUNT; i++) {
     anim[i].LoadBvh (IniString ("Animations", anim_names[i]));
+    IniStringSet ("Animations", anim_names[i], IniString ("Animations", anim_names[i]));
+  }
   /*
   anim[ANIM_RUN].LoadBvh (IniString ("Animations", "Run"));
   anim[ANIM_SPRINT].LoadBvh (IniString ("Animations", "Sprint"));

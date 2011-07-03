@@ -150,7 +150,7 @@ void glFontInit ()
   GLtexture*  t;
 
   return;
-  t = TextureFromName ("font2.bmp", MASK_LUMINANCE);
+  t = TextureFromName ("font.png");
   f.FaceSet (t->id);
 
 }

@@ -26,7 +26,7 @@
 
 static struct LayerAttributes
 {
-  char*         texture;
+  unsigned      texture_frame;
   float         luminance;
   float         opacity;
   float         size;
@@ -36,32 +36,32 @@ static struct LayerAttributes
 {
   //{"rock.bmp",     1.0f,  1.0f,    3.0f,   SURFACE_ROCK,      SURFACE_COLOR_ROCK},
   
-  {"sand.bmp",     0.7f,  0.3f,   1.3f,   SURFACE_SAND,       SURFACE_COLOR_SAND},
-  {"sand.bmp",     0.8f,  0.3f,   1.2f,   SURFACE_SAND,       SURFACE_COLOR_SAND},
-  {"sand.bmp",     1.0f,  1.0f,   1.1f,   SURFACE_SAND,       SURFACE_COLOR_SAND},
+  {7,     0.7f,  0.3f,   1.3f,   SURFACE_SAND,       SURFACE_COLOR_SAND},
+  {7,     0.8f,  0.3f,   1.2f,   SURFACE_SAND,       SURFACE_COLOR_SAND},
+  {7,     1.0f,  1.0f,   1.1f,   SURFACE_SAND,       SURFACE_COLOR_SAND},
 
-  {"sand.bmp",     0.6f,  1.0f,   1.5f,   SURFACE_SAND_DARK,  SURFACE_COLOR_SAND},
+  {7,     0.6f,  1.0f,   1.5f,   SURFACE_SAND_DARK,  SURFACE_COLOR_SAND},
 
 
-  {"dirt2.bmp",    0.0f,  0.5f,   1.6f,   SURFACE_DIRT,       SURFACE_COLOR_BLACK},
-  {"dirt2.bmp",    0.0f,  0.5f,   1.5f,   SURFACE_DIRT,       SURFACE_COLOR_BLACK},
-  {"dirt2.bmp",    1.0f,  1.0f,   1.4f,   SURFACE_DIRT,       SURFACE_COLOR_DIRT},
-  {"dirt2.bmp",    0.6f,  1.0f,   1.6f,   SURFACE_DIRT_DARK,  SURFACE_COLOR_DIRT},
+  //{4,    0.0f,  0.5f,   1.6f,   SURFACE_DIRT,       SURFACE_COLOR_BLACK},
+  //{4,    0.0f,  0.5f,   1.5f,   SURFACE_DIRT,       SURFACE_COLOR_BLACK},
+  {4,    1.0f,  1.0f,   1.4f,   SURFACE_DIRT,       SURFACE_COLOR_DIRT},
+  {4,    0.6f,  1.0f,   1.6f,   SURFACE_DIRT_DARK,  SURFACE_COLOR_DIRT},
 
-  {"ground1.bmp",  1.0f,  1.0f,   1.6f,   SURFACE_FOREST,     SURFACE_COLOR_DIRT},
+  {3,  1.0f,  1.0f,   1.6f,     SURFACE_FOREST,     SURFACE_COLOR_DIRT},
 
-  {"grass3.bmp",   0.0f,  0.3f,   2.3f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
-  {"grass3.bmp",   0.0f,  0.5f,   2.2f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
-  {"grass3.bmp",   0.0f,  0.5f,   2.1f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
-  {"grass1.bmp",   0.0f,  0.3f,   1.5f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
-  {"grass1.bmp",   0.0f,  0.5f,   1.3f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
-  {"grass1.bmp",   1.0f,  1.0f,   1.2f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
-  {"grass3.bmp",   1.0f,  1.0f,   2.0f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
+  {6,   0.0f,  0.3f,   2.3f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
+  {6,   0.0f,  0.5f,   2.2f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
+  {6,   0.0f,  0.5f,   2.1f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
+  {5,   0.0f,  0.3f,   1.5f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
+  {5,   0.0f,  0.5f,   1.3f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
+  {5,   1.0f,  1.0f,   1.2f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
+  {6,   1.0f,  1.0f,   2.0f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
 
-  {"snow1.bmp",    0.0f,  0.3f,   1.9f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW},
-  {"snow1.bmp",    0.6f,  0.8f,   1.6f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW},
-  {"snow1.bmp",    0.8f,  0.8f,   1.55f,  SURFACE_SNOW,       SURFACE_COLOR_SNOW},
-  {"snow1.bmp",    1.0f,  1.0f,   1.5f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW},
+  {2,    0.0f,  0.3f,   1.9f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW},
+  {2,    0.6f,  0.8f,   1.6f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW},
+  {2,    0.8f,  0.8f,   1.55f,  SURFACE_SNOW,       SURFACE_COLOR_SNOW},
+  {2,    1.0f,  1.0f,   1.5f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW},
 
 
 };
@@ -126,6 +126,8 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
   int         angle;
   GLrgba      surface_color;
   GLcoord     start, end;
+  GLuvbox     uvb;
+  GLvector2   uv;
 
   glDisable (GL_CULL_FACE);
   glDisable (GL_FOG);
@@ -145,7 +147,9 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
     start.x = start.y = -2;
     end.x = end.y = TERRAIN_EDGE + 2;
   }
-  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("rockface.bmp"));
+  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("terrain_rock.png"));
+	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	
+  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
   for (y = start.y; y < end.y - 1; y++) {
     glBegin (GL_QUAD_STRIP);
     for (x = start.x; x < end.x; x++) {
@@ -163,14 +167,13 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
     glEnd ();
   }
   for (stage = 0; stage < LAYERS; stage++) {
-
     //Special layer to give the sand & rock some more depth
     if (stage == 3) {
       glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glColor4f (1,1,1, 0.5f);
       glColor3f (1,1,1);
       glBlendFunc (GL_DST_COLOR, GL_SRC_COLOR);
-      glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("wave.bmp"));
+      glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("terrain_shading.png"));
 	    glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	
       glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
       glBegin (GL_QUADS);
@@ -183,11 +186,10 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
     }
     if (!_surface_used[layers[stage].surface])
       continue;
-    //t = TextureFromName (layers[stage].texture);
-    glBindTexture (GL_TEXTURE_2D, TextureIdFromName (layers[stage].texture));
+    glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("terrain.png"));
+    uvb.Set (0, layers[stage].texture_frame, 1, 8);
 	  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	
     glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
-
     for (y = start.y; y < end.y - 1; y++) {
       for (x = start.x; x < end.x; x++) {
         world_x = _origin.x + x;
@@ -212,10 +214,10 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
         col.alpha = layers[stage].opacity;
         glColor4fv (&col.red);
         glBegin (GL_QUADS);
-        glTexCoord2f (0, 0); glVertex2f (pos.x - tile, pos.y - tile);
-        glTexCoord2f (1, 0); glVertex2f (pos.x + tile, pos.y - tile);
-        glTexCoord2f (1, 1); glVertex2f (pos.x + tile, pos.y + tile);
-        glTexCoord2f (0, 1); glVertex2f (pos.x - tile, pos.y + tile);
+        uv = uvb.Corner (0); glTexCoord2fv (&uv.x); glVertex2f (pos.x - tile, pos.y - tile);
+        uv = uvb.Corner (1); glTexCoord2fv (&uv.x); glVertex2f (pos.x + tile, pos.y - tile);
+        uv = uvb.Corner (2); glTexCoord2fv (&uv.x); glVertex2f (pos.x + tile, pos.y + tile);
+        uv = uvb.Corner (3); glTexCoord2fv (&uv.x); glVertex2f (pos.x - tile, pos.y + tile);
         glEnd ();
         glPopMatrix ();
       }

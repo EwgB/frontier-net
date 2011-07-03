@@ -102,6 +102,7 @@ struct GLuvbox
   GLvector2 ul;
   GLvector2 lr;
   void      Set (GLvector2 ul, GLvector2 lr);
+  void      Set (int x, int y, int columns, int rows);
   void      Set (float repeats);
   GLvector2 Corner (unsigned index);
   GLvector2 Center ();

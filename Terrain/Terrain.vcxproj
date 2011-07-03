@@ -41,9 +41,12 @@
     <LinkIncremental>true</LinkIncremental>
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>
+    <LibraryPath>H:\SDK\devIL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>H:\SDK\devIL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>H:\SDK\devIL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -51,7 +54,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_USE_32BIT_TIME_T;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>H:\Source\SDK\SDL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>H:\Source\SDK\SDL\include;H:\SDK\devIL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -80,7 +83,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Avatar.cpp" />
-    <ClCompile Include="BmpFile.cpp" />
     <ClCompile Include="Cache.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CAnim.cpp" />
@@ -94,6 +96,7 @@
     <ClCompile Include="Env.cpp" />
     <ClCompile Include="Figure.cpp" />
     <ClCompile Include="File.cpp" />
+    <ClCompile Include="FileImage.cpp" />
     <ClCompile Include="FileX.cpp" />
     <ClCompile Include="glBbox.cpp" />
     <ClCompile Include="glCoord.cpp" />
@@ -126,7 +129,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Avatar.h" />
-    <ClInclude Include="BmpFile.h" />
     <ClInclude Include="Cache.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Canim.h" />

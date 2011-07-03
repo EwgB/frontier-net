@@ -112,9 +112,6 @@ void* CameraRegion ()
 void CameraInit (void)		
 {
 
-  angle = IniVector ("CameraAngle");
-  position = IniVector ("CameraPosition");
-
 }
 
 /*-----------------------------------------------------------------------------
@@ -135,8 +132,5 @@ void CameraUpdate (void)
 void CameraTerm (void)		
 {
 
-  //just store our most recent position in the ini
-  IniVectorSet ("CameraAngle", angle);
-  IniVectorSet ("CameraPosition", position);
  
 }

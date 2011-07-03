@@ -19,6 +19,20 @@ void GLuvbox::Set (float repeats)
 }
 
 
+void GLuvbox::Set (int x, int y, int columns, int rows)
+{
+
+  GLvector2   frame_size;
+
+  frame_size.x = 1.0f / (float)columns;
+  frame_size.y = 1.0f / (float)rows;
+
+  ul = glVector ((float)x * frame_size.x, (float)y * frame_size.y);
+  lr = glVector ((float)(x + 1) * frame_size.x, (float)(y + 1) * frame_size.y);
+}
+
+
+
 void GLuvbox::Set (GLvector2 ul_in, GLvector2 lr_in)
 {
   ul = ul_in;

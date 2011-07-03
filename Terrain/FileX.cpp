@@ -316,25 +316,7 @@ static void do_weights (char* buffer, CFigure* fig)
 
 bool FileXLoad (char* filename, CFigure* fig)
 {
-  /*
-  char*             buffer;
-  char*             token;
-  char*             find;
-  bool              done;
-  long              size;
-  unsigned          count;
-  unsigned          i;
-  GLvector          pos;
-  int               i1, i2, i3, i4;
-  int               poly;
-  vector<BoneId>    hierarchy;
-  bool              skel_done;
-  BoneId            bone;
-  BoneId            parent_id;
-  unsigned          frame_depth;
-  GLmatrix          matrix;
-  vector<GLmatrix>  matrix_stack;
-  */
+
   long              size;
   char*             buffer;
 
@@ -352,74 +334,4 @@ bool FileXLoad (char* filename, CFigure* fig)
   return true;
 
 
-
-
-  /*
-  while (!done) {
-    //Read the skeleton
-    if ((!skel_done) && (find = strstr (token, "FRAME"))) {
-      GLvector pusher = glVector (0.0f, 0.0f, 0.0f);
-      frame_depth = 0;
-      //_bone[_bone_index[BONE_ROOT]]._matrix.Identity ();
-      matrix.Identity ();
-      matrix_stack.push_back (matrix);
-      _bone.clear ();
-      while (!skel_done) {
-
-    //We begin reading the vertex positions
-    if (find = strstr (token, "MESH ")) {
-      token = strtok (NULL, NEWLINE);
-      count = atoi (token);
-      for (i = 0; i < count; i++) {
-        token = strtok (NULL, NEWLINE);
-        clean_chars (token, ";,");
-        sscanf (token, "%f %f %f", &pos.x, &pos.y, &pos.z);
-        _skin_static.PushVertex (pos, glVector (0.0f, 0.0f, 0.0f), glVector (0.0f, 0.0f));
-      }
-      //Directly after the verts are the polys
-      token = strtok (NULL, NEWLINE);
-      count = atoi (token);
-      for (i = 0; i < count; i++) {
-        token = strtok (NULL, NEWLINE);
-        clean_chars (token, ";,");
-        poly = atoi (token);
-        if (poly == 3) {
-          sscanf (token + 2, "%d %d %d", &i1, &i2, &i3);
-          _skin_static.PushTriangle (i3, i2, i1);
-        } else if (poly == 4) {
-          sscanf (token + 2, "%d %d %d %d", &i1, &i2, &i3, &i4);
-          _skin_static.PushQuad (i4, i3, i2, i1);
-        }
-      }
-    }
-    //Reading the Normals
-    if (find = strstr (token, "MESHNORMALS ")) {
-      token = strtok (NULL, NEWLINE);
-      clean_chars (token, ";,");
-      count = atoi (token);
-      for (i = 0; i < count; i++) {
-        token = strtok (NULL, NEWLINE);
-        sscanf (token, "%f %f %f", &pos.x, &pos.y, &pos.z);
-        _skin_static._normal[i] = pos;
-      }
-    }
-    //Reading the UV values
-    if (find = strstr (token, "MESHTEXTURECOORDS ")) {
-      token = strtok (NULL, NEWLINE);
-      clean_chars (token, ";,");
-      count = atoi (token);
-      for (i = 0; i < count; i++) {
-        token = strtok (NULL, NEWLINE);
-        sscanf (token, "%f %f %f", &pos.x, &pos.y, &pos.z);
-        _skin_static._normal[i] = pos;
-      }
-    }
-    token = strtok (NULL, NEWLINE);
-    if (!token)
-      done = true;
-  }
-  _skin_static.CalculateNormalsSeamless ();
-  free (buffer);
-  return true;
-  */
 }

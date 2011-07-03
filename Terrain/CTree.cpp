@@ -718,7 +718,7 @@ void CTree::DrawVines ()
 
   glColor3fv (&_bark_color1.red);
   glBindTexture (GL_TEXTURE_2D, 0);
-  t = TextureFromName ("vines.bmp", MASK_PINK);
+  t = TextureFromName ("vines.bmp");
 	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
   glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
   frames = max (t->height / t->width, 1);
@@ -771,7 +771,7 @@ void CTree::DrawLeaves ()
   Leaf              l;
   //GLrgba            color;
     
-  t = TextureFromName ("foliage1.bmp", MASK_PINK);
+  t = TextureFromName ("foliage.png");
   frames = max (t->height / t->width, 1);
   frame_size = 1.0f / (float)frames;
   frame = WorldNoisei (_seed_current++) % frames;
@@ -823,7 +823,7 @@ void CTree::DrawBark ()
   glTexCoord2f (0, 1); glVertex2i (0, TEXTURE_SIZE);
   glEnd ();
   
-  t = TextureFromName ("bark1.bmp", MASK_LUMINANCE);
+  t = TextureFromName ("bark1.bmp");
 	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
   glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
   frames = max (t->height / t->width, 1);

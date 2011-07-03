@@ -189,7 +189,8 @@ void SceneRender ()
   glColor3f (1,1,1);
   if (draw_tree)
     test_tree.Render (last_tree, 0, LOD_HIGH);
-  t = TextureFromName ("g3.bmp", MASK_PINK);
+  //t = TextureFromName ("g3.bmp", MASK_PINK);
+  t = TextureFromName ("grass.png");
   glBindTexture (GL_TEXTURE_2D, t->id);
   gm_grass.Render ();
   glDisable(GL_CULL_FACE);

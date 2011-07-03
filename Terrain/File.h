@@ -9,3 +9,5 @@ bool  FileSave (char *name, char *buf, int size);
 void  FileTouch (char *filename);
 void  FileCreateFolder (char* folder);
 bool  FileXLoad (char* filename, class CFigure* fig);
+char* FileImageLoad (char* filename, GLcoord* size_in);
+

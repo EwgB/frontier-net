@@ -117,7 +117,7 @@ void TextCreate (int width, int height)
 
   view_size.x = width;
   view_size.y = height;
-  t = TextureFromName ("font.bmp", MASK_LUMINANCE);
+  t = TextureFromName ("font.png");
   font.FaceSet (t->id);
 
 }

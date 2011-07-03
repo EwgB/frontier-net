@@ -330,9 +330,7 @@ void CPage::DoSurface ()
     if (delta > 4.0f && region.temperature > 0.0f)
       c->surface = SURFACE_ROCK;
   } else {
-    if (c->surface == SURFACE_GRASS
-      && _walk.x > 0 && _walk.x < PAGE_SIZE - 1 && _walk.y > 0 && _walk.y < PAGE_SIZE - 1 &&
-      region.moisture > 0.5f) {
+    if (c->surface == SURFACE_GRASS && _walk.x > 0 && _walk.x < PAGE_SIZE - 1 && _walk.y > 0 && _walk.y < PAGE_SIZE - 1) {  
       bool all_grass = true;
       for (xx = -1; xx <= 1; xx++) {
         if (!all_grass)
