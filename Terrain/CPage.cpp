@@ -29,7 +29,7 @@
 static char* page_file_name (GLcoord p)
 {
 
-  static char     name[20];
+  static char     name[256];
 
   
   sprintf (name, "%s//cache%d-%d.pag", WorldDirectory (), p.x, p.y);
@@ -392,6 +392,7 @@ void CPage::Cache (int origin_x, int origin_y)
   _stage = PAGE_STAGE_BEGIN;
   _bbox.Clear ();
   if (FileExists (page_file_name (_origin))) {
+  //if (0) {
     char*   buf;
     long    size;
     long    my_size;

@@ -22,6 +22,7 @@
 CForest::CForest ()
 {
 
+  GridData ();
   _stage = FOREST_STAGE_BEGIN;
   _current_distance = 0;
   _valid = false;

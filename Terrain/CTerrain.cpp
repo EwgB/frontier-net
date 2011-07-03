@@ -61,10 +61,13 @@ static struct LayerAttributes
   {2,    0.0f,  0.3f,   1.9f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW},
   {2,    0.6f,  0.8f,   1.6f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW},
   {2,    0.8f,  0.8f,   1.55f,  SURFACE_SNOW,       SURFACE_COLOR_SNOW},
-  {2,    1.0f,  1.0f,   1.5f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW},
+  {2,    1.0f,  1.0f,   1.5f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW}
 
 
 };
+
+static bool   bound_ready;
+static int    boundary[TERRAIN_SIZE];
 
 /*-----------------------------------------------------------------------------
   //This finds the largest power-of-two denominator for the given number.  This 
@@ -74,10 +77,7 @@ static struct LayerAttributes
 static int Boundary (int val)
 {
 
-  static bool   ready;
-  static int    boundary[TERRAIN_SIZE];
-
-  if (!ready) {
+  if (!bound_ready) {
     for (int n = 0; n < TERRAIN_SIZE; n++) {
       boundary[n] = -1;
       if (n == 0)
@@ -93,7 +93,7 @@ static int Boundary (int val)
           boundary[n] = 1;
       }
     }
-    ready = true;
+    bound_ready = true;
   }
   return boundary[val];
 
@@ -105,6 +105,8 @@ static int Boundary (int val)
 
 CTerrain::CTerrain ()
 {
+
+  GridData ();
   _vertex_list = NULL;
   _normal_list = NULL;
   _uv_list = NULL;

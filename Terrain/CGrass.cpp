@@ -42,6 +42,7 @@ static bool           uv_done;
 CGrass::CGrass () 
 {
 
+  GridData ();
   _origin.x = 0;
   _origin.y = 0;
   _current_distance = 0;

@@ -21,6 +21,8 @@ http://opengameart.org/content/very-low-poly-human
 
 http://www.youtube.com/watch?v=-d2-PtK4F6Y
 
+http://www.bramstein.com/projects/gui/
+
 -----------------------------------------------------------------------------*/
 
 #include "stdafx.h"
@@ -46,7 +48,8 @@ http://www.youtube.com/watch?v=-d2-PtK4F6Y
 #pragma comment (lib, "sdl.lib")
 #pragma comment (lib, "glu32.lib")
 #pragma comment (lib, "DevIL.lib")
-
+#pragma comment( lib, "cg.lib" )							// Search For Cg.lib While Linking
+#pragma comment( lib, "cggl.lib" )							// Search For CgGL.lib While Linking
 
 static bool       quit;
 
@@ -58,6 +61,7 @@ static void init ()
 {
 
   LogInit (APP ".log");
+
   ilInit ();
   RandomInit (11);
   SdlInit ();
@@ -126,30 +130,6 @@ void MainQuit ()
   quit = true;
 
 }
-/*
-void do_thing ()
-{
-
-  ILubyte *Lump;
-  ILuint Size;
-  FILE *fff;
-
-
-  fff = fopen("textures//terrain.png", "rb");
-  fseek(fff, 0, SEEK_END);
-  Size = ftell(fff);
-
-  Lump = (ILubyte*)malloc(Size);
-  fseek(fff, 0, SEEK_SET);
-  fread(Lump, 1, Size, fff);
-  fclose(fff);
-  unsigned img;
-  ilGenImages (1, &img);
-  ilBindImage (img);
-  free(Lump);
-
-}
-*/
 
 /*-----------------------------------------------------------------------------
 
@@ -159,7 +139,6 @@ int PASCAL WinMain (HINSTANCE instance_in, HINSTANCE previous_instance, LPSTR co
 {
 
   init ();
-  //do_thing ();
   run ();
   term ();
   return 0;

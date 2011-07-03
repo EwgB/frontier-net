@@ -28,7 +28,7 @@ struct Dist
 #define TABLE_HALF  (TABLE_SIZE / 2)
 
 static vector<Dist> distance_list;
-static vector<Dist> foo2;
+//static vector<Dist> foo2;
 static bool         list_ready;
 
 /*-----------------------------------------------------------------------------
@@ -61,7 +61,7 @@ static void do_list ()
 
   list_ready = true;
   distance_list.resize (TABLE_SIZE *  TABLE_SIZE);
-  foo2.resize (TABLE_SIZE *  TABLE_SIZE);
+//  foo2.resize (TABLE_SIZE *  TABLE_SIZE);
   i = 0;
   for (x = 0; x < TABLE_SIZE; x++) {
     for (y = 0; y < TABLE_SIZE; y++) {
@@ -134,6 +134,7 @@ void GridManager::Init (GridData* itemptr, unsigned grid_size, unsigned item_siz
   do {
     gd = Item (walk);
     gd->Invalidate ();
+    gd->Set (0, 0, 0);
     //gd->Set ( _last_viewer.x + walk.x - _grid_half,  _last_viewer.y + walk.y - _grid_half, 0);
     //gd->Set (viewer.x + walk.x - _grid_half, viewer.y + walk.y - _grid_half, 0);
   } while (!walk.Walk (_grid_size));

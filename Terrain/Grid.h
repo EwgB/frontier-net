@@ -10,7 +10,9 @@ protected:
   GLcoord           _grid_position;
   GLbbox            _bbox;
 public:
-  GLcoord           GridPosition () const { return _grid_position; };
+  GLcoord           GridPosition () const { 
+    return _grid_position; 
+  };
   virtual bool      Ready () { return true; };
   virtual void      Render () {};
   virtual void      Set (int grid_x, int grid_y, int grid_distance) {};

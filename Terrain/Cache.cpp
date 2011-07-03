@@ -69,7 +69,7 @@ float CacheElevation (int world_x, int world_y)
   
   p = page_lookup (world_x, world_y);
   if (!p) 
-    return 0;
+    return -99;
   return p->Elevation (world_x % PAGE_SIZE, world_y % PAGE_SIZE);
 
 }

@@ -995,16 +995,16 @@ void TerraformCoast ()
       else
         sprintf (r.title, "%s coast", get_direction_name (current.x, current.y));
       //beaches are low and partially submerged
+      r.geo_detail = 5.0f + Entropy (current.x, current.y) * 10.0f;
       if (!pass) {
-        r.geo_bias = -1.0f;
+        r.geo_bias = -r.geo_detail * 0.5f;
         if (is_cliff)
           r.flags_shape |= REGION_FLAG_BEACH_CLIFF;
         else
           r.flags_shape |= REGION_FLAG_BEACH;
       } else 
         r.geo_bias = 0.0f;
-      r.geo_detail = 5.0f + Entropy (current.x, current.y) * 10.0f;
-      r.cliff_threshold = r.geo_detail * 0.5f;
+      r.cliff_threshold = r.geo_detail * 0.25f;
       r.moisture = 1.0f;
       r.geo_water = 0.0f;
       r.flags_shape |= REGION_FLAG_NOBLEND;

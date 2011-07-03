@@ -140,14 +140,26 @@ char* FileBinaryLoad (char* name, long* size)
 
 -----------------------------------------------------------------------------*/
 
-int FileExists (char *name)
+bool FileExists (char *name)
 {
-/*
+
+
+  FILE*     f;
+
+  f = fopen (name, "rb");
+  if (f == NULL)
+    return false;
+  fclose (f);
+  return true;
+
+
+  /*
   if (GetFileAttributes (name) == -1) {
 	  return 0;
   }
-  */
+  
   return 1;
+  */
 
 }
 

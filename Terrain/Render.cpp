@@ -27,7 +27,8 @@
 #include "water.h"
 #include "world.h"
 
-#define RENDER_DISTANCE     2048
+#define RENDER_DISTANCE     1536
+#define NEAR_CLIP           0.2f
 #define FOV                 90
 #define MAP_SIZE            512
 
@@ -37,7 +38,7 @@ static float          view_aspect;
 static SDL_Surface*   screen;
 static int            max_dimension;
 static int            terrain_debug;
-static bool           world_debug;
+static bool           world_debug = true;
 static bool           show_map;
 static GLrgba         current_ambient;
 static GLrgba         current_diffuse;
@@ -211,7 +212,7 @@ void RenderCreate (int width, int height, int bits, bool fullscreen)
   fovy = FOV;
   if (view_aspect > 1.0f) 
     fovy /= view_aspect; 
-  gluPerspective (fovy, view_aspect, 0.1f, RENDER_DISTANCE);
+  gluPerspective (fovy, view_aspect, NEAR_CLIP, RENDER_DISTANCE);
   //gluPerspective (fovy, view_aspect, 0.1f, 400);
 	glMatrixMode (GL_MODELVIEW);
   size = min (width, height); 
