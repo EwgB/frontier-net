@@ -35,7 +35,7 @@ enum
 };
 
 #ifndef GRID
-#include "Grid.h"
+#include "cgrid.h"
 #endif
 
 class CTerrain : public GridData

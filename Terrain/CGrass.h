@@ -10,7 +10,7 @@ enum
 
 
 #ifndef GRID
-#include "Grid.h"
+#include "cgrid.h"
 #endif
 
 class CGrass : public GridData

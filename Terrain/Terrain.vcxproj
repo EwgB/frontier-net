@@ -90,6 +90,7 @@
     <ClCompile Include="CForest.cpp" />
     <ClCompile Include="Cg.cpp" />
     <ClCompile Include="CGrass.cpp" />
+    <ClCompile Include="CGrid.cpp" />
     <ClCompile Include="CPage.cpp" />
     <ClCompile Include="CTerrain.cpp" />
     <ClCompile Include="CTree.cpp" />
@@ -137,6 +138,7 @@
     <ClInclude Include="CForest.h" />
     <ClInclude Include="Cg.h" />
     <ClInclude Include="CGrass.h" />
+    <ClInclude Include="CGrid.h" />
     <ClInclude Include="Cpage.h" />
     <ClInclude Include="CTerrain.h" />
     <ClInclude Include="CTree.h" />
@@ -145,7 +147,6 @@
     <ClInclude Include="Figure.h" />
     <ClInclude Include="File.h" />
     <ClInclude Include="glTypes.h" />
-    <ClInclude Include="Grid.h" />
     <ClInclude Include="Ini.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Log.h" />

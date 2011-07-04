@@ -22,7 +22,7 @@ struct TreeVBO
 };
 
 #ifndef GRID
-#include "Grid.h"
+#include "cgrid.h"
 #endif
 
 class CForest : public GridData

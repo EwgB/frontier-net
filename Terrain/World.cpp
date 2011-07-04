@@ -636,7 +636,7 @@ char* WorldDirectory ()
 
   static char     dir[32];
 
-  sprintf (dir, "cache//seed%d//", planet.seed);
+  sprintf (dir, "saves//seed%d//", planet.seed);
   return dir;
 
 }
