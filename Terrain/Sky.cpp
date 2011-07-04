@@ -136,7 +136,7 @@ void SkyInit ()
     angle = 22.5f + (((float)i / DISC) * 360.0f) * DEGREES_TO_RADIANS; 
     sky[i].x = sin (angle) * 6.0f;
     sky[i].y = -cos (angle) * 6.0f;
-    sky[i].z = -0.1f;
+    sky[i].z = -0.5f;
   }
 
   

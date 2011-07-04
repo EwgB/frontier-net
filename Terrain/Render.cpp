@@ -478,7 +478,7 @@ void Render (void)
 
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  CgUpdate ();
+  //CgUpdate ();
   //SkyRender ();
   //if (world_debug) 
   SceneRender ();
