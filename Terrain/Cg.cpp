@@ -10,11 +10,12 @@
 
 #include "stdafx.h"
 #include "camera.h"
+#include "console.h"
 #include "env.h"
-#include "log.h"
-
 #include <cg\cg.h>									
 #include <cg\cggl.h>
+
+#define SHADER_FILE   "shaders/standard.cg"
 
 CGcontext	cgContext;								// A Context To Hold Our Cg Program(s)
 CGprogram	cgProgram;								// Our Cg Vertex Program
@@ -39,21 +40,21 @@ void CgInit ()
   cgSetErrorCallback(MyErrorCallback);
   // Validate Our Profile Determination Was Successful
   if (cgVertexProfile == CG_PROFILE_UNKNOWN) {
-	  Log ("CgInit: Invalid profile type creating vertex profile.");
+	  ConsoleLog ("CgInit: Invalid profile type creating vertex profile.");
     return;
   }
   cgGLSetOptimalOptions(cgVertexProfile);						// Set The Current Profile
 
   // Load And Compile The Vertex Shader From File
-  cgProgram = cgCreateProgramFromFile (cgContext, CG_SOURCE, "shaders/test.cg", cgVertexProfile, "main", 0);
+  cgProgram = cgCreateProgramFromFile (cgContext, CG_SOURCE, SHADER_FILE, cgVertexProfile, "main", 0);
 
   if (cgProgram == NULL) {
     CGerror Error = cgGetError();
     // Show A Message Box Explaining What Went Wrong
-    Log ("CgInit: ERROR: %s", cgGetErrorString(Error));
-    Log ("CgInit: ERROR: %s", cgGetLastErrorString(&Error));
+    ConsoleLog ("CgInit: ERROR: %s", cgGetErrorString(Error));
     return;
   }
+  ConsoleLog ("CgInit: Loaded %s", SHADER_FILE);
   // Load The Program
 	cgGLLoadProgram(cgProgram);
   cgGLBindProgram(cgProgram);

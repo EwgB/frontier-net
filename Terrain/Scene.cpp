@@ -36,7 +36,7 @@
 #define FOREST_HALF     (FOREST_GRID / 2)
 #define GRASS_GRID      7
 #define GRASS_HALF      (GRASS_GRID / 2)
-#define TERRAIN_GRID    17
+#define TERRAIN_GRID    27
 
 static CTree            test_tree;
 static int              cached;
@@ -216,7 +216,7 @@ void SceneRender ()
 
 }
 
-void SceneRenderDebug (int style)
+void SceneRenderDebug ()
 {
 
   glEnable (GL_BLEND);
@@ -224,6 +224,12 @@ void SceneRenderDebug (int style)
   glDisable (GL_LIGHTING);
   glBlendFunc (GL_ONE, GL_ONE);
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glColor3f (1,1,1);
+  gm_forest.Render ();
   gm_terrain.Render ();
+  gm_grass.Render ();
+  glColor3f (1,1,1);
+  AvatarRender ();
+  WaterRender ();
 
 }

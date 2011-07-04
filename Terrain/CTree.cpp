@@ -410,7 +410,7 @@ void CTree::DoTrunk (GLmesh* m, unsigned local_seed, LOD lod)
   //Work out the circumference of the BASE of the tree
   circumference = _current_base_radius * _current_base_radius * (float)PI;
   //The texture will repeat ONCE horizontally around the tree.  Set the vertical to repeat in the same distance.
-  _texture_tile = 1.0f / circumference; 
+  _texture_tile = (float)((int)circumference + 0.5f); 
   radial_steps = 3;
   if (lod == LOD_HIGH)
     radial_steps = 7;

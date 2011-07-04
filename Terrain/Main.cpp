@@ -30,10 +30,11 @@ http://www.bramstein.com/projects/gui/
 #include "avatar.h"
 #include "camera.h"
 #include "cache.h"
+#include "console.h"
 #include "env.h"
 #include "sdl.h"
+#include "il\il.h"
 #include "main.h"
-#include "log.h"
 #include "random.h"
 #include "render.h"
 #include "scene.h"
@@ -42,16 +43,17 @@ http://www.bramstein.com/projects/gui/
 #include "texture.h"
 #include "world.h"
 
-#include "il\il.h"
+#pragma comment (lib, "opengl32.lib") //OpenGL
+#pragma comment (lib, "glu32.lib")    //OpenGL
+#pragma comment (lib, "sdl.lib")      //Good 'ol SDL.
+#pragma comment (lib, "DevIL.lib")    //For loading images
+#pragma comment( lib, "cg.lib" )		  //NVIDIA Cg toolkit			
+#pragma comment( lib, "cggl.lib" )	  //NVIDIA Cg toolkit			
+#pragma comment( lib, "H:/SDK/glConsole/lib/debug/cvars.lib" )	  //NVIDIA Cg toolkit		
 
-#pragma comment (lib, "opengl32.lib")
-#pragma comment (lib, "sdl.lib")
-#pragma comment (lib, "glu32.lib")
-#pragma comment (lib, "DevIL.lib")
-#pragma comment( lib, "cg.lib" )							// Search For Cg.lib While Linking
-#pragma comment( lib, "cggl.lib" )							// Search For CgGL.lib While Linking
+#define SETTINGS_FILE   "frontier.set"
 
-static bool       quit;
+static bool           quit;
 
 /*-----------------------------------------------------------------------------
 
@@ -60,8 +62,8 @@ static bool       quit;
 static void init ()
 {
 
-  LogInit (APP ".log");
-
+  ConsoleLog ("%s: Begin startup.", APP);
+  ConsoleInit ();
   ilInit ();
   RandomInit (11);
   SdlInit ();
@@ -74,6 +76,7 @@ static void init ()
   SceneInit ();
   SkyInit ();
   TextInit ();
+  ConsoleLog ("init: Done.");
 
 }
 
@@ -103,6 +106,7 @@ static void run ()
 
   while (!quit) {
     stop = SdlTick () + 15;
+    ConsoleUpdate ();
     SdlUpdate ();
     AvatarUpdate ();
     CameraUpdate ();
@@ -138,9 +142,15 @@ void MainQuit ()
 int PASCAL WinMain (HINSTANCE instance_in, HINSTANCE previous_instance, LPSTR command_line, int show_style)
 {
 
+  CVarUtils::Load (SETTINGS_FILE);
+  int& nTest = CVarUtils::CreateCVar ("testVar", 100, "Another test CVar");
+  bool& render_shaders = CVarUtils::CreateCVar ("render.shaders", true, "enable vertex, fragment shaders");
+  bool& render_wireframe = CVarUtils::CreateCVar ("render.wireframe", false, "overlay scene with wireframe");
+
   init ();
   run ();
   term ();
+  CVarUtils::Save (SETTINGS_FILE);
   return 0;
 
 }

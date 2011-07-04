@@ -29,6 +29,12 @@
 #include <vector>
 using namespace std;
 #include <windows.h>
+//include this header for CVars and GLConsole
+#include <GLConsole/GLConsole.h>
+//A CVar version of std::vector
+#include <CVars/CVarVectorIO.h>
+//A CVar version of std::map
+#include <CVars/CVarMapIO.h>
 #include <SDL.h>
 #include <SDL_opengl.h>
 #include "gltypes.h"

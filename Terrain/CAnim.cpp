@@ -10,9 +10,9 @@
 
 #include "stdafx.h"
 #include "canim.h"
+#include "console.h"
 #include "cfigure.h"
 #include "file.h"
-#include "log.h"
 #include "math.h"
 
 #define NEWLINE     "\n"
@@ -269,7 +269,7 @@ bool CAnim::LoadBvh (char* filename)
     path.append (".bvh");
   buffer = FileLoad ((char*)path.c_str (), &size);
   if (!buffer) {
-    Log ("CAnim::LoadBvh: Can't find %s", (char*)path.c_str ());
+    ConsoleLog ("CAnim::LoadBvh: Can't find %s", (char*)path.c_str ());
     SetDefaultAnimation ();
     return false;
   }

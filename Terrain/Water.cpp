@@ -17,7 +17,7 @@
 #define WATER_TILE      7
 
 static VBO        water;
-static VBO        map;
+static VBO        wmap;
 
 /*-----------------------------------------------------------------------------
 
@@ -54,7 +54,7 @@ void WaterBuild ()
   }
 
   water.Create (GL_QUADS, index.size (), vert.size (), &index[0], &vert[0], &normal[0], NULL, &uv[0]);
-  map.Create (GL_QUADS, index.size (), vert.size (), &index[0], &vert[0], &normal[0], NULL, &uv_map[0]);
+  wmap.Create (GL_QUADS, index.size (), vert.size (), &index[0], &vert[0], &normal[0], NULL, &uv_map[0]);
   
 }
 
@@ -80,6 +80,6 @@ void WaterRender ()
     glEnable (GL_BLEND);
     glBlendFunc (GL_SRC_COLOR, GL_DST_COLOR);
   }
-  map.Render ();
+  wmap.Render ();
 
 }

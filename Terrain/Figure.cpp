@@ -16,7 +16,6 @@
 #include "avatar.h"
 #include "file.h"
 #include "input.h"
-#include "log.h"
 /////////////////////////
 
 

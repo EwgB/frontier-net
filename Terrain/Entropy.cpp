@@ -20,7 +20,7 @@
 
 static bool       loaded;
 static GLcoord    size;
-static float*     map;
+static float*     emap;
 
 /*-----------------------------------------------------------------------------
 -----------------------------------------------------------------------------*/
@@ -62,7 +62,7 @@ static void entropy_erode ()
   int     count;
 
   buffer = new float[size.x * size.y];
-  memcpy (buffer, map, sizeof (float) * size.x * size.y);
+  memcpy (buffer, emap, sizeof (float) * size.x * size.y);
   //Pass over the entire map, dropping a "raindrop" on each point. Trace
   //a path downhill until the drop hits bottom. Subtract elevation
   //along the way.  Makes natural hells from handmade ones. Super effective.
@@ -78,12 +78,12 @@ static void entropy_erode ()
           for (n.x = current.x - 1; n.x <= current.x + 1; n.x++) {
             for (n.y = current.y - 1; n.y <= current.y + 1; n.y++) {
               index = entropy_index (n);
-              if (map[index] >= high) {
-                high = map[index];
+              if (emap[index] >= high) {
+                high = emap[index];
                 high_index = n;
               }
-              if (map[index] <= low) {
-                low = map[index];
+              if (emap[index] <= low) {
+                low = emap[index];
                 low_index = n;
               }
             }
@@ -110,7 +110,7 @@ static void entropy_erode ()
         }
       }
     }
-    memcpy (map, buffer, sizeof (float) * size.x * size.y);
+    memcpy (emap, buffer, sizeof (float) * size.x * size.y);
   }
 
 
@@ -129,8 +129,8 @@ static void entropy_erode ()
         }
       }
       val /= (float)count;
-      map[index] = (map[index] + val) / 2.0f;
-      map[index] = val;
+      emap[index] = (emap[index] + val) / 2.0f;
+      emap[index] = val;
     }
   }
   delete[] buffer;
@@ -140,16 +140,16 @@ static void entropy_erode ()
   for (y = 0; y < size.y; y++) {
     for (x = 0; x < size.x; x++) {
       index = entropy_index (x, y);
-      high = max (map[index], high);
-      low = min (map[index], low);
+      high = max (emap[index], high);
+      low = min (emap[index], low);
     }
   }
   high = high - low;
   for (y = 0; y < size.y; y++) {
     for (x = 0; x < size.x; x++) {
       index = entropy_index (x, y);
-      map[index] -= low;
-      map[index] /= high;
+      emap[index] -= low;
+      emap[index] /= high;
     }
   }
 
@@ -174,7 +174,7 @@ static void entropy_create (char* filename)
 	fclose (file);
   buffer = FileImageLoad (filename, &size);
   elements = size.x * size.y;
-  map = new float [elements];
+  emap = new float [elements];
   for (y = 0; y < size.y; y++) {
     for (x = 0; x < size.x; x++) {
       offset.x = (float)x / (float)size.x;
@@ -182,7 +182,7 @@ static void entropy_create (char* filename)
       scan.x = (int)(offset.x * (float)size.x);
       scan.y = (int)(offset.y * (float)size.y);
       red = buffer[(scan.x + scan.y * size.x) * 4];
-      map[x + y * size.x] = (float)red / 255;
+      emap[x + y * size.x] = (float)red / 255;
     }
   }
   entropy_erode ();
@@ -190,7 +190,7 @@ static void entropy_create (char* filename)
   if (file) {
     fwrite (&size.x, sizeof (size.x), 1, file);
     fwrite (&size.y, sizeof (size.y), 1, file);
-    fwrite (map, sizeof (float), size.x * size.y, file);
+    fwrite (emap, sizeof (float), size.x * size.y, file);
     fclose (file);
   }
   delete buffer;
@@ -211,8 +211,8 @@ static void entropy_load ()
   if (file) {
     fread (&size.x, sizeof (size.x), 1, file);
     fread (&size.y, sizeof (size.y), 1, file);
-    map = new float [size.x * size.y];
-    fread (map, sizeof (float), size.x * size.y, file);
+    emap = new float [size.x * size.y];
+    fread (emap, sizeof (float), size.x * size.y, file);
     fclose (file);
     loaded = true;
   } else
@@ -226,9 +226,9 @@ float Entropy (int x, int y)
 
   if (!loaded) 
     entropy_load ();
-  if (!map || x < 0 || y < 0)
+  if (!emap || x < 0 || y < 0)
     return 0;
-  return map[(x % size.x) + (y % size.y) * size.x];
+  return emap[(x % size.x) + (y % size.y) * size.x];
 
 }
 

@@ -11,9 +11,9 @@
 
 #define MOUSE_SCALING       0.01f
 
-#include "Avatar.h"
+#include "avatar.h"
+#include "console.h"
 #include "input.h"
-#include "log.h"
 #include "main.h"
 #include "render.h"
 #include "sdl.h"
@@ -34,7 +34,7 @@ void SdlInit ()
 {
 
   if (SDL_Init (SDL_INIT_EVERYTHING | SDL_INIT_JOYSTICK) != 0) {
-    Log ("Unable to initialize SDL: %s\n", SDL_GetError());
+    ConsoleLog ("Unable to initialize SDL: %s\n", SDL_GetError());
     return;
   }
   SDL_WM_SetIcon (SDL_LoadBMP("textures/arrow.bmp"), NULL);
@@ -56,7 +56,7 @@ void SdlInit ()
   return true;
   */
   last_update = SDL_GetTicks ();
-  Log("SDLInit: %i joysticks found.", SDL_NumJoysticks());
+  ConsoleLog("SDLInit: %i joysticks found.", SDL_NumJoysticks());
   for (int i = 0; i < SDL_NumJoysticks(); i++) {
     SDL_JoystickEventState(SDL_ENABLE);
     //joystick = 
@@ -112,7 +112,14 @@ void SdlUpdate ()
     case SDL_KEYDOWN:
       if (event.key.keysym.sym == SDLK_ESCAPE)
         MainQuit ();
-      InputKeyDown (event.key.keysym.sym);
+      if (event.key.keysym.sym == SDLK_BACKQUOTE) {
+        ConsoleToggle ();      
+        break;
+      }
+      if (ConsoleIsOpen ())
+        ConsoleInput (event.key.keysym.sym, event.key.keysym.unicode);
+      else
+        InputKeyDown (event.key.keysym.sym);
       break;
     case SDL_JOYAXISMOTION:
       InputJoystickSet (event.jaxis.axis, event.jaxis.value);

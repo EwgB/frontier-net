@@ -2,7 +2,6 @@
 
   render.cpp
 
-
 -------------------------------------------------------------------------------
 
   This module kicks off most of the rendering jobs and handles the GL setup.
@@ -16,8 +15,8 @@
 #include "cache.h"
 #include "camera.h"
 #include "cg.h"
+#include "console.h"
 #include "env.h"
-#include "log.h"
 #include "input.h"
 #include "render.h"
 #include "scene.h"
@@ -186,6 +185,7 @@ void RenderInit  (void)
   draw_console = true;
   CgInit ();
 
+
 }
 
 void RenderCreate (int width, int height, int bits, bool fullscreen)
@@ -196,6 +196,7 @@ void RenderCreate (int width, int height, int bits, bool fullscreen)
   int         d;
   int         size;
 
+  ConsoleLog ("RenderCreate: Creating %dx%d viewport", width, height);
   SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1); 
   view_width = width;
   view_height = height;
@@ -207,7 +208,7 @@ void RenderCreate (int width, int height, int bits, bool fullscreen)
     flags |= SDL_RESIZABLE;
   screen = SDL_SetVideoMode (width, height, bits, flags); 
   if (!screen) 
-	  Log ("Unable to set video mode: %s\n", SDL_GetError());
+	  ConsoleLog ("Unable to set video mode: %s\n", SDL_GetError());
 
   glMatrixMode (GL_PROJECTION);
   glLoadIdentity ();
@@ -333,8 +334,11 @@ void RenderUpdate (void)
   current_fog = e->color[ENV_COLOR_FOG];
   fog_min = e->fog_min;
   fog_max = e->fog_max;
-  if (InputKeyPressed (SDLK_BACKQUOTE)) 
+  /*
+  if (InputKeyPressed (SDLK_BACKQUOTE)) {
     draw_console = !draw_console;
+  }
+  */
   if (InputKeyPressed (SDLK_F3)) {
     terrain_debug++;
     terrain_debug %= DEBUG_RENDER_TYPES;
@@ -478,20 +482,21 @@ void Render (void)
 
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  //CgUpdate ();
+  if (CVarUtils::GetCVar<bool> ("render.shaders"))
+    CgUpdate ();
   //SkyRender ();
   //if (world_debug) 
   SceneRender ();
   CgOff ();
-  if (terrain_debug)
-    SceneRenderDebug (terrain_debug);
+  if (CVarUtils::GetCVar<bool> ("render.wireframe"))
+    SceneRenderDebug ();
   if (world_debug)
     CacheRenderDebug ();
   TextRender ();
   if (show_map) 
     RenderTexture (WorldMap ());
+  ConsoleRender ();
   SDL_GL_SwapBuffers ();
-
 
 }
 

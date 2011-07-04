@@ -10,9 +10,9 @@
 
 #include "stdafx.h"
 
+#include "console.h"
 #include "cfigure.h"
 #include "cg.h"
-#include "log.h"
 #include "file.h"
 
 #define NEWLINE   "\n"
@@ -65,7 +65,7 @@ BoneId CFigure::IdentifyBone (char* name)
   bid = CAnim::BoneFromString (name);
   //If CAnim couldn't make sense of the name, or if that id is already in use...
   if (bid == BONE_INVALID || _bone_index[bid] != BONE_INVALID) {
-    Log ("Couldn't id Bone '%s'.", name);
+    ConsoleLog ("Couldn't id Bone '%s'.", name);
     bid = (BoneId)(BONE_UNKNOWN0 + _unknown_count);
     _unknown_count++;
   }
