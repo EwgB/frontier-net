@@ -166,6 +166,10 @@
     <ClInclude Include="Water.h" />
     <ClInclude Include="World.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\standard.cg" />
+    <None Include="Shaders\trees.cg" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

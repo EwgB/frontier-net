@@ -16,6 +16,7 @@
 #include "camera.h"
 #include "cache.h"
 #include "cforest.h"
+#include "cg.h"
 #include "cgrass.h"
 #include "cterrain.h"
 #include "ini.h"
@@ -183,24 +184,22 @@ void SceneUpdate (long stop)
 void SceneRender ()
 {
 
-  GLtexture*    t;
+  //glEnable(GL_TEXTURE_2D);
+  //glColor3f (1,1,1);
+  //if (draw_tree)
+    //test_tree.Render (last_tree, 0, LOD_HIGH);
 
-  glEnable(GL_TEXTURE_2D);
-  glColor3f (1,1,1);
-  if (draw_tree)
-    test_tree.Render (last_tree, 0, LOD_HIGH);
-  //t = TextureFromName ("g3.bmp", MASK_PINK);
-  t = TextureFromName ("grass.png");
-  glBindTexture (GL_TEXTURE_2D, t->id);
-  gm_grass.Render ();
   glDisable(GL_CULL_FACE);
-  //glDisable(GL_TEXTURE_2D);
-  //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  CgShaderSelect (SHADER_TREES);
   gm_forest.Render ();
   glEnable(GL_CULL_FACE);
+  CgShaderSelect (SHADER_NORMAL);
   gm_terrain.Render ();
-  AvatarRender ();
+  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("grass.png"));
+  gm_grass.Render ();
   WaterRender ();
+  CgShaderSelect (SHADER_NONE);
+  AvatarRender ();
   if (0) { //Show tree texture
     GLvector      camera;
     Region*       r;

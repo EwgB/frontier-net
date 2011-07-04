@@ -37,17 +37,14 @@ static int            view_height;
 static float          view_aspect;
 static SDL_Surface*   screen;
 static int            max_dimension;
-static int            terrain_debug;
-static bool           world_debug;
+//static int            terrain_debug;
+//static bool           world_debug;
 static bool           show_map;
 static GLrgba         current_ambient;
 static GLrgba         current_diffuse;
 static GLrgba         current_fog;
 static float          fog_min;
 static float          fog_max;
-static bool           draw_console;
-
-
 	
 /*** static Functions *******************************************************/
 
@@ -131,13 +128,6 @@ void RenderClick (int x, int y)
 
 }
 
-bool RenderConsole ()
-{
-
-  return draw_console;
-
-}
-
 void RenderCanvasBegin (int left, int right, int bottom, int top, int size)
 {
 
@@ -182,7 +172,6 @@ void RenderInit  (void)
   current_fog = glRgba (1.0f);
   fog_max = 1000;
   fog_min = 1;
-  draw_console = true;
   CgInit ();
 
 
@@ -339,12 +328,6 @@ void RenderUpdate (void)
     draw_console = !draw_console;
   }
   */
-  if (InputKeyPressed (SDLK_F3)) {
-    terrain_debug++;
-    terrain_debug %= DEBUG_RENDER_TYPES;
-  }
-  if (InputKeyPressed (SDLK_F4)) 
-    world_debug = !world_debug;
   if (InputKeyPressed (SDLK_TAB)) 
     show_map = !show_map;
 
@@ -484,14 +467,12 @@ void Render (void)
 
   if (CVarUtils::GetCVar<bool> ("render.shaders"))
     CgUpdate ();
-  //SkyRender ();
-  //if (world_debug) 
   SceneRender ();
-  CgOff ();
+  CgShaderSelect (SHADER_NONE);
   if (CVarUtils::GetCVar<bool> ("render.wireframe"))
     SceneRenderDebug ();
-  if (world_debug)
-    CacheRenderDebug ();
+  //if (world_debug)
+    //CacheRenderDebug ();
   TextRender ();
   if (show_map) 
     RenderTexture (WorldMap ());

@@ -238,8 +238,8 @@ void CTree::DoVines (GLmesh* m, GLvector* points, unsigned segments)
   base_index = m->_vertex.size ();
   for (segment = 0; segment < segments; segment++) {
     float  v = (float)segment;
-    m->PushVertex (points[segment], UP, glVector (0.5f, v));
-    m->PushVertex (points[segment] + glVector (0.0f, 0.0f, -3.5f), UP, glVector (0.75f, v));
+    m->PushVertex (points[segment], UP, glVector (0.75f, v));
+    m->PushVertex (points[segment] + glVector (0.0f, 0.0f, -3.5f), UP, glVector (0.5f, v));
   }
   for (segment = 0; segment < segments - 1; segment++) {
     m->PushTriangle (
@@ -313,7 +313,7 @@ void CTree::DoBranch (GLmesh* m, BranchAnchor anchor, float branch_angle, LOD lo
       pos.y = anchor.length * horz_pos;
       pos.z = 0.0f;
       pos = glMatrixTransformPoint (mat, pos);
-      m->PushVertex (pos + core, glVector (pos.x, 0.0f, pos.z), glVector (0.25f, pos.y * _texture_tile));
+      m->PushVertex (pos + core, glVector (pos.x, 0.0f, pos.z), glVector (0.249f, pos.y * _texture_tile));
     } else for (ring = 0; ring <= radial_steps; ring++) {
       //Make sure the final edge perfectly matches the starting one. Can't leave
       //this to floating-point math.
@@ -326,7 +326,7 @@ void CTree::DoBranch (GLmesh* m, BranchAnchor anchor, float branch_angle, LOD lo
       pos.y = anchor.length * horz_pos;
       pos.z = -cos (angle) * radius;
       pos = glMatrixTransformPoint (mat, pos);
-      m->PushVertex (pos + core, glVector (pos.x, 0.0f, pos.z), glVector (((float)ring / (float) radial_steps) * 0.25f, pos.y * _texture_tile));
+      m->PushVertex (pos + core, glVector (pos.x, 0.0f, pos.z), glVector (((float)ring / (float) radial_steps) * 0.249f, pos.y * _texture_tile));
     }
     underside.push_back (pos + core);
   }
@@ -438,7 +438,7 @@ void CTree::DoTrunk (GLmesh* m, unsigned local_seed, LOD lod)
       y = cos (angle);
       m->PushVertex (core + glVector (x * radius, y * radius, 0.0f),
         glVector (x, y, 0.0f),
-        glVector (((float)ring / (float) radial_steps) * 0.25f, core.z * _texture_tile));
+        glVector (((float)ring / (float) radial_steps) * 0.249f, core.z * _texture_tile));
 
     }
     segment_count++;

@@ -52,6 +52,12 @@ vfconn main(appdata IN,
   if (diffuse <= 0)
     specular = 0;
 
+  if (IN.uv.x >= 0.25 && IN.uv.x <= 0.5) {
+    float move = abs (IN.uv.y - 0.5) + abs (IN.uv.x - 0.375);
+    IN.position.x += sin ((IN.position.y + IN.position.x) / 10.0f + data.x) * move;
+  }
+  
+
 	// Transform The Vertex Position Into Homogenous Clip-Space (Required)
 	OUT.HPos = mul(ModelViewProj, IN.position);
 	// Set The Color To The Value Specified In IN.color

@@ -358,7 +358,7 @@ void AvatarRender ()
 
   glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("check.bmp"));
   avatar.Render ();
-  if (RenderConsole ())
+  if (CVarUtils::GetCVar<bool> ("show.skeleton"))
     avatar.RenderSkeleton ();
 
 }

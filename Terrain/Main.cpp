@@ -143,9 +143,11 @@ int PASCAL WinMain (HINSTANCE instance_in, HINSTANCE previous_instance, LPSTR co
 {
 
   CVarUtils::Load (SETTINGS_FILE);
-  int& nTest = CVarUtils::CreateCVar ("testVar", 100, "Another test CVar");
+  //int& nTest = CVarUtils::CreateCVar ("testVar", 100, "Another test CVar");
   bool& render_shaders = CVarUtils::CreateCVar ("render.shaders", true, "enable vertex, fragment shaders");
   bool& render_wireframe = CVarUtils::CreateCVar ("render.wireframe", false, "overlay scene with wireframe");
+  bool& show_skeleton = CVarUtils::CreateCVar ("show.skeleton", false, "show the skeletons of avatars");
+  bool& show_stats = CVarUtils::CreateCVar ("show.stats", false, "show various debug statistics");
 
   init ();
   run ();

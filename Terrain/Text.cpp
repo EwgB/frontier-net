@@ -146,7 +146,7 @@ void TextRender ()
   glEnable (GL_TEXTURE_2D);
 
   glColor3f (1, 1, 1);
-  if (RenderConsole ())
+  if (CVarUtils::GetCVar<bool> ("show.stats"))
     text_draw (buffer);
 
   glPopMatrix ();
