@@ -11,6 +11,7 @@
 #include "stdafx.h"
 
 #include "cfigure.h"
+#include "cg.h"
 #include "log.h"
 #include "file.h"
 
@@ -211,13 +212,11 @@ void CFigure::Render ()
   
   glColor3f (1,1,1);
   glPushMatrix ();
-  //glRotatef (_rotation.x, 1.0f, 0.0f, 0.0f);
-  //glRotatef (_rotation.y, 0.0f, 1.0f, 0.0f);
-  //glRotatef (_rotation.z, 0.0f, 0.0f, 1.0f);
-
   glTranslatef (_position.x, _position.y, _position.z); 
+  CgUpdateMatrix ();
   _skin_render.Render ();
   glPopMatrix ();
+  CgUpdateMatrix ();
   
 }
 
@@ -230,6 +229,7 @@ void CFigure::RenderSkeleton ()
   glLineWidth (12.0f);
   glPushMatrix ();
   glTranslatef (_position.x, _position.y, _position.z); 
+  CgUpdateMatrix ();
   glDisable (GL_DEPTH_TEST);
   glDisable (GL_TEXTURE_2D);
   glDisable (GL_LIGHTING);
@@ -249,6 +249,7 @@ void CFigure::RenderSkeleton ()
   glEnable (GL_TEXTURE_2D);
   glEnable (GL_DEPTH_TEST);
   glPopMatrix ();
+  CgUpdateMatrix ();
 
 }
 

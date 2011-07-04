@@ -15,6 +15,7 @@
 #include "avatar.h"
 #include "cache.h"
 #include "camera.h"
+#include "cg.h"
 #include "env.h"
 #include "log.h"
 #include "input.h"
@@ -48,6 +49,7 @@ static float          fog_max;
 static bool           draw_console;
 
 
+	
 /*** static Functions *******************************************************/
 
 static void draw_water (float tile)
@@ -182,7 +184,7 @@ void RenderInit  (void)
   fog_max = 1000;
   fog_min = 1;
   draw_console = true;
-  
+  CgInit ();
 
 }
 
@@ -476,10 +478,11 @@ void Render (void)
 
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-
+  CgUpdate ();
   //SkyRender ();
   //if (world_debug) 
   SceneRender ();
+  CgOff ();
   if (terrain_debug)
     SceneRenderDebug (terrain_debug);
   if (world_debug)

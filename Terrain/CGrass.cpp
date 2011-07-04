@@ -14,7 +14,6 @@
 #include "entropy.h"
 #include "sdl.h"
 #include "CGrass.h"
-//#include "random.h"
 #include "Render.h"
 #include "texture.h"
 #include "world.h"
@@ -235,6 +234,8 @@ void CGrass::Render ()
 	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
   glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
   glDisable (GL_CULL_FACE);
+  _vbo.Render ();
+  return;
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glDisable (GL_BLEND);
   //glEnable (GL_BLEND);
