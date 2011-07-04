@@ -1,0 +1,77 @@
+struct appdata 
+{
+	float4 position : POSITION;
+	float4 color	: COLOR0;
+  float4 normal		: NORMAL;
+  float4 uv			: TEXCOORD0;
+/*
+  Uniform Float3 globalAmbient,
+  Uniform Float3 lightColor,
+  Uniform Float3 lightPosition,
+  Uniform Float3 eyePosition,
+  */
+};
+
+struct vfconn
+{
+	float4 HPos	: POSITION;
+	float4 Col0	: COLOR0;
+  //float4 normal		: NORMAL;
+  float4 uv			: TEXCOORD0;
+};
+		
+vfconn main(appdata IN,	
+  uniform float4x4 ModelViewProj, 
+  uniform float3 lightpos,
+  uniform float3 eyepos,
+  uniform float3 lightcol,
+  uniform float3 ambientcol)
+{
+	vfconn OUT;									// Variable To Handle Our Output From The Vertex
+											// Shader (Goes To A Fragment Shader If Available)
+
+
+  float2 O = IN.position.xy - eyepos.xy;
+  float  D = length (O) / 512;
+  D *= D * D;
+  IN.position.z -= D * 42;
+
+  float3 P = IN.position.xyz;		
+  float3 N = IN.normal;
+
+  float3 L = normalize(lightpos - P);
+  float diffuse = max(dot(N, lightpos), 0);		
+  float3 diffusecol = diffuse * lightcol;		
+
+  //Specular lighting
+  float3 V = normalize(eyepos - P);
+  float3 H = normalize(lightpos + V);
+  float specular = pow(max(dot(N, H), 0), 10);
+  float3 speccol = specular * lightcol;		
+  if (diffuse <= 0)
+    specular = 0;
+  //specular = 0;
+
+  // Compute the specular term
+  //float3 V = normalize(eyePosition - P);
+  //float3 H = normalize(L + V);
+  //float specularLight = pow(max(dot(N, H), 0), shininess);
+
+
+	// Change The Y Position Of The Vertex Based On Sine Waves
+	//IN.position.z = ( sin(IN.wave.x + (IN.position.y / 4.0) ) + sin(IN.wave.x + (IN.position.x / 5.0) ) ) * 2.5f;
+  //IN.position.z += sin(IN.position.x + IN.wave.x) + sin(IN.position.y / 3.0f);
+  //IN.position.z = 1;
+		
+		
+	// Transform The Vertex Position Into Homogenous Clip-Space (Required)
+	OUT.HPos = mul(ModelViewProj, IN.position);
+	// Set The Color To The Value Specified In IN.color
+	OUT.Col0.xyz = (IN.color.xyz * ambientcol) + (IN.color.xyz * diffusecol) + (IN.color.xyz * specular);
+  //OUT.Col0.xyz = IN.color.xyz * (diffuse * lightcol) + specular * IN.color.xyz;
+  //OUT.Col0.xyz = 1;
+  OUT.Col0.w = 1;
+  OUT.uv = IN.uv;
+  //OUT.normal = IN.normal;
+	return OUT;
+}
