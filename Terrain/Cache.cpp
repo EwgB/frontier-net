@@ -8,7 +8,10 @@
 
 -----------------------------------------------------------------------------*/
 
+
 #include "stdafx.h"
+#include <io.h>
+#include "console.h"
 #include "cpage.h"
 #include "entropy.h"
 #include "sdl.h"
@@ -227,6 +230,59 @@ void CachePurge ()
   }
 
 }
+
+bool CacheSize (vector<string> *args)
+{
+
+  char          filespec[256];
+  _finddata32_t fd;
+  long          handle;
+  bool          more;
+  int           bytes;
+  int           files;
+
+  sprintf (filespec, "%s*.pag", WorldDirectory ());
+  more = true;
+  bytes = 0;
+  files = 0;
+  handle = _findfirst (filespec, &fd);
+  while (handle && more) {
+    bytes += fd.size;  
+    files++;
+    if (_findnext (handle, &fd) != 0)
+      more = false;
+  }
+  _findclose(handle);
+  ConsoleLog ("Cache contains %d files, %d bytes used.", files, bytes);
+  return true;
+
+}
+
+bool CacheDump (vector<string> *args)
+{
+
+  char          filespec[256];
+  char          file[256];
+  _finddata32_t fd;
+  long          handle;
+  bool          more;
+
+  CachePurge ();
+  sprintf (filespec, "%s*.pag", WorldDirectory ());
+  more = true;
+  handle = _findfirst (filespec, &fd);
+  while (handle && more) {
+    sprintf (file, "%s%s", WorldDirectory (), fd.name);
+    _unlink (file);
+    ConsoleLog (file);
+    if (_findnext (handle, &fd) != 0)
+      more = false;
+  }
+  _findclose(handle);
+  return true;
+
+}
+
 
 void CacheRenderDebug ()
 {

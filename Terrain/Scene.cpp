@@ -19,6 +19,7 @@
 #include "cg.h"
 #include "cgrass.h"
 #include "cterrain.h"
+#include "game.h"
 #include "ini.h"
 #include "input.h"
 #include "math.h"
@@ -61,7 +62,12 @@ static unsigned           world_seed = 2;
 void SceneClear ()
 {
 
-  CachePurge ();
+  il_grass.clear ();
+  il_forest.clear ();
+  il_terrain.clear ();
+  gm_grass.Clear ();
+  gm_forest.Clear ();
+  gm_terrain.Clear ();
 
 }
 
@@ -72,7 +78,6 @@ void SceneGenerate ()
   GLcoord     current;
 
   SceneClear ();
-  WorldGenerate (world_seed++);
   WaterBuild ();
   camera = CameraPosition ();
   current.x = (int)(camera.x) / GRASS_SIZE;
@@ -88,8 +93,6 @@ void SceneGenerate ()
   il_terrain.clear ();
   il_terrain.resize (TERRAIN_GRID * TERRAIN_GRID);
   gm_terrain.Init (&il_terrain[0], TERRAIN_GRID, TERRAIN_SIZE);
-
-  //FigureInit ();
 
 }
 
@@ -128,52 +131,24 @@ CTerrain* SceneTerrainGet (int x, int y)
 
 }
 
-static GLvector last_tree;
-static int  seed;
-static bool draw_tree;
-
 void SceneInit ()
 {
 
-  SceneGenerate ();
-  last_tree = IniVector ("Treepos");
-  seed = IniInt ("TreeSeed");
-
 }
 
+void SceneProgress (unsigned* ready, unsigned* total)
+{
+
+  *ready = gm_terrain.ItemsReady ();
+  *total = 100;
+
+}
 
 void SceneUpdate (long stop)
 {
 
-  GLvector      camera;
-  Region*       r;
-  CTree*        tree;
-
-  if (InputKeyPressed (SDLK_F11))
-    SceneGenerate ();
-
-
-  //TextPrint ("%d Terrains cached: %s\nTexture memory: %s\n%d Terrain triangles", cached, TextBytes (cached * sizeof (CTerrain)), TextBytes (texture_bytes), polygons);
-  //TextPrint ("Tree has %d polys.", tree.Polygons ());
-  camera = CameraPosition ();
-  r = (Region*)CameraRegion ();
-  tree = WorldTree (r->tree_type);
-  tree->Info ();
-  if (InputKeyPressed (SDLK_r)) {
-    if (draw_tree)
-      seed++;
-    IniVectorSet ("Treepos", last_tree);
-    IniIntSet ("TreeSeed", seed);
-    test_tree.Create (false, 0.5f, 0.5f, seed);
-    draw_tree = true;
-  }
-  
-  if (InputKeyPressed (SDLK_t)) {
-    GLvector  apos = AvatarPosition ();
-    apos.x -= 4.0f;
-    apos.z = CacheElevation (apos.x, apos.y);
-    last_tree = apos;
-  }
+  if (!GameRunning ())
+    return;
   gm_terrain.Update (stop);
   gm_grass.Update (stop);
   gm_forest.Update (stop);
@@ -188,6 +163,10 @@ void SceneRender ()
   //glColor3f (1,1,1);
   //if (draw_tree)
     //test_tree.Render (last_tree, 0, LOD_HIGH);
+  if (!CVarUtils::GetCVar<bool> ("render.textured"))
+    glDisable(GL_TEXTURE_2D);
+  else
+    glEnable(GL_TEXTURE_2D);
 
   glDisable(GL_CULL_FACE);
   CgShaderSelect (SHADER_TREES);

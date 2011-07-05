@@ -32,6 +32,7 @@ http://www.bramstein.com/projects/gui/
 #include "cache.h"
 #include "console.h"
 #include "env.h"
+#include "game.h"
 #include "sdl.h"
 #include "il\il.h"
 #include "main.h"
@@ -51,7 +52,7 @@ http://www.bramstein.com/projects/gui/
 #pragma comment( lib, "cggl.lib" )	  //NVIDIA Cg toolkit			
 #pragma comment( lib, "H:/SDK/glConsole/lib/debug/cvars.lib" )	  //NVIDIA Cg toolkit		
 
-#define SETTINGS_FILE   "frontier.set"
+#define SETTINGS_FILE   "user.set"
 
 static bool           quit;
 
@@ -123,7 +124,6 @@ static void run ()
 
 }
 
-
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/
@@ -135,6 +135,23 @@ void MainQuit ()
 
 }
 
+
+bool MainIsQuit ()
+{ 
+
+  return quit;
+
+}
+
+
+bool cf (vector<string> *args)
+{
+
+  ConsoleLog ("FOO!");
+  return true;
+
+}
+
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/
@@ -142,17 +159,26 @@ void MainQuit ()
 int PASCAL WinMain (HINSTANCE instance_in, HINSTANCE previous_instance, LPSTR command_line, int show_style)
 {
 
-  CVarUtils::Load (SETTINGS_FILE);
   //int& nTest = CVarUtils::CreateCVar ("testVar", 100, "Another test CVar");
-  bool& render_shaders = CVarUtils::CreateCVar ("render.shaders", true, "enable vertex, fragment shaders");
-  bool& render_wireframe = CVarUtils::CreateCVar ("render.wireframe", false, "overlay scene with wireframe");
-  bool& show_skeleton = CVarUtils::CreateCVar ("show.skeleton", false, "show the skeletons of avatars");
-  bool& show_stats = CVarUtils::CreateCVar ("show.stats", false, "show various debug statistics");
+  bool& render_shaders = CVarUtils::CreateCVar ("render.shaders", true, "Enable vertex, fragment shaders.");
+  bool& render_wireframe = CVarUtils::CreateCVar ("render.wireframe", false, "Overlay scene with wireframe.");
+  bool& render_textured = CVarUtils::CreateCVar ("render.textured", true, "Render the scene with textures.");
+  bool& show_skeleton = CVarUtils::CreateCVar ("show.skeleton", false, "Show the skeletons of avatars.");
+  bool& show_stats = CVarUtils::CreateCVar ("show.stats", false, "Show various debug statistics.");
+  bool& show_pages = CVarUtils::CreateCVar ("show.pages", false, "Show bounding boxes for paged data.");
+  bool& cache_active = CVarUtils::CreateCVar ("cache.active", true, "Controls saving of paged data.");
+  CVarUtils::CreateCVar ("foo", cf, "do foo");
+  CVarUtils::CreateCVar ("cache.dump", CacheDump, "Clear all saved data from memory & disk.");
+  CVarUtils::CreateCVar ("cache.size", CacheSize, "Returns the current size of the cache.");
+  CVarUtils::CreateCVar ("game", GameCmd, "Usage: Game [ new | quit ]");
+  CVarUtils::Load (SETTINGS_FILE);
+  //CVarUtils::ExecuteFunction ("foo", 
 
   init ();
   run ();
   term ();
   CVarUtils::Save (SETTINGS_FILE);
+  //CVarUtils::Save ();
   return 0;
 
 }

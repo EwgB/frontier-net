@@ -15,17 +15,9 @@
 #include "stdafx.h"
 #include <stdarg.h>
 #include "sdl.h"
-//include this header for CVars and GLConsole
-#include <GLConsole/GLConsole.h>
-//A CVar version of std::vector
-#include <CVars/CVarVectorIO.h>
-//A CVar version of std::map
-#include <CVars/CVarMapIO.h>
 
-#define MAX_MSG_LEN     (1024)  // 1k
+#define MAX_MSG_LEN     1024  // 1k
 
-
-// Single global instance so glut can get access
 static GLConsole      con;  
 static bool           ready;
 static vector<string> queue;
@@ -37,9 +29,9 @@ static vector<string> queue;
 void ConsoleInit ()
 {
 
-  con.m_fOverlayPercent = 0.5f;
-  //int& nTest = CVarUtils::CreateCVar( "testVar", 100, "Another test CVar" );
-  
+  con.m_fOverlayPercent = 0.75f;
+  con.SetHelpColor (0, 255, 255);
+  //con._IsConsoleFunc (
 
 }
 
@@ -48,6 +40,9 @@ void ConsoleToggle ()
 
   
   con.ToggleConsole();
+  con.m_fOverlayPercent = 0.75f;
+  con.SetHelpColor (0, 255, 255);
+  
 
 
 }
@@ -61,6 +56,22 @@ void ConsoleInput (int key, int char_code)
   }
   if (key == SDLK_DOWN) {
     con.HistoryForward ();
+    return;
+  }
+  if (key == SDLK_PAGEDOWN) {
+    con.ScrollUpPage ();
+    return;
+  }
+  if (key == SDLK_PAGEUP) {
+    con.ScrollDownPage ();
+    return;
+  }
+  if (key == SDLK_HOME) {
+    con.CursorToBeginningOfLine ();
+    return;
+  }
+  if (key == SDLK_END) {
+    con.CursorToEndOfLine ();
     return;
   }
   if (key == SDLK_RSHIFT || key == SDLK_LSHIFT) 
@@ -84,7 +95,6 @@ void ConsoleRender ()
     return;
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glDisable(GL_TEXTURE_2D);
-  //con.SetCommandColor ( 0, 0, 0);
 //  &con.m_consoleColor.a
   //con.SetLogColor (1,1,1);
   con.RenderConsole();
@@ -103,7 +113,7 @@ void ConsoleUpdate ()
 
 }
 
-void ConsoleLog (char* message, ...)
+void ConsoleLog (const char* message, ...)
 {
 
   static char    msg_text[MAX_MSG_LEN];

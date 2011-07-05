@@ -20,7 +20,6 @@
 
 #define SEGMENTS_PER_METER    0.25f
 #define MIN_SEGMENTS          3
-//#define TEXTURE_SIZE          512
 #define TEXTURE_SIZE          256
 #define TEXTURE_HALF          (TEXTURE_SIZE / 2)
 #define MIN_RADIUS            0.3f
@@ -461,7 +460,7 @@ void CTree::DoTrunk (GLmesh* m, unsigned local_seed, LOD lod)
     m->PushTriangle ((ring + 1) + (segment_count - 1) * radial_edge, m->_vertex.size () - 1,
       (ring + 0) + (segment_count - 1) * radial_edge);
   }
-  DoFoliage (m, m->_vertex[m->_vertex.size () - 1] + glVector (0.0f, 0.0f, -2.0f), _current_height / 2, 0.0f);
+  DoFoliage (m, m->_vertex[m->_vertex.size () - 1] + glVector (0.0f, 0.0f, -0.0f), _current_height / 2, 0.0f);
   if (!_canopy) {
     //DoFoliage (TrunkPosition (vertical_pos, NULL), vertical_pos * _height, 0.0f);
     if (_evergreen) { //just rings of foliage, like an evergreen

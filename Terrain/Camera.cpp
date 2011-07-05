@@ -51,9 +51,6 @@ void CameraReset ()
 void CameraPositionSet (GLvector new_pos)		
 {
 
-  new_pos.z = clamp (new_pos.z, -25, 1024);
-  new_pos.x = clamp (new_pos.x, -512, (REGION_SIZE * WORLD_GRID));
-  new_pos.y = clamp (new_pos.y, -512, (REGION_SIZE * WORLD_GRID));
   position = new_pos;
 
 }
@@ -86,7 +83,7 @@ void CameraAngleSet (GLvector new_angle)
 {
 
   angle = new_angle;
-  angle.x = clamp (angle.x, 5.0f, 175.0f);
+  angle.x = clamp (angle.x, 0.0f, 180.0f);
   angle.z = fmod (angle.z, 360.0f);
   if (angle.z < 0.0f)
     angle.z += 360.0f;

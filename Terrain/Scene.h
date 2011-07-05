@@ -8,9 +8,12 @@ enum
 };
 
 
-void            SceneTexturePurge ();
+void            SceneClear ();
 void            SceneInit ();
+void            SceneGenerate ();
 void            SceneUpdate (long stop);
+void            SceneProgress (unsigned* ready, unsigned* total);
 void            SceneRender ();
 void            SceneRenderDebug ();
-class CTerrain*  SceneTerrainGet (int x, int y);
+class CTerrain* SceneTerrainGet (int x, int y);
+void            SceneTexturePurge ();

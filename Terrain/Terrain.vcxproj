@@ -101,6 +101,7 @@
     <ClCompile Include="File.cpp" />
     <ClCompile Include="FileImage.cpp" />
     <ClCompile Include="FileX.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="glBbox.cpp" />
     <ClCompile Include="glCoord.cpp" />
     <ClCompile Include="glFont.cpp" />
@@ -109,7 +110,6 @@
     <ClCompile Include="glQuat.cpp" />
     <ClCompile Include="glRgba.cpp" />
     <ClCompile Include="glUvbox.cpp" />
-    <ClCompile Include="Grid.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="Region.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -147,6 +147,7 @@
     <ClInclude Include="Env.h" />
     <ClInclude Include="Figure.h" />
     <ClInclude Include="File.h" />
+    <ClInclude Include="Game.h" />
     <ClInclude Include="glTypes.h" />
     <ClInclude Include="Ini.h" />
     <ClInclude Include="Input.h" />

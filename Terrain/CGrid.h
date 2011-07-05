@@ -40,7 +40,9 @@ protected:
   GridData*             Item (unsigned index);
 public:
   GridManager ();
+  void                  Clear ();
   void                  Init (GridData* items, unsigned grid_size, unsigned item_size);
+  unsigned              ItemsReady () { return _list_pos; }
   void                  Update (long stop);
   void                  Render ();
 

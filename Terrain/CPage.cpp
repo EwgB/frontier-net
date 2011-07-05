@@ -413,7 +413,8 @@ void CPage::Cache (int origin_x, int origin_y)
 void CPage::Save ()
 {
 
-  return;
+  if (!CVarUtils::GetCVar<bool> ("cache.active"))
+    return;
   if (_stage == PAGE_STAGE_DONE)
     FileSave (page_file_name (_origin), (char*)this, sizeof (CPage));
 

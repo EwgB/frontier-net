@@ -37,8 +37,6 @@ static int            view_height;
 static float          view_aspect;
 static SDL_Surface*   screen;
 static int            max_dimension;
-//static int            terrain_debug;
-//static bool           world_debug;
 static bool           show_map;
 static GLrgba         current_ambient;
 static GLrgba         current_diffuse;
@@ -139,8 +137,10 @@ void RenderCanvasBegin (int left, int right, int bottom, int top, int size)
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable (GL_TEXTURE_2D);
-  glViewport (0, 0, size, size);
-
+  if (size)
+    glViewport (0, 0, size, size);
+  else 
+    glViewport (0, 0, view_width, view_height);
   glMatrixMode (GL_PROJECTION);
   glPushMatrix ();
   glLoadIdentity ();
@@ -339,6 +339,30 @@ void RenderUpdate (void)
 
 -----------------------------------------------------------------------------*/
 
+void RenderLoadingScreen (float progress)
+{
+
+  glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
+  glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glColor3f (1.0f - progress, progress, 0.0f);
+  glLineWidth (10.0f);
+  RenderCanvasBegin (0, 100, 0, 100, 0);
+  glBegin (GL_LINES);
+  glVertex2f (0, 50);
+  glVertex2f (progress * 100, 50);
+  glEnd ();
+  RenderCanvasEnd ();
+  TextRender ();
+  ConsoleRender ();
+  SDL_GL_SwapBuffers ();
+
+}
+
+
+/*-----------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------*/
+
 void Render (void)		
 {
 
@@ -366,7 +390,7 @@ void Render (void)
   glFogi (GL_FOG_MODE, GL_LINEAR);
   //glFogi (GL_FOG_MODE, GL_EXP);
   glFogfv (GL_FOG_COLOR, &e->color[ENV_COLOR_FOG].red);
-  glClearColor (e->color[ENV_COLOR_FOG].red, e->color[ENV_COLOR_FOG].green, e->color[ENV_COLOR_FOG].blue, 1.0f);
+  glClearColor (e->color[ENV_COLOR_FOG].red, e->color[ENV_COLOR_FOG].green, e->color[ENV_COLOR_FOG].blue, 0.0f);
   //glClearColor (0, 0, 0, 1.0f);
   glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   //glClear (GL_DEPTH_BUFFER_BIT);
@@ -472,7 +496,8 @@ void Render (void)
   if (CVarUtils::GetCVar<bool> ("render.wireframe"))
     SceneRenderDebug ();
   //if (world_debug)
-    //CacheRenderDebug ();
+  if (CVarUtils::GetCVar<bool> ("show.pages"))
+    CacheRenderDebug ();
   TextRender ();
   if (show_map) 
     RenderTexture (WorldMap ());

@@ -86,8 +86,7 @@ static void do_list ()
 GridManager::GridManager ()
 {
 
-  _item = NULL;
-  _grid_size = _grid_half = _item_size = _item_count = 0;
+  Clear ();
 
 }
 
@@ -111,6 +110,21 @@ GridData* GridManager::Item (unsigned index)
 
   ptr = (char*)&_item[0] + (index * _item_bytes);
   return (GridData*)ptr;
+
+}
+
+
+void GridManager::Clear ()
+{
+  
+  _item = NULL;
+  _grid_size = 0;
+  _grid_half = 0;
+  _item_size = 0;
+  _item_bytes = 0;
+  _item_count = 0;
+  _last_viewer.Clear ();
+  _list_pos = 0;
 
 }
 
@@ -160,6 +174,8 @@ void GridManager::Update (long stop)
   GLcoord     grid_pos;
   unsigned    dist;
 
+  if (!_item)
+    return;
   viewer = ViewPosition (CameraPosition ());
   //If the player has moved to a new spot on the grid, restart our
   //outward walk.
