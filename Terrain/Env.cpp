@@ -9,8 +9,9 @@
 -----------------------------------------------------------------------------*/
 
 #include "stdafx.h"
-#include "camera.h"
+#include "avatar.h"
 #include "env.h"
+#include "game.h"
 #include "input.h"
 #include "math.h"
 #include "scene.h"
@@ -50,11 +51,7 @@
 
 static Env        desired;
 static Env        current;
-static long       seconds;
-static int        minutes;
-static int        hours;
 static int        update;
-static float      decimal_time;
 static int        last_decimal_time;    
 static bool       cycle_on;
 
@@ -72,10 +69,12 @@ static void do_cycle ()
   GLrgba    color_scaling;
   float     fade;
   float     humid_fog;
+  float     decimal_time;
 
-  r = (Region*)CameraRegion ();
+  r = (Region*)AvatarRegion ();
   humid_fog = (1.0f - r->moisture) * MAX_DISTANCE;
   desired.sunrise_fade = desired.sunset_fade = 0.0f;
+  decimal_time = GameTime ();
   if (decimal_time >= TIME_DAWN && decimal_time < TIME_DAY) { //sunrise
     fade = (decimal_time - TIME_DAWN) / (TIME_DAY - TIME_DAWN);
     base_color = glRgbaInterpolate (NIGHT_COLOR, DAY_COLOR, fade);
@@ -150,10 +149,9 @@ static void do_time (float delta)
 
   //Convert out hours and minutes into a decimal number. (100 "minutes" per hour.)
   desired.light = glVector (-0.5f, 0.0f, -0.5f);
-  decimal_time = (float)hours + (float)minutes * SECONDS_TO_DECIMAL;
-  if (decimal_time != last_decimal_time)
+  if (GameTime () != last_decimal_time)
     do_cycle ();
-   
+  last_decimal_time = GameTime ();     
   for (int i = 0; i < ENV_COLOR_COUNT; i++) 
     current.color[i] = glRgbaInterpolate (current.color[i], desired.color[i], delta);
   current.fog_min = MathInterpolate (current.fog_min, desired.fog_min, delta);
@@ -175,7 +173,6 @@ static void do_time (float delta)
 void    EnvInit ()
 {
 
-  hours = 19;
   do_time (1);
   current = desired;
 
@@ -184,33 +181,12 @@ void    EnvInit ()
 void    EnvUpdate ()
 {
 
-  if (InputKeyPressed (SDLK_RIGHTBRACKET))
-    hours++;
-  if (InputKeyPressed (SDLK_LEFTBRACKET)) {
-    hours--;
-    if (hours < 0)
-      hours += 24;
-  }
-  if (InputKeyPressed (SDLK_BACKSLASH))
-    cycle_on = !cycle_on;
-  if (cycle_on)
-    seconds += SdlElapsed ();
-  if (seconds >= TIME_SCALE) {
-    seconds -= TIME_SCALE;
-    minutes++;
-  }
-  if (minutes >= 60) {
-    minutes -= 60;
-    hours++;
-  }
-  if (hours >= 24)
-    hours -= 24;
   update += SdlElapsed ();
   if (update > UPDATE_INTERVAL) {
     do_time (ENV_TRANSITION);
     update -= UPDATE_INTERVAL;
   }
-  TextPrint ("Time: %02d:%02d", hours, minutes);
+  
   
 }
 

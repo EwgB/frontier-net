@@ -13,7 +13,6 @@
 #include <math.h>
 #include "avatar.h"
 #include "cache.h"
-#include "camera.h"
 #include "cg.h"
 #include "console.h"
 #include "env.h"
@@ -282,7 +281,7 @@ void RenderTexture (unsigned id)
     r++;
     c = glRgbaUnique (r);
     glBindTexture (GL_TEXTURE_2D, 0);
-    pos = CameraPosition ();
+    pos = AvatarCameraPosition ();
     pos /= (WORLD_GRID * REGION_SIZE);
     //pos.y /= (WORLD_GRID * REGION_SIZE);
     pos *= MAP_SIZE;
@@ -342,11 +341,15 @@ void RenderUpdate (void)
 void RenderLoadingScreen (float progress)
 {
 
-  glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
+  glClearColor (0.0f, 0.0f, 0.0f, 1.0f);
   glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glColor3f (1.0f - progress, progress, 0.0f);
   glLineWidth (10.0f);
-  RenderCanvasBegin (0, 100, 0, 100, 0);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_TEXTURE_2D);
+  glDisable (GL_BLEND);
+  glBindTexture (GL_TEXTURE_2D, 0);
+  RenderCanvasBegin (-20, 120, 0, 100, 0);
   glBegin (GL_LINES);
   glVertex2f (0, 50);
   glVertex2f (progress * 100, 50);
@@ -371,7 +374,7 @@ void Render (void)
   Env*            e;
   float           water_level;
 
-  pos = CameraPosition ();
+  pos = AvatarCameraPosition ();
   e = EnvGet ();
   water_level = WorldWaterLevel ((int)pos.x, (int)pos.y);
   water_level = max (water_level, 0);
@@ -434,9 +437,9 @@ void Render (void)
 
   //Move into our unique coordanate system
   glLoadIdentity();
-  pos = CameraPosition ();
+  pos = AvatarCameraPosition ();
   glScalef (1, -1, 1);
-  angle = CameraAngle ();
+  angle = AvatarCameraAngle ();
   glRotatef (angle.x, 1.0f, 0.0f, 0.0f);
   glRotatef (angle.y, 0.0f, 1.0f, 0.0f);
   glRotatef (angle.z, 0.0f, 0.0f, 1.0f);
@@ -444,7 +447,7 @@ void Render (void)
   SkyRender ();
   //glScalef (1, -1, 1);
 
-
+/*
   if (0) { //water reflection effect.  Needs stencil buffer to work right
     glDisable (GL_FOG);
     glPushMatrix ();
@@ -486,6 +489,7 @@ void Render (void)
     glPolygonMode(GL_BACK, GL_LINE);
 
   }
+  */
 
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

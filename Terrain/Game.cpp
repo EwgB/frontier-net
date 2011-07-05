@@ -12,6 +12,7 @@
 #include "avatar.h"
 #include "cache.h"
 #include "console.h"
+#include "input.h"
 #include "main.h"
 #include "render.h"
 #include "scene.h"
@@ -19,8 +20,16 @@
 #include "sdl.h"
 #include "world.h"
 
+#define TIME_SCALE          1000  //how many milliseconds per in-game minute
+#define SECONDS_TO_DECIMAL  (1.0f / 60.0f)
+
 static unsigned     seed;
 static bool         running;
+static long         seconds;
+static long         minutes;
+static long         hours;
+static long         days;
+static float        decimal_time;
 
 /*-----------------------------------------------------------------------------
 
@@ -69,6 +78,11 @@ void GameNew (unsigned seed_in)
     GameQuit ();
     return;
   }
+  days = 0;
+  hours = 6;
+  minutes = 30;
+  seconds = 0;
+  decimal_time = (float)days * 24.0f + (float)hours + (float)minutes * SECONDS_TO_DECIMAL;
   running = true;
   if (ConsoleIsOpen ())
     ConsoleToggle ();
@@ -111,7 +125,7 @@ void GameNew (unsigned seed_in)
   points_checked = 0;
   while (points_checked < REGION_SIZE * 3 &&  !MainIsQuit ()) { 
     TextPrint ("Scanning %d", world_pos.x);
-    loading (2.0f);
+    loading (0.02f);
     if (!CachePointAvailable (world_pos.x, world_pos.y)) {
       CacheUpdatePage (world_pos.x, world_pos.y, SDL_GetTicks () + 20);
       continue;
@@ -126,6 +140,7 @@ void GameNew (unsigned seed_in)
   }
   AvatarPositionSet (av_pos);
   SceneGenerate ();
+  AvatarUpdate ();
   do {
     SceneProgress (&ready, &total);
     SceneUpdate (SDL_GetTicks () + 20);
@@ -170,3 +185,39 @@ char* GameDirectory ()
   return dir;
 
 }
+
+float GameTime ()
+{
+  return decimal_time;
+}
+
+void GameUpdate ()
+{
+
+  if (!running)
+    return;
+  if (InputKeyPressed (SDLK_RIGHTBRACKET))
+    hours++;
+  if (InputKeyPressed (SDLK_LEFTBRACKET)) {
+    hours--;
+    if (hours < 0)
+      hours += 24;
+  }
+  seconds += SdlElapsed ();
+  if (seconds >= TIME_SCALE) {
+    seconds -= TIME_SCALE;
+    minutes++;
+  }
+  if (minutes >= 60) {
+    minutes -= 60;
+    hours++;
+  }
+  if (hours >= 24) {
+    hours -= 24;
+    days++;
+  }
+  decimal_time = (float)days * 24.0f + (float)hours + (float)minutes * SECONDS_TO_DECIMAL;
+  TextPrint ("Day %d: %02d:%02d = %1.2f", days + 1, hours, minutes, decimal_time);
+
+}
+

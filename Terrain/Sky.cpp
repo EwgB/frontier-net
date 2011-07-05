@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 
-#include "camera.h"
+#include "avatar.h"
 #include "env.h"
 #include "math.h"
 #include "random.h"
@@ -162,7 +162,7 @@ void SkyRender ()
 
   //We want to use a camera space that uses the camera orientation, but not its position.
   e = EnvGet ();
-  angle = CameraAngle ();
+  angle = AvatarCameraAngle ();
   glPushMatrix ();
   glLoadIdentity ();
   glScalef (1, -1, 1);

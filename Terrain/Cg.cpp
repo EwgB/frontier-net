@@ -9,7 +9,7 @@
 -----------------------------------------------------------------------------*/
 
 #include "stdafx.h"
-#include "camera.h"
+#include "avatar.h"
 #include "console.h"
 #include "cg.h"
 #include "env.h"
@@ -166,7 +166,7 @@ void CgShaderSelect (int select)
   cgGLSetParameter3f (s->lightcol, c.red, c.green, c.blue);
   c = e->color[ENV_COLOR_AMBIENT] * glRgba (0.2f, 0.2f, 1.0f);
   cgGLSetParameter3f (s->ambientcol, c.red, c.green, c.blue);
-  p = CameraPosition ();
+  p = AvatarCameraPosition ();
   cgGLSetParameter3f (s->eyepos, p.x, p.y, p.z);
   cgGLSetStateMatrixParameter(s->matrix, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MODELVIEW_MATRIX);
 
@@ -210,7 +210,7 @@ void CgUpdate ()
   //c = glRgba (0.0f, 0.0f, 1.0f);
   cgGLSetParameter3f (ambientcol, c.red, c.green, c.blue);
   GLvector    p;
-  p = CameraPosition ();
+  p = AvatarCameraPosition ();
   cgGLSetParameter3f (eyepos, p.x, p.y, p.z);
 
 }

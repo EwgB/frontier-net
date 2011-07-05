@@ -13,7 +13,7 @@
 -----------------------------------------------------------------------------*/
 
 #include "stdafx.h"
-#include "camera.h"
+#include "avatar.h"
 #include "cgrid.h"
 #include "input.h"
 
@@ -133,6 +133,7 @@ void GridManager::Init (GridData* itemptr, unsigned grid_size, unsigned item_siz
 
   GridData*   gd;
   GLcoord     walk;
+  unsigned    i;
 
   if (!list_ready)
     do_list ();
@@ -142,9 +143,16 @@ void GridManager::Init (GridData* itemptr, unsigned grid_size, unsigned item_siz
   _item_size = item_size;
   _item_bytes = _item[0].Sizeof ();
   _item_count = _grid_size * _grid_size;
-  _last_viewer = ViewPosition (CameraPosition ());
+  _last_viewer = ViewPosition (AvatarPosition ());
   _list_pos = 0;
   walk.Clear ();
+  _view_items = 0;
+  for (i = 0; i < distance_list.size (); i++) {
+    if (distance_list[i].distancei <= _grid_half)
+      _view_items++;
+    else
+      break;
+  }
   do {
     gd = Item (walk);
     gd->Invalidate ();
@@ -176,7 +184,7 @@ void GridManager::Update (long stop)
 
   if (!_item)
     return;
-  viewer = ViewPosition (CameraPosition ());
+  viewer = ViewPosition (AvatarPosition ());
   //If the player has moved to a new spot on the grid, restart our
   //outward walk.
   if (viewer != _last_viewer) {

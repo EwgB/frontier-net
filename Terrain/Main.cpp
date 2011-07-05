@@ -28,7 +28,6 @@ http://www.bramstein.com/projects/gui/
 #include "stdafx.h"
 
 #include "avatar.h"
-#include "camera.h"
 #include "cache.h"
 #include "console.h"
 #include "env.h"
@@ -71,7 +70,6 @@ static void init ()
   RenderInit ();
   EnvInit ();
   AvatarInit ();
-  CameraInit ();
   TextureInit ();
   WorldInit ();
   SceneInit ();
@@ -89,7 +87,6 @@ static void term ()
 {
 
   AvatarTerm ();
-  CameraTerm ();
   TextureTerm ();
   SdlTerm ();
 
@@ -109,8 +106,8 @@ static void run ()
     stop = SdlTick () + 15;
     ConsoleUpdate ();
     SdlUpdate ();
+    GameUpdate ();
     AvatarUpdate ();
-    CameraUpdate ();
     EnvUpdate ();
     SkyUpdate ();
     SceneUpdate (stop);
@@ -144,14 +141,6 @@ bool MainIsQuit ()
 }
 
 
-bool cf (vector<string> *args)
-{
-
-  ConsoleLog ("FOO!");
-  return true;
-
-}
-
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/
@@ -167,12 +156,14 @@ int PASCAL WinMain (HINSTANCE instance_in, HINSTANCE previous_instance, LPSTR co
   bool& show_stats = CVarUtils::CreateCVar ("show.stats", false, "Show various debug statistics.");
   bool& show_pages = CVarUtils::CreateCVar ("show.pages", false, "Show bounding boxes for paged data.");
   bool& cache_active = CVarUtils::CreateCVar ("cache.active", true, "Controls saving of paged data.");
-  CVarUtils::CreateCVar ("foo", cf, "do foo");
+  CVarUtils::CreateCVar ("flying", false, "Allows flight.");
+  CVarUtils::CreateCVar ("mouse.invert", false, "Reverse mouse y axis.");
+  CVarUtils::CreateCVar ("mouse.sensitivity", 1.0f, "Mouse tracking");
+  //Functions
   CVarUtils::CreateCVar ("cache.dump", CacheDump, "Clear all saved data from memory & disk.");
   CVarUtils::CreateCVar ("cache.size", CacheSize, "Returns the current size of the cache.");
   CVarUtils::CreateCVar ("game", GameCmd, "Usage: Game [ new | quit ]");
   CVarUtils::Load (SETTINGS_FILE);
-  //CVarUtils::ExecuteFunction ("foo", 
 
   init ();
   run ();

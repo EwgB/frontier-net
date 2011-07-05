@@ -306,7 +306,6 @@ static void do_weights (char* buffer, CFigure* fig)
     fig->_bone[fig->_bone_index[bid]]._vertex_weights.push_back (bw);
   }
 
-
 }
 
 
@@ -332,6 +331,5 @@ bool FileXLoad (char* filename, CFigure* fig)
   do_weights (buffer, fig);
   free (buffer);
   return true;
-
 
 }

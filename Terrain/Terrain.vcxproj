@@ -84,7 +84,6 @@
   <ItemGroup>
     <ClCompile Include="Avatar.cpp" />
     <ClCompile Include="Cache.cpp" />
-    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CAnim.cpp" />
     <ClCompile Include="CFigure.cpp" />
     <ClCompile Include="CForest.cpp" />
@@ -132,7 +131,6 @@
   <ItemGroup>
     <ClInclude Include="Avatar.h" />
     <ClInclude Include="Cache.h" />
-    <ClInclude Include="Camera.h" />
     <ClInclude Include="Canim.h" />
     <ClInclude Include="CFigure.h" />
     <ClInclude Include="CForest.h" />

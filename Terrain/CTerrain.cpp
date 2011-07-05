@@ -9,7 +9,6 @@
 -----------------------------------------------------------------------------*/
 
 #include "stdafx.h"
-#include "camera.h"
 #include "cache.h"
 #include "sdl.h"
 #include "CTerrain.h"

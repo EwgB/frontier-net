@@ -10,9 +10,7 @@ protected:
   GLcoord           _grid_position;
   GLbbox            _bbox;
 public:
-  GLcoord           GridPosition () const { 
-    return _grid_position; 
-  };
+  GLcoord           GridPosition () const { return _grid_position; };
   virtual bool      Ready () { return true; };
   virtual void      Render () {};
   virtual void      Set (int grid_x, int grid_y, int grid_distance) {};
@@ -26,12 +24,13 @@ public:
 class GridManager
 {
 protected:
-  GridData*             _item;
-  unsigned              _grid_size;
-  unsigned              _grid_half;
-  unsigned              _item_size;
-  unsigned              _item_count;
-  unsigned              _item_bytes;
+  GridData*             _item;       //Our list of items
+  unsigned              _grid_size;  //The size of the grid of items to manage. Should be odd. Bigger = see farther.
+  unsigned              _grid_half;  //The mid-point of the grid
+  unsigned              _item_size;  //Size of an item in world units.
+  unsigned              _item_count; //How many total items in the table?
+  unsigned              _item_bytes; //size of items, in bytes
+  unsigned              _view_items; //How many items in the table are withing the viewable circle?
   GLcoord               _last_viewer;
   unsigned              _list_pos;
 
@@ -43,6 +42,7 @@ public:
   void                  Clear ();
   void                  Init (GridData* items, unsigned grid_size, unsigned item_size);
   unsigned              ItemsReady () { return _list_pos; }
+  unsigned              ItemsViewable () { return _view_items; }
   void                  Update (long stop);
   void                  Render ();
 

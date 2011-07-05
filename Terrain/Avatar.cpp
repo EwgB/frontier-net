@@ -14,8 +14,8 @@
 #include <sstream>
 #include "avatar.h"
 #include "cache.h"
-#include "camera.h"
 #include "cfigure.h"
+#include "game.h"
 #include "ini.h"
 #include "input.h"
 #include "main.h"
@@ -33,7 +33,7 @@
 #define CAM_MAX         12
 #define STOP_SPEED      0.02f
 #define SWIM_DEPTH      1.4f
-#define DEFAULT_SENSE   1.0f
+
 
 
 enum
@@ -61,6 +61,29 @@ static char*      anim_names[] =
   "Floating",
 };
 
+static float    burn_rate[] = 
+{
+  56,     //stand
+  200,    //run, which we treat as "walking" for gameplay purposes
+  450,    //sprint
+  0,      //flying
+  50,     //falling
+  200,    //jumping
+  450,    //swimming
+  400,    //treading water
+};
+
+
+
+struct Player
+{
+  float         distance_walked;
+  float         calories_burned;
+};
+
+
+static GLvector         camera_position;
+static GLvector         camera_angle;
 static GLvector         angle;
 static GLvector         avatar_facing;
 static GLvector         position;
@@ -69,7 +92,6 @@ static GLvector2        desired_movement;
 static float            cam_distance;
 static float            desired_cam_distance;
 static float            velocity;
-static bool             flying;
 static bool             on_ground;
 static bool             swimming;
 static bool             sprinting;
@@ -77,9 +99,9 @@ static unsigned         last_update;
 static Region           region;
 static CFigure          avatar;
 static CAnim            anim[ANIM_COUNT];
-static float            distance_walked;
-static bool             invert_y;
-static float            mouse_sense;
+//static float            distance_walked;
+static Player           stats;
+static float            last_time;
 
 /*-----------------------------------------------------------------------------
 
@@ -91,7 +113,7 @@ static void do_move (GLvector delta)
   GLvector    movement;
   float       forward;
   
-  if (flying) {
+  if (CVarUtils::GetCVar<bool> ("flying")) {
     forward = sin (angle.x * DEGREES_TO_RADIANS);
     movement.x = cos (angle.z * DEGREES_TO_RADIANS) * delta.x +  sin (angle.z * DEGREES_TO_RADIANS) * delta.y * forward;
     movement.y = -sin (angle.z * DEGREES_TO_RADIANS) * delta.x +  cos (angle.z * DEGREES_TO_RADIANS) * delta.y * forward;
@@ -128,8 +150,8 @@ void do_camera ()
 
   ground = CacheElevation (cam.x, cam.y) + 0.2f;
   cam.z = max (cam.z, ground);
-  CameraAngleSet (angle);
-  CameraPositionSet (cam);
+  camera_angle = angle;
+  camera_position = cam;
 
 }
 
@@ -162,14 +184,15 @@ void AvatarUpdate (void)
   float     steps;
   int       anim_id;
   float     movement_animation;
+  float     time_passed;
   GLvector  old;
+  bool      flying;
 
+  flying = CVarUtils::GetCVar<bool> ("flying");
   elapsed = SdlElapsedSeconds ();
   elapsed = min (elapsed, 0.25f);
   old = position;
   desired_movement = glVector (0.0f, 0.0f);
-  if (InputKeyPressed (SDLK_F2))
-    flying = !flying;
   if (InputKeyPressed (SDLK_SPACE) && on_ground) {
     velocity = JUMP_SPEED;
     on_ground = false;
@@ -177,7 +200,6 @@ void AvatarUpdate (void)
   //Jotstick movement
   AvatarLook ((int)(InputJoystickGet (3) * 5.0f), (int)(InputJoystickGet (4) * -5.0f));
   do_move (glVector (InputJoystickGet (0), InputJoystickGet (1), 0.0f));
-  TextPrint ("%1.4f %1.4f", InputJoystickGet (4), InputJoystickGet (3));
   if (InputMouselook ()) {
     if (InputKeyPressed (INPUT_MWHEEL_UP))
       desired_cam_distance -= 1.0f;
@@ -234,9 +256,9 @@ void AvatarUpdate (void)
       velocity = 0.0f;
     }
   }
-  movement_animation = distance_walked / 4.0f;
+  movement_animation = stats.distance_walked / 4.0f;
   if (on_ground)
-    distance_walked += steps;
+    stats.distance_walked += steps;
   if (current_movement.x != 0.0f && current_movement.y != 0.0f)
     avatar_facing.z = -MathAngle (0.0f, 0.0f, current_movement.x, current_movement.y) / 2.0f;
   if (flying)
@@ -261,9 +283,15 @@ void AvatarUpdate (void)
   avatar.PositionSet (position);
   avatar.RotationSet (avatar_facing);
   avatar.Update ();
+  time_passed = GameTime () - last_time;
+  last_time = GameTime ();
+  stats.calories_burned += burn_rate [anim_id] * time_passed;
+
   region = WorldRegionGet ((int)(position.x + REGION_HALF) / REGION_SIZE, (int)(position.y + REGION_HALF) / REGION_SIZE);
-  //TextPrint ("Temp:%1.1f%c Moisture:%1.0f%%\nGeo Scale: %1.2f Water Level: %1.2f Topography Detail:%1.2f Topography Bias:%1.2f", region.temperature * 100.0f, 186, region.moisture * 100.0f, region.geo_scale, region.geo_water, region.geo_detail, region.geo_bias);
+  TextPrint ("Temp:%1.1f%c Moisture:%1.0f%%\nGeo Scale: %1.2f Water Level: %1.2f Topography Detail:%1.2f Topography Bias:%1.2f", region.temperature * 100.0f, 186, region.moisture * 100.0f, region.geo_scale, region.geo_water, region.geo_detail, region.geo_bias);
   TextPrint ("%s", anim_names[anim_id]);
+  TextPrint ("Calories burned: %1.2f (%f)", stats.calories_burned, burn_rate [anim_id]);
+  TextPrint ("Walked %1.2fkm", stats.distance_walked / 1000.0f);
   do_camera ();
   do_location ();
 
@@ -273,18 +301,9 @@ void AvatarUpdate (void)
 void AvatarInit (void)		
 {
 
-  angle = IniVector ("Avatar", "Angle");
-  position = IniVector ("Avatar", "Position");
   desired_cam_distance = IniFloat ("Avatar", "CameraDistance");
-  flying = IniInt ("Avatar", "Flying") != 0;
-  invert_y = IniInt ("Avatar", "InvertY") != 0;
-  mouse_sense = IniFloat ("Avatar", "MouseSensitivity");
-  if (mouse_sense == 0) {
-    mouse_sense = DEFAULT_SENSE;
-    IniFloatSet ("Avatar", "MouseSensitivity", mouse_sense);
-  }
+
   avatar.LoadX ("models//male.x");
-  
   avatar.BoneInflate (BONE_PELVIS, 0.02f, true);
   avatar.BoneInflate (BONE_HEAD, 0.025f, true);
   avatar.BoneInflate (BONE_LWRIST, 0.03f, true);
@@ -296,32 +315,23 @@ void AvatarInit (void)
     anim[i].LoadBvh (IniString ("Animations", anim_names[i]));
     IniStringSet ("Animations", anim_names[i], IniString ("Animations", anim_names[i]));
   }
-  /*
-  anim[ANIM_RUN].LoadBvh (IniString ("Animations", "Run"));
-  anim[ANIM_SPRINT].LoadBvh (IniString ("Animations", "Sprint"));
-  anim[ANIM_FALL].LoadBvh (IniString ("Animations", "Fall"));
-  anim[ANIM_JUMP].LoadBvh (IniString ("Animations", "Jump"));
-  anim[ANIM_SWIM].LoadBvh (IniString ("Animations", "Swim"));
-  //anim.LoadBvh ("Anims//walk.bvh");
-  */
+
 }
 
 void AvatarTerm (void)		
 {
 
-  //just store our most recent position in the ini
-  IniVectorSet ("Avatar", "Angle", angle);
-  IniFloatSet ("Avatar", "CameraDistance", cam_distance);
-  IniVectorSet ("Avatar", "Position", position);
-  IniIntSet ("Avatar", "Flying", flying ? 1 : 0);
- 
+
 }
 
 void AvatarLook (int x, int y)
 {
 
-  if (invert_y)
+  float   mouse_sense;
+
+  if (CVarUtils::GetCVar<bool> ("mouse.invert"))
     x = -x;
+  mouse_sense = CVarUtils::GetCVar<float> ("mouse.sensitivity");
   angle.x -= (float)x * mouse_sense;
   angle.z += (float)y * mouse_sense;
   angle.x = clamp (angle.x, 0.0f, 180.0f);
@@ -331,10 +341,6 @@ void AvatarLook (int x, int y)
 
 
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 GLvector AvatarPosition ()
 {
@@ -350,8 +356,30 @@ void AvatarPositionSet (GLvector new_pos)
   new_pos.x = clamp (new_pos.x, 0, (REGION_SIZE * WORLD_GRID));
   new_pos.y = clamp (new_pos.y, 0, (REGION_SIZE * WORLD_GRID));
   position = new_pos;
+  camera_position = position;
+  angle = camera_angle = glVector (90.0f, 0.0f, 0.0f);
+  last_time = GameTime ();
 
 }
+
+GLvector AvatarCameraPosition ()
+{
+
+  return camera_position;
+
+}
+
+GLvector AvatarCameraAngle ()
+{
+
+  return camera_angle;
+
+}
+
+void* AvatarRegion ()
+{
+  return (void*)&region;
+};
 
 void AvatarRender ()
 {

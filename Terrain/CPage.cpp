@@ -392,7 +392,6 @@ void CPage::Cache (int origin_x, int origin_y)
   _stage = PAGE_STAGE_BEGIN;
   _bbox.Clear ();
   if (FileExists (page_file_name (_origin))) {
-  //if (0) {
     char*   buf;
     long    size;
     long    my_size;

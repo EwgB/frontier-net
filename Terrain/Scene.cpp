@@ -13,7 +13,6 @@
 
 #include "stdafx.h"
 #include "avatar.h"
-#include "camera.h"
 #include "cache.h"
 #include "cforest.h"
 #include "cg.h"
@@ -31,8 +30,8 @@
 #include "water.h"
 #include "world.h"
 
-#include "ctree.h"
-#include "figure.h"
+//#include "ctree.h"
+//#include "figure.h"
 
 #define FOREST_GRID     7
 #define FOREST_HALF     (FOREST_GRID / 2)
@@ -40,7 +39,6 @@
 #define GRASS_HALF      (GRASS_GRID / 2)
 #define TERRAIN_GRID    27
 
-static CTree            test_tree;
 static int              cached;
 static int              texture_bytes;
 static int              texture_bytes_counter;
@@ -56,6 +54,8 @@ static vector<CForest>    il_forest;
 static GridManager        gm_grass;
 static vector<CGrass>     il_grass;
 static unsigned           world_seed = 2;
+
+static CTerrain           leaker;
 
 /* Module Functions *************************************************************/
 
@@ -79,7 +79,7 @@ void SceneGenerate ()
 
   SceneClear ();
   WaterBuild ();
-  camera = CameraPosition ();
+  camera = AvatarPosition ();
   current.x = (int)(camera.x) / GRASS_SIZE;
 
   il_grass.clear ();
@@ -134,13 +134,15 @@ CTerrain* SceneTerrainGet (int x, int y)
 void SceneInit ()
 {
 
+  leaker.Set (WORLD_GRID_CENTER, WORLD_GRID_CENTER, 0);
+
 }
 
 void SceneProgress (unsigned* ready, unsigned* total)
 {
 
   *ready = gm_terrain.ItemsReady ();
-  *total = 100;
+  *total =20;
 
 }
 
@@ -152,6 +154,7 @@ void SceneUpdate (long stop)
   gm_terrain.Update (stop);
   gm_grass.Update (stop);
   gm_forest.Update (stop);
+  TextPrint ("Scene: %d of %d terrains ready", gm_terrain.ItemsReady (), gm_terrain.ItemsViewable ());
 
 }
 
@@ -163,6 +166,8 @@ void SceneRender ()
   //glColor3f (1,1,1);
   //if (draw_tree)
     //test_tree.Render (last_tree, 0, LOD_HIGH);
+  if (!GameRunning ())
+    return;
   if (!CVarUtils::GetCVar<bool> ("render.textured"))
     glDisable(GL_TEXTURE_2D);
   else
@@ -179,18 +184,6 @@ void SceneRender ()
   WaterRender ();
   CgShaderSelect (SHADER_NONE);
   AvatarRender ();
-  if (0) { //Show tree texture
-    GLvector      camera;
-    Region*       r;
-    CTree*        tree;
-
-    glDisable (GL_BLEND);
-    camera = CameraPosition ();
-    r = (Region*)CameraRegion ();
-    tree = WorldTree (r->tree_type);
-    RenderTexture (tree->_texture);
-  }
-  //FigureRender ();
 
 }
 
@@ -203,6 +196,7 @@ void SceneRenderDebug ()
   glBlendFunc (GL_ONE, GL_ONE);
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glColor3f (1,1,1);
+  leaker.Render ();
   gm_forest.Render ();
   gm_terrain.Render ();
   gm_grass.Render ();

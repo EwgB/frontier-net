@@ -5,3 +5,5 @@ void  GameNew (unsigned seed_in);
 void  GameQuit ();
 bool  GameRunning ();
 void  GameTerm ();
+float GameTime ();
+void  GameUpdate ();
