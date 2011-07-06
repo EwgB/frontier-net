@@ -49,7 +49,7 @@ SurfaceType CPage::Surface (int x, int y)
 {
 
   _last_touched = SdlTick ();
-  return _cell[x][y].surface;
+  return (SurfaceType)_cell[x][y].surface;
 
 }
 
@@ -65,7 +65,7 @@ GLvector CPage::Position (int x, int y)
 {
 
   _last_touched = SdlTick ();
-  return _cell[(x % PAGE_SIZE)][(y % PAGE_SIZE)].pos;
+  return glVector ((float)x, (float)y, _cell[(x % PAGE_SIZE)][(y % PAGE_SIZE)].elevation);
 
 }
 
@@ -80,21 +80,21 @@ GLvector CPage::Normal (int x, int y)
 GLrgba CPage::ColorGrass (int x, int y)
 {
 
-  return _cell[(x % PAGE_SIZE)][(y % PAGE_SIZE)].grass;
+  return _cell[(x % PAGE_SIZE)][(y % PAGE_SIZE)].color;
 
 }
 
 GLrgba CPage::ColorDirt (int x, int y)
 {
 
-  return _cell[(x % PAGE_SIZE)][(y % PAGE_SIZE)].dirt;
+  return _cell[(x % PAGE_SIZE)][(y % PAGE_SIZE)].color;
 
 }
 
 GLrgba CPage::ColorRock (int x, int y)
 {
 
-  return _cell[(x % PAGE_SIZE)][(y % PAGE_SIZE)].rock;
+  return _cell[(x % PAGE_SIZE)][(y % PAGE_SIZE)].color;
 
 }
 
@@ -128,7 +128,7 @@ float CPage::Elevation (int x, int y)
 {
 
   _last_touched = SdlTick ();
-  return _cell[x][y].pos.z;
+  return _cell[x][y].elevation;
 
 }
 
@@ -156,7 +156,7 @@ void CPage::DoPosition ()
   world_x = (_origin.x * PAGE_SIZE + _walk.x);
   world_y = (_origin.y * PAGE_SIZE + _walk.y);
   c = WorldCell (world_x, world_y);
-  _cell[_walk.x][_walk.y].pos = glVector ((float)world_x, (float)world_y, c.elevation);
+  _cell[_walk.x][_walk.y].elevation = c.elevation;
   _cell[_walk.x][_walk.y].detail = c.detail;
   _cell[_walk.x][_walk.y].water_level = c.water_level;
   _cell[_walk.x][_walk.y].tree_id = 0;
@@ -174,10 +174,15 @@ void CPage::DoColor ()
   world_x = (_origin.x * PAGE_SIZE + _walk.x);
   world_y = (_origin.y * PAGE_SIZE + _walk.y);
   if (_cell[_walk.x][_walk.y].surface == SURFACE_GRASS || _cell[_walk.x][_walk.y].surface == SURFACE_GRASS_EDGE)
-    _cell[_walk.x][_walk.y].grass = WorldColorGet (world_x, world_y, SURFACE_COLOR_GRASS);
-  if (_cell[_walk.x][_walk.y].surface == SURFACE_DIRT || _cell[_walk.x][_walk.y].surface == SURFACE_DIRT_DARK || _cell[_walk.x][_walk.y].surface == SURFACE_FOREST)
-    _cell[_walk.x][_walk.y].dirt = WorldColorGet (world_x, world_y, SURFACE_COLOR_DIRT);
-  _cell[_walk.x][_walk.y].rock = WorldColorGet (world_x, world_y, SURFACE_COLOR_ROCK);
+    _cell[_walk.x][_walk.y].color = WorldColorGet (world_x, world_y, SURFACE_COLOR_GRASS);
+  else if (_cell[_walk.x][_walk.y].surface == SURFACE_DIRT || _cell[_walk.x][_walk.y].surface == SURFACE_DIRT_DARK || _cell[_walk.x][_walk.y].surface == SURFACE_FOREST)
+    _cell[_walk.x][_walk.y].color = WorldColorGet (world_x, world_y, SURFACE_COLOR_DIRT);
+  else if (_cell[_walk.x][_walk.y].surface == SURFACE_SAND || _cell[_walk.x][_walk.y].surface == SURFACE_SAND_DARK)
+    _cell[_walk.x][_walk.y].color = WorldColorGet (world_x, world_y, SURFACE_COLOR_SAND);
+  else if (_cell[_walk.x][_walk.y].surface == SURFACE_SNOW)
+    _cell[_walk.x][_walk.y].color = glRgba (1.0f, 1.0f, 1.0f);
+  else 
+    _cell[_walk.x][_walk.y].color = WorldColorGet (world_x, world_y, SURFACE_COLOR_ROCK);
   if (_walk.Walk (PAGE_SIZE))
     _stage++;
 
@@ -188,15 +193,20 @@ void CPage::DoNormal ()
 {
 
   GLvector        normal_y, normal_x;
+  float           world_x, world_y;
 
+  world_x = (float)(_origin.x + _walk.x);
+  world_y = (float)(_origin.y + _walk.y);
   if (_walk.x < 1 || _walk.x >= PAGE_SIZE - 1) 
     normal_x = glVector (-1, 0, 0);
   else
-    normal_x = _cell[_walk.x - 1][_walk.y].pos - _cell[_walk.x + 1][_walk.y].pos;
+    normal_x = glVector (world_x - 1, world_y, _cell[_walk.x - 1][_walk.y].elevation) -
+      glVector (world_x + 1, world_y, _cell[_walk.x + 1][_walk.y].elevation);
   if (_walk.y < 1 || _walk.y >= PAGE_SIZE - 1) 
     normal_y = glVector (0, -1, 0);
   else
-    normal_y = _cell[_walk.x][_walk.y - 1].pos - _cell[_walk.x][_walk.y + 1].pos;
+    normal_y = glVector (world_x, world_y - 1, _cell[_walk.x][_walk.y - 1].elevation) -
+      glVector (world_x, world_y, _cell[_walk.x][_walk.y + 1].elevation);
   _cell[_walk.x][_walk.y].normal = glVectorCrossProduct (normal_x, normal_y);
   _cell[_walk.x][_walk.y].normal.z *= NORMAL_SCALING;
   _cell[_walk.x][_walk.y].normal.Normalize ();
@@ -234,18 +244,18 @@ void CPage::DoTrees ()
       if (c->surface != SURFACE_GRASS && c->surface != SURFACE_SNOW && c->surface != SURFACE_FOREST)
         continue;
       //Don't spawn trees that might touch water.  Looks odd.
-      if (c->pos.z < c->water_level + 1.2f)
+      if (c->elevation < c->water_level + 1.2f)
         continue;
-      if (tree->GrowsHigh() && (c->detail + region.tree_threshold) > 1.0f && c->pos.z > best) {
+      if (tree->GrowsHigh() && (c->detail + region.tree_threshold) > 1.0f && c->elevation > best) {
         plant.x = _walk.x * TREE_SPACING + x;
         plant.y = _walk.y * TREE_SPACING + y;
-        best = c->pos.z;
+        best = c->elevation;
         valid = true;
       }
-      if (!tree->GrowsHigh() && (c->detail - region.tree_threshold) < 0.0f && c->pos.z < best) {
+      if (!tree->GrowsHigh() && (c->detail - region.tree_threshold) < 0.0f && c->elevation < best) {
         plant.x = _walk.x * TREE_SPACING + x;
         plant.y = _walk.y * TREE_SPACING + y;
-        best = c->pos.z;
+        best = c->elevation;
         valid = true;
       }
     }
@@ -277,7 +287,7 @@ void CPage::DoSurface ()
   c = &_cell[_walk.x][_walk.y];
   if (_stage == PAGE_STAGE_SURFACE1) {
     //Get the elevation of our neighbors
-    high = low = c->pos.z;
+    high = low = c->elevation;
     for (xx = -2; xx <= 2; xx++) {
       neighbor_x = _walk.x + xx;
       if (neighbor_x < 0 || neighbor_x >= PAGE_SIZE) 
@@ -286,8 +296,8 @@ void CPage::DoSurface ()
         neighbor_y = _walk.y + yy;
         if (neighbor_y < 0 || neighbor_y >= PAGE_SIZE) 
           continue;
-        high = max (high, _cell[neighbor_x][neighbor_y].pos.z);
-        low = min (low, _cell[neighbor_x][neighbor_y].pos.z);
+        high = max (high, _cell[neighbor_x][neighbor_y].elevation);
+        low = min (low, _cell[neighbor_x][neighbor_y].elevation);
       }
     }
     delta = high - low;

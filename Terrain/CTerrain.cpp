@@ -40,8 +40,6 @@ static struct LayerAttributes
   {7,     1.0f,  1.0f,   1.1f,   SURFACE_SAND,       SURFACE_COLOR_SAND},
 
   {7,     0.6f,  1.0f,   1.5f,   SURFACE_SAND_DARK,  SURFACE_COLOR_SAND},
-
-
   //{4,    0.0f,  0.5f,   1.6f,   SURFACE_DIRT,       SURFACE_COLOR_BLACK},
   //{4,    0.0f,  0.5f,   1.5f,   SURFACE_DIRT,       SURFACE_COLOR_BLACK},
   {4,    1.0f,  1.0f,   1.4f,   SURFACE_DIRT,       SURFACE_COLOR_DIRT},
@@ -56,12 +54,11 @@ static struct LayerAttributes
   {5,   0.0f,  0.5f,   1.3f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
   {5,   1.0f,  1.0f,   1.2f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
   {6,   1.0f,  1.0f,   2.0f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
-
+  
   {2,    0.0f,  0.3f,   1.9f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW},
   {2,    0.6f,  0.8f,   1.6f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW},
   {2,    0.8f,  0.8f,   1.55f,  SURFACE_SNOW,       SURFACE_COLOR_SNOW},
   {2,    1.0f,  1.0f,   1.5f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW}
-
 };
 
 static bool   bound_ready;

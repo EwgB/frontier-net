@@ -19,15 +19,13 @@ enum
 
 struct pcell
 {
-  SurfaceType surface;
+  UCHAR       surface;
+  short       tree_id;
   float       water_level;
+  float       elevation;
   float       detail;
-  GLrgba      grass;
-  GLrgba      rock;
-  GLrgba      dirt;
+  GLrgba      color;
   GLvector    normal;
-  GLvector    pos;
-  unsigned    tree_id;
 };
 
 class CPage

@@ -542,14 +542,7 @@ GLrgba WorldColorGet (int world_x, int world_y, SurfaceColor c)
   r1 = WorldRegionGet (origin.x + 1, origin.y);
   r2 = WorldRegionGet (origin.x, origin.y + 1);
   r3 = WorldRegionGet (origin.x + 1, origin.y + 1);
-  //return r0.color_grass;
   switch (c) {
-  case SURFACE_COLOR_GRASS:
-    c0 = r0.color_grass;
-    c1 = r1.color_grass;
-    c2 = r2.color_grass;
-    c3 = r3.color_grass;
-    break;
   case SURFACE_COLOR_DIRT:
     c0 = r0.color_dirt;
     c1 = r1.color_dirt;
@@ -561,6 +554,15 @@ GLrgba WorldColorGet (int world_x, int world_y, SurfaceColor c)
     c1 = r1.color_rock;
     c2 = r2.color_rock;
     c3 = r3.color_rock;
+    break;
+  case SURFACE_COLOR_SAND:
+    return glRgba (0.98f, 0.82f, 0.42f);
+  default:
+  case SURFACE_COLOR_GRASS:
+    c0 = r0.color_grass;
+    c1 = r1.color_grass;
+    c2 = r2.color_grass;
+    c3 = r3.color_grass;
     break;
   }
   result.red   = MathInterpolateQuad (c0.red, c1.red, c2.red, c3.red, offset);
