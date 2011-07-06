@@ -253,7 +253,6 @@ void CTerrain::DoHeightmap ()
 
   GLcoord         world;
   GLvector        pos;
-//  GLvector2       delta;
 
   world.x = _origin.x + _walk.x;
   world.y = _origin.y + _walk.y;
@@ -262,25 +261,6 @@ void CTerrain::DoHeightmap ()
   pos.y = (float)world.y;
   pos.z = CacheElevation (world.x, world.y);
   _pos[_walk.x][_walk.y] = pos;
-  _uv[_walk.x][_walk.y] = glVector ((float)_walk.x / TERRAIN_SIZE, (float)_walk.y / TERRAIN_SIZE);
-  /*
-  if (!_walk.x)
-    _contour[_walk.x][_walk.y].x = 0;
-  else {
-    delta.y = 1;
-    delta.x = _pos[_walk.x][_walk.y].z - _pos[_walk.x - 1][_walk.y].z;
-    _contour[_walk.x][_walk.y].x = _contour[_walk.x - 1][_walk.y].x + glVectorLength (delta);
-  }
-  if (!_walk.y)
-    _contour[_walk.x][_walk.y].y = 0;
-  else {
-    delta.x = 1;
-    delta.y = _pos[_walk.x][_walk.y].z - _pos[_walk.x][_walk.y - 1].z;
-    _contour[_walk.x][_walk.y].y = _contour[_walk.x][_walk.y - 1].y + glVectorLength (delta);
-    _contour[_walk.x][_walk.y].y = _contour[_walk.x][_walk.y - 1].y + 1;
-  }
-  _normal[_walk.x][_walk.y] = CacheNormal (world.x, world.y); 
-  */
   if (_walk.Walk (TERRAIN_EDGE))
     _stage++;
 
@@ -794,8 +774,6 @@ void CTerrain::Clear ()
   _uv_list.clear ();
   _index_buffer.clear ();
   _walk.Clear ();
-
-
 
 }
 

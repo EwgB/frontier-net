@@ -22,6 +22,10 @@
 #include "sdl.h"
 #include "world.h"
 
+#define SAVE_INTERVAL     1000
+
+static unsigned     save_cooldown;
+
 /*-----------------------------------------------------------------------------
  
 -----------------------------------------------------------------------------*/
@@ -31,7 +35,6 @@ static char* page_file_name (GLcoord p)
 
   static char     name[256];
 
-  
   sprintf (name, "%s//cache%d-%d.pag", WorldDirectory (), p.x, p.y);
   return name;
 
@@ -54,7 +57,7 @@ bool CPage::Ready ()
 {
 
   _last_touched = SdlTick ();
-  return _stage == PAGE_STAGE_DONE;
+  return _stage >= PAGE_STAGE_SAVE;
 
 }
 
@@ -152,14 +155,11 @@ void CPage::DoPosition ()
 
   world_x = (_origin.x * PAGE_SIZE + _walk.x);
   world_y = (_origin.y * PAGE_SIZE + _walk.y);
-  //_cell[_walk.x][_walk.y].elevation = RegionElevation (world_x, world_y);
   c = WorldCell (world_x, world_y);
-  //c.elevation = c.water_level;
   _cell[_walk.x][_walk.y].pos = glVector ((float)world_x, (float)world_y, c.elevation);
   _cell[_walk.x][_walk.y].detail = c.detail;
   _cell[_walk.x][_walk.y].water_level = c.water_level;
   _cell[_walk.x][_walk.y].tree_id = 0;
-  //_cell[_walk.x][_walk.y].elevation = _cell[_walk.x][_walk.y].pt.elevation;
   _bbox.ContainPoint (Position (world_x, world_y));
   if (_walk.Walk (PAGE_SIZE))
     _stage++;
@@ -378,9 +378,8 @@ void CPage::Build (int stop)
       DoTrees ();
       break;
     case PAGE_STAGE_SAVE:
-      _stage++;
       Save ();
-      break;
+      return;
     }
   }
 
@@ -414,9 +413,20 @@ void CPage::Cache (int origin_x, int origin_y)
 void CPage::Save ()
 {
 
-  if (!CVarUtils::GetCVar<bool> ("cache.active"))
+  unsigned    now;
+
+  if (!CVarUtils::GetCVar<bool> ("cache.active")) {
+    _stage++;
     return;
-  if (_stage == PAGE_STAGE_DONE)
-    FileSave (page_file_name (_origin), (char*)this, sizeof (CPage));
+  }
+  now = SdlTick ();
+  if (now < save_cooldown)
+    return;
+  if (_stage < PAGE_STAGE_SAVE)
+    return;
+  if (_stage == PAGE_STAGE_SAVE)
+    _stage++;
+  FileSave (page_file_name (_origin), (char*)this, sizeof (CPage));
+  save_cooldown = now + SAVE_INTERVAL;
 
 }

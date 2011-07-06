@@ -41,9 +41,6 @@ class CTerrain : public GridData
 private:
   GLcoord           _origin;
   GLvector          _pos[TERRAIN_EDGE][TERRAIN_EDGE];
-  //GLvector          _normal[TERRAIN_EDGE][TERRAIN_EDGE];
-  GLvector2         _uv[TERRAIN_EDGE][TERRAIN_EDGE];
-  //GLvector2         _contour[TERRAIN_EDGE][TERRAIN_EDGE];//OBSOLETE
   int               _index_map[TERRAIN_EDGE][TERRAIN_EDGE];
   bool              _point[TERRAIN_EDGE][TERRAIN_EDGE];
   GLcoord           _walk;
@@ -58,11 +55,9 @@ private:
   class VBO         _vbo;
   int               _stage;
   bool              _surface_used[SURFACE_TYPES];
-  //int               _list_size;
-  //int               _list_pos;
-  vector<UINT>       _index_buffer;
-  vector<GLvector>   _vertex_list;
-  vector<GLvector>   _normal_list;
+  vector<UINT>      _index_buffer;
+  vector<GLvector>  _vertex_list;
+  vector<GLvector>  _normal_list;
   vector<GLvector2> _uv_list;
   long              _rebuild;
   int               _neighbors[NEIGHBOR_COUNT];
