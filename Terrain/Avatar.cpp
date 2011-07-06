@@ -159,7 +159,7 @@ void AvatarUpdate (void)
     velocity = JUMP_SPEED;
     on_ground = false;
   }
-  //Jotstick movement
+  //Joystick movement
   AvatarLook ((int)(InputJoystickGet (3) * 5.0f), (int)(InputJoystickGet (4) * -5.0f));
   do_move (glVector (InputJoystickGet (0), InputJoystickGet (1), 0.0f));
   if (InputMouselook ()) {
