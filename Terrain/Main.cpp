@@ -152,6 +152,7 @@ bool MainIsQuit ()
 int PASCAL WinMain (HINSTANCE instance_in, HINSTANCE previous_instance, LPSTR command_line, int show_style)
 {
 
+  CVarUtils::CreateCVar ("avatar.expand", false, "Resize avatar proportions to be more cartoon-y.");
   CVarUtils::CreateCVar ("render.shaders", true, "Enable vertex, fragment shaders.");
   CVarUtils::CreateCVar ("render.wireframe", false, "Overlay scene with wireframe.");
   CVarUtils::CreateCVar ("render.textured", true, "Render the scene with textures.");

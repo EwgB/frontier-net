@@ -33,11 +33,23 @@ static void clean_chars (char* target, char* chars)
 CFigure::CFigure ()
 {
 
+  Clear ();
+
+}
+
+void CFigure::Clear ()
+{
+
   unsigned    i;
 
   for (i = 0; i < BONE_COUNT; i++) 
     _bone_index[i] = BONE_INVALID;
   _unknown_count = 0;
+  _skin_static.Clear ();
+  _skin_deform.Clear ();
+  _skin_render.Clear ();
+  _bone.clear ();
+
 
 }
 

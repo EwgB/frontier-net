@@ -188,6 +188,7 @@ void PlayerUpdate ()
     my.calorie_fat += my.calorie_pool;
     my.calorie_pool = 0.0f;
   }
+  //determine how hungry we are.
   if (my.calorie_stomach > MAX_STOMACH * 0.9f) 
     my.condition_hunger = HUNGER_FULL;
   else if (my.calorie_stomach > MAX_STOMACH * 0.25f) 
@@ -213,7 +214,7 @@ void PlayerUpdate ()
     TextPrint ("Hunger: %s", hunger_states[my.condition_hunger]);
     TextPrint ("Calorie Stomach %1.2f", my.calorie_stomach);
     TextPrint ("Calorie Pool %1.2f", my.calorie_pool);
-    TextPrint ("Calorie Fat %1.2f (%1.0f lbs)", my.calorie_fat, my.calorie_fat / ONE_POUND);
+    TextPrint ("Calorie Fat %1.2f (%+1.1f lbs)", my.calorie_fat, my.calorie_fat / ONE_POUND);
 
   }
 

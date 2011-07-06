@@ -37,7 +37,6 @@ static void do_frames (char* buffer, CFigure* fig)
   done = false;
   matrix.Identity ();
   matrix_stack.push_back (matrix);
-  fig->_bone.clear ();
   token = strtok (NULL, DELIMIT);
   while (strcmp (token, "FRAME"))
     token = strtok (NULL, DELIMIT);
@@ -319,6 +318,7 @@ bool FileXLoad (char* filename, CFigure* fig)
   long              size;
   char*             buffer;
 
+  fig->Clear ();
   buffer = FileLoad (filename, &size);
   if (!buffer)
     return false;

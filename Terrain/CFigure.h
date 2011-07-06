@@ -45,6 +45,7 @@ public:
 
   CFigure ();
   void              Animate (CAnim* anim, float delta);
+  void              Clear ();
   bool              LoadX (char* filename);
   BoneId            IdentifyBone (char* name);
   void              PositionSet (GLvector pos) { _position = pos; };

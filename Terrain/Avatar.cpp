@@ -70,6 +70,22 @@ static float            last_time;
 
 -----------------------------------------------------------------------------*/
 
+static void do_model ()
+{
+
+  avatar.LoadX ("models//male.x");
+  if (CVarUtils::GetCVar<bool> ("avatar.expand")) {
+    avatar.BoneInflate (BONE_PELVIS, 0.02f, true);
+    avatar.BoneInflate (BONE_HEAD, 0.025f, true);
+    avatar.BoneInflate (BONE_LWRIST, 0.03f, true);
+    avatar.BoneInflate (BONE_RWRIST, 0.03f, true);
+    avatar.BoneInflate (BONE_RANKLE, 0.05f, true);
+    avatar.BoneInflate (BONE_LANKLE, 0.05f, true);
+  }
+
+
+}
+
 static void do_move (GLvector delta)		
 {
 
@@ -266,16 +282,7 @@ void AvatarInit (void)
 {
 
   desired_cam_distance = IniFloat ("Avatar", "CameraDistance");
-
-  avatar.LoadX ("models//male.x");
-  
-  avatar.BoneInflate (BONE_PELVIS, 0.02f, true);
-  avatar.BoneInflate (BONE_HEAD, 0.025f, true);
-  avatar.BoneInflate (BONE_LWRIST, 0.03f, true);
-  avatar.BoneInflate (BONE_RWRIST, 0.03f, true);
-  avatar.BoneInflate (BONE_RANKLE, 0.05f, true);
-  avatar.BoneInflate (BONE_LANKLE, 0.05f, true);
-  
+  do_model ();
   for (int i = 0; i < ANIM_COUNT; i++) {
     anim[i].LoadBvh (IniString ("Animations", anim_names[i]));
     IniStringSet ("Animations", anim_names[i], IniString ("Animations", anim_names[i]));
@@ -318,6 +325,7 @@ void AvatarPositionSet (GLvector new_pos)
   camera_position = position;
   angle = camera_angle = glVector (90.0f, 0.0f, 0.0f);
   last_time = GameTime ();
+  do_model ();
 
 }
 
