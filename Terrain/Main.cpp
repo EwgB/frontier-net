@@ -152,6 +152,7 @@ bool MainIsQuit ()
 int PASCAL WinMain (HINSTANCE instance_in, HINSTANCE previous_instance, LPSTR command_line, int show_style)
 {
 
+  //Variables
   CVarUtils::CreateCVar ("avatar.expand", false, "Resize avatar proportions to be more cartoon-y.");
   CVarUtils::CreateCVar ("render.shaders", true, "Enable vertex, fragment shaders.");
   CVarUtils::CreateCVar ("render.wireframe", false, "Overlay scene with wireframe.");
@@ -160,11 +161,12 @@ int PASCAL WinMain (HINSTANCE instance_in, HINSTANCE previous_instance, LPSTR co
   CVarUtils::CreateCVar ("show.stats", false, "Show various debug statistics.");
   CVarUtils::CreateCVar ("show.pages", false, "Show bounding boxes for paged data.");
   CVarUtils::CreateCVar ("show.vitals", false, "Show the player statistics.");
-  bool& cache_active = CVarUtils::CreateCVar ("cache.active", true, "Controls saving of paged data.");
+  CVarUtils::CreateCVar ("show.region", false, "Show information about the currently occupied region.");
+  CVarUtils::CreateCVar ("cache.active", true, "Controls saving of paged data.");
   CVarUtils::CreateCVar ("flying", false, "Allows flight.");
   CVarUtils::CreateCVar ("mouse.invert", false, "Reverse mouse y axis.");
   CVarUtils::CreateCVar ("mouse.sensitivity", 1.0f, "Mouse tracking");
-
+  CVarUtils::CreateCVar ("last_played", 0, "");
   //Functions
   CVarUtils::CreateCVar ("cache.dump", CacheDump, "Clear all saved data from memory & disk.");
   CVarUtils::CreateCVar ("cache.size", CacheSize, "Returns the current size of the cache.");
@@ -175,7 +177,6 @@ int PASCAL WinMain (HINSTANCE instance_in, HINSTANCE previous_instance, LPSTR co
   run ();
   term ();
   CVarUtils::Save (SETTINGS_FILE);
-  //CVarUtils::Save ();
   return 0;
 
 }

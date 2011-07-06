@@ -42,32 +42,21 @@ struct Shader
 };
 
 
-CGcontext	cgContext;								// A Context To Hold Our Cg Program(s)
-CGprogram	cgProgram;								// Our Cg Vertex Program
-CGprofile	cgVertexProfile;							// The Profile To Use For Our Vertex Shader
-CGparameter	position, color, modelViewMatrix, wave, lightpos, lightcol, ambientcol, eyepos;					// The Parameters Needed For Our Shader
-
+static CGcontext	    cgContext;				// A Context To Hold Our Cg Program(s)
+static CGprogram	    cgProgram;				// Our Cg Vertex Program
+static CGprofile	    cgVertexProfile;	// The Profile To Use For Our Vertex Shader
 static Shader         shader_list[SHADER_COUNT];
 static float          wind;
-
-void MyErrorCallback (void)
-{
- 
-  const char* errorString = cgGetErrorString (cgGetError());
- 
-  //Log ("Cg error: %s", errorString);
- 
-}
 
 void CgCompile ()
 {
 
-  Shader*   s;
+  Shader*     s;
+  unsigned    i;
 
   // Setup Cg
   cgContext = cgCreateContext();							// Create A New Context For Our Cg Program(s)
   cgVertexProfile = cgGLGetLatestProfile(CG_GL_VERTEX);				// Get The Latest GL Vertex Profile
-  cgSetErrorCallback(MyErrorCallback);
   // Validate Our Profile Determination Was Successful
   if (cgVertexProfile == CG_PROFILE_UNKNOWN) {
 	  ConsoleLog ("CgCompile: Invalid profile type creating vertex profile.");
@@ -75,7 +64,6 @@ void CgCompile ()
   }
   cgGLSetOptimalOptions(cgVertexProfile);						// Set The Current Profile
   //Now set up our list of shaders
-  unsigned      i;
 
   for (i = 0; i < SHADER_COUNT; i++) {
     s = &shader_list[i];
@@ -115,29 +103,6 @@ void CgInit ()
     sprintf (shader_list[i].file, "shaders//%s", name);
   }
   CgCompile ();
-  // Load And Compile The Vertex Shader From File
-  cgProgram = cgCreateProgramFromFile (cgContext, CG_SOURCE, SHADER_FILE, cgVertexProfile, "main", 0);
-
-  if (cgProgram == NULL) {
-    CGerror Error = cgGetError();
-    // Show A Message Box Explaining What Went Wrong
-    ConsoleLog ("CgInit: ERROR: %s", cgGetErrorString(Error));
-    return;
-  }
-  ConsoleLog ("CgInit: Loaded %s", SHADER_FILE);
-  // Load The Program
-	cgGLLoadProgram(cgProgram);
-  cgGLBindProgram(cgProgram);
-  // Get Handles To Each Of Our Parameters So That
-	// We Can Change Them At Will Within Our Code
-	position	= cgGetNamedParameter(cgProgram, "IN.position");
-	color		= cgGetNamedParameter(cgProgram, "IN.color");
-	lightpos		= cgGetNamedParameter(cgProgram, "lightpos");
-  eyepos		= cgGetNamedParameter(cgProgram, "eyepos");
-	lightcol		= cgGetNamedParameter(cgProgram, "lightcol");
-  ambientcol		= cgGetNamedParameter(cgProgram, "ambientcol");
-	modelViewMatrix	= cgGetNamedParameter(cgProgram, "ModelViewProj");
-
 
 }
 
@@ -150,6 +115,7 @@ void CgShaderSelect (int select)
   GLvector      p;
   Env*          e;
   GLrgba        c;
+  float         val1, val2;
 
   if (!CVarUtils::GetCVar<bool> ("render.shaders"))
     return;
@@ -157,6 +123,9 @@ void CgShaderSelect (int select)
     cgGLDisableProfile(cgVertexProfile);
     return;
   }
+  val1 = val2 = 0.0f;
+  if (select == SHADER_TREES) 
+    val1 = wind;
   s = &shader_list[select];
   e = EnvGet ();
   cgGLEnableProfile (cgVertexProfile);
@@ -169,6 +138,7 @@ void CgShaderSelect (int select)
   p = AvatarCameraPosition ();
   cgGLSetParameter3f (s->eyepos, p.x, p.y, p.z);
   cgGLSetStateMatrixParameter(s->matrix, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MODELVIEW_MATRIX);
+  cgGLSetParameter4f (s->data, 1024, 42, val1, val2);
   glColor3f (1,1,1);
 
 }
@@ -182,49 +152,12 @@ void CgUpdate ()
 
   elapsed = SdlElapsed ();
   wind += elapsed * 0.001f;
-  cgGLSetParameter3f (shader_list[SHADER_TREES].data, wind, 0.0f, 0.0f);
-
-  Env*            e;
-
-  e = EnvGet ();
-
-  wwww += 0.03f;
-
-  // Set The Modelview Matrix Of Our Shader To Our OpenGL Modelview Matrix
-  //cgGLSetStateMatrixParameter(modelViewMatrix, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
-  cgGLSetStateMatrixParameter(modelViewMatrix, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MODELVIEW_MATRIX);
-  
-
-  cgGLEnableProfile(cgVertexProfile);					// Enable Our Vertex Shader Profile
-  cgGLBindProgram(cgProgram);
-
-  // Bind Our Vertex Program To The Current State
-  
-  // Set The Drawing Color To Light Green (Can Be Changed By Shader, Etc...)
-
-  cgGLSetParameter3f (lightpos, -e->light.x, -e->light.y, -e->light.z);
-  GLrgba    c;
-  c = e->color[ENV_COLOR_LIGHT];
-  cgGLSetParameter3f (lightcol, c.red, c.green, c.blue);
-  //c = glRgba (1.0f, 1.0f, 0.0f);
-  c = e->color[ENV_COLOR_AMBIENT] * glRgba (0.2f, 0.2f, 1.0f);
-  //c = glRgba (0.0f, 0.0f, 1.0f);
-  cgGLSetParameter3f (ambientcol, c.red, c.green, c.blue);
-  GLvector    p;
-  p = AvatarCameraPosition ();
-  cgGLSetParameter3f (eyepos, p.x, p.y, p.z);
-
+ 
 }
 
 void CgUpdateMatrix ()
 {
 
-  cgGLSetStateMatrixParameter(modelViewMatrix, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MODELVIEW_MATRIX);
+  //cgGLSetStateMatrixParameter(modelViewMatrix, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MODELVIEW_MATRIX);
 
 }
-/*
-void CgOff ()
-{
-  cgGLDisableProfile(cgVertexProfile);					// Enable Our Vertex Shader Profile
-
-}*/

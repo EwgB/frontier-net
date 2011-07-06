@@ -1,4 +1,4 @@
-struct appdata 
+struct appdata
 {
 	float4 position : POSITION;
 	float4 color	: COLOR0;
@@ -27,7 +27,7 @@ vfconn main(appdata IN,
   uniform float3 eyepos,
   uniform float3 lightcol,
   uniform float3 ambientcol,
-  uniform float3 data)
+  uniform float4 data)
 {
 	vfconn OUT;									// Variable To Handle Our Output From The Vertex
 											// Shader (Goes To A Fragment Shader If Available)
@@ -56,7 +56,7 @@ vfconn main(appdata IN,
 
   if (IN.uv.x >= 0.25 && IN.uv.x <= 0.5) {
     float move = abs (IN.uv.y - 0.5) + abs (IN.uv.x - 0.375);
-    IN.position.x += sin ((IN.position.y + IN.position.x) / 10.0f + data.x) * move;
+    IN.position.x += sin ((IN.position.y + IN.position.x) / 10.0f + data.z) * move;
   }
   
 

@@ -7,7 +7,6 @@ enum
 };
 
 void CgInit ();
-//void CgOff ();
 void CgUpdate ();
 void CgUpdateMatrix ();
 void CgShaderSelect (int shader);

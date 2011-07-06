@@ -13,6 +13,7 @@
 #include "game.h"
 #include "input.h"
 #include "text.h"
+#include "world.h"
 
 #define MAX_STOMACH         4000
 #define MAX_POOL            3000
@@ -68,6 +69,7 @@ struct Player
 };
 
 static Player     my;
+static Region     region;
 
 /*-----------------------------------------------------------------------------
 
@@ -215,8 +217,11 @@ void PlayerUpdate ()
     TextPrint ("Calorie Stomach %1.2f", my.calorie_stomach);
     TextPrint ("Calorie Pool %1.2f", my.calorie_pool);
     TextPrint ("Calorie Fat %1.2f (%+1.1f lbs)", my.calorie_fat, my.calorie_fat / ONE_POUND);
-
+    TextPrint ("%1.1f %1.1f %1.1f", my.position.x, my.position.y, my.position.z);
   }
+  region = WorldRegionGet ((int)(my.position.x + REGION_HALF) / REGION_SIZE, (int)(my.position.y + REGION_HALF) / REGION_SIZE);
+  if (CVarUtils::GetCVar<bool> ("show.region")) 
+    TextPrint ("Temp:%1.1f%c Moisture:%1.0f%%\nGeo Scale: %1.2f Water Level: %1.2f Topography Detail:%1.2f Topography Bias:%1.2f", region.temperature * 100.0f, 186, region.moisture * 100.0f, region.geo_scale, region.geo_water, region.geo_detail, region.geo_bias);
 
 
 }

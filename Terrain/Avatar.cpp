@@ -166,6 +166,8 @@ void AvatarUpdate (void)
   GLvector  old;
   bool      flying;
 
+  if (!GameRunning ())
+    return;
   flying = CVarUtils::GetCVar<bool> ("flying");
   elapsed = SdlElapsedSeconds ();
   elapsed = min (elapsed, 0.25f);
@@ -175,6 +177,8 @@ void AvatarUpdate (void)
     velocity = JUMP_SPEED;
     on_ground = false;
   }
+  if (InputKeyPressed (SDLK_F2)) 
+    CVarUtils::SetCVar ("flying", !CVarUtils::GetCVar<bool> ("flying"));  
   //Joystick movement
   AvatarLook ((int)(InputJoystickGet (3) * 5.0f), (int)(InputJoystickGet (4) * -5.0f));
   do_move (glVector (InputJoystickGet (0), InputJoystickGet (1), 0.0f));
@@ -263,11 +267,8 @@ void AvatarUpdate (void)
   avatar.Update ();
   time_passed = GameTime () - last_time;
   last_time = GameTime ();
-  
-
-  region = WorldRegionGet ((int)(position.x + REGION_HALF) / REGION_SIZE, (int)(position.y + REGION_HALF) / REGION_SIZE);
-  TextPrint ("Temp:%1.1f%c Moisture:%1.0f%%\nGeo Scale: %1.2f Water Level: %1.2f Topography Detail:%1.2f Topography Bias:%1.2f", region.temperature * 100.0f, 186, region.moisture * 100.0f, region.geo_scale, region.geo_water, region.geo_detail, region.geo_bias);
   TextPrint ("%s", anim_names[anim_id]);
+  region = WorldRegionGet ((int)(position.x + REGION_HALF) / REGION_SIZE, (int)(position.y + REGION_HALF) / REGION_SIZE);
   do_camera ();
   do_location ();
 

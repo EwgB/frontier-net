@@ -206,14 +206,11 @@ void CForest::Render ()
     return;
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);/////////////////////////
-  //glDisable (GL_LIGHTING);
   for (i = 0; i < _vbo_list.size (); i++) {
     glBindTexture (GL_TEXTURE_2D, _vbo_list[i]._texture_id);
-    //glColor3f (0.0f, 1, 0);
-    //glBindTexture (GL_TEXTURE_2D, 0);
     _vbo_list[i]._vbo.Render ();
+    //glBindTexture (GL_TEXTURE_2D, 0);
+    //_vbo_list[i]._bbox.Render ();
   }
-  //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);///////////////////////////////
 
 }

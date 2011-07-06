@@ -33,7 +33,7 @@ static long         minutes;
 static long         hours;
 static long         days;
 static float        decimal_time;
-static bool         first_update_done;
+static bool         loaded_previous;
 
 /*-----------------------------------------------------------------------------
 
@@ -93,6 +93,7 @@ void GameLoad (unsigned seed_in)
   }
   if (ConsoleIsOpen ())
     ConsoleToggle ();
+  CVarUtils::SetCVar ("last_played", seed);
   running = true;
   sub_group.push_back ("game");
   sub_group.push_back ("player");
@@ -125,12 +126,10 @@ void GameSave ()
 
 void GameInit ()
 {
-
   CVarUtils::AttachCVar ("game.days", &days, "");
   CVarUtils::AttachCVar ("game.hours", &hours, "");
   CVarUtils::AttachCVar ("game.minutes", &minutes, "");
   seconds = 0;
-
 }
 
 void GameTerm ()
@@ -239,6 +238,7 @@ void GameNew (unsigned seed_in)
     world_pos.x += step;
   }
   ConsoleLog ("GameNew: Found beach in %d moves.", points_checked);
+  CVarUtils::SetCVar ("last_played", seed);
   PlayerReset ();
   PlayerPositionSet (av_pos);
   GameUpdate ();
@@ -297,6 +297,13 @@ float GameTime ()
 void GameUpdate ()
 {
 
+  if (!loaded_previous) {
+    loaded_previous = true;
+    seed = CVarUtils::GetCVar<int> ("last_played");
+    if (seed)
+      GameLoad (seed);
+    CVarUtils::SetCVar ("last_played", seed);
+  }
   if (!running)
     return;
   if (InputKeyPressed (SDLK_RIGHTBRACKET))
@@ -320,7 +327,7 @@ void GameUpdate ()
     days++;
   }
   decimal_time = (float)days * 24.0f + (float)hours + (float)minutes * SECONDS_TO_DECIMAL;
-  TextPrint ("Day %d: %02d:%02d = %1.2f", days + 1, hours, minutes, decimal_time);
+  TextPrint ("Day %d: %02d:%02d", days + 1, hours, minutes);
 
 }
 

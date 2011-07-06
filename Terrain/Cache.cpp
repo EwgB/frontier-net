@@ -288,7 +288,7 @@ void CacheUpdate (long stop)
 
   int   count;
 
-  TextPrint ("%d pages. (%s)", page_count, TextBytes (sizeof (CPage) * page_count));
+  //TextPrint ("%d pages. (%s)", page_count, TextBytes (sizeof (CPage) * page_count));
   count = 0;
   //Pass over the table a bit at a time and do garbage collection
   while (count < (PAGE_GRID / 4) && SdlTick () < stop) {
