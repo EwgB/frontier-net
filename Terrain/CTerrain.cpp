@@ -104,11 +104,8 @@ static int Boundary (int val)
 CTerrain::CTerrain ()
 {
 
+  //Call parent constructor
   GridData ();
-  _vertex_list = NULL;
-  _normal_list = NULL;
-  _uv_list = NULL;
-  _index_buffer = NULL;
 
 }
 
@@ -256,7 +253,7 @@ void CTerrain::DoHeightmap ()
 
   GLcoord         world;
   GLvector        pos;
-  GLvector2       delta;
+//  GLvector2       delta;
 
   world.x = _origin.x + _walk.x;
   world.y = _origin.y + _walk.y;
@@ -266,6 +263,7 @@ void CTerrain::DoHeightmap ()
   pos.z = CacheElevation (world.x, world.y);
   _pos[_walk.x][_walk.y] = pos;
   _uv[_walk.x][_walk.y] = glVector ((float)_walk.x / TERRAIN_SIZE, (float)_walk.y / TERRAIN_SIZE);
+  /*
   if (!_walk.x)
     _contour[_walk.x][_walk.y].x = 0;
   else {
@@ -282,6 +280,7 @@ void CTerrain::DoHeightmap ()
     _contour[_walk.x][_walk.y].y = _contour[_walk.x][_walk.y - 1].y + 1;
   }
   _normal[_walk.x][_walk.y] = CacheNormal (world.x, world.y); 
+  */
   if (_walk.Walk (TERRAIN_EDGE))
     _stage++;
 
@@ -474,11 +473,9 @@ void CTerrain::DoQuad (int x1, int y1, int size)
 void CTerrain::TrianglePush (int i1, int i2, int i3)
 {
 
-  _index_buffer = (unsigned int*)realloc (_index_buffer, sizeof (int) * (_index_buffer_size + 3));
-  _index_buffer[_index_buffer_size] = i1;
-  _index_buffer[_index_buffer_size + 1] = i2;
-  _index_buffer[_index_buffer_size + 2] = i3;
-  _index_buffer_size += 3;
+  _index_buffer.push_back (i1);
+  _index_buffer.push_back (i2);
+  _index_buffer.push_back (i3);
 
 }
 
@@ -682,7 +679,6 @@ void CTerrain::Update (long stop)
         _surface_used[i] = false;
       for (int i =0; i < NEIGHBOR_COUNT; i++)
         _neighbors[i] = 0;
-      _list_size = 0;
       _walk.Clear ();
       _rebuild = SdlTick ();
       _stage++;
@@ -715,43 +711,23 @@ void CTerrain::Update (long stop)
       break;  
     case STAGE_STITCH:
       DoStitch ();
+      _vertex_list.clear ();
+      _normal_list.clear ();
+      _uv_list.clear ();
+      _index_buffer.clear ();
       _stage++;
-      break;
-    case STAGE_INVENTORY_PREPARE:
-      _list_size = 0;
-      if (_vertex_list)
-        delete _vertex_list;
-      if (_normal_list)
-        delete _normal_list;
-      if (_uv_list)
-        delete _uv_list;
-      if (_index_buffer)
-        delete _index_buffer;
-      _index_buffer_size = 0;
-      _index_buffer = NULL;
-      _vertex_list = NULL;
-      _normal_list = NULL;
-      _uv_list = NULL;
-      _stage++;
-      break;  
-    case STAGE_INVENTORY:
-      if (Point (_walk.x, _walk.y)) 
-        _list_size++;
-      if (_walk.Walk (TERRAIN_EDGE)) {
-        _vertex_list = new GLvector [_list_size];
-        _normal_list = new GLvector [_list_size];
-        _uv_list = new GLvector2 [_list_size];
-        _list_pos = 0;
-        _stage++;
-      }
       break;  
     case STAGE_BUFFER_LOAD: 
       if (Point (_walk.x, _walk.y)) {
-        _vertex_list[_list_pos] = _pos[_walk.x][_walk.y];
-        _normal_list[_list_pos] = _normal[_walk.x][_walk.y];
-        _uv_list[_list_pos] = glVector ((float)_walk.x / TERRAIN_SIZE, (float)_walk.y / TERRAIN_SIZE);
-        _index_map[_walk.x][_walk.y] = _list_pos;
-        _list_pos++;
+        GLcoord world;
+        
+        world.x = _origin.x + _walk.x;
+        world.y = _origin.y + _walk.y;
+        _index_map[_walk.x][_walk.y] = _vertex_list.size ();
+        _vertex_list.push_back (_pos[_walk.x][_walk.y]);
+        _normal_list.push_back (CacheNormal (world.x, world.y));
+        _uv_list.push_back (glVector ((float)_walk.x / TERRAIN_SIZE, (float)_walk.y / TERRAIN_SIZE));
+        //_list_pos++;
       }
       if (_walk.Walk (TERRAIN_EDGE))
         _stage++;
@@ -764,10 +740,7 @@ void CTerrain::Update (long stop)
     case STAGE_VBO:
       if (_vbo.Ready ())
         _vbo.Clear ();
-      _vbo.Create (GL_TRIANGLES, _index_buffer_size, _list_size, _index_buffer, _vertex_list, _normal_list, NULL, _uv_list);
-      if (_index_buffer)
-        free (_index_buffer);
-      _index_buffer = NULL;
+      _vbo.Create (GL_TRIANGLES, _index_buffer.size (), _vertex_list.size (), &_index_buffer[0], &_vertex_list[0], &_normal_list[0], NULL, &_uv_list[0]);
       _stage++;
       break;
     case STAGE_TEXTURE: 
@@ -814,20 +787,12 @@ void CTerrain::Clear ()
     glDeleteTextures (1, &_back_texture); 
   _front_texture = 0;
   _back_texture = 0;
-  if (_vertex_list)
-    delete _vertex_list;
-  if (_normal_list)
-    delete _normal_list;
-  if (_uv_list)
-    delete _uv_list;
-  if (_index_buffer)
-    delete _index_buffer;
-  _index_buffer = NULL;
-  _vertex_list = NULL;
-  _normal_list = NULL;
-  _uv_list = NULL;
   _stage = STAGE_BEGIN;
   _texture_current_size = 0;
+  _vertex_list.clear ();
+  _normal_list.clear ();
+  _uv_list.clear ();
+  _index_buffer.clear ();
   _walk.Clear ();
 
 
@@ -871,11 +836,6 @@ void CTerrain::TexturePurge ()
     _stage = STAGE_TEXTURE;
     _walk.Clear ();
   }
-  _index_buffer = NULL;
-  _vertex_list = NULL;
-  _normal_list = NULL;
-  _uv_list = NULL;
-  _list_size = 0;
 
 }
 
@@ -901,7 +861,7 @@ void CTerrain::Set (int grid_x, int grid_y, int distance)
   sup = (unsigned)pow (2.0f, (float)distance);
   _texture_desired_size = 2048 / sup;
   _walk.Clear ();
-  _list_size = 0;
+  //_list_size = 0;
   _stage = STAGE_BEGIN;
 
 }
