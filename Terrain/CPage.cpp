@@ -329,6 +329,8 @@ void CPage::DoSurface ()
       c->surface = SURFACE_SAND;
     if (delta > 4.0f && region.temperature > 0.0f)
       c->surface = SURFACE_ROCK;
+    if ((region.climate == CLIMATE_DESERT) && c->surface != SURFACE_ROCK)
+      c->surface = SURFACE_SAND;
   } else {
     if (c->surface == SURFACE_GRASS && _walk.x > 0 && _walk.x < PAGE_SIZE - 1 && _walk.y > 0 && _walk.y < PAGE_SIZE - 1) {  
       bool all_grass = true;
