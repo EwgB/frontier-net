@@ -57,7 +57,7 @@ bool CPage::Ready ()
 {
 
   _last_touched = SdlTick ();
-  return _stage >= PAGE_STAGE_SAVE;
+  return _stage == PAGE_STAGE_DONE;
 
 }
 
@@ -65,7 +65,7 @@ GLvector CPage::Position (int x, int y)
 {
 
   _last_touched = SdlTick ();
-  return glVector ((float)x, (float)y, _cell[(x % PAGE_SIZE)][(y % PAGE_SIZE)].elevation);
+  return glVector ((float)(x + _origin.x * PAGE_SIZE), (float)(y + _origin.y * PAGE_SIZE), _cell[(x % PAGE_SIZE)][(y % PAGE_SIZE)].elevation);
 
 }
 

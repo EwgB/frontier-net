@@ -1,4 +1,4 @@
-#define PAGE_SIZE       256
+#define PAGE_SIZE       128
 #define PAGE_HALF       (PAGE_SIZE / 2)
 #define PAGE_EXPIRE     30000 //milliseconds
 #define TREE_SPACING    8 //Power of 2, how far apart trees should be. (Roughly)
@@ -20,12 +20,12 @@ enum
 struct pcell
 {
   UCHAR       surface;
-  short       tree_id;
   float       water_level;
   float       elevation;
   float       detail;
   GLrgba      color;
   GLvector    normal;
+  short       tree_id;
 };
 
 class CPage
