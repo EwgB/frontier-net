@@ -109,6 +109,7 @@
     <ClCompile Include="glQuat.cpp" />
     <ClCompile Include="glRgba.cpp" />
     <ClCompile Include="glUvbox.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="Region.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="World.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Player.h" />
     <None Include="Shaders\standard.cg" />
     <None Include="Shaders\trees.cg" />
   </ItemGroup>

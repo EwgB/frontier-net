@@ -35,6 +35,7 @@ http://www.bramstein.com/projects/gui/
 #include "sdl.h"
 #include "il\il.h"
 #include "main.h"
+#include "player.h"
 #include "random.h"
 #include "render.h"
 #include "scene.h"
@@ -69,6 +70,8 @@ static void init ()
   SdlInit ();
   RenderInit ();
   EnvInit ();
+  GameInit ();
+  PlayerInit ();
   AvatarInit ();
   TextureInit ();
   WorldInit ();
@@ -86,7 +89,7 @@ static void init ()
 static void term ()
 {
 
-  AvatarTerm ();
+  GameTerm ();
   TextureTerm ();
   SdlTerm ();
 
@@ -108,6 +111,7 @@ static void run ()
     SdlUpdate ();
     GameUpdate ();
     AvatarUpdate ();
+    PlayerUpdate ();
     EnvUpdate ();
     SkyUpdate ();
     SceneUpdate (stop);
@@ -148,17 +152,18 @@ bool MainIsQuit ()
 int PASCAL WinMain (HINSTANCE instance_in, HINSTANCE previous_instance, LPSTR command_line, int show_style)
 {
 
-  //int& nTest = CVarUtils::CreateCVar ("testVar", 100, "Another test CVar");
-  bool& render_shaders = CVarUtils::CreateCVar ("render.shaders", true, "Enable vertex, fragment shaders.");
-  bool& render_wireframe = CVarUtils::CreateCVar ("render.wireframe", false, "Overlay scene with wireframe.");
-  bool& render_textured = CVarUtils::CreateCVar ("render.textured", true, "Render the scene with textures.");
-  bool& show_skeleton = CVarUtils::CreateCVar ("show.skeleton", false, "Show the skeletons of avatars.");
-  bool& show_stats = CVarUtils::CreateCVar ("show.stats", false, "Show various debug statistics.");
-  bool& show_pages = CVarUtils::CreateCVar ("show.pages", false, "Show bounding boxes for paged data.");
+  CVarUtils::CreateCVar ("render.shaders", true, "Enable vertex, fragment shaders.");
+  CVarUtils::CreateCVar ("render.wireframe", false, "Overlay scene with wireframe.");
+  CVarUtils::CreateCVar ("render.textured", true, "Render the scene with textures.");
+  CVarUtils::CreateCVar ("show.skeleton", false, "Show the skeletons of avatars.");
+  CVarUtils::CreateCVar ("show.stats", false, "Show various debug statistics.");
+  CVarUtils::CreateCVar ("show.pages", false, "Show bounding boxes for paged data.");
+  CVarUtils::CreateCVar ("show.vitals", false, "Show the player statistics.");
   bool& cache_active = CVarUtils::CreateCVar ("cache.active", true, "Controls saving of paged data.");
   CVarUtils::CreateCVar ("flying", false, "Allows flight.");
   CVarUtils::CreateCVar ("mouse.invert", false, "Reverse mouse y axis.");
   CVarUtils::CreateCVar ("mouse.sensitivity", 1.0f, "Mouse tracking");
+
   //Functions
   CVarUtils::CreateCVar ("cache.dump", CacheDump, "Clear all saved data from memory & disk.");
   CVarUtils::CreateCVar ("cache.size", CacheSize, "Returns the current size of the cache.");

@@ -55,8 +55,6 @@ static GridManager        gm_grass;
 static vector<CGrass>     il_grass;
 static unsigned           world_seed = 2;
 
-static CTerrain           leaker;
-
 /* Module Functions *************************************************************/
 
 void SceneClear ()
@@ -131,10 +129,19 @@ CTerrain* SceneTerrainGet (int x, int y)
 
 }
 
+//This is called to restart the terrain grid manager. After the terrains are built,
+//we need to pass over them again so they can do their stitching.
+void SceneRestartProgress ()
+{
+
+  gm_terrain.RestartProgress ();
+
+}
+
+
 void SceneInit ()
 {
 
-  leaker.Set (WORLD_GRID_CENTER, WORLD_GRID_CENTER, 0);
 
 }
 
@@ -142,7 +149,7 @@ void SceneProgress (unsigned* ready, unsigned* total)
 {
 
   *ready = gm_terrain.ItemsReady ();
-  *total =20;
+  *total = 30;
 
 }
 
@@ -157,7 +164,6 @@ void SceneUpdate (long stop)
   TextPrint ("Scene: %d of %d terrains ready", gm_terrain.ItemsReady (), gm_terrain.ItemsViewable ());
 
 }
-
 
 void SceneRender ()
 {
@@ -196,7 +202,6 @@ void SceneRenderDebug ()
   glBlendFunc (GL_ONE, GL_ONE);
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glColor3f (1,1,1);
-  leaker.Render ();
   gm_forest.Render ();
   gm_terrain.Render ();
   gm_grass.Render ();

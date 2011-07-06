@@ -15,5 +15,6 @@ void            SceneUpdate (long stop);
 void            SceneProgress (unsigned* ready, unsigned* total);
 void            SceneRender ();
 void            SceneRenderDebug ();
+void            SceneRestartProgress ();
 class CTerrain* SceneTerrainGet (int x, int y);
 void            SceneTexturePurge ();

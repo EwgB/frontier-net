@@ -9,7 +9,6 @@
  
 -----------------------------------------------------------------------------*/
 
-
 #include "stdafx.h"
 #include <sstream>
 #include "avatar.h"
@@ -34,21 +33,6 @@
 #define STOP_SPEED      0.02f
 #define SWIM_DEPTH      1.4f
 
-
-
-enum
-{
-  ANIM_IDLE,
-  ANIM_RUN,
-  ANIM_SPRINT,
-  ANIM_FLYING,
-  ANIM_FALL,
-  ANIM_JUMP,
-  ANIM_SWIM,
-  ANIM_FLOAT,
-  ANIM_COUNT
-};
-
 static char*      anim_names[] =
 {
   "Idle",
@@ -60,27 +44,6 @@ static char*      anim_names[] =
   "Swimming",
   "Floating",
 };
-
-static float    burn_rate[] = 
-{
-  56,     //stand
-  200,    //run, which we treat as "walking" for gameplay purposes
-  450,    //sprint
-  0,      //flying
-  50,     //falling
-  200,    //jumping
-  450,    //swimming
-  400,    //treading water
-};
-
-
-
-struct Player
-{
-  float         distance_walked;
-  float         calories_burned;
-};
-
 
 static GLvector         camera_position;
 static GLvector         camera_angle;
@@ -99,8 +62,8 @@ static unsigned         last_update;
 static Region           region;
 static CFigure          avatar;
 static CAnim            anim[ANIM_COUNT];
-//static float            distance_walked;
-static Player           stats;
+static AnimType         anim_id;
+static float            distance_walked;
 static float            last_time;
 
 /*-----------------------------------------------------------------------------
@@ -182,7 +145,6 @@ void AvatarUpdate (void)
   float     speed;
   float     elapsed;
   float     steps;
-  int       anim_id;
   float     movement_animation;
   float     time_passed;
   GLvector  old;
@@ -256,9 +218,9 @@ void AvatarUpdate (void)
       velocity = 0.0f;
     }
   }
-  movement_animation = stats.distance_walked / 4.0f;
+  movement_animation = distance_walked / 4.0f;
   if (on_ground)
-    stats.distance_walked += steps;
+    distance_walked += steps;
   if (current_movement.x != 0.0f && current_movement.y != 0.0f)
     avatar_facing.z = -MathAngle (0.0f, 0.0f, current_movement.x, current_movement.y) / 2.0f;
   if (flying)
@@ -285,18 +247,20 @@ void AvatarUpdate (void)
   avatar.Update ();
   time_passed = GameTime () - last_time;
   last_time = GameTime ();
-  stats.calories_burned += burn_rate [anim_id] * time_passed;
+  
 
   region = WorldRegionGet ((int)(position.x + REGION_HALF) / REGION_SIZE, (int)(position.y + REGION_HALF) / REGION_SIZE);
   TextPrint ("Temp:%1.1f%c Moisture:%1.0f%%\nGeo Scale: %1.2f Water Level: %1.2f Topography Detail:%1.2f Topography Bias:%1.2f", region.temperature * 100.0f, 186, region.moisture * 100.0f, region.geo_scale, region.geo_water, region.geo_detail, region.geo_bias);
   TextPrint ("%s", anim_names[anim_id]);
-  TextPrint ("Calories burned: %1.2f (%f)", stats.calories_burned, burn_rate [anim_id]);
-  TextPrint ("Walked %1.2fkm", stats.distance_walked / 1000.0f);
   do_camera ();
   do_location ();
 
 }
 
+AnimType AvatarAnim ()
+{
+  return anim_id;
+}
 
 void AvatarInit (void)		
 {
@@ -304,6 +268,7 @@ void AvatarInit (void)
   desired_cam_distance = IniFloat ("Avatar", "CameraDistance");
 
   avatar.LoadX ("models//male.x");
+  
   avatar.BoneInflate (BONE_PELVIS, 0.02f, true);
   avatar.BoneInflate (BONE_HEAD, 0.025f, true);
   avatar.BoneInflate (BONE_LWRIST, 0.03f, true);
@@ -315,12 +280,6 @@ void AvatarInit (void)
     anim[i].LoadBvh (IniString ("Animations", anim_names[i]));
     IniStringSet ("Animations", anim_names[i], IniString ("Animations", anim_names[i]));
   }
-
-}
-
-void AvatarTerm (void)		
-{
-
 
 }
 
@@ -384,7 +343,8 @@ void* AvatarRegion ()
 void AvatarRender ()
 {
 
-  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("check.bmp"));
+  //glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("check.bmp"));
+  glBindTexture (GL_TEXTURE_2D, 0);
   avatar.Render ();
   if (CVarUtils::GetCVar<bool> ("show.skeleton"))
     avatar.RenderSkeleton ();

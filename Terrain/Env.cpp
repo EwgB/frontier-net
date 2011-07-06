@@ -74,7 +74,7 @@ static void do_cycle ()
   r = (Region*)AvatarRegion ();
   humid_fog = (1.0f - r->moisture) * MAX_DISTANCE;
   desired.sunrise_fade = desired.sunset_fade = 0.0f;
-  decimal_time = GameTime ();
+  decimal_time = fmod (GameTime (), 24.0f);
   if (decimal_time >= TIME_DAWN && decimal_time < TIME_DAY) { //sunrise
     fade = (decimal_time - TIME_DAWN) / (TIME_DAY - TIME_DAWN);
     base_color = glRgbaInterpolate (NIGHT_COLOR, DAY_COLOR, fade);
@@ -126,7 +126,7 @@ static void do_cycle ()
     desired.fog_min = 1;
     desired.fog_max = NIGHT_FOG;
     desired.star_fade = 1.0f;
-    desired.color[ENV_COLOR_LIGHT] = glRgba (0.1f, 0.5f, 1.0f);
+    desired.color[ENV_COLOR_LIGHT] = glRgba (0.2f, 0.5f, 0.7f);
     desired.light = VECTOR_NIGHT;
     desired.sun_angle = -90.0f;
     desired.draw_sun = false;

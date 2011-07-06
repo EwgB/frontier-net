@@ -45,6 +45,7 @@ public:
   unsigned              ItemsViewable () { return _view_items; }
   void                  Update (long stop);
   void                  Render ();
+  void                  RestartProgress () { _list_pos = 0; };
 
 };
 

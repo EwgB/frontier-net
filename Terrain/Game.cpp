@@ -12,8 +12,11 @@
 #include "avatar.h"
 #include "cache.h"
 #include "console.h"
+#include "game.h"
+#include "file.h"
 #include "input.h"
 #include "main.h"
+#include "player.h"
 #include "render.h"
 #include "scene.h"
 #include "text.h"
@@ -30,6 +33,7 @@ static long         minutes;
 static long         hours;
 static long         days;
 static float        decimal_time;
+static bool         first_update_done;
 
 /*-----------------------------------------------------------------------------
 
@@ -43,12 +47,109 @@ static void loading (float progress)
 
 }
 
+static void precache ()
+{
+
+  unsigned  ready, total;
+
+  SceneGenerate ();
+  PlayerUpdate ();
+  do {
+    SceneProgress (&ready, &total);
+    SceneUpdate (SDL_GetTicks () + 20);
+    loading (((float)ready / (float)total) * 0.5f);
+  } while (ready < total && !MainIsQuit ());
+  SceneRestartProgress ();
+  do {
+    SceneProgress (&ready, &total);
+    SceneUpdate (SDL_GetTicks () + 20);
+    loading (0.5f + ((float)ready / (float)total) * 0.5f);
+  } while (ready < total && !MainIsQuit ());
+
+
+}
+
+void GameLoad (unsigned seed_in)
+{
+
+  string            filename;
+  vector<string>    sub_group;
+
+  if (!seed_in) {
+    ConsoleLog ("GameLoad: Error: Can't load a game without a valid seed.");
+    return;
+  }
+  if (running) {
+    ConsoleLog ("GameLoad: Error: Can't load while a game is in progress.");
+    return;
+  }
+  seed = seed_in;
+  filename = GameDirectory ();
+  filename += "game.sav";
+  if (!FileExists (filename.c_str ())) {
+    seed = 0;
+    ConsoleLog ("GameLoad: Error: File %s not found.", filename.c_str ());
+    return;
+  }
+  if (ConsoleIsOpen ())
+    ConsoleToggle ();
+  running = true;
+  sub_group.push_back ("game");
+  sub_group.push_back ("player");
+  CVarUtils::Load (filename, sub_group);
+  AvatarPositionSet (PlayerPositionGet ());
+  WorldGenerate (seed);
+  seconds = 0;
+  GameUpdate ();
+  precache ();
+
+}
+
+void GameSave ()
+{
+
+  string            filename;
+  vector<string>    sub_group;
+
+  if (seed == 0) {
+    ConsoleLog ("GameSave: Error: No valid game to save.");
+    return;
+  }
+  filename = GameDirectory ();
+  filename += "game.sav";
+  sub_group.push_back ("game");
+  sub_group.push_back ("player");
+  CVarUtils::Save (filename, sub_group);
+
+}
+
+void GameInit ()
+{
+
+  CVarUtils::AttachCVar ("game.days", &days, "");
+  CVarUtils::AttachCVar ("game.hours", &hours, "");
+  CVarUtils::AttachCVar ("game.minutes", &minutes, "");
+  seconds = 0;
+
+}
+
+void GameTerm ()
+{
+
+  if (running && seed)
+    GameSave ();
+
+}
+
+
 void GameQuit ()
 {
 
   ConsoleLog ("Quit Game");
   SceneClear ();
   CachePurge ();
+  GameSave ();
+  seed = 0;
   running = false;
 
 }
@@ -70,7 +171,6 @@ void GameNew (unsigned seed_in)
   Region    region_neighbor;
   GLvector  av_pos;
   GLcoord   world_pos;
-  unsigned  ready, total;
   float     elevation;
   int       points_checked;
 
@@ -123,7 +223,7 @@ void GameNew (unsigned seed_in)
   av_pos.z = 0.0f;
   step *= -1;//Now scan inward, towards the landmass
   points_checked = 0;
-  while (points_checked < REGION_SIZE * 3 &&  !MainIsQuit ()) { 
+  while (points_checked < REGION_SIZE * 4 &&  !MainIsQuit ()) { 
     TextPrint ("Scanning %d", world_pos.x);
     loading (0.02f);
     if (!CachePointAvailable (world_pos.x, world_pos.y)) {
@@ -138,14 +238,11 @@ void GameNew (unsigned seed_in)
     }
     world_pos.x += step;
   }
-  AvatarPositionSet (av_pos);
-  SceneGenerate ();
-  AvatarUpdate ();
-  do {
-    SceneProgress (&ready, &total);
-    SceneUpdate (SDL_GetTicks () + 20);
-    loading ((float)ready / (float)total);
-  } while (ready < total && !MainIsQuit ());
+  ConsoleLog ("GameNew: Found beach in %d moves.", points_checked);
+  PlayerReset ();
+  PlayerPositionSet (av_pos);
+  GameUpdate ();
+  precache (); 
 
 
 }
@@ -165,6 +262,12 @@ bool GameCmd (vector<string> *args)
     else 
       new_seed = atoi (args->data ()[1].c_str ());
     GameNew (new_seed);
+    return true;
+  }
+  if (!args->data ()[0].compare ("load")) {
+    if (args->size () > 1) 
+      new_seed = atoi (args->data ()[1].c_str ());
+    GameLoad (new_seed);
     return true;
   }
   if (!args->data ()[0].compare ("quit")) {

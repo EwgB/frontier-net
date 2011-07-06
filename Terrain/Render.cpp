@@ -28,7 +28,7 @@
 
 #define RENDER_DISTANCE     1536
 #define NEAR_CLIP           0.2f
-#define FOV                 90
+#define FOV                 120
 #define MAP_SIZE            512
 
 static int            view_width;

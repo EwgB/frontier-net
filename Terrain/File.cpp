@@ -140,7 +140,7 @@ char* FileBinaryLoad (char* name, long* size)
 
 -----------------------------------------------------------------------------*/
 
-bool FileExists (char *name)
+bool FileExists (const char *name)
 {
 
 
@@ -151,15 +151,6 @@ bool FileExists (char *name)
     return false;
   fclose (f);
   return true;
-
-
-  /*
-  if (GetFileAttributes (name) == -1) {
-	  return 0;
-  }
-  
-  return 1;
-  */
 
 }
 
