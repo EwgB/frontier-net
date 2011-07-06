@@ -149,7 +149,7 @@ void SceneProgress (unsigned* ready, unsigned* total)
 {
 
   *ready = gm_terrain.ItemsReady ();
-  *total = 30;
+  *total = 15;
 
 }
 
@@ -181,9 +181,11 @@ void SceneRender ()
 
   glDisable(GL_CULL_FACE);
   CgShaderSelect (SHADER_TREES);
+  glColor3f (1,1,1);
   gm_forest.Render ();
   glEnable(GL_CULL_FACE);
   CgShaderSelect (SHADER_NORMAL);
+  glColor3f (1,1,1);
   gm_terrain.Render ();
   glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("grass.png"));
   gm_grass.Render ();

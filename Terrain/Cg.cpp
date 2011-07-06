@@ -169,6 +169,7 @@ void CgShaderSelect (int select)
   p = AvatarCameraPosition ();
   cgGLSetParameter3f (s->eyepos, p.x, p.y, p.z);
   cgGLSetStateMatrixParameter(s->matrix, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MODELVIEW_MATRIX);
+  glColor3f (1,1,1);
 
 }
 

@@ -32,7 +32,7 @@
 #define TIME_SUNSET         19.5f // 7:30pm
 #define TIME_DUSK           20.5f // 8:30pm
 
-#define NIGHT_COLOR         glRgba (0.0f, 0.2f, 0.5f)
+#define NIGHT_COLOR         glRgba (0.0f, 0.2f, 0.7f)
 #define DAY_COLOR           glRgba (0.4f, 0.7f, 1.0f)
 
 #define NIGHT_SCALING       glRgba (0.0f, 0.1f, 0.4f)
@@ -92,6 +92,7 @@ static void do_cycle ()
     desired.light = glVectorInterpolate (VECTOR_SUNRISE, VECTOR_MORNING, fade);
     desired.sun_angle = MathInterpolate (SUN_ANGLE_SUNRISE, SUN_ANGLE_MORNING, fade);
     desired.draw_sun = true;
+    desired.color[ENV_COLOR_AMBIENT] = glRgba (0.3f, 0.3f, 0.6f);
   } else if (decimal_time >= TIME_DAY && decimal_time < TIME_SUNSET)  { //day
     fade = (decimal_time - TIME_DAY) / (TIME_SUNSET - TIME_DAY);
     base_color = DAY_COLOR;
@@ -105,6 +106,7 @@ static void do_cycle ()
     desired.light = glVectorInterpolate (VECTOR_MORNING, VECTOR_AFTERNOON, fade);
     desired.sun_angle = MathInterpolate (SUN_ANGLE_MORNING, SUN_ANGLE_AFTERNOON, fade);
     desired.draw_sun = true;
+    desired.color[ENV_COLOR_AMBIENT] = glRgba (0.3f, 0.3f, 0.6f);
   } else if (decimal_time >= TIME_SUNSET && decimal_time < TIME_DUSK) { // sunset
     fade = (decimal_time - TIME_SUNSET) / (TIME_DUSK - TIME_SUNSET);
     base_color = glRgbaInterpolate (DAY_COLOR, NIGHT_COLOR, fade);
@@ -120,17 +122,20 @@ static void do_cycle ()
     desired.light = glVectorInterpolate (VECTOR_AFTERNOON, VECTOR_SUNSET, fade);
     desired.sun_angle = MathInterpolate (SUN_ANGLE_AFTERNOON, SUN_ANGLE_SUNSET, fade);
     desired.draw_sun = true;
+    desired.color[ENV_COLOR_AMBIENT] = glRgba (0.3f, 0.3f, 0.6f);
  } else { //night
     color_scaling = NIGHT_SCALING;
     base_color = NIGHT_COLOR;
     desired.fog_min = 1;
     desired.fog_max = NIGHT_FOG;
     desired.star_fade = 1.0f;
-    desired.color[ENV_COLOR_LIGHT] = glRgba (0.2f, 0.5f, 0.7f);
+    desired.color[ENV_COLOR_LIGHT] = glRgba (0.1f, 0.3f, 0.7f);
+    desired.color[ENV_COLOR_AMBIENT] = glRgba (0.0f, 0.0f, 0.4f);
     desired.light = VECTOR_NIGHT;
     desired.sun_angle = -90.0f;
     desired.draw_sun = false;
   }
+
   for (i = 0; i < ENV_COLOR_COUNT; i++) {
     if (i == ENV_COLOR_LIGHT) 
       continue;

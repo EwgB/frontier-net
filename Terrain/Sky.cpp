@@ -26,7 +26,7 @@
 #define SKY_DOME    0.5f
 #define SKY_TILE    5
 //How big the sunrise / set is. Higher = smaller. Don't set lower than near clip plane. 
-#define SUNSET_SIZE 0.29f
+#define SUNSET_SIZE 0.35f
 //The size of the sun itself
 #define SUN_SIZE    0.5f
 
@@ -225,8 +225,8 @@ void SkyRender ()
   //Draw the sun
 
   if (e->draw_sun) {
-    color = e->color[ENV_COLOR_LIGHT];
-    glColor3fv (&color.red);
+    //color = e->color[ENV_COLOR_LIGHT];
+    glColor3f (1.0f, 1.0f, 0.3f);
     glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("sun.bmp"));
     draw_sun (e->sun_angle, SUN_SIZE);  
   }
