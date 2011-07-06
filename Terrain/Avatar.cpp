@@ -26,12 +26,15 @@
 #include "world.h"
 
 #define JUMP_SPEED      4.0f
-#define MOVE_SPEED      4.5f
+#define MOVE_SPEED      4.0f
+#define SPRINT_SPEED    8.0f
 #define EYE_HEIGHT      1.75f
 #define CAM_MIN         1
 #define CAM_MAX         12
 #define STOP_SPEED      0.02f
 #define SWIM_DEPTH      1.4f
+#define ACCEL           0.33f
+#define DECEL           1.0f
 
 static char*      anim_names[] =
 {
@@ -54,7 +57,6 @@ static GLvector2        current_movement;
 static GLvector2        desired_movement;
 static float            cam_distance;
 static float            desired_cam_distance;
-static float            velocity;
 static bool             on_ground;
 static bool             swimming;
 static bool             sprinting;
@@ -65,6 +67,9 @@ static CAnim            anim[ANIM_COUNT];
 static AnimType         anim_id;
 static float            distance_walked;
 static float            last_time;
+static float            current_speed;
+static float            current_angle;
+static float            velocity;
 
 /*-----------------------------------------------------------------------------
 
@@ -158,13 +163,16 @@ void AvatarUpdate (void)
 
   float     ground;
   float     water;
-  float     speed;
   float     elapsed;
-  float     steps;
   float     movement_animation;
   float     time_passed;
   GLvector  old;
   bool      flying;
+  bool      moving;
+  float     max_speed;
+  float     min_speed;
+  float     desired_angle;
+  float     angle_adjust;
 
   if (!GameRunning ())
     return;
@@ -197,35 +205,47 @@ void AvatarUpdate (void)
       do_move (glVector (1, 0, 0));
     do_move (glVector (InputJoystickGet (0), InputJoystickGet (1), 0.0f));
   }
-  speed = elapsed * MOVE_SPEED;
-  if (flying) 
-    velocity = 0.0f;
-  else {
-    position.z += velocity * elapsed;
-    velocity -= elapsed * GRAVITY;
-  }
+  //Figure out our   speed
+  max_speed = MOVE_SPEED;
+  min_speed = 0.0f;
+  moving = desired_movement.Length () > 0.0f;//"moving" means, "trying to move". (Pressing buttons.)
+  if (moving)
+    min_speed = MOVE_SPEED * 0.33f;
   if (InputKeyState (SDLK_LSHIFT)) {
     sprinting = true;
-    if (!flying)
-      speed *= 2.5f;
-    else 
-      speed *= 25;
+    max_speed = SPRINT_SPEED;
   } else 
     sprinting = false;
   if (desired_movement.Length () > 1.0f)
     desired_movement.Normalize ();
-  desired_movement *= speed;
-  current_movement = glVectorInterpolate (current_movement, desired_movement, elapsed * 4.0f);
-  steps = current_movement.Length ();
-  if (desired_movement.x == 0.0f && desired_movement.y == 0.0f && steps < STOP_SPEED) 
-    current_movement = glVector (0.0f, 0.0f);
+  desired_angle = current_angle;
+  if (moving && current_speed < max_speed) {//We're moving
+    desired_angle = MathAngle (0.0f, 0.0f, desired_movement.x, desired_movement.y);
+    current_speed += elapsed * MOVE_SPEED * ACCEL;
+  } else
+    current_speed -= elapsed * MOVE_SPEED * DECEL;
+  current_speed = clamp (current_speed, min_speed, max_speed);
+  //Now figure out the angle of movement
+  angle_adjust = MathAngleDifference (current_angle, desired_angle);
+  if (abs (angle_adjust) < 3.0f || current_speed < MOVE_SPEED * 0.1f) {
+    current_angle = desired_angle;
+    angle_adjust = 0.0f;
+  } else
+    current_angle -= angle_adjust * elapsed * 2.0f;
+  current_movement.x = -sin (current_angle * DEGREES_TO_RADIANS);
+  current_movement.y = -cos (current_angle * DEGREES_TO_RADIANS);
+  //Apply the movement
+  current_movement *= current_speed * elapsed;
   position.x += current_movement.x;
   position.y += current_movement.y;
   desired_cam_distance = clamp (desired_cam_distance, CAM_MIN, CAM_MAX);
   cam_distance = MathInterpolate (cam_distance, desired_cam_distance, elapsed);
   ground = CacheElevation (position.x, position.y);
   water = WorldWaterLevel ((int)position.x, (int)position.y);
+
   if (!flying) {
+    velocity -= GRAVITY * elapsed;
+    position.z += velocity * elapsed;
     if (position.z <= ground) {
       on_ground = true;
       swimming = false;
@@ -240,13 +260,13 @@ void AvatarUpdate (void)
   }
   movement_animation = distance_walked / 4.0f;
   if (on_ground)
-    distance_walked += steps;
+    distance_walked += current_speed * elapsed;
   if (current_movement.x != 0.0f && current_movement.y != 0.0f)
     avatar_facing.z = -MathAngle (0.0f, 0.0f, current_movement.x, current_movement.y) / 2.0f;
   if (flying)
     anim_id = ANIM_FLYING;
   else if (swimming) {
-    if (steps == 0.0f)
+    if (current_speed == 0.0f)
       anim_id = ANIM_FLOAT;
     else
       anim_id = ANIM_SWIM;
@@ -255,7 +275,7 @@ void AvatarUpdate (void)
       anim_id = ANIM_JUMP;
     else 
       anim_id = ANIM_FALL;
-  } else if (steps == 0.0f) 
+  } else if (current_speed == 0.0f) 
     anim_id = ANIM_IDLE;
   else if (sprinting)
     anim_id = ANIM_SPRINT;
@@ -267,7 +287,7 @@ void AvatarUpdate (void)
   avatar.Update ();
   time_passed = GameTime () - last_time;
   last_time = GameTime ();
-  TextPrint ("%s", anim_names[anim_id]);
+  TextPrint ("%s %1.2f", anim_names[anim_id], elapsed);
   region = WorldRegionGet ((int)(position.x + REGION_HALF) / REGION_SIZE, (int)(position.y + REGION_HALF) / REGION_SIZE);
   do_camera ();
   do_location ();
@@ -352,8 +372,8 @@ void* AvatarRegion ()
 void AvatarRender ()
 {
 
-  //glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("check.bmp"));
-  glBindTexture (GL_TEXTURE_2D, 0);
+  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("avatar.png"));
+  //glBindTexture (GL_TEXTURE_2D, 0);
   avatar.Render ();
   if (CVarUtils::GetCVar<bool> ("show.skeleton"))
     avatar.RenderSkeleton ();

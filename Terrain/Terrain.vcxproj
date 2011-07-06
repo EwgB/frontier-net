@@ -45,8 +45,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>H:\SDK\devIL\include;$(IncludePath)</IncludePath>
-    <LibraryPath>H:\SDK\devIL\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>H:\SDK\devIL\include;H:\SDK\glConsole;H:\SDK\Cg\include;$(IncludePath)</IncludePath>
+    <LibraryPath>H:\SDK\devIL\lib;H:\SDK\Cg\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -78,7 +78,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>C:\Work\SDK\SDL\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Work\SDK\SDL\lib;H:\SDK\glConsole\lib\Release</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
