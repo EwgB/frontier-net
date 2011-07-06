@@ -49,9 +49,7 @@ public:
   GLvector        Position (int x, int y);
   GLvector        Normal (int x, int y);
   unsigned        Tree (int x, int y);
-  GLrgba          ColorGrass (int x, int y);
-  GLrgba          ColorDirt (int x, int y);
-  GLrgba          ColorRock (int x, int y);
+  GLrgba          Color (int x, int y);
   SurfaceType     Surface (int x, int y);
   void            Save ();
   void            Build (int stop);

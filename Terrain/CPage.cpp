@@ -77,27 +77,12 @@ GLvector CPage::Normal (int x, int y)
 
 }
 
-GLrgba CPage::ColorGrass (int x, int y)
+GLrgba CPage::Color (int x, int y)
 {
 
   return _cell[(x % PAGE_SIZE)][(y % PAGE_SIZE)].color;
 
 }
-
-GLrgba CPage::ColorDirt (int x, int y)
-{
-
-  return _cell[(x % PAGE_SIZE)][(y % PAGE_SIZE)].color;
-
-}
-
-GLrgba CPage::ColorRock (int x, int y)
-{
-
-  return _cell[(x % PAGE_SIZE)][(y % PAGE_SIZE)].color;
-
-}
-
 
 void CPage::Render ()
 {

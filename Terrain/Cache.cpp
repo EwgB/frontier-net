@@ -192,22 +192,7 @@ GLrgba CacheSurfaceColor (int world_x, int world_y, SurfaceColor sc)
   p = page_lookup (world_x, world_y);
   if (!p) 
     return glRgba (1.0f, 0.0f, 1.0f); //Pink, so we notice
-  switch (sc) {
-  case SURFACE_COLOR_GRASS:
-    return p->ColorGrass (world_x % PAGE_SIZE, world_y % PAGE_SIZE);
-  case SURFACE_COLOR_DIRT:
-    return p->ColorDirt (world_x % PAGE_SIZE, world_y % PAGE_SIZE);
-  case SURFACE_COLOR_ROCK:
-    return p->ColorRock (world_x % PAGE_SIZE, world_y % PAGE_SIZE);
-  case SURFACE_COLOR_BLACK:
-    return glRgba (0, 0, 0);
-  case SURFACE_COLOR_SAND:
-    return glRgba (0.98f, 0.82f, 0.42f);
-  case SURFACE_COLOR_SNOW:
-    return glRgba (1.0f);
-  }
-  //Shouldn't happen.
-  return glRgba (1, 0, 1); //Bright pink, so we notice the problem.
+  return p->Color (world_x % PAGE_SIZE, world_y % PAGE_SIZE);
 
 }
 

@@ -33,27 +33,23 @@ static struct LayerAttributes
   SurfaceColor   color;
 } layers [] = 
 {
-  //{"rock.bmp",     1.0f,  1.0f,    3.0f,   SURFACE_ROCK,      SURFACE_COLOR_ROCK},
-  
-  {7,     0.7f,  0.3f,   1.3f,   SURFACE_SAND,       SURFACE_COLOR_SAND},
-  {7,     0.8f,  0.3f,   1.2f,   SURFACE_SAND,       SURFACE_COLOR_SAND},
-  {7,     1.0f,  1.0f,   1.1f,   SURFACE_SAND,       SURFACE_COLOR_SAND},
+  {7,     0.7f,  0.3f,   1.3f,  SURFACE_SAND,       SURFACE_COLOR_SAND},
+  {7,     0.8f,  0.3f,   1.2f,  SURFACE_SAND,       SURFACE_COLOR_SAND},
+  {7,     1.0f,  1.0f,   1.1f,  SURFACE_SAND,       SURFACE_COLOR_SAND},
 
-  {7,     0.6f,  1.0f,   1.5f,   SURFACE_SAND_DARK,  SURFACE_COLOR_SAND},
-  //{4,    0.0f,  0.5f,   1.6f,   SURFACE_DIRT,       SURFACE_COLOR_BLACK},
-  //{4,    0.0f,  0.5f,   1.5f,   SURFACE_DIRT,       SURFACE_COLOR_BLACK},
+  {7,     0.6f,  1.0f,   1.5f,  SURFACE_SAND_DARK,  SURFACE_COLOR_SAND},
   {4,    1.0f,  1.0f,   1.4f,   SURFACE_DIRT,       SURFACE_COLOR_DIRT},
   {4,    0.6f,  1.0f,   1.6f,   SURFACE_DIRT_DARK,  SURFACE_COLOR_DIRT},
 
   {3,  1.0f,  1.0f,   1.6f,     SURFACE_FOREST,     SURFACE_COLOR_DIRT},
 
-  {6,   0.0f,  0.3f,   2.3f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
-  {6,   0.0f,  0.5f,   2.2f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
-  {6,   0.0f,  0.5f,   2.1f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
-  {5,   0.0f,  0.3f,   1.5f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
-  {5,   0.0f,  0.5f,   1.3f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
-  {5,   1.0f,  1.0f,   1.2f,   SURFACE_GRASS,      SURFACE_COLOR_GRASS},
-  {6,   1.0f,  1.0f,   2.0f,   SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
+  {6,   0.0f,  0.3f,   2.3f,    SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
+  {6,   0.0f,  0.5f,   2.2f,    SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
+  {6,   0.0f,  0.5f,   2.1f,    SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
+  {5,   0.0f,  0.3f,   1.7f,    SURFACE_GRASS,      SURFACE_COLOR_GRASS},
+  {5,   0.0f,  0.5f,   1.5f,    SURFACE_GRASS,      SURFACE_COLOR_GRASS},
+  {5,   1.0f,  1.0f,   1.4f,    SURFACE_GRASS,      SURFACE_COLOR_GRASS},
+  {6,   1.0f,  1.0f,   2.0f,    SURFACE_GRASS_EDGE, SURFACE_COLOR_GRASS},
   
   {2,    0.0f,  0.3f,   1.9f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW},
   {2,    0.6f,  0.8f,   1.6f,   SURFACE_SNOW,       SURFACE_COLOR_SNOW},
@@ -154,7 +150,7 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
       glColor3fv (&surface_color.red);
       glVertex2f ((float)x, (float)y);
       glTexCoord2f ((float)x / 8, (float)(y + 1) / 8);
-      surface_color = CacheSurfaceColor (world_x, world_y, SURFACE_COLOR_ROCK);
+      surface_color = CacheSurfaceColor (world_x, world_y + 1, SURFACE_COLOR_ROCK);
       glColor3fv (&surface_color.red);
       glVertex2f ((float)x, (float)(y + 1));
     }
