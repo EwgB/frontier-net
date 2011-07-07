@@ -1,6 +1,15 @@
-#define FOO   x
 #define CURVE_DISTANCE    x
 #define CURVE_STRENGTH    y
+   /*
+struct unidata
+{
+  uniform float4x4 matrix;
+  uniform float3 lightpos;
+  uniform float3 eyepos;
+  uniform float3 lightcol;
+  uniform float3 ambientcol;
+  uniform float4 data;
+};   */
 
 struct appdata
 {
@@ -10,19 +19,18 @@ struct appdata
   float4 uv			  : TEXCOORD0;
 };
 
-struct vfconn
+struct output
 {
-	float4 HPos	: POSITION;
-	float4 Col0	: COLOR0;
-  float  fog  : FOG;
+	float4 HPos	    : POSITION;
+	float4 color    : COLOR0;
+  float  fog      : FOG;
+  float4 uv			  : TEXCOORD0;
   //float4 fogc : FOGC;
-
   //float4 normal		: NORMAL;
-  float4 uv			: TEXCOORD0;
 };
 
 
-
+/*
 vfconn main(appdata IN,
   uniform float4x4 ModelViewProj,
   uniform float3 lightpos,
@@ -64,3 +72,64 @@ vfconn main(appdata IN,
   OUT.uv = IN.uv;
 	return OUT;
 }
+*/
+
+output standard (appdata IN,
+  uniform float4x4 ModelViewProj,
+  uniform float3 lightpos,
+  uniform float3 eyepos,
+  uniform float3 lightcol,
+  uniform float3 ambientcol,
+  uniform float4 data)
+{
+
+	output OUT;
+
+  float2 O = IN.position.xy - eyepos.xy;
+  float  D = length (O) / data.CURVE_DISTANCE;
+  D *= D;
+  OUT.fog = length (O) / 512;
+  IN.position.z -= D * data.CURVE_STRENGTH;
+
+  float3 P = IN.position.xyz;
+  float3 N = IN.normal;
+
+  float3 L = normalize(lightpos - P);
+  float diffuse = max(dot(N, lightpos), 0);
+  float3 diffusecol = diffuse * lightcol;
+
+  //Specular lighting
+  float3 V = normalize(eyepos - P);
+  float3 H = normalize(lightpos + V);
+  float specular = pow(max(dot(N, H), 0), 10);
+  float3 speccol = specular * lightcol;
+  if (diffuse <= 0)
+    specular = 0;
+	// Transform The Vertex Position Into Homogenous Clip-Space (Required)
+	OUT.HPos = mul(ModelViewProj, IN.position);
+	// Set The Color To The Value Specified In IN.color
+	OUT.color.xyz = (IN.color.xyz * ambientcol) + (IN.color.xyz * diffusecol) + (IN.color.xyz * specular);
+  OUT.color.w = 1;
+  OUT.uv = IN.uv;
+	return OUT;
+}
+
+
+output main (appdata IN, uniform float4x4 ModelViewProj,
+  uniform float3 lightpos,
+  uniform float3 eyepos,
+  uniform float3 lightcol,
+  uniform float3 ambientcol,
+  uniform float4 data)
+{
+	output OUT;
+
+	OUT = standard (IN, ModelViewProj, lightpos, eyepos, lightcol, ambientcol, data);
+	return OUT;
+
+}
+
+
+
+
+

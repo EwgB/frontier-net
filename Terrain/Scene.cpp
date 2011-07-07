@@ -149,7 +149,7 @@ void SceneProgress (unsigned* ready, unsigned* total)
 {
 
   *ready = gm_terrain.ItemsReady ();
-  *total = min (gm_terrain.ItemsViewable (), 15);
+  *total = min (gm_terrain.ItemsViewable (), 6);
 
 }
 
@@ -176,7 +176,7 @@ void SceneRender ()
     glEnable(GL_TEXTURE_2D);
 
   glDisable(GL_CULL_FACE);
-  CgShaderSelect (SHADER_TREES);
+  //CgShaderSelect (SHADER_TREES);
   glColor3f (1,1,1);
   gm_forest.Render ();
   glEnable(GL_CULL_FACE);
