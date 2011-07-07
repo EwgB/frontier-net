@@ -176,7 +176,7 @@ void SceneRender ()
     glEnable(GL_TEXTURE_2D);
 
   glDisable(GL_CULL_FACE);
-  //CgShaderSelect (SHADER_TREES);
+  CgShaderSelect (SHADER_TREES);
   glColor3f (1,1,1);
   gm_forest.Render ();
   glEnable(GL_CULL_FACE);

@@ -19,12 +19,19 @@
 #include <cg\cggl.h>
 
 #define SHADER_FILE   "shaders/standard.cg"
+#define VSHADER_FILE  "shaders/vertex.cg"
 #define MAX_FILE_NAME 100
 
 static char*          shader_entry[] =
 {
   "ShaderNormal",
   "ShaderTrees",
+};
+
+static char*          shader_function[] =
+{
+  "standard",
+  "trees",
 };
 
 struct Shader
@@ -68,7 +75,7 @@ void CgCompile ()
   for (i = 0; i < SHADER_COUNT; i++) {
     s = &shader_list[i];
     // Load And Compile The Vertex Shader From File
-    s->program = cgCreateProgramFromFile (cgContext, CG_SOURCE, s->file, cgVertexProfile, "main", 0);
+    s->program = cgCreateProgramFromFile (cgContext, CG_SOURCE, VSHADER_FILE, cgVertexProfile, shader_function[i], 0);
     if (!s->program) {
       CGerror Error = cgGetError();
       ConsoleLog ("CgCompile: ERROR: %s", cgGetErrorString(Error));
@@ -138,7 +145,7 @@ void CgShaderSelect (int select)
   p = AvatarCameraPosition ();
   cgGLSetParameter3f (s->eyepos, p.x, p.y, p.z);
   cgGLSetStateMatrixParameter(s->matrix, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MODELVIEW_MATRIX);
-  cgGLSetParameter4f (s->data, 1024, 42, val1, val2);
+  cgGLSetParameter4f (s->data, 600, 142, val1, val2);
   glColor3f (1,1,1);
 
 }
