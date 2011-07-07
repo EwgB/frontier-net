@@ -19,19 +19,6 @@
 
 #define GRASS_TYPES   4
 
-struct uvframe
-{
-  GLvector2     ul; //upper left
-  GLvector2     br; //bottom right
-  GLvector2     UpperLeft () { return ul;};
-  GLvector2     UpperRight () { return glVector (br.x, ul.y);};
-  GLvector2     BottomRight () { return br;};
-  GLvector2     BottomLeft () { return glVector (ul.x, br.y);};
-};
-
-
-static uvframe        grass[GRASS_TYPES];
-static uvframe        flowers[GRASS_TYPES];
 
 static GLuvbox        box_grass[GRASS_TYPES];
 static GLuvbox        box_flower[GRASS_TYPES];
@@ -58,10 +45,6 @@ CGrass::CGrass ()
   for (int i = 0; i < GRASS_TYPES; i++) {
     box_grass[i].Set (i, 0, 4, 2);
     box_flower[i].Set (i, 1, 4, 2);
-    //grass[i].br = glVector (0.5f, (float)i / GRASS_TYPES);
-    //grass[i].ul = glVector (0.0f, (float)i / GRASS_TYPES + 1.0f / GRASS_TYPES);
-    //flowers[i].br = grass[i].br + glVector (0.5f, 0.0f);
-    //flowers[i].ul = grass[i].ul + glVector (0.5f, 0.0f);
   }
   uv_done = true;
 

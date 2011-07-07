@@ -23,6 +23,9 @@ http://www.youtube.com/watch?v=-d2-PtK4F6Y
 
 http://www.bramstein.com/projects/gui/
 
+//glActiveTexture(GL_TEXTURE0);glBindTexture(GL_TEXTURE_2D, decal)
+
+
 -----------------------------------------------------------------------------*/
 
 #include "stdafx.h"
@@ -30,6 +33,7 @@ http://www.bramstein.com/projects/gui/
 #include "avatar.h"
 #include "cache.h"
 #include "console.h"
+#include "cg.h"
 #include "env.h"
 #include "game.h"
 #include "sdl.h"
@@ -149,6 +153,11 @@ bool MainIsQuit ()
 
 }
 
+bool ConsoleCgCompile (vector<string> *args) 
+{
+  CgCompile ();
+  return true;
+}
 
 /*-----------------------------------------------------------------------------
 
@@ -167,12 +176,13 @@ int PASCAL WinMain (HINSTANCE instance_in, HINSTANCE previous_instance, LPSTR co
   CVarUtils::CreateCVar ("show.pages", false, "Show bounding boxes for paged data.");
   CVarUtils::CreateCVar ("show.vitals", false, "Show the player statistics.");
   CVarUtils::CreateCVar ("show.region", false, "Show information about the currently occupied region.");
-  CVarUtils::CreateCVar ("cache.active", true, "Controls saving of paged data.");
+  CVarUtils::CreateCVar ("cache.active", false, "Controls saving of paged data.");
   CVarUtils::CreateCVar ("flying", false, "Allows flight.");
   CVarUtils::CreateCVar ("mouse.invert", false, "Reverse mouse y axis.");
   CVarUtils::CreateCVar ("mouse.sensitivity", 1.0f, "Mouse tracking");
   CVarUtils::CreateCVar ("last_played", 0, "");
   //Functions
+  CVarUtils::CreateCVar ("compile", ConsoleCgCompile, "");
   CVarUtils::CreateCVar ("cache.dump", CacheDump, "Clear all saved data from memory & disk.");
   CVarUtils::CreateCVar ("cache.size", CacheSize, "Returns the current size of the cache.");
   CVarUtils::CreateCVar ("game", GameCmd, "Usage: Game [ new | quit ]");

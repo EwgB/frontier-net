@@ -5,3 +5,4 @@ void ConsoleLog (const char* message, ...);
 void ConsoleRender ();
 void ConsoleToggle ();
 void ConsoleUpdate ();
+
