@@ -183,22 +183,22 @@ void SceneRender ()
     glEnable(GL_TEXTURE_2D);
 
   glDisable(GL_CULL_FACE);
-  CgShaderSelect (SHADER_TREES);
+  CgShaderSelect (VSHADER_TREES);
   glColor3f (1,1,1);
   gm_forest.Render ();
   glEnable(GL_CULL_FACE);
-  CgShaderSelect (SHADER_NORMAL);
+  CgShaderSelect (VSHADER_NORMAL);
   glColor3f (1,1,1);
   gm_terrain.Render ();
   glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("grass2.png"));
-  CgShaderSelect (SHADER_GRASS);
+  CgShaderSelect (VSHADER_GRASS);
   glColorMask (false, false, false, false);
   gm_grass.Render ();
   glColorMask (true, true, true, true);
   gm_grass.Render ();
-  CgShaderSelect (SHADER_NORMAL);
+  CgShaderSelect (VSHADER_NORMAL);
   WaterRender ();
-  CgShaderSelect (SHADER_NONE);
+  CgShaderSelect (VSHADER_NONE);
   AvatarRender ();
 
 }

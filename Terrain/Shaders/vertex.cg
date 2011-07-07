@@ -83,10 +83,13 @@ output grass (appdata IN, UNIFORM_DATA)
 
   float dist = length (float2 (IN.position.xy - eyepos.xy)) / 48;
   dist = max (dist - 0.75, 0) * 4;
-  if (IN.uv.y >= 0.5) {
-    float move = abs (IN.uv.y - 0.5);
-    IN.position.x += sin ((IN.position.y + IN.position.x) / 10.0f + data.z) * move;
-  }
+
+  float move = min (IN.uv.y, 0.5) * 2.0f;
+  move = sin ((IN.position.y + IN.position.x) / 10.0f + data.z) * move * 0.33;
+  IN.position.x += move;
+//  IN.normal.x -= abs (move) * 4;
+//  IN.normal.z += abs (move) * 4;
+//  IN.normal = normalize (IN.normal);
 	OUT = TransformAndLight (IN, ModelViewProj, lightpos, eyepos, lightcol, ambientcol, data);
 	OUT.color.a = 1 - dist;
 	return OUT;

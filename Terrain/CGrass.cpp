@@ -56,12 +56,12 @@ CGrass::CGrass ()
   if (uv_done) 
     return;
   for (int i = 0; i < GRASS_TYPES; i++) {
-    box_grass[i].Set (i, 1, 4, 2);
-    box_flower[i].Set (i, 0, 4, 2);
-    grass[i].br = glVector (0.5f, (float)i / GRASS_TYPES);
-    grass[i].ul = glVector (0.0f, (float)i / GRASS_TYPES + 1.0f / GRASS_TYPES);
-    flowers[i].br = grass[i].br + glVector (0.5f, 0.0f);
-    flowers[i].ul = grass[i].ul + glVector (0.5f, 0.0f);
+    box_grass[i].Set (i, 0, 4, 2);
+    box_flower[i].Set (i, 1, 4, 2);
+    //grass[i].br = glVector (0.5f, (float)i / GRASS_TYPES);
+    //grass[i].ul = glVector (0.0f, (float)i / GRASS_TYPES + 1.0f / GRASS_TYPES);
+    //flowers[i].br = grass[i].br + glVector (0.5f, 0.0f);
+    //flowers[i].ul = grass[i].ul + glVector (0.5f, 0.0f);
   }
   uv_done = true;
 
@@ -137,8 +137,6 @@ void CGrass::Build (long stop)
   do_grass = CacheSurface (world_x, world_y) == SURFACE_GRASS;
   if (_walk.x % _current_distance || _walk.y  % _current_distance)
     do_grass = false;
-  //if (_walk.x % 4)
-    //do_grass = false;
   if (do_grass) {
     GLvector    vb0, vb1, vb2, vb3;
     GLvector    vt0, vt1, vt2, vt3;
@@ -159,7 +157,7 @@ void CGrass::Build (long stop)
     root.y = (float)world_y + (WorldNoisef (world_x + world_y * GRASS_SIZE) -0.5f) * 2.0f;
     root.z = CacheElevation (root.x, root.y);
     height = 0.05f + r.moisture * r.temperature;
-    size.x = 0.2f + WorldNoisef (world_x - world_y * GRASS_SIZE) * 0.5f;
+    size.x = 0.4f + WorldNoisef (world_x - world_y * GRASS_SIZE) * 0.5f;
     size.y = WorldNoisef (world_x + world_y * GRASS_SIZE) * height + height;
     do_flower = r.has_flowers;
     if (do_flower) //flowers are shorter than grass

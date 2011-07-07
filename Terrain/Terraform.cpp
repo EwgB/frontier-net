@@ -190,8 +190,6 @@ void add_flowers (Region* r, unsigned odds)
 Functions to place individual climates
 -----------------------------------------------------------------------------*/
 
-
-
 //Place one mountain
 static void do_mountain (int x, int y, int mtn_size)
 {
@@ -262,7 +260,8 @@ static void do_plains (int x, int y, int size)
       r.geo_water = water;
       r.geo_bias = 8.0f;
       r.moisture = 1.0f;
-      r.geo_detail = 1.0f;
+      r.tree_threshold = 0.1f + WorldNoisef (x + xx + (y + yy) * WORLD_GRID) * 0.2f;
+      r.geo_detail = 1.5f + WorldNoisef (x + xx + (y + yy) * WORLD_GRID) * 2.0f;
       add_flowers (&r, 8);
       r.flags_shape |= REGION_FLAG_NOBLEND;
       WorldRegionSet (x + xx, y + yy, r);
@@ -349,7 +348,7 @@ static void do_forest (int x, int y, int size)
       r.climate = CLIMATE_FOREST;
       r.color_atmosphere = glRgba (0.1f, 0.6f, 0.3f);
       r.geo_detail = 8.0f;
-      r.tree_threshold = 0.75f;
+      r.tree_threshold = 0.66f;
       //r.flags_shape |= REGION_FLAG_NOBLEND;
       WorldRegionSet (x + xx, y + yy, r);
     }

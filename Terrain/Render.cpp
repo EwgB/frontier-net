@@ -496,7 +496,7 @@ void Render (void)
   if (CVarUtils::GetCVar<bool> ("render.shaders"))
     CgUpdate ();
   SceneRender ();
-  CgShaderSelect (SHADER_NONE);
+  CgShaderSelect (VSHADER_NONE);
   if (CVarUtils::GetCVar<bool> ("render.wireframe"))
     SceneRenderDebug ();
   //if (world_debug)

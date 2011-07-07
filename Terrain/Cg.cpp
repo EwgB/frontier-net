@@ -23,16 +23,20 @@
 #define VSHADER_FILE  "shaders/vertex.cg"
 #define MAX_FILE_NAME 100
 
-static char*          shader_function[] =
+static char*          vshader_function[] =
 {
   "standard",
   "trees",
   "grass",
 };
 
-struct Shader
+static char*          fshader_function[] =
 {
-  char        file[MAX_FILE_NAME];
+  "green",
+};
+
+struct VShader
+{
   CGprogram	  program;
   CGprofile	  profile;
   CGparameter	position;
@@ -47,9 +51,58 @@ struct Shader
 
 static CGcontext	    cgContext;				// A Context To Hold Our Cg Program(s)
 static CGprogram	    cgProgram;				// Our Cg Vertex Program
-static CGprofile	    cgVertexProfile;	// The Profile To Use For Our Vertex Shader
-static Shader         shader_list[SHADER_COUNT];
+static CGprofile	    cgp_vertex;	
+static CGprofile	    cgp_fragment;	
+static VShader        vshader_list[VSHADER_COUNT];
 static float          wind;
+
+/*-----------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------*/
+
+static void checkForCgError(CGerror error, const char* program, const char *situation)
+{
+  if (error != CG_NO_ERROR) 
+    ConsoleLog ("%s: %s: %s", program, situation, cgGetErrorString(error));
+  else
+    ConsoleLog ("%s: %s... ok.", program, situation);
+
+}
+
+static void vshader_select (int select)
+{
+  
+  VShader*      s;
+  GLvector      p;
+  Env*          e;
+  GLrgba        c;
+  float         val1, val2;
+
+  if (!CVarUtils::GetCVar<bool> ("render.shaders"))
+    return;
+  if (select == VSHADER_NONE) {
+    cgGLDisableProfile (cgp_vertex);
+    return;
+  }
+  val1 = val2 = 0.0f;
+  if (select == VSHADER_TREES || select == VSHADER_GRASS) 
+    val1 = wind;
+  s = &vshader_list[select];
+  e = EnvGet ();
+  cgGLEnableProfile (cgp_vertex);
+  cgGLBindProgram (s->program);
+  cgGLSetParameter3f (s->lightpos, -e->light.x, -e->light.y, -e->light.z);
+  c = e->color[ENV_COLOR_LIGHT];
+  cgGLSetParameter3f (s->lightcol, c.red, c.green, c.blue);
+  c = e->color[ENV_COLOR_AMBIENT] * glRgba (0.2f, 0.2f, 1.0f);
+  cgGLSetParameter3f (s->ambientcol, c.red, c.green, c.blue);
+  p = AvatarCameraPosition ();
+  cgGLSetParameter3f (s->eyepos, p.x, p.y, p.z);
+  cgGLSetStateMatrixParameter(s->matrix, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MODELVIEW_MATRIX);
+  cgGLSetParameter4f (s->data, SceneVisibleRange (), SceneVisibleRange () * 0.05, val1, val2);
+  glColor3f (1,1,1);
+
+}
 
 /*-----------------------------------------------------------------------------
 
@@ -58,28 +111,43 @@ static float          wind;
 void CgCompile ()
 {
 
-  Shader*     s;
+  VShader*    s;
   unsigned    i;
 
   //Setup Cg
   cgContext = cgCreateContext();				
-  cgVertexProfile = cgGLGetLatestProfile(CG_GL_VERTEX);			
-  if (cgVertexProfile == CG_PROFILE_UNKNOWN) {
-	  ConsoleLog ("CgCompile: Invalid profile type creating vertex profile.");
+  checkForCgError (cgGetError(), "Init", "Establishing Cg context");
+  cgp_fragment = cgGLGetLatestProfile (CG_GL_FRAGMENT);
+  if (cgp_fragment == CG_PROFILE_UNKNOWN) {
+	  ConsoleLog ("CgCompile: Invalid profile type creating fragment profile.");
     return;
   }
-  cgGLSetOptimalOptions(cgVertexProfile);// Set The Current Profile
+  checkForCgError (cgGetError(), "Init", "Establishing Cg Fragment profile");
+  cgGLSetOptimalOptions (cgp_fragment);
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  cgp_vertex = cgGLGetLatestProfile (CG_GL_VERTEX);			
+  checkForCgError (cgGetError(), "Init", "Establishing Cg Vertex profile");
+  cgGLSetOptimalOptions (cgp_vertex);// Set The Current Profile
   //Now set up our list of shaders
-  for (i = 0; i < SHADER_COUNT; i++) {
-    s = &shader_list[i];
+  for (i = 0; i < VSHADER_COUNT; i++) {
+    s = &vshader_list[i];
     // Load And Compile The Vertex Shader From File
-    s->program = cgCreateProgramFromFile (cgContext, CG_SOURCE, VSHADER_FILE, cgVertexProfile, shader_function[i], 0);
-    if (!s->program) {
-      CGerror Error = cgGetError();
-      ConsoleLog ("CgCompile: ERROR: %s", cgGetErrorString(Error));
-      continue;
-    }
-    ConsoleLog ("CgCompile: Loaded %s", s->file);
+    s->program = cgCreateProgramFromFile (cgContext, CG_SOURCE, VSHADER_FILE, cgp_vertex, vshader_function[i], 0);
+    checkForCgError (cgGetError(), vshader_function[i], "Compiling");
     // Load The Program
 	  cgGLLoadProgram (s->program);
     cgGLBindProgram (s->program);
@@ -106,35 +174,10 @@ void CgInit ()
 void CgShaderSelect (int select)
 {
 
-  Shader*       s;
-  GLvector      p;
-  Env*          e;
-  GLrgba        c;
-  float         val1, val2;
-
-  if (!CVarUtils::GetCVar<bool> ("render.shaders"))
-    return;
-  if (select == SHADER_NONE) {
-    cgGLDisableProfile(cgVertexProfile);
+  if (select < FSHADER_BASE) {
+    vshader_select (select);
     return;
   }
-  val1 = val2 = 0.0f;
-  if (select == SHADER_TREES || select == SHADER_GRASS) 
-    val1 = wind;
-  s = &shader_list[select];
-  e = EnvGet ();
-  cgGLEnableProfile (cgVertexProfile);
-  cgGLBindProgram (s->program);
-  cgGLSetParameter3f (s->lightpos, -e->light.x, -e->light.y, -e->light.z);
-  c = e->color[ENV_COLOR_LIGHT];
-  cgGLSetParameter3f (s->lightcol, c.red, c.green, c.blue);
-  c = e->color[ENV_COLOR_AMBIENT] * glRgba (0.2f, 0.2f, 1.0f);
-  cgGLSetParameter3f (s->ambientcol, c.red, c.green, c.blue);
-  p = AvatarCameraPosition ();
-  cgGLSetParameter3f (s->eyepos, p.x, p.y, p.z);
-  cgGLSetStateMatrixParameter(s->matrix, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MODELVIEW_MATRIX);
-  cgGLSetParameter4f (s->data, SceneVisibleRange (), SceneVisibleRange () * 0.05, val1, val2);
-  glColor3f (1,1,1);
 
 }
 
