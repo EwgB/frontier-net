@@ -35,7 +35,7 @@
 
 #define FOREST_GRID     7
 #define FOREST_HALF     (FOREST_GRID / 2)
-#define GRASS_GRID      7
+#define GRASS_GRID      3
 #define GRASS_HALF      (GRASS_GRID / 2)
 #define TERRAIN_GRID    21
 
@@ -183,8 +183,13 @@ void SceneRender ()
   CgShaderSelect (SHADER_NORMAL);
   glColor3f (1,1,1);
   gm_terrain.Render ();
-  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("grass.png"));
+  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("grass2.png"));
+  CgShaderSelect (SHADER_GRASS);
+  glColorMask (false, false, false, false);
   gm_grass.Render ();
+  glColorMask (true, true, true, true);
+  gm_grass.Render ();
+  CgShaderSelect (SHADER_NORMAL);
   WaterRender ();
   CgShaderSelect (SHADER_NONE);
   AvatarRender ();

@@ -33,8 +33,8 @@
 #define CAM_MAX         12
 #define STOP_SPEED      0.02f
 #define SWIM_DEPTH      1.4f
-#define ACCEL           0.33f
-#define DECEL           1.0f
+#define ACCEL           0.66f
+#define DECEL           1.5f
 
 static char*      anim_names[] =
 {

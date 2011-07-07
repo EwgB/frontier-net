@@ -1,0 +1,98 @@
+#define CURVE_DISTANCE    x
+#define CURVE_STRENGTH    y
+#define UNIFORM_DATA      uniform float4x4 ModelViewProj, uniform float3 lightpos, uniform float3 eyepos, uniform float3 lightcol,  uniform float3 ambientcol, uniform float4 data
+
+struct appdata
+{
+  float4 position : POSITION;
+	float4 color	  : COLOR0;
+  float4 normal		: NORMAL;
+  float4 uv			  : TEXCOORD0;
+};
+
+struct output
+{
+	float4 pos      : POSITION;
+	float4 color    : COLOR0;
+  float  fog      : FOG;
+  float4 uv			  : TEXCOORD0;
+  //float4 fogc : FOGC;
+  //float4 normal		: NORMAL;
+};
+
+//Our general-purpose transformations are done here. All other vshaders call this one.
+output TransformAndLight (appdata IN, UNIFORM_DATA)
+{
+
+	output OUT;
+
+  float2 O = IN.position.xy - eyepos.xy;
+  float  D = length (O) / data.CURVE_DISTANCE;
+  D *= D;
+  OUT.fog = length (O) / 512;
+  IN.position.z -= D * data.CURVE_STRENGTH;
+
+  float3 P = IN.position.xyz;
+  float3 N = IN.normal;
+
+  float3 L = normalize(lightpos - P);
+  float diffuse = max(dot(N, lightpos), 0);
+  float3 diffusecol = diffuse * lightcol;
+
+  //Specular lighting
+  float3 V = normalize(eyepos - P);
+  float3 H = normalize(lightpos + V);
+  float specular = pow(max(dot(N, H), 0), 10);
+  float3 speccol = specular * lightcol;
+  if (diffuse <= 0)
+    specular = 0;
+	// Transform The Vertex Position Into Homogenous Clip-Space (Required)
+	OUT.pos = mul(ModelViewProj, IN.position);
+	// Set The Color To The Value Specified In IN.color
+	OUT.color.rgb = (IN.color.xyz * ambientcol) + (IN.color.xyz * diffusecol) + (IN.color.xyz * specular);
+  OUT.color.a = 1;
+  OUT.uv = IN.uv;
+	return OUT;
+}
+
+output standard (appdata IN, UNIFORM_DATA)
+{
+	output OUT;
+
+	OUT = TransformAndLight (IN, ModelViewProj, lightpos, eyepos, lightcol, ambientcol, data);
+	return OUT;
+
+}
+
+output trees (appdata IN, UNIFORM_DATA)
+{
+
+  if (IN.uv.x >= 0.25 && IN.uv.x <= 0.5) {
+    float move = abs (IN.uv.y - 0.5) + abs (IN.uv.x - 0.375);
+    IN.position.x += sin ((IN.position.y + IN.position.x) / 10.0f + data.z) * move;
+  }
+	return TransformAndLight (IN, ModelViewProj, lightpos, eyepos, lightcol, ambientcol, data);
+
+}
+
+
+output grass (appdata IN, UNIFORM_DATA)
+{
+
+	output OUT;
+
+  float dist = length (float2 (IN.position.xy - eyepos.xy)) / 48;
+  dist = max (dist - 0.75, 0) * 4;
+  if (IN.uv.y >= 0.5) {
+    float move = abs (IN.uv.y - 0.5);
+    IN.position.x += sin ((IN.position.y + IN.position.x) / 10.0f + data.z) * move;
+  }
+	OUT = TransformAndLight (IN, ModelViewProj, lightpos, eyepos, lightcol, ambientcol, data);
+	OUT.color.a = 1 - dist;
+	return OUT;
+
+}
+
+
+
+

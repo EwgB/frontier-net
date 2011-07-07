@@ -32,6 +32,7 @@ static char*          shader_function[] =
 {
   "standard",
   "trees",
+  "grass",
 };
 
 struct Shader
@@ -113,8 +114,6 @@ void CgInit ()
 
 }
 
-static float wwww;
-
 void CgShaderSelect (int select)
 {
 
@@ -131,7 +130,7 @@ void CgShaderSelect (int select)
     return;
   }
   val1 = val2 = 0.0f;
-  if (select == SHADER_TREES) 
+  if (select == SHADER_TREES || select == SHADER_GRASS) 
     val1 = wind;
   s = &shader_list[select];
   e = EnvGet ();
