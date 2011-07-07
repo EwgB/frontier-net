@@ -33,11 +33,11 @@
 //#include "ctree.h"
 //#include "figure.h"
 
-#define FOREST_GRID     7
+#define FOREST_GRID     3
 #define FOREST_HALF     (FOREST_GRID / 2)
 #define GRASS_GRID      3
 #define GRASS_HALF      (GRASS_GRID / 2)
-#define TERRAIN_GRID    21
+#define TERRAIN_GRID    5
 
 static int              cached;
 static int              texture_bytes;

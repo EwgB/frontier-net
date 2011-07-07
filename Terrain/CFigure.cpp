@@ -153,8 +153,8 @@ void CFigure::Update ()
 
     m.Identity ();
     m.Rotate (b->_rotation.x, 1.0f, 0.0f, 0.0f);
-    m.Rotate (b->_rotation.y, 0.0f, 1.0f, 0.0f);
     m.Rotate (b->_rotation.z, 0.0f, 0.0f, 1.0f);
+    m.Rotate (b->_rotation.y, 0.0f, 1.0f, 0.0f);
     RotatePoints (b->_id, b->_position, m);
     for (c = 0; c < b->_children.size (); c++) 
       RotateHierarchy (b->_children[c], b->_position, m);

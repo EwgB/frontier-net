@@ -14,6 +14,7 @@
 #include "avatar.h"
 #include "cache.h"
 #include "cfigure.h"
+#include "console.h"
 #include "game.h"
 #include "ini.h"
 #include "input.h"
@@ -26,7 +27,8 @@
 #include "world.h"
 
 #define JUMP_SPEED      4.0f
-#define MOVE_SPEED      4.0f
+#define MOVE_SPEED      5.5f
+#define SLOW_SPEED      (MOVE_SPEED * 0.15f)
 #define SPRINT_SPEED    8.0f
 #define EYE_HEIGHT      1.75f
 #define CAM_MIN         1
@@ -172,10 +174,13 @@ void AvatarUpdate (void)
   float     max_speed;
   float     min_speed;
   float     desired_angle;
+  float     lean_angle;
   float     angle_adjust;
 
   if (!GameRunning ())
     return;
+  if (InputKeyState (SDLK_LCTRL)) 
+    AvatarLook (0, 1);
   flying = CVarUtils::GetCVar<bool> ("flying");
   elapsed = SdlElapsedSeconds ();
   elapsed = min (elapsed, 0.25f);
@@ -209,29 +214,35 @@ void AvatarUpdate (void)
   max_speed = MOVE_SPEED;
   min_speed = 0.0f;
   moving = desired_movement.Length () > 0.0f;//"moving" means, "trying to move". (Pressing buttons.)
-  if (moving)
+  if (moving) 
     min_speed = MOVE_SPEED * 0.33f;
   if (InputKeyState (SDLK_LSHIFT)) {
     sprinting = true;
     max_speed = SPRINT_SPEED;
   } else 
     sprinting = false;
-  if (desired_movement.Length () > 1.0f)
-    desired_movement.Normalize ();
   desired_angle = current_angle;
-  if (moving && current_speed < max_speed) {//We're moving
+  if (moving) {//We're trying to accelerate
     desired_angle = MathAngle (0.0f, 0.0f, desired_movement.x, desired_movement.y);
     current_speed += elapsed * MOVE_SPEED * ACCEL;
-  } else
+  } else //We've stopped pushing forward
     current_speed -= elapsed * MOVE_SPEED * DECEL;
   current_speed = clamp (current_speed, min_speed, max_speed);
   //Now figure out the angle of movement
   angle_adjust = MathAngleDifference (current_angle, desired_angle);
-  if (abs (angle_adjust) < 3.0f || current_speed < MOVE_SPEED * 0.1f) {
+  //if we're trying to reverse direction, don't do a huge, arcing turn.  Just slow and double back
+  lean_angle = 0.0f;
+  if (abs (angle_adjust) > 135)
+    current_speed = SLOW_SPEED;
+  if (abs (angle_adjust) < 1.0f || current_speed <= SLOW_SPEED) {
     current_angle = desired_angle;
     angle_adjust = 0.0f;
-  } else
-    current_angle -= angle_adjust * elapsed * 2.0f;
+  } else {
+    if (abs (angle_adjust) < 135) {
+      current_angle -= angle_adjust * elapsed * 2.0f;
+      lean_angle = clamp (angle_adjust / 5.0f, -15, 15);
+    }
+  }
   current_movement.x = -sin (current_angle * DEGREES_TO_RADIANS);
   current_movement.y = -cos (current_angle * DEGREES_TO_RADIANS);
   //Apply the movement
@@ -242,7 +253,7 @@ void AvatarUpdate (void)
   cam_distance = MathInterpolate (cam_distance, desired_cam_distance, elapsed);
   ground = CacheElevation (position.x, position.y);
   water = WorldWaterLevel ((int)position.x, (int)position.y);
-
+  avatar_facing.y = MathInterpolate (avatar_facing.y, lean_angle, elapsed);
   if (!flying) {
     velocity -= GRAVITY * elapsed;
     position.z += velocity * elapsed;
