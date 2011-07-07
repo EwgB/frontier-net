@@ -50,8 +50,12 @@ http://www.bramstein.com/projects/gui/
 #pragma comment (lib, "DevIL.lib")    //For loading images
 #pragma comment( lib, "cg.lib" )		  //NVIDIA Cg toolkit			
 #pragma comment( lib, "cggl.lib" )	  //NVIDIA Cg toolkit			
-//#pragma comment( lib, "H:/SDK/glConsole/lib/debug/cvars.lib" )	  
+#ifdef DEBUG
+#pragma comment( lib, "H:/SDK/glConsole/lib/debug/cvars.lib" )	 
+#else
 #pragma comment( lib, "H:/SDK/glConsole/lib/release/cvars.lib" )	  
+#endif
+
 
 #define SETTINGS_FILE   "user.set"
 

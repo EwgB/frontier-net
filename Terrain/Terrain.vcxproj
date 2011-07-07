@@ -14,6 +14,7 @@
     <ProjectGuid>{A1163D2D-59A7-4B3E-9DBE-5DFE09E0A7F2}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Terrain</RootNamespace>
+    <ProjectName>Frontier</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
