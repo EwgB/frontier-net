@@ -18,3 +18,4 @@ void            SceneRenderDebug ();
 void            SceneRestartProgress ();
 class CTerrain* SceneTerrainGet (int x, int y);
 void            SceneTexturePurge ();
+float           SceneVisibleRange ();

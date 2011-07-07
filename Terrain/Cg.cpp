@@ -14,6 +14,7 @@
 #include "cg.h"
 #include "env.h"
 #include "ini.h"
+#include "scene.h"
 #include "sdl.h"
 #include <cg\cg.h>									
 #include <cg\cggl.h>
@@ -21,12 +22,6 @@
 #define SHADER_FILE   "shaders/standard.cg"
 #define VSHADER_FILE  "shaders/vertex.cg"
 #define MAX_FILE_NAME 100
-
-static char*          shader_entry[] =
-{
-  "ShaderNormal",
-  "ShaderTrees",
-};
 
 static char*          shader_function[] =
 {
@@ -56,23 +51,25 @@ static CGprofile	    cgVertexProfile;	// The Profile To Use For Our Vertex Shade
 static Shader         shader_list[SHADER_COUNT];
 static float          wind;
 
+/*-----------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------*/
+
 void CgCompile ()
 {
 
   Shader*     s;
   unsigned    i;
 
-  // Setup Cg
-  cgContext = cgCreateContext();							// Create A New Context For Our Cg Program(s)
-  cgVertexProfile = cgGLGetLatestProfile(CG_GL_VERTEX);				// Get The Latest GL Vertex Profile
-  // Validate Our Profile Determination Was Successful
+  //Setup Cg
+  cgContext = cgCreateContext();				
+  cgVertexProfile = cgGLGetLatestProfile(CG_GL_VERTEX);			
   if (cgVertexProfile == CG_PROFILE_UNKNOWN) {
 	  ConsoleLog ("CgCompile: Invalid profile type creating vertex profile.");
     return;
   }
-  cgGLSetOptimalOptions(cgVertexProfile);						// Set The Current Profile
+  cgGLSetOptimalOptions(cgVertexProfile);// Set The Current Profile
   //Now set up our list of shaders
-
   for (i = 0; i < SHADER_COUNT; i++) {
     s = &shader_list[i];
     // Load And Compile The Vertex Shader From File
@@ -102,14 +99,6 @@ void CgCompile ()
 void CgInit ()
 {
 
-  unsigned      i;
-  char          name[MAX_FILE_NAME];
-
-  for (i = 0; i < SHADER_COUNT; i++) {
-    strcpy (name, IniString ("Shaders", shader_entry[i]));
-    IniStringSet ("Shaders", shader_entry[i], name);
-    sprintf (shader_list[i].file, "shaders//%s", name);
-  }
   CgCompile ();
 
 }
@@ -144,7 +133,7 @@ void CgShaderSelect (int select)
   p = AvatarCameraPosition ();
   cgGLSetParameter3f (s->eyepos, p.x, p.y, p.z);
   cgGLSetStateMatrixParameter(s->matrix, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MODELVIEW_MATRIX);
-  cgGLSetParameter4f (s->data, 600, 142, val1, val2);
+  cgGLSetParameter4f (s->data, SceneVisibleRange (), SceneVisibleRange () * 0.05, val1, val2);
   glColor3f (1,1,1);
 
 }

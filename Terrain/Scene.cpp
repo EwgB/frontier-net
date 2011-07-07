@@ -33,11 +33,11 @@
 //#include "ctree.h"
 //#include "figure.h"
 
-#define FOREST_GRID     3
+#define FOREST_GRID     7
 #define FOREST_HALF     (FOREST_GRID / 2)
 #define GRASS_GRID      3
 #define GRASS_HALF      (GRASS_GRID / 2)
-#define TERRAIN_GRID    5
+#define TERRAIN_GRID    15
 
 static int              cached;
 static int              texture_bytes;
@@ -113,7 +113,6 @@ void SceneTexturePurge ()
 
 }
 
-
 CTerrain* SceneTerrainGet (int x, int y)
 {
 
@@ -126,6 +125,14 @@ CTerrain* SceneTerrainGet (int x, int y)
       return &il_terrain[i];
   }
   return NULL;
+
+}
+
+//How far is it from the center of the terrain grid to the outer edge?
+float SceneVisibleRange ()
+{
+
+  return (float)(TERRAIN_GRID / 2) * TERRAIN_SIZE;
 
 }
 
