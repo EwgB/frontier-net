@@ -831,6 +831,8 @@ void CTerrain::Set (int grid_x, int grid_y, int distance)
 
   LOD       new_lod;
 
+  if (_stage == STAGE_TEXTURE)
+    return;
   if (distance < 2) 
     new_lod = LOD_HIGH;
   else

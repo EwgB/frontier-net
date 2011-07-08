@@ -18,4 +18,5 @@ void CgCompile ();
 void CgInit ();
 void CgUpdate ();
 void CgUpdateMatrix ();
+void CgSetOffset (GLvector offset);
 void CgShaderSelect (int shader);

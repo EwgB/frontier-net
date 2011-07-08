@@ -3,7 +3,8 @@
 #define DIST_MIN          x
 #define DIST_MAX          y
 
-#define UNIFORM_DATA      uniform float4x4 ModelViewProj, uniform float3 lightpos, uniform float3 eyepos, uniform float3 lightcol,  uniform float3 ambientcol, uniform float2 fogdist, uniform float4 data
+#define UNIFORM_DATA      uniform float4x4 ModelViewProj, uniform float3 offset, uniform float3 lightpos, uniform float3 eyepos, uniform float3 lightcol,  uniform float3 ambientcol, uniform float2 fogdist, uniform float4 data
+#define PARAMS            IN, ModelViewProj, offset, lightpos, eyepos, lightcol, ambientcol, fogdist, data
 
 struct appdata
 {
@@ -28,6 +29,8 @@ output TransformAndLight (appdata IN, UNIFORM_DATA)
 
 	output OUT;
 
+  IN.position.xyz += offset.xyz;
+  //IN.normal = mul (IN.normal, ModelViewProj);
   float2 O = IN.position.xy - eyepos.xy;
   float  dist = length (O);
   float  D = dist / data.CURVE_DISTANCE;
@@ -64,7 +67,7 @@ output standard (appdata IN, UNIFORM_DATA)
 {
 	output OUT;
 
-	OUT = TransformAndLight (IN, ModelViewProj, lightpos, eyepos, lightcol, ambientcol, fogdist, data);
+	OUT = TransformAndLight (PARAMS);
 	return OUT;
 
 }
@@ -76,7 +79,7 @@ output trees (appdata IN, UNIFORM_DATA)
     float move = abs (IN.uv.y - 0.5) + abs (IN.uv.x - 0.375);
     IN.position.x += sin ((IN.position.y + IN.position.x) / 10.0f + data.z) * move;
   }
-	return TransformAndLight (IN, ModelViewProj, lightpos, eyepos, lightcol, ambientcol, fogdist, data);
+	return TransformAndLight (PARAMS);
 
 }
 
@@ -95,7 +98,7 @@ output grass (appdata IN, UNIFORM_DATA)
 //  IN.normal.x -= abs (move) * 4;
 //  IN.normal.z += abs (move) * 4;
 //  IN.normal = normalize (IN.normal);
-	OUT = TransformAndLight (IN, ModelViewProj, lightpos, eyepos, lightcol, ambientcol, fogdist, data);
+	OUT = TransformAndLight (PARAMS);
 	OUT.color.a = 1 - dist;
 	return OUT;
 

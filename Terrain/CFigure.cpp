@@ -224,9 +224,11 @@ void CFigure::Render ()
   
   glColor3f (1,1,1);
   glPushMatrix ();
+  CgSetOffset (_position);
   glTranslatef (_position.x, _position.y, _position.z); 
   CgUpdateMatrix ();
   _skin_render.Render ();
+  CgSetOffset (glVector (0,0,0));
   glPopMatrix ();
   CgUpdateMatrix ();
   

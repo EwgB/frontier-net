@@ -30,9 +30,6 @@
 #include "water.h"
 #include "world.h"
 
-//#include "ctree.h"
-//#include "figure.h"
-
 #define FOREST_GRID     7
 #define FOREST_HALF     (FOREST_GRID / 2)
 #define GRASS_GRID      5
@@ -212,7 +209,7 @@ void SceneRender ()
   gm_grass.Render ();
   CgShaderSelect (VSHADER_NORMAL);
   WaterRender ();
-  CgShaderSelect (VSHADER_NONE);
+  //CgShaderSelect (VSHADER_NONE);
   AvatarRender ();
   CgShaderSelect (FSHADER_NONE);
 

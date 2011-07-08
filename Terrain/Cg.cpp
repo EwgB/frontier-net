@@ -42,6 +42,7 @@ struct VShader
   CGprogram	  program;
   CGprofile	  profile;
   CGparameter	position;
+  CGparameter	offset;
   CGparameter	matrix;
   CGparameter	lightpos;
   CGparameter	lightcol;
@@ -66,6 +67,8 @@ static CGprofile	    cgp_fragment;
 static VShader        vshader_list[VSHADER_COUNT];
 static FShader        fshader_list[FSHADER_COUNT];
 static float          wind;
+static int            vshader_selected;
+static int            fshader_selected;
 
 /*-----------------------------------------------------------------------------
 
@@ -86,6 +89,7 @@ static void fshader_select (int select)
   FShader*      s;
   Env*          e;
 
+  fshader_selected = select;
   if (select == -1) {
     cgGLDisableProfile (cgp_fragment);
     return;
@@ -113,6 +117,7 @@ static void vshader_select (int select)
   GLrgba        c;
   float         val1, val2;
 
+  vshader_selected = select;
   if (!CVarUtils::GetCVar<bool> ("render.shaders"))
     return;
   if (select == VSHADER_NONE) {
@@ -203,6 +208,7 @@ void CgCompile ()
     // Get Handles To Each Of Our Parameters So That
 	  // We Can Change Them At Will Within Our Code
 	  s->position   = cgGetNamedParameter(s->program, "IN.position");
+    s->offset     = cgGetNamedParameter(s->program, "offset");
 	  s->lightpos   = cgGetNamedParameter(s->program, "lightpos");
     s->eyepos     = cgGetNamedParameter(s->program, "eyepos");
 	  s->lightcol	  = cgGetNamedParameter(s->program, "lightcol");
@@ -252,5 +258,18 @@ void CgUpdateMatrix ()
 {
 
   //cgGLSetStateMatrixParameter(modelViewMatrix, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MODELVIEW_MATRIX);
+
+}
+
+void CgSetOffset (GLvector p)
+{
+
+  VShader*    s;
+
+
+  if (vshader_selected == VSHADER_NONE)
+    return;
+  s = &vshader_list[vshader_selected];
+  cgGLSetParameter3f (s->offset, p.x, p.y, p.z);
 
 }

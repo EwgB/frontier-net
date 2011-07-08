@@ -11,11 +11,11 @@ x Fix canopy trees
 x Fix UV mapping on trees.
 * Clouds
 * More biomes
-* World saving
+x World saving
 * Undergrowth
 x Terrains eat less CPU cycles per frame
 x Grass rotate
-* Fix avatar rendering
+x Fix avatar rendering
 ? Fix opaque trees on mike's PC
 * shadows
 * Collision
@@ -58,7 +58,6 @@ http://www.bramstein.com/projects/gui/
 #else
 #pragma comment( lib, "H:/SDK/glConsole/lib/release/cvars.lib" )	  
 #endif
-
 
 #define SETTINGS_FILE   "user.set"
 
