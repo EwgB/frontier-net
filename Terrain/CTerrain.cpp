@@ -10,11 +10,12 @@
 
 #include "stdafx.h"
 #include "cache.h"
-#include "sdl.h"
-#include "CTerrain.h"
-#include "Render.h"
+#include "console.h"
+#include "cterrain.h"
+#include "render.h"
 #include "scene.h"
-#include "Texture.h"
+#include "sdl.h"
+#include "texture.h"
 
 
 //Lower values make the terrain more precise at the expense of more polygons
@@ -717,6 +718,10 @@ void CTerrain::Update (long stop)
       _stage++;
       break;
     case STAGE_TEXTURE: 
+      if (_texture_current_size == _texture_desired_size) {
+        _stage = STAGE_DONE;
+        break;
+      }
       DoTexture ();
       break;
     case STAGE_TEXTURE_FINAL: 
@@ -733,7 +738,7 @@ void CTerrain::Update (long stop)
         return;
       ZoneCheck (stop);//touch the zones to keep them in memory
       _rebuild = SdlTick () + 1000;
-      if (DoCheckNeighbors ())
+      if (_lod == LOD_HIGH && DoCheckNeighbors ())
         _stage = STAGE_QUADTREE;
       return;
     default: //any stages not used end up here, skip it
@@ -813,27 +818,35 @@ void CTerrain::TexturePurge ()
 void CTerrain::Set (int grid_x, int grid_y, int distance)
 {
 
-  unsigned  sup;
+  LOD       new_lod;
 
-  if (distance > 0)
-    distance--;
-  distance = min (distance, 4);
-  if (grid_x == _grid_position.x && grid_y == _grid_position.y && _current_distance == distance)
+  if (distance < 2) 
+    new_lod = LOD_HIGH;
+  else
+    new_lod = LOD_LOW;
+  if (grid_x == _grid_position.x && grid_y == _grid_position.y && _lod == new_lod)
     return;
   //If this terrain is now in a new location, we have to kill it entirely
-  if (grid_x != _grid_position.x || grid_y != _grid_position.y)
+  if (grid_x != _grid_position.x || grid_y != _grid_position.y) 
     Clear ();
+  else //Just changed LOD, rebuild the texture
+    _stage = STAGE_TEXTURE;
+  _lod = new_lod;
   _grid_position.x = grid_x;
   _grid_position.y = grid_y;
   _current_distance = distance;
   _origin.x = grid_x * TERRAIN_SIZE;
   _origin.y = grid_y * TERRAIN_SIZE;
   _color = glRgbaUnique (_grid_position.x + _grid_position.y * 16);
-  sup = (unsigned)pow (2.0f, (float)distance);
-  _texture_desired_size = 2048 / sup;
+  if (_lod == LOD_HIGH) {
+    _color = glRgba (1.0f, 0.0f, 1.0f);
+    _texture_desired_size = 2048;
+  } else {
+    _color = glRgba (0.0f, 1.0f, 1.0f);
+    _texture_desired_size = 128;
+  }
+  //ConsoleLog ("Texture: %d, %d = %d", grid_x, grid_y, _texture_desired_size);
   _walk.Clear ();
-  //_list_size = 0;
-  _stage = STAGE_BEGIN;
 
 }
 
@@ -841,7 +854,7 @@ void CTerrain::Render ()
 {
 
   if (_front_texture && _valid) {
-    //glColor3fv (&_color.red);
+    glColor3fv (&_color.red);
     glBindTexture (GL_TEXTURE_2D, _front_texture);
     _vbo.Render ();
   }

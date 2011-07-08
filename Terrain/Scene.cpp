@@ -163,8 +163,18 @@ void SceneProgress (unsigned* ready, unsigned* total)
 void SceneUpdate (long stop)
 {
 
+  static unsigned update_type;
+
   if (!GameRunning ())
     return;
+  //We don't want any grid to starve the others, so we rotate the order of priority.
+  update_type++;
+  switch (update_type % 3) {
+  case 0: gm_terrain.Update (stop); break;
+  case 1: gm_grass.Update (stop); break;
+  case 2: gm_forest.Update (stop); break;
+  }
+  //any time left over goes to the losers...
   gm_terrain.Update (stop);
   gm_grass.Update (stop);
   gm_forest.Update (stop);
@@ -197,6 +207,8 @@ void SceneRender ()
   glColorMask (false, false, false, false);
   gm_grass.Render ();
   glColorMask (true, true, true, true);
+  glEnable (GL_BLEND);
+  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   gm_grass.Render ();
   CgShaderSelect (VSHADER_NORMAL);
   WaterRender ();

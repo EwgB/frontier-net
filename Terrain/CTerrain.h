@@ -48,6 +48,7 @@ private:
   unsigned          _back_texture;
   int               _texture_desired_size;
   int               _texture_current_size;
+  LOD               _lod;
   int               _patch_size;
   int               _patch_steps;
   int               _index_buffer_size;

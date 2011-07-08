@@ -156,7 +156,7 @@ void GridManager::Init (GridData* itemptr, unsigned grid_size, unsigned item_siz
   do {
     gd = Item (walk);
     gd->Invalidate ();
-    gd->Set (0, 0, 0);
+    //gd->Set (0, 0, 0);
     //gd->Set ( _last_viewer.x + walk.x - _grid_half,  _last_viewer.y + walk.y - _grid_half, 0);
     //gd->Set (viewer.x + walk.x - _grid_half, viewer.y + walk.y - _grid_half, 0);
   } while (!walk.Walk (_grid_size));

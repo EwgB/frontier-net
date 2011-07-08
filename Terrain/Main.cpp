@@ -7,19 +7,15 @@
 
 TODO:
 
-* Small trees up, big trees down
-http://opengameart.org/content/very-low-poly-human
-
-
-* Lighting
-* Culling
-* Pathing
-* Saving development costs
-* Dynamic content & replayability
-
-* FUEL and Minecraft
-
-http://www.youtube.com/watch?v=-d2-PtK4F6Y
+* Fix canopy trees
+* Fix UV mapping on trees.
+* Clouds
+* More biomes
+* World saving
+* Undergrowth
+* Terrains eat less CPU cycles per frame
+* Grass rotate
+* Fix avatar rendering
 
 http://www.bramstein.com/projects/gui/
 
