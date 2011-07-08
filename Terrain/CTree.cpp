@@ -56,12 +56,13 @@ GLmesh* CTree::Mesh (unsigned alt, LOD lod)
 
 //Given the value of 0.0 (root) to 1.0f (top), return the center of the trunk 
 //at that height.
-GLvector CTree::TrunkPosition (float delta, float* radius)
+GLvector CTree::TrunkPosition (float delta, float* radius_in)
 {
 
   GLvector    trunk;
   float       bend;
   float       delta_curve;
+  float       radius;
 
   if (_funnel_trunk) {
     delta_curve = 1.0f - delta;
@@ -69,10 +70,12 @@ GLvector CTree::TrunkPosition (float delta, float* radius)
     delta_curve = 1.0f - delta_curve;
   } else 
     delta_curve = delta;
-  if (radius) {
-    *radius = _current_base_radius * (1.0f - delta_curve);
-    *radius = max (*radius, MIN_RADIUS);
-  }
+  if (_canopy) //canopy trees are thick all the way up, do not taper to a point
+    radius = _current_base_radius * (1.0f - delta_curve * 0.5);
+  else
+    radius = _current_base_radius * (1.0f - delta_curve);
+
+  radius = max (radius, MIN_RADIUS);
   bend = delta * delta;
   switch (_trunk_style) {
   case TREE_TRUNK_BENT:
@@ -90,6 +93,8 @@ GLvector CTree::TrunkPosition (float delta, float* radius)
     break;
   }
   trunk.z = delta * _current_height;
+  if (radius_in)
+    *radius_in = radius;
   return trunk;
   
 }
@@ -410,7 +415,7 @@ void CTree::DoTrunk (GLmesh* m, unsigned local_seed, LOD lod)
   //Work out the circumference of the BASE of the tree
   circumference = _current_base_radius * _current_base_radius * (float)PI;
   //The texture will repeat ONCE horizontally around the tree.  Set the vertical to repeat in the same distance.
-  _texture_tile = (float)((int)circumference + 0.5f); 
+  _texture_tile = 1;//(float)((int)circumference + 0.5f); 
   radial_steps = 3;
   if (lod == LOD_HIGH)
     radial_steps = 7;
@@ -536,7 +541,6 @@ void CTree::Create (bool is_canopy, float moisture, float temp_in, int seed_in)
   _leaf_style = (TreeLeafStyle)(WorldNoisei (_seed_current++) % TREE_LEAF_STYLES);
   _evergreen = _temperature + (WorldNoisef (_seed_current++) * 0.25f) < 0.5f;
   _has_vines = _moisture > 0.6f && _temperature > 0.5f;
-  _has_vines = true;///////////////////////////////////////////////////////////////////////////////////////////;
   //Narrow trees can gorw on top of hills. (Big ones will stick out over cliffs, so we place them low.)
   if (_default_base_radius <= 1.0f) 
     _grows_high = true;
@@ -552,7 +556,7 @@ void CTree::Create (bool is_canopy, float moisture, float temp_in, int seed_in)
   //1 in 8 non-tropical trees has white bark
   if (!_has_vines && !(WorldNoisei (_seed_current++) % 8))
     _bark_color2 = glRgba (1.0f);
-  //These two foliage styles don't look right on evergreens.
+  //These foliage styles don't look right on evergreens.
   if (_evergreen && _foliage_style == TREE_FOLIAGE_BOWL)
     _foliage_style = TREE_FOLIAGE_UMBRELLA;
   if (_evergreen && _foliage_style == TREE_FOLIAGE_SHIELD)
@@ -562,7 +566,7 @@ void CTree::Create (bool is_canopy, float moisture, float temp_in, int seed_in)
   if (_canopy) {
     _foliage_style = TREE_FOLIAGE_UMBRELLA;
     _default_height = max (_default_height, 16.0f);
-    _default_base_radius = 3.0f;
+    _default_base_radius = 1.5f;
     _foliage_size = 2.0f;
     _trunk_style = TREE_TRUNK_NORMAL;
   }

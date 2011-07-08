@@ -865,7 +865,7 @@ void CTerrain::Render ()
 {
 
   if (_front_texture && _valid) {
-    glColor3fv (&_color.red);
+    //glColor3fv (&_color.red);
     glBindTexture (GL_TEXTURE_2D, _front_texture);
     _vbo.Render ();
   }

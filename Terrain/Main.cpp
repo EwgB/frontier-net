@@ -16,7 +16,8 @@ TODO:
 x Terrains eat less CPU cycles per frame
 * Grass rotate
 * Fix avatar rendering
-* Fix opaque trees on mike's PC
+? Fix opaque trees on mike's PC
+* shadows
 
 http://www.bramstein.com/projects/gui/
 
