@@ -100,6 +100,7 @@ void GameLoad (unsigned seed_in)
   CVarUtils::Load (filename, sub_group);
   AvatarPositionSet (PlayerPositionGet ());
   WorldLoad (seed);
+  WorldSave ();
   seconds = 0;
   GameUpdate ();
   precache ();
@@ -192,6 +193,7 @@ void GameNew (unsigned seed_in)
   SceneClear ();
   CachePurge ();
   WorldGenerate (seed);
+  WorldSave ();
   //Now the world is ready.  Look for a good starting point.
   //Start in the center
   w = WorldPtr ();
