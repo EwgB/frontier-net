@@ -19,6 +19,7 @@
 #include "ctree.h"
 #include "entropy.h"
 #include "file.h"
+#include "game.h"
 #include "sdl.h"
 #include "world.h"
 
@@ -35,7 +36,7 @@ static char* page_file_name (GLcoord p)
 
   static char     name[256];
 
-  sprintf (name, "%s//cache%d-%d.pag", WorldDirectory (), p.x, p.y);
+  sprintf (name, "%s//cache%d-%d.pag", GameDirectory (), p.x, p.y);
   return name;
 
 }

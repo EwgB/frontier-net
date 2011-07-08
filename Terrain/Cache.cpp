@@ -14,6 +14,7 @@
 #include "console.h"
 #include "cpage.h"
 #include "entropy.h"
+#include "game.h"
 #include "sdl.h"
 #include "text.h"
 #include "world.h"
@@ -226,7 +227,7 @@ bool CacheSize (vector<string> *args)
   int           bytes;
   int           files;
 
-  sprintf (filespec, "%s*.pag", WorldDirectory ());
+  sprintf (filespec, "%s*.pag", GameDirectory ());
   more = true;
   bytes = 0;
   files = 0;
@@ -253,11 +254,11 @@ bool CacheDump (vector<string> *args)
   bool          more;
 
   CachePurge ();
-  sprintf (filespec, "%s*.pag", WorldDirectory ());
+  sprintf (filespec, "%s*.pag", GameDirectory ());
   more = true;
   handle = _findfirst (filespec, &fd);
   while (handle && more) {
-    sprintf (file, "%s%s", WorldDirectory (), fd.name);
+    sprintf (file, "%s%s", GameDirectory (), fd.name);
     _unlink (file);
     ConsoleLog (file);
     if (_findnext (handle, &fd) != 0)

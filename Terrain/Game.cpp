@@ -99,7 +99,7 @@ void GameLoad (unsigned seed_in)
   sub_group.push_back ("player");
   CVarUtils::Load (filename, sub_group);
   AvatarPositionSet (PlayerPositionGet ());
-  WorldGenerate (seed);
+  WorldLoad (seed);
   seconds = 0;
   GameUpdate ();
   precache ();
@@ -145,6 +145,7 @@ void GameQuit ()
 {
 
   ConsoleLog ("Quit Game");
+  WorldSave ();
   SceneClear ();
   CachePurge ();
   GameSave ();
@@ -187,6 +188,7 @@ void GameNew (unsigned seed_in)
     ConsoleToggle ();
   seed = seed_in;
   ConsoleLog ("Beginning new game with seed %d.", seed);
+  FileMakeDirectory (GameDirectory ());
   SceneClear ();
   CachePurge ();
   WorldGenerate (seed);

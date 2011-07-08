@@ -19,20 +19,31 @@
 
 #include "stdafx.h"
 #include "ctree.h"
+#include "console.h"
 #include "entropy.h"
 #include "file.h"
+#include "game.h"
 #include "math.h"
 #include "random.h"
 #include "terraform.h"
 #include "world.h"
 
-#define LARGE_STRENGTH    1 //Not used. Considering removing.
-#define LARGE_SCALE       9 //Not used. Considering removing.
 //The dither map scatters surface data so that grass colorings end up in adjacent regions.
 #define DITHER_SIZE       (REGION_SIZE / 2)
 //How much space in a region is spent interpolating between itself and its neighbors.
 #define BLEND_DISTANCE    (REGION_SIZE / 4)
 
+#define FILE_VERSION      1
+
+struct WHeader
+{
+  int         version;
+  unsigned    seed;
+  int         world_grid;
+  int         noise_buffer;
+  int         tree_types;
+  int         map_bytes;
+};
 
 static GLcoord      dithermap[DITHER_SIZE][DITHER_SIZE];
 static unsigned     map_id;
@@ -178,7 +189,7 @@ static float do_height (Region r, GLvector2 offset, float water, float detail, f
 
 
   //Apply the values!
-  val = water + detail * r.geo_detail + bias * LARGE_STRENGTH;
+  val = water + detail * r.geo_detail + bias;
   if (r.climate == CLIMATE_SWAMP) {
     val -= r.geo_detail / 2.0f;
     val = max (val, r.geo_water - 0.5f);
@@ -213,6 +224,26 @@ static float do_height (Region r, GLvector2 offset, float water, float detail, f
 
 }
 
+static void build_trees ()
+{
+
+  unsigned    m, t;
+  bool        is_canopy;
+  int         rotator;
+
+  rotator = 0;
+  for (m = 0; m < TREE_TYPES; m++) {
+    for (t = 0; t < TREE_TYPES; t++) {
+      if ((m == TREE_TYPES / 2) && (t == TREE_TYPES / 2)) {
+        is_canopy = true;
+        canopy = m + t * TREE_TYPES;
+      } else
+        is_canopy = false;
+      tree[m][t].Create (is_canopy, (float)m / TREE_TYPES, (float)t / TREE_TYPES, rotator++);
+    }
+  }
+
+}
 
 static void build_map_texture ()
 {
@@ -438,32 +469,67 @@ unsigned WorldNoisei (int index)
 
 }
 
+void WorldSave ()
+{
+
+  FILE*     f;
+  char      filename[256];
+  WHeader   header;
+
+  sprintf (filename, "%sworld.sav", GameDirectory ());
+  if (!(f = fopen (filename, "wb"))) {
+    ConsoleLog ("WorldSave: Could not open file %s", filename);
+    return;
+  }
+  header.version = FILE_VERSION;
+  header.seed = planet.seed;
+  header.world_grid = WORLD_GRID;
+  header.noise_buffer = NOISE_BUFFER;
+  header.map_bytes = sizeof (planet);
+  header.tree_types = TREE_TYPES;
+  fwrite (&header, sizeof (header), 1, f);
+  fwrite (&planet, sizeof (planet), 1, f);
+  fclose (f);
+  ConsoleLog ("WorldSave: '%s' saved.", filename);
+
+}
+
+
+void WorldLoad (unsigned seed_in)
+{
+
+  FILE*     f;
+  char      filename[256];
+  WHeader   header;
+
+  sprintf (filename, "%sworld.sav", GameDirectory ());
+  if (!(f = fopen (filename, "rb"))) {
+    ConsoleLog ("WorldLoad: Could not open file %s", filename);
+    WorldGenerate (seed_in);
+    return;
+  }
+  fread (&header, sizeof (header), 1, f);
+  fread (&planet, sizeof (planet), 1, f);
+  fclose (f);
+  ConsoleLog ("WorldLoad: '%s' loaded.", filename);
+  build_trees ();
+  build_map_texture ();
+
+}
+
 void    WorldGenerate (unsigned seed_in)
 {
 
   int         x;
-  unsigned    m, t;
-  bool        is_canopy;
-  int         rotator;
 
   RandomInit (seed_in);
   planet.seed = seed_in;
-  FileMakeDirectory (WorldDirectory ());
+  
   for (x = 0; x < NOISE_BUFFER; x++) {
     planet.noisei[x] = RandomVal ();
     planet.noisef[x] = RandomFloat ();
   }
-  rotator = 0;
-  for (m = 0; m < TREE_TYPES; m++) {
-    for (t = 0; t < TREE_TYPES; t++) {
-      if ((m == TREE_TYPES / 2) && (t == TREE_TYPES / 2)) {
-        is_canopy = true;
-        canopy = m + t * TREE_TYPES;
-      } else
-        is_canopy = false;
-      tree[m][t].Create (is_canopy, (float)m / TREE_TYPES, (float)t / TREE_TYPES, rotator++);
-    }
-  }
+  build_trees ();
   planet.wind_from_west = (RandomVal () % 2) ? true : false;
   planet.northern_hemisphere = (RandomVal () % 2) ? true : false;
   planet.river_count = 5 + RandomVal () % 4;
@@ -632,7 +698,7 @@ char* WorldDirectionFromAngle (float angle)
   return direction;
 
 }
-
+/*
 char* WorldDirectory ()
 {
 
@@ -642,3 +708,5 @@ char* WorldDirectory ()
   return dir;
 
 }
+
+*/

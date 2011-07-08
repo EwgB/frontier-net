@@ -14,7 +14,7 @@ x Fix UV mapping on trees.
 * World saving
 * Undergrowth
 x Terrains eat less CPU cycles per frame
-* Grass rotate
+x Grass rotate
 * Fix avatar rendering
 ? Fix opaque trees on mike's PC
 * shadows
