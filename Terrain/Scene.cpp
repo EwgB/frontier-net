@@ -34,7 +34,7 @@
 #define FOREST_HALF     (FOREST_GRID / 2)
 #define GRASS_GRID      5
 #define GRASS_HALF      (GRASS_GRID / 2)
-#define TERRAIN_GRID    15
+#define TERRAIN_GRID    9
 
 static int              cached;
 static int              texture_bytes;

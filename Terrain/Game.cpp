@@ -23,6 +23,7 @@
 #include "sdl.h"
 #include "world.h"
 
+#define AUTO_LOAD           1
 #define TIME_SCALE          1000  //how many milliseconds per in-game minute
 #define SECONDS_TO_DECIMAL  (1.0f / 60.0f)
 
@@ -301,7 +302,7 @@ float GameTime ()
 void GameUpdate ()
 {
 
-  if (!loaded_previous) {
+  if (!loaded_previous && AUTO_LOAD) {
     loaded_previous = true;
     seed = CVarUtils::GetCVar<int> ("last_played");
     if (seed)

@@ -77,7 +77,8 @@ static void do_cycle ()
   max_distance = SceneVisibleRange ();
   r = (Region*)AvatarRegion ();
   atmosphere = r->color_atmosphere;
-  humid_fog = (1.0f - r->moisture) * max_distance;
+  humid_fog = (1.5f - r->moisture * 2) * max_distance;
+  humid_fog = clamp (humid_fog, 1, max_distance);
   desired.sunrise_fade = desired.sunset_fade = 0.0f;
   decimal_time = fmod (GameTime (), 24.0f);
   if (decimal_time >= TIME_DAWN && decimal_time < TIME_DAY) { //sunrise
@@ -144,7 +145,7 @@ static void do_cycle ()
     desired.sun_angle = -90.0f;
     desired.draw_sun = false;
   }
-
+  desired.fog_min = min (desired.fog_min, humid_fog);
   for (i = 0; i < ENV_COLOR_COUNT; i++) {
     if (i == ENV_COLOR_LIGHT) 
       continue;

@@ -24,7 +24,7 @@
 
 #define REGION_SIZE             64
 #define REGION_HALF             (REGION_SIZE / 2)
-#define WORLD_GRID              256
+#define WORLD_GRID              64
 #define WORLD_GRID_EDGE         (WORLD_GRID + 1)
 #define WORLD_GRID_CENTER       (WORLD_GRID / 2)
 #define WORLD_SIZE_METERS       (REGION_SIZE * WORLD_GRID)

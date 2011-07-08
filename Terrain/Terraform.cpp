@@ -632,13 +632,13 @@ void TerraformClimate ()
     temp = clamp (temp, MIN_TEMP, MAX_TEMP);
     //************  RAINFALL *******************//
     //Oceans are ALWAYS WET.
-    if (r.climate == CLIMATE_OCEAN)
+    if (r.climate == CLIMATE_OCEAN) 
       rainfall = 1.0f;
     //We lose rainfall as we move inland.
-    rain_loss = 1.5f / WORLD_GRID_CENTER;
+    rain_loss = 1.0f / WORLD_GRID_CENTER;
     //We lose rainfall more slowly as it gets colder.
     if (temp < 0.5f)
-      rain_loss *= temp * 2.0f;
+      rain_loss *= temp * 1.0f;
     rainfall -= rain_loss;
     //Mountains block rainfall
     if (r.climate == CLIMATE_MOUNTAIN) 
@@ -1085,11 +1085,11 @@ void TerraformZones ()
       r = WorldRegionGet (x, y);
       climates.clear ();
       //swamps only appear in wet areas that aren't cold.
-      if (r.moisture > 0.9f && r.temperature > TEMP_TEMPERATE)
+      if (r.moisture > 0.8f && r.temperature > 0.5f)
         climates.push_back (CLIMATE_SWAMP);
       //mountains only appear in the middle
-      if (abs (x - WORLD_GRID_CENTER) < 10 && radius > 1)
-        climates.push_back (CLIMATE_MOUNTAIN);
+      //if (abs (x - WORLD_GRID_CENTER) < 10 && radius > 1)
+        //climates.push_back (CLIMATE_MOUNTAIN);
       //Deserts are HOT and DRY. Duh.
       if (r.temperature > TEMP_HOT && r.moisture < 0.05f && radius > 1)
         climates.push_back (CLIMATE_DESERT);
@@ -1101,8 +1101,8 @@ void TerraformZones ()
       //Rocky wastelands favor cold areas
       if (r.temperature < TEMP_TEMPERATE)
         climates.push_back (CLIMATE_ROCKY);
-      if (radius > 1)
-        climates.push_back (CLIMATE_CANYON);
+      //if (radius > 1)
+        //climates.push_back (CLIMATE_CANYON);
       if (r.temperature > TEMP_TEMPERATE && r.temperature < TEMP_HOT && r.moisture > 0.5f)
         climates.push_back (CLIMATE_FOREST);
       if (climates.empty ()) {

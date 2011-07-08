@@ -532,8 +532,8 @@ void    WorldGenerate (unsigned seed_in)
   build_trees ();
   planet.wind_from_west = (RandomVal () % 2) ? true : false;
   planet.northern_hemisphere = (RandomVal () % 2) ? true : false;
-  planet.river_count = 5 + RandomVal () % 4;
-  planet.lake_count = 5 + RandomVal () % 4;
+  planet.river_count = 1 + RandomVal () % 4;
+  planet.lake_count = 1 + RandomVal () % 4;
   TerraformPrepare ();
   TerraformOceans ();
   TerraformCoast ();

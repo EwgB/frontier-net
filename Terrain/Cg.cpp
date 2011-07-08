@@ -139,7 +139,7 @@ static void vshader_select (int select)
   p = AvatarCameraPosition ();
   cgGLSetParameter3f (s->eyepos, p.x, p.y, p.z);
   cgGLSetStateMatrixParameter(s->matrix, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MODELVIEW_MATRIX);
-  cgGLSetParameter2f (s->fog, e->fog_max / 2, e->fog_max);
+  cgGLSetParameter2f (s->fog, e->fog_min, e->fog_max);
   cgGLSetParameter4f (s->data, SceneVisibleRange (), SceneVisibleRange () * 0.05, val1, val2);
   glColor3f (1,1,1);
 
