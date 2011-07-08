@@ -17,12 +17,48 @@
 #include "texture.h"
 #include "world.h"
 
-#define GRASS_TYPES   4
+#define GRASS_TYPES   8
+#define MAX_TUFTS     9
 
+struct tuft
+{
+  GLvector            v[4];
+};
 
 static GLuvbox        box_grass[GRASS_TYPES];
 static GLuvbox        box_flower[GRASS_TYPES];
-static bool           uv_done;
+static bool           prep_done;
+static tuft           tuft_list[MAX_TUFTS];
+
+/*-----------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------*/
+
+static void do_prep ()
+{
+
+  int           i, j;
+  GLmatrix      m;
+  float         angle_step;
+
+  for (i = 0; i < GRASS_TYPES; i++) {
+    box_grass[i].Set (i, 0, GRASS_TYPES, 2);
+    box_flower[i].Set (i, 1, GRASS_TYPES, 2);
+  }
+  angle_step = 360.0f / MAX_TUFTS;
+  for (i = 0; i < MAX_TUFTS; i++) {
+    tuft_list[i].v[0] = glVector (-1, -1, 0);
+    tuft_list[i].v[1] = glVector ( 1, -1, 0);
+    tuft_list[i].v[2] = glVector ( 1,  1, 0);
+    tuft_list[i].v[3] = glVector (-1,  1, 0);
+    m.Identity ();
+    m.Rotate (angle_step * (float)i, 0.0f, 0.0f, 1.0f);
+    for (j = 0; j < 4; j++) 
+      tuft_list[i].v[j] = m.TransformPoint (tuft_list[i].v[j]);
+  }
+  prep_done = true;
+
+}
 
 /*-----------------------------------------------------------------------------
 
@@ -30,6 +66,7 @@ static bool           uv_done;
 
 CGrass::CGrass () 
 {
+
 
   GridData ();
   _origin.x = 0;
@@ -40,13 +77,8 @@ CGrass::CGrass ()
   _grid_position.Clear ();
   _walk.Clear ();
   _stage = GRASS_STAGE_BEGIN;
-  if (uv_done) 
-    return;
-  for (int i = 0; i < GRASS_TYPES; i++) {
-    box_grass[i].Set (i, 0, 4, 2);
-    box_flower[i].Set (i, 1, 4, 2);
-  }
-  uv_done = true;
+  if (!prep_done) 
+    do_prep ();
 
 }
 
@@ -113,7 +145,6 @@ void CGrass::Build (long stop)
 
   int       world_x, world_y;
   bool      do_grass;
-    
 
   world_x = _origin.x + _walk.x;
   world_y = _origin.y + _walk.y;
@@ -121,8 +152,7 @@ void CGrass::Build (long stop)
   if (_walk.x % _current_distance || _walk.y  % _current_distance)
     do_grass = false;
   if (do_grass) {
-    GLvector    vb0, vb1, vb2, vb3;
-    GLvector    vt0, vt1, vt2, vt3;
+    GLvector    v[8];
     GLvector    normal;
     GLrgba      color;
     int         current;
@@ -133,15 +163,19 @@ void CGrass::Build (long stop)
     int         index;
     bool        do_flower;
     int         patch;
+    tuft*       this_tuft;
+    //GLmatrix    mat;
+    unsigned    i;
 
     r = WorldRegionFromPosition (world_x, world_y);
-    index = _vertex.size ();
-    root.x = (float)world_x + (WorldNoisef (world_x + world_y * GRASS_SIZE) -0.5f) * 2.0f;
-    root.y = (float)world_y + (WorldNoisef (world_x + world_y * GRASS_SIZE) -0.5f) * 2.0f;
-    root.z = CacheElevation (root.x, root.y);
+    index = world_x + world_y * GRASS_SIZE;
+    this_tuft = &tuft_list[index % MAX_TUFTS];
+    root.x = (float)world_x + (WorldNoisef (index) -0.5f) * 2.0f;
+    root.y = (float)world_y + (WorldNoisef (index) -0.5f) * 2.0f;
+    root.z = 0.0f;
     height = 0.05f + r.moisture * r.temperature;
-    size.x = 0.4f + WorldNoisef (world_x - world_y * GRASS_SIZE) * 0.5f;
-    size.y = WorldNoisef (world_x + world_y * GRASS_SIZE) * height + height;
+    size.x = 0.4f + WorldNoisef (index) * 0.5f;
+    size.y = WorldNoisef (index) * height + (height / 2);
     do_flower = r.has_flowers;
     if (do_flower) //flowers are shorter than grass
       size.y /= 2;
@@ -149,35 +183,36 @@ void CGrass::Build (long stop)
     color = CacheSurfaceColor (world_x, world_y, SURFACE_COLOR_GRASS);
     color.alpha = 1.0f;
     //Now we construct our grass panels
-    vb0.x = root.x - size.x * -1; vb0.y = root.y - size.x * -1; vb0.z = CacheElevation (vb0.x, vb0.y);
-    vb1.x = root.x - size.x *  1; vb1.y = root.y - size.x * -1; vb1.z = CacheElevation (vb1.x, vb1.y);
-    vb2.x = root.x - size.x *  1; vb2.y = root.y - size.x *  1; vb2.z = CacheElevation (vb2.x, vb2.y);
-    vb3.x = root.x - size.x * -1; vb3.y = root.y - size.x *  1; vb3.z = CacheElevation (vb3.x, vb3.y);
-    vt0 = vb0 + glVector (0.0f, 0.0f, size.y);
-    vt1 = vb1 + glVector (0.0f, 0.0f, size.y);
-    vt2 = vb2 + glVector (0.0f, 0.0f, size.y);
-    vt3 = vb3 + glVector (0.0f, 0.0f, size.y);
+    for (i = 0; i < 4; i++) { 
+      v[i] = this_tuft->v[i] * glVector (size.x, size.x, 0.0f);
+      v[i + 4] = this_tuft->v[i] * glVector (size.x, size.x, 0.0f);
+      v[i + 4].z += size.y;
+    }
+    for (i = 0; i < 8; i++) {
+      v[i] += root;
+      v[i].z += CacheElevation (v[i].x, v[i].y);
+    }
     patch = r.flower_shape[index % FLOWERS] % GRASS_TYPES;
     current = _vertex.size ();
     normal = CacheNormal (world_x, world_y);
-    VertexPush (vb0, normal, color, box_grass[patch].Corner (1));
-    VertexPush (vb1, normal, color, box_grass[patch].Corner (1));
-    VertexPush (vb2, normal, color, box_grass[patch].Corner (0));
-    VertexPush (vb3, normal, color, box_grass[patch].Corner (0));
-    VertexPush (vt0, normal, color, box_grass[patch].Corner (2));
-    VertexPush (vt1, normal, color, box_grass[patch].Corner (2));
-    VertexPush (vt2, normal, color, box_grass[patch].Corner (3));
-    VertexPush (vt3, normal, color, box_grass[patch].Corner (3));
+    VertexPush (v[0], normal, color, box_grass[patch].Corner (1));
+    VertexPush (v[1], normal, color, box_grass[patch].Corner (1));
+    VertexPush (v[2], normal, color, box_grass[patch].Corner (0));
+    VertexPush (v[3], normal, color, box_grass[patch].Corner (0));
+    VertexPush (v[4], normal, color, box_grass[patch].Corner (2));
+    VertexPush (v[5], normal, color, box_grass[patch].Corner (2));
+    VertexPush (v[6], normal, color, box_grass[patch].Corner (3));
+    VertexPush (v[7], normal, color, box_grass[patch].Corner (3));
     QuadPush (current, current + 2, current + 6, current + 4);
     QuadPush (current + 1, current + 3, current + 7, current + 5);
     if (do_flower) {
       current = _vertex.size ();
       color = r.color_flowers[index % FLOWERS];
       normal = glVector (0.0f, 0.0f, 1.0f);
-      VertexPush (vt0, normal, color, box_flower[patch].Corner (0));
-      VertexPush (vt1, normal, color, box_flower[patch].Corner (1));
-      VertexPush (vt2, normal, color, box_flower[patch].Corner (2));
-      VertexPush (vt3, normal, color, box_flower[patch].Corner (3));
+      VertexPush (v[4], normal, color, box_flower[patch].Corner (0));
+      VertexPush (v[5], normal, color, box_flower[patch].Corner (1));
+      VertexPush (v[6], normal, color, box_flower[patch].Corner (2));
+      VertexPush (v[7], normal, color, box_flower[patch].Corner (3));
       QuadPush (current, current + 1, current + 2, current + 3);
     }
   }

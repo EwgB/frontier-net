@@ -7,8 +7,8 @@
 
 TODO:
 
-* Fix canopy trees
-* Fix UV mapping on trees.
+x Fix canopy trees
+x Fix UV mapping on trees.
 * Clouds
 * More biomes
 * World saving
@@ -18,6 +18,7 @@ x Terrains eat less CPU cycles per frame
 * Fix avatar rendering
 ? Fix opaque trees on mike's PC
 * shadows
+* Collision
 
 http://www.bramstein.com/projects/gui/
 

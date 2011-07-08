@@ -369,8 +369,8 @@ void GLmatrix::Rotate (float theta, float x, float y, float z)
   z /= length;
   s = (float)sin (theta);
   c = (float)cos (theta);
-  t = 1.0f - c;  
- 
+  t = 1.0f - c;
+
   in.x = in.y = in.z = 1.0f;
   E(0,0) = t*x*x + c;
   E(1,0) = t*x*y - s*z;
@@ -417,5 +417,18 @@ void GLmatrix::Multiply (GLmatrix a)
   E(2,2) = M(a, 0,2) * M(b, 2, 0) + M(a, 1,2) * M(b, 2, 1) + M(a, 2,2) * M(b, 2, 2);
   E(3,2) = M(a, 0,2) * M(b, 3, 0) + M(a, 1,2) * M(b, 3, 1) + M(a, 2,2) * M(b, 3, 2) + M(a, 3,2);
   
+
+}
+
+
+GLvector GLmatrix::TransformPoint (GLvector in)
+{
+
+  GLvector              out;
+
+  out.x = (E(0,0) * in.x + E(1,0) * in.y + E(2,0) * in.z + E(3,0));
+  out.y = (E(0,1) * in.x + E(1,1) * in.y + E(2,1) * in.z + E(3,1));
+  out.z = (E(0,2) * in.x + E(1,2) * in.y + E(2,2) * in.z + E(3,2));
+  return out;
 
 }

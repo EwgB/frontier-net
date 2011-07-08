@@ -129,7 +129,7 @@ struct GLmatrix
   void        Identity ();
   void        Rotate (float theta, float x, float y, float z);
   void        Multiply (GLmatrix m);
-  GLvector    TransformPoint ();
+  GLvector    TransformPoint (GLvector pt);
 };
 
 struct GLbbox
