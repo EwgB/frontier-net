@@ -36,7 +36,7 @@ float4 green (float2 uv : TEXCOORD0,
             float fog : FOG,
             uniform float3 fogcolor,
             uniform float4 data,
-            float3 light : COLOR0,
+            float4 light : COLOR0,
             uniform sampler2D texture : TEXUNIT0,
             sampler2D texture2): COLOR
 {
@@ -49,7 +49,7 @@ float4 green (float2 uv : TEXCOORD0,
 //  c.rgb *= shading.rgb;
 //  c.rgb = also_pos.xyz;
   c.rgb = lerp (c.rgb, fogcolor.rgb, fog);
-
+  c.a *= light.a;
   //c = tex2D (texture2, uv_shading);
   //c.a = 1;
   //c.rgb *= light;

@@ -28,22 +28,12 @@ output TransformAndLight (appdata IN, UNIFORM_DATA)
 
 	output OUT;
 
-//  fog.x = 100;
-  //fog.y = 1;
   float2 O = IN.position.xy - eyepos.xy;
   float  dist = length (O);
   float  D = dist / data.CURVE_DISTANCE;
   D *= D;
   OUT.fog = (length (O) - fogdist.DIST_MIN) / (fogdist.DIST_MAX - fogdist.DIST_MIN);
-  //if (dist > fogdist.y)
-    //OUT.fog = 1;
-  //OUT.fog = 0;
-//  OUT.fog = dist / fog.DIST_MAX;
   OUT.fog = clamp (OUT.fog, 0, 1);
-  //if (OUT.fog > 0.8)
-    //OUT.fog = 0;
-//  OUT.fog = (20 -IN.position.z) / 10.0f;
-//  OUT.fog = max (OUT.fog, 0);
   IN.position.z -= D * data.CURVE_STRENGTH;
 
   float3 P = IN.position.xyz;
