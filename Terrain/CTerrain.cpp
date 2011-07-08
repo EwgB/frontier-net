@@ -20,6 +20,7 @@
 
 //Lower values make the terrain more precise at the expense of more polygons
 #define TOLERANCE         0.08f
+#define LAYERS            (sizeof (layers) / sizeof (LayerAttributes))
 
 #define COMPILE_GRID      4
 #define COMPILE_SIZE      (TERRAIN_SIZE / COMPILE_GRID)
@@ -222,14 +223,24 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
 
 void CTerrain::DoTexture ()
 {
- if (!_back_texture) {
+
+
+
+  if (!_back_texture) {
     glGenTextures (1, &_back_texture); 
     glBindTexture(GL_TEXTURE_2D, _back_texture);
  	  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	
     glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
+    //We draw the terrain texture in squares called patches, but how big should they be?
+    //We can't draw more than will fit in the viewport
     _patch_size = min (RenderMaxDimension (), _texture_desired_size);
     _patch_steps = _texture_desired_size / _patch_size;
-    _patch_steps = max (_patch_steps, 1);//Avoid div by zero. Trust me, it's bad.
+    //We also don't want to do much at once. Walking a 128x128 grid in a singe frame creates stuttering. 
+    while (TERRAIN_SIZE / _patch_steps > 32) {
+      _patch_size /= 2;
+      _patch_steps = _texture_desired_size / _patch_size;
+    }
+    //_patch_steps = max (_patch_steps, 1);//Avoid div by zero. Trust me, it's bad.
     glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, _texture_desired_size, _texture_desired_size, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
   }
   RenderCanvasBegin (_walk.x * TERRAIN_PATCH, _walk.x * TERRAIN_PATCH + TERRAIN_PATCH, _walk.y * TERRAIN_PATCH, _walk.y * TERRAIN_PATCH + TERRAIN_PATCH, _patch_size);

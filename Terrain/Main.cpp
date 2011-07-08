@@ -13,9 +13,10 @@ TODO:
 * More biomes
 * World saving
 * Undergrowth
-* Terrains eat less CPU cycles per frame
+x Terrains eat less CPU cycles per frame
 * Grass rotate
 * Fix avatar rendering
+* Fix opaque trees on mike's PC
 
 http://www.bramstein.com/projects/gui/
 

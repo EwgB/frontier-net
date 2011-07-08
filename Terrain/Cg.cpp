@@ -20,7 +20,6 @@
 #include <cg\cg.h>									
 #include <cg\cggl.h>
 
-#define SHADER_FILE   "shaders/standard.cg"
 #define VSHADER_FILE  "shaders/vertex.cg"
 #define FSHADER_FILE  "shaders/fragment.cg"
 #define MAX_FILE_NAME 100
@@ -35,6 +34,7 @@ static char*          vshader_function[] =
 static char*          fshader_function[] =
 {
   "green",
+  "mask_transfer",
 };
 
 struct VShader

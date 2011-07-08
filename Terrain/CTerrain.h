@@ -1,8 +1,4 @@
-#define LAYERS            (sizeof (layers) / sizeof (LayerAttributes))
-#define VISIBLE           1
-
-#define PPM               16
-#define TERRAIN_SIZE      64
+#define TERRAIN_SIZE      128
 #define TERRAIN_HALF      (TERRAIN_SIZE / 2)
 #define TERRAIN_EDGE      (TERRAIN_SIZE + 1)
 #define TERRAIN_PATCH     (TERRAIN_SIZE / _patch_steps)

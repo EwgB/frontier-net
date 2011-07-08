@@ -9,6 +9,7 @@
 -----------------------------------------------------------------------------*/
 
 #include "stdafx.h"
+#include "cg.h"
 #include "ctree.h"
 #include "math.h"
 #include "render.h"
@@ -534,7 +535,8 @@ void CTree::Create (bool is_canopy, float moisture, float temp_in, int seed_in)
   _lift_style = (TreeLiftStyle)(WorldNoisei (_seed_current++) % TREE_LIFT_STYLES);
   _leaf_style = (TreeLeafStyle)(WorldNoisei (_seed_current++) % TREE_LEAF_STYLES);
   _evergreen = _temperature + (WorldNoisef (_seed_current++) * 0.25f) < 0.5f;
-  _has_vines = _moisture > 0.7f && _temperature > 0.7f;
+  _has_vines = _moisture > 0.6f && _temperature > 0.5f;
+  _has_vines = true;///////////////////////////////////////////////////////////////////////////////////////////;
   //Narrow trees can gorw on top of hills. (Big ones will stick out over cliffs, so we place them low.)
   if (_default_base_radius <= 1.0f) 
     _grows_high = true;
@@ -865,8 +867,9 @@ void CTree::DoTexture ()
   RenderCanvasBegin (0, TEXTURE_SIZE, 0, TEXTURE_SIZE, TEXTURE_SIZE);
  	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
   glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
+  char* buffer = new char[TEXTURE_SIZE * TEXTURE_SIZE * 4];
   for (i = 0; i < 4; i++) {
-    glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
+    glClearColor (1.0f, 0.0f, 1.0f, 0.0f);
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if (i == 0)       
       DrawBark ();
@@ -876,12 +879,17 @@ void CTree::DoTexture ()
       DrawVines ();
     else
       DrawFacer ();    
+    //CgShaderSelect (FSHADER_MASK_TRANSFER);
     glBindTexture(GL_TEXTURE_2D, _texture);
  	  glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
     glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
-    glCopyTexSubImage2D (GL_TEXTURE_2D, 0, TEXTURE_SIZE * i, 0, 0, 0, TEXTURE_SIZE, TEXTURE_SIZE);
+    //glCopyTexSubImage2D (GL_TEXTURE_2D, 0, TEXTURE_SIZE * i, 0, 0, 0, TEXTURE_SIZE, TEXTURE_SIZE);
+    glReadPixels (0, 0, TEXTURE_SIZE, TEXTURE_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+    //CgShaderSelect (FSHADER_MASK_TRANSFER);
+    glTexSubImage2D (GL_TEXTURE_2D, 0, TEXTURE_SIZE * i, 0, TEXTURE_SIZE, TEXTURE_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+    //CgShaderSelect (FSHADER_NONE);
   }
-
+  delete buffer;
   RenderCanvasEnd ();
   
 }

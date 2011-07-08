@@ -224,8 +224,8 @@ void RenderCreate (int width, int height, int bits, bool fullscreen)
 int RenderMaxDimension ()
 {
 
-  return 64;///////////////////////////////////////////
-  //return max_dimension;
+  //return 64;///////////////////////////////////////////
+  return max_dimension;
 
 }
 
