@@ -11,6 +11,7 @@
 #include "stdafx.h"
 
 #include "avatar.h"
+#include "Cg.h"
 #include "env.h"
 #include "math.h"
 #include "random.h"
@@ -18,6 +19,7 @@
 #include "texture.h"
 #include "vbo.h"
 
+#define UP          glVector (0,0,1)
 #define STAR_TILE   3
 #define DISC        8
 #define SKY_GRID    12
@@ -33,6 +35,7 @@
 
 static GLvector   sky[DISC];
 static VBO        skydome;
+static VBO        stardome;
 static unsigned   texture_stars;
 static GLvector   tip;
 static float      star_fade;
@@ -77,32 +80,58 @@ static void build_sky ()
   vector<GLvector>    vert;
   vector<GLvector>    normal;
   vector<GLvector2>   uv;
+  vector<GLrgba>      color;
   vector<unsigned>    index;
   int                 x, y;
   float               dist;
   GLvector2           distance;
+  GLvector2           uv_step;
+  GLvector2           uv_map;
+  GLmesh              star;
+  GLvector            v;
+  int                 x1, x2, y1, y2;
 
+
+  uv_map = glVector (0.0f, 0.0f);
   texture_stars = TextureIdFromName ("stars2.bmp");
   for (y = 0; y < SKY_EDGE; y++) {
+    uv_map.x = 0;
     for (x = 0; x < SKY_EDGE; x++) {
+      uv_step.x = abs (((float)x - SKY_HALF) / SKY_HALF);
+      uv_step.x *= uv_step.x;
+      uv_map.x += uv_step.x + 0.1f;
       distance = glVector ((float)x - SKY_HALF, (float)y - SKY_HALF);
+      dist = glVectorLength (distance) / SKY_HALF;
+      dist = 1 - dist;
+      dist = clamp (dist, 0, 1);
+      color.push_back (glRgba (dist, dist, dist, dist));
       dist = 1.0f - glVectorLength (distance) / (SKY_HALF - 3);
-      vert.push_back (glVector ((float)x - SKY_HALF, (float)y - SKY_HALF, dist * SKY_DOME));
+      v = glVector ((float)x - SKY_HALF, (float)y - SKY_HALF, dist * SKY_DOME);
+      vert.push_back (v);
       normal.push_back (glVector (0.0f, 0.0f, 1.0f));
-      uv.push_back (glVector (((float)(x) / SKY_GRID) * SKY_TILE, ((float)(y) / SKY_GRID) * SKY_TILE));
-
+      uv.push_back (uv_map * 4);
+      star.PushVertex (v, UP, glVector (((float)(x) / SKY_GRID) * SKY_TILE, ((float)(y) / SKY_GRID) * SKY_TILE)); 
     }
+    uv_step.y = abs (((float)y - SKY_HALF) / SKY_HALF);
+    uv_step.y *= uv_step.y;
+    uv_map.y += uv_step.y + 0.1f;
   }
   for (y = 0; y < SKY_GRID; y++) {
     for (x = 0; x < SKY_GRID; x++) {
+      x1 = x;
+      x2 = x + 1;
+      y1 = y * SKY_EDGE;
+      y2 = (y + 1) * SKY_EDGE;
       if ((x + y) % 2) {
         index.push_back (x + y * SKY_EDGE);  
         index.push_back ((x + 1) + y * SKY_EDGE);  
         index.push_back (x + (y + 1) * SKY_EDGE);  
-
+        
         index.push_back ((x + 1) + y * SKY_EDGE);  
         index.push_back ((x + 1) + (y + 1) * SKY_EDGE);  
         index.push_back (x + (y + 1) * SKY_EDGE);  
+        star.PushTriangle (x1 + y1, x2 + y1, x1 + y2);
+        star.PushTriangle (x2 + y1, x2 + y2, x1 + y2);
       } else {
         index.push_back (x + y * SKY_EDGE);  
         index.push_back ((x + 1) + y * SKY_EDGE);  
@@ -111,11 +140,16 @@ static void build_sky ()
         index.push_back (x + y * SKY_EDGE);  
         index.push_back ((x + 1) + (y + 1) * SKY_EDGE);  
         index.push_back (x + (y + 1) * SKY_EDGE);  
+
+        star.PushTriangle (x1 + y1, x2 + y1, x2 + y2);
+        star.PushTriangle (x1 + y1, x2 + y2, x1 + y2);
       }
 
     }
   }
-  skydome.Create (GL_TRIANGLES, index.size (), vert.size (), &index[0], &vert[0], &normal[0], NULL, &uv[0]);
+  skydome.Create (GL_TRIANGLES, index.size (), vert.size (), &index[0], &vert[0], &normal[0], &color[0], &uv[0]);
+  stardome.Create (&star);
+  //skydome.Create (GL_TRIANGLES, index.size (), vert.size (), &index[0], &vert[0], &normal[0], NULL, &uv[0]);
 
 
 }
@@ -190,7 +224,8 @@ void SkyRender ()
   glBlendFunc (GL_ONE, GL_ONE);
   glBindTexture (GL_TEXTURE_2D, texture_stars);
   glColor3f (star_fade,star_fade,star_fade);
-  skydome.Render ();
+  //skydome.Render ();
+  stardome.Render ();
   //Possibly render the sunset / sunrise polygon, which puts a huge gradient in the sky.
   glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
   glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("sunrise.bmp"));
@@ -230,6 +265,13 @@ void SkyRender ()
     glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("sun.bmp"));
     draw_sun (e->sun_angle, SUN_SIZE);  
   }
+  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("clouds.png"));
+  CgShaderSelect (VSHADER_CLOUDS);
+  CgShaderSelect (FSHADER_CLOUDS);
+  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  skydome.Render ();
+  CgShaderSelect (VSHADER_NONE);
+  CgShaderSelect (FSHADER_NONE);
   //Cleanup and put the modelview matrix back where we found it
   glEnable (GL_LIGHTING);
   glEnable (GL_CULL_FACE);

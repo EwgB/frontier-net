@@ -202,6 +202,7 @@ struct GLmesh
   vector<UINT>      _index;
   vector<GLvector>  _vertex;
   vector<GLvector>  _normal;
+  vector<GLrgba>    _color;
   vector<GLvector2> _uv;
 
   void              CalculateNormals ();
@@ -210,6 +211,7 @@ struct GLmesh
   void              PushTriangle (UINT i1, UINT i2, UINT i3);
   void              PushQuad (UINT i1, UINT i2, UINT i3, UINT i4);
   void              PushVertex (GLvector vert, GLvector normal, GLvector2 uv);
+  void              PushVertex (GLvector vert, GLvector normal, GLrgba color, GLvector2 uv);
   void              RecalculateBoundingBox  ();
   void              Render ();
   unsigned          Triangles () { return _index.size () / 3; };

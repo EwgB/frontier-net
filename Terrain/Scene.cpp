@@ -153,7 +153,7 @@ void SceneProgress (unsigned* ready, unsigned* total)
 {
 
   *ready = gm_terrain.ItemsReady ();
-  *total = min (gm_terrain.ItemsViewable (), 6);
+  *total = min (gm_terrain.ItemsViewable (), 3);
 
 }
 

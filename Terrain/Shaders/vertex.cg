@@ -2,6 +2,7 @@
 #define CURVE_STRENGTH    y
 #define DIST_MIN          x
 #define DIST_MAX          y
+#define CLOUD_WAVE        z
 
 #define UNIFORM_DATA      uniform float4x4 ModelViewProj, uniform float3 offset, uniform float3 lightpos, uniform float3 eyepos, uniform float3 lightcol,  uniform float3 ambientcol, uniform float2 fogdist, uniform float4 data
 #define PARAMS            IN, ModelViewProj, offset, lightpos, eyepos, lightcol, ambientcol, fogdist, data
@@ -19,8 +20,8 @@ struct output
 	float4 pos      : POSITION;
 	float4 color    : COLOR0;
   float  fog      : FOG;
-  float4 uv			  : TEXCOORD0;
   float3 world_pos: TEXCOORD1;
+  float4 uv			  : TEXCOORD0;
 };
 
 //Our general-purpose transformations are done here. All other vshaders call this one.
@@ -83,7 +84,6 @@ output trees (appdata IN, UNIFORM_DATA)
 
 }
 
-
 output grass (appdata IN, UNIFORM_DATA)
 {
 
@@ -100,6 +100,26 @@ output grass (appdata IN, UNIFORM_DATA)
 //  IN.normal = normalize (IN.normal);
 	OUT = TransformAndLight (PARAMS);
 	OUT.color.a = 1 - dist;
+	return OUT;
+
+}
+
+
+output clouds (appdata IN, UNIFORM_DATA)
+{
+
+	output OUT;
+
+  float2 move;
+  sincos (IN.position.y + IN.position.x + data.CLOUD_WAVE, move.x, move.y);
+	OUT.uv = IN.uv;
+	OUT.uv.xy += move / 10;
+	OUT.world_pos.xy = IN.uv.xy + data.CLOUD_WAVE / 50;
+  //IN.uv.xy += move;
+//	OUT = TransformAndLight (PARAMS);
+	OUT.pos = mul(ModelViewProj, IN.position);
+//	OUT.color.rgb = float3 (.5,.5,.5);
+  OUT.color.rgba = IN.color.rgba;
 	return OUT;
 
 }

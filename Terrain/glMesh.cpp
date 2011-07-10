@@ -39,6 +39,17 @@ void GLmesh::PushVertex (GLvector vert, GLvector normal, GLvector2 uv)
 
 }
 
+void GLmesh::PushVertex (GLvector vert, GLvector normal, GLrgba color, GLvector2 uv)
+{
+
+  _bbox.ContainPoint (vert);
+  _vertex.push_back (vert);
+  _normal.push_back (normal);
+  _color.push_back (color);
+  _uv.push_back (uv);
+
+}
+
 void GLmesh::Clear () 
 {
 

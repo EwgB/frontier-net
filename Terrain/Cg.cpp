@@ -29,11 +29,13 @@ static char*          vshader_function[] =
   "standard",
   "trees",
   "grass",
+  "clouds",
 };
 
 static char*          fshader_function[] =
 {
   "green",
+  "clouds",
   "mask_transfer",
 };
 
@@ -58,6 +60,7 @@ struct FShader
   CGprofile	  profile;
   CGparameter	texture;
   CGparameter	fogcolor;
+  CGparameter	data;
 };
 
 static CGcontext	    cgContext;				// A Context To Hold Our Cg Program(s)
@@ -83,26 +86,30 @@ static void checkForCgError(CGerror error, const char* program, const char *situ
 
 }
 
-static void fshader_select (int select)
+static void fshader_select (int select_in)
 {
   
   FShader*      s;
   Env*          e;
-
-  fshader_selected = select;
-  if (select == -1) {
+   
+  fshader_selected = select_in - FSHADER_BASE;
+  if (fshader_selected == -1) {
     cgGLDisableProfile (cgp_fragment);
     return;
   }
   if (!CVarUtils::GetCVar<bool> ("render.shaders"))
     return;
-  s = &fshader_list[select];
+  s = &fshader_list[fshader_selected];
   e = EnvGet ();
   cgGLEnableProfile (cgp_fragment);
   cgGLBindProgram (s->program);
-  cgGLSetParameter3f (s->fogcolor, e->color[ENV_COLOR_FOG].red, e->color[ENV_COLOR_FOG].green, e->color[ENV_COLOR_FOG].blue);
-  //cgGLSetParameter3f (s->fogcolor, 1,0,1);
-  cgGLSetTextureParameter (s->texture, TextureIdFromName ("fade.png"));
+  if (select_in == FSHADER_CLOUDS) {
+    GLrgba c = (e->color[ENV_COLOR_SKY] + e->color[ENV_COLOR_HORIZON]) / 2.0f;
+    cgGLSetParameter3f (s->fogcolor, c.red, c.green, c.blue);
+  } else
+    cgGLSetParameter3f (s->fogcolor, e->color[ENV_COLOR_FOG].red, e->color[ENV_COLOR_FOG].green, e->color[ENV_COLOR_FOG].blue);
+  cgGLSetTextureParameter (s->texture, TextureIdFromName ("clouds.png"));
+  cgGLSetParameter4f (s->data, wind, 0.5f, 1 - e->star_fade, 0);
   cgGLEnableTextureParameter (s->texture);
 
 }
@@ -116,7 +123,7 @@ static void vshader_select (int select)
   Env*          e;
   GLrgba        c;
   float         val1, val2;
-
+     
   vshader_selected = select;
   if (!CVarUtils::GetCVar<bool> ("render.shaders"))
     return;
@@ -127,6 +134,8 @@ static void vshader_select (int select)
   val1 = val2 = 0.0f;
   if (select == VSHADER_TREES || select == VSHADER_GRASS) 
     val1 = wind;
+  if (select == VSHADER_CLOUDS) 
+    val1 = wind / 5;
   s = &vshader_list[select];
   e = EnvGet ();
   cgGLEnableProfile (cgp_vertex);
@@ -175,8 +184,9 @@ void CgCompile ()
 	  cgGLLoadProgram (fs->program);
     cgGLBindProgram (fs->program);
     checkForCgError (cgGetError(), fshader_function[i], "Binding");
-    fs->texture = cgGetNamedParameter (fs->program, "texture2");
-    fs->fogcolor = cgGetNamedParameter (fs->program, "fogcolor");
+    fs->texture   = cgGetNamedParameter (fs->program, "texture2");
+    fs->fogcolor  = cgGetNamedParameter (fs->program, "fogcolor");
+    fs->data      = cgGetNamedParameter (fs->program, "data");
     checkForCgError (cgGetError(), fshader_function[i], "Loading variables");
   }
   
@@ -237,7 +247,7 @@ void CgShaderSelect (int select)
     vshader_select (select);
     return;
   }
-  fshader_select (select - FSHADER_BASE);
+  fshader_select (select);
 
 
 }

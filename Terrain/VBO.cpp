@@ -139,6 +139,17 @@ void VBO::Create (int polygon, int index_count, int vert_count, unsigned* index_
 
 }
 
+void VBO::Create (GLmesh* m)
+{
+
+  if (m->_color.size ())
+    Create (GL_TRIANGLES, m->_index.size (), m->Vertices (), &m->_index[0], &m->_vertex[0], &m->_normal[0], &m->_color[0], &m->_uv[0]);
+  else
+    Create (GL_TRIANGLES, m->_index.size (), m->Vertices (), &m->_index[0], &m->_vertex[0], &m->_normal[0], NULL, &m->_uv[0]);
+
+}
+
+
 void VBO::Render ()
 {
 
