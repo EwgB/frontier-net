@@ -138,26 +138,25 @@ void CFigure::Update ()
   unsigned    c;
   GLmatrix    m;
   Bone*       b;
+  vector<Bone>::reverse_iterator rit;
 
   _skin_render = _skin_deform;
   for (i = 1; i < _bone.size (); i++) 
     _bone[i]._position = _bone[i]._origin;
-
-  vector<Bone>::reverse_iterator rit;
   for (rit = _bone.rbegin(); rit < _bone.rend(); ++rit) {
     b = &(*rit);
     if (b->_rotation == glVector (0.0f, 0.0f, 0.0f))
       continue;
-    if (b->_id == BONE_ROOT)
-      m.Identity ();
-
     m.Identity ();
     m.Rotate (b->_rotation.x, 1.0f, 0.0f, 0.0f);
     m.Rotate (b->_rotation.z, 0.0f, 0.0f, 1.0f);
     m.Rotate (b->_rotation.y, 0.0f, 1.0f, 0.0f);
     RotatePoints (b->_id, b->_position, m);
-    for (c = 0; c < b->_children.size (); c++) 
-      RotateHierarchy (b->_children[c], b->_position, m);
+    for (c = 0; c < b->_children.size (); c++) {
+      //Root is self-parent, but shouldn't rotate self!
+      if (b->_children[c]) 
+        RotateHierarchy (b->_children[c], b->_position, m);
+    }
   }
   
 }

@@ -173,7 +173,6 @@ void RenderInit  (void)
   fog_min = 1;
   CgInit ();
 
-
 }
 
 void RenderCreate (int width, int height, int bits, bool fullscreen)

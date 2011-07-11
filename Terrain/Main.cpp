@@ -9,7 +9,7 @@ TODO:
 
 x Fix canopy trees
 x Fix UV mapping on trees.
-* Clouds
+x Clouds
 * More biomes
 x World saving
 * Undergrowth

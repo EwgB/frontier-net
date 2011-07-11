@@ -240,7 +240,7 @@ void AvatarUpdate (void)
   } else {
     if (abs (angle_adjust) < 135) {
       current_angle -= angle_adjust * elapsed * 2.0f;
-      lean_angle = clamp (angle_adjust / 5.0f, -15, 15);
+      lean_angle = clamp (angle_adjust / 4.0f, -15, 15);
     }
   }
   current_movement.x = -sin (current_angle * DEGREES_TO_RADIANS);
@@ -273,7 +273,7 @@ void AvatarUpdate (void)
   if (on_ground)
     distance_walked += current_speed * elapsed;
   if (current_movement.x != 0.0f && current_movement.y != 0.0f)
-    avatar_facing.z = -MathAngle (0.0f, 0.0f, current_movement.x, current_movement.y) / 2.0f;
+    avatar_facing.z = -MathAngle (0.0f, 0.0f, current_movement.x, current_movement.y);
   if (flying)
     anim_id = ANIM_FLYING;
   else if (swimming) {
