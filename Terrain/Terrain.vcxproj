@@ -86,6 +86,7 @@
     <ClCompile Include="Avatar.cpp" />
     <ClCompile Include="Cache.cpp" />
     <ClCompile Include="CAnim.cpp" />
+    <ClCompile Include="CBrush.cpp" />
     <ClCompile Include="CFigure.cpp" />
     <ClCompile Include="CForest.cpp" />
     <ClCompile Include="Cg.cpp" />
@@ -134,6 +135,7 @@
     <ClInclude Include="Avatar.h" />
     <ClInclude Include="Cache.h" />
     <ClInclude Include="Canim.h" />
+    <ClInclude Include="CBrush.h" />
     <ClInclude Include="CFigure.h" />
     <ClInclude Include="CForest.h" />
     <ClInclude Include="Cg.h" />

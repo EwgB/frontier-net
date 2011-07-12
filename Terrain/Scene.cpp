@@ -14,6 +14,7 @@
 #include "stdafx.h"
 #include "avatar.h"
 #include "cache.h"
+#include "cbrush.h"
 #include "cforest.h"
 #include "cg.h"
 #include "cgrass.h"
@@ -29,6 +30,8 @@
 #include "texture.h"
 #include "water.h"
 #include "world.h"
+
+#define BRUSH_GRID      7
 
 #define FOREST_GRID     7
 #define FOREST_HALF     (FOREST_GRID / 2)
@@ -50,7 +53,9 @@ static GridManager        gm_forest;
 static vector<CForest>    il_forest;
 static GridManager        gm_grass;
 static vector<CGrass>     il_grass;
-static unsigned           world_seed = 2;
+static GridManager        gm_brush;
+static vector<CBrush>     il_brush;
+//static unsigned           world_seed = 2;
 
 /* Module Functions *************************************************************/
 
@@ -58,9 +63,11 @@ void SceneClear ()
 {
 
   il_grass.clear ();
+  il_brush.clear ();
   il_forest.clear ();
   il_terrain.clear ();
   gm_grass.Clear ();
+  gm_brush.Clear ();
   gm_forest.Clear ();
   gm_terrain.Clear ();
 
@@ -89,6 +96,11 @@ void SceneGenerate ()
   il_terrain.resize (TERRAIN_GRID * TERRAIN_GRID);
   gm_terrain.Init (&il_terrain[0], TERRAIN_GRID, TERRAIN_SIZE);
 
+  il_brush.clear ();
+  il_brush.resize (BRUSH_GRID * BRUSH_GRID);
+  gm_brush.Init (&il_brush[0], BRUSH_GRID, BRUSH_SIZE);
+
+
 }
 
 
@@ -107,6 +119,10 @@ void SceneTexturePurge ()
   il_terrain.clear ();
   il_terrain.resize (TERRAIN_GRID * TERRAIN_GRID);
   gm_terrain.Init (&il_terrain[0], TERRAIN_GRID, TERRAIN_SIZE);
+
+  il_brush.clear ();
+  il_brush.resize (BRUSH_GRID * BRUSH_GRID);
+  gm_brush.Init (&il_brush[0], BRUSH_GRID, BRUSH_SIZE);
 
 }
 
@@ -166,15 +182,17 @@ void SceneUpdate (long stop)
     return;
   //We don't want any grid to starve the others, so we rotate the order of priority.
   update_type++;
-  switch (update_type % 3) {
+  switch (update_type % 4) {
   case 0: gm_terrain.Update (stop); break;
   case 1: gm_grass.Update (stop); break;
   case 2: gm_forest.Update (stop); break;
+  case 3: gm_brush.Update (stop); break;
   }
   //any time left over goes to the losers...
   gm_terrain.Update (stop);
   gm_grass.Update (stop);
   gm_forest.Update (stop);
+  gm_brush.Update (stop);
   TextPrint ("Scene: %d of %d terrains ready", gm_terrain.ItemsReady (), gm_terrain.ItemsViewable ());
 
 }
@@ -199,14 +217,16 @@ void SceneRender ()
   glColor3f (1,1,1);
   gm_terrain.Render ();
   //CgShaderSelect (FSHADER_NONE);
-  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("grass2.png"));
+  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("grass3.png"));
   CgShaderSelect (VSHADER_GRASS);
   glColorMask (false, false, false, false);
   gm_grass.Render ();
+  gm_brush.Render ();
   glColorMask (true, true, true, true);
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   gm_grass.Render ();
+  gm_brush.Render ();
   CgShaderSelect (VSHADER_NORMAL);
   WaterRender ();
   //CgShaderSelect (VSHADER_NONE);
@@ -227,6 +247,7 @@ void SceneRenderDebug ()
   gm_forest.Render ();
   gm_terrain.Render ();
   gm_grass.Render ();
+  gm_brush.Render ();
   glColor3f (1,1,1);
   AvatarRender ();
   WaterRender ();

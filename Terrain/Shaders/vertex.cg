@@ -92,8 +92,12 @@ output grass (appdata IN, UNIFORM_DATA)
   float dist = length (float2 (IN.position.xy - eyepos.xy)) / 48;
   dist = max (dist - 0.75, 0) * 4;
 
-  float move = min (IN.uv.y, 0.5) * 2.0f;
-  move = sin ((IN.position.y + IN.position.x) / 10.0f + data.z) * move * 0.33;
+  float move;
+  if (IN.uv.y > 0.5)
+    move = min (IN.uv.y, 0.75);
+  else if (IN.uv.y < 0.5)
+    move = IN.uv.y * 2.0f;
+  move = sin ((IN.position.y + IN.position.x) / 10.0f + data.z) * move * 0.15;
   IN.position.x += move;
 //  IN.normal.x -= abs (move) * 4;
 //  IN.normal.z += abs (move) * 4;

@@ -1,6 +1,6 @@
 /*-----------------------------------------------------------------------------
 
-  CTerrain.cpp
+  CGrass.cpp
 
 -------------------------------------------------------------------------------
 
@@ -10,10 +10,10 @@
 
 #include "stdafx.h"
 #include "cache.h"
+#include "cgrass.h"
 #include "entropy.h"
 #include "sdl.h"
-#include "CGrass.h"
-#include "Render.h"
+#include "render.h"
 #include "texture.h"
 #include "world.h"
 
@@ -42,8 +42,8 @@ static void do_prep ()
   float         angle_step;
 
   for (i = 0; i < GRASS_TYPES; i++) {
-    box_grass[i].Set (i, 0, GRASS_TYPES, 2);
-    box_flower[i].Set (i, 1, GRASS_TYPES, 2);
+    box_grass[i].Set (i, 2, GRASS_TYPES, 4);
+    box_flower[i].Set (i, 3, GRASS_TYPES, 4);
   }
   angle_step = 360.0f / MAX_TUFTS;
   for (i = 0; i < MAX_TUFTS; i++) {
