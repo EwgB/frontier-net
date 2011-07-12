@@ -20,10 +20,8 @@
 #include "render.h"
 #include "scene.h"
 #include "sdl.h"
-#include "sky.h"
 #include "texture.h"
 #include "text.h"
-#include "water.h"
 #include "world.h"
 
 #define RENDER_DISTANCE     1536
@@ -214,6 +212,7 @@ void RenderCreate (int width, int height, int bits, bool fullscreen)
   TexturePurge ();
   SceneTexturePurge ();
   WorldTexturePurge ();
+  CgCompile ();
   TextCreate (width, height);  
 
 }
@@ -418,7 +417,6 @@ void Render (void)
   glViewport (0, 0, view_width, view_height);
   glDepthFunc (GL_LEQUAL);
   glEnable(GL_DEPTH_TEST);
-
   //Culling and shading
   glShadeModel(GL_SMOOTH);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -444,8 +442,25 @@ void Render (void)
   glRotatef (angle.y, 0.0f, 1.0f, 0.0f);
   glRotatef (angle.z, 0.0f, 0.0f, 1.0f);
   glTranslatef (-pos.x, -pos.y, -pos.z);
-  SkyRender ();
-  //glScalef (1, -1, 1);
+
+  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  if (CVarUtils::GetCVar<bool> ("render.shaders"))
+    CgUpdate ();
+  SceneRender ();
+  CgShaderSelect (VSHADER_NONE);
+  if (CVarUtils::GetCVar<bool> ("render.wireframe"))
+    SceneRenderDebug ();
+  if (CVarUtils::GetCVar<bool> ("show.pages"))
+    CacheRenderDebug ();
+  TextRender ();
+  if (show_map) 
+    RenderTexture (WorldMap ());
+  ConsoleRender ();
+  SDL_GL_SwapBuffers ();
+
+}
+
 
 /*
   if (0) { //water reflection effect.  Needs stencil buffer to work right
@@ -490,23 +505,3 @@ void Render (void)
 
   }
   */
-
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  if (CVarUtils::GetCVar<bool> ("render.shaders"))
-    CgUpdate ();
-  SceneRender ();
-  CgShaderSelect (VSHADER_NONE);
-  if (CVarUtils::GetCVar<bool> ("render.wireframe"))
-    SceneRenderDebug ();
-  //if (world_debug)
-  if (CVarUtils::GetCVar<bool> ("show.pages"))
-    CacheRenderDebug ();
-  TextRender ();
-  if (show_map) 
-    RenderTexture (WorldMap ());
-  ConsoleRender ();
-  SDL_GL_SwapBuffers ();
-
-}
-

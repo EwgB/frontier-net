@@ -25,6 +25,7 @@
 #include "math.h"
 #include "render.h"
 #include "scene.h"
+#include "sky.h"
 #include "sdl.h"
 #include "text.h"
 #include "texture.h"
@@ -206,7 +207,7 @@ void SceneRender ()
     glDisable(GL_TEXTURE_2D);
   else
     glEnable(GL_TEXTURE_2D);
-
+  SkyRender ();
   glDisable(GL_CULL_FACE);
   CgShaderSelect (VSHADER_TREES);
   CgShaderSelect (FSHADER_GREEN);
@@ -216,7 +217,7 @@ void SceneRender ()
   CgShaderSelect (VSHADER_NORMAL);
   glColor3f (1,1,1);
   gm_terrain.Render ();
-  //CgShaderSelect (FSHADER_NONE);
+  WaterRender ();
   glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("grass3.png"));
   CgShaderSelect (VSHADER_GRASS);
   glColorMask (false, false, false, false);
@@ -228,8 +229,6 @@ void SceneRender ()
   gm_grass.Render ();
   gm_brush.Render ();
   CgShaderSelect (VSHADER_NORMAL);
-  WaterRender ();
-  //CgShaderSelect (VSHADER_NONE);
   AvatarRender ();
   CgShaderSelect (FSHADER_NONE);
 

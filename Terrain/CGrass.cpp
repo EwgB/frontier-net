@@ -170,8 +170,8 @@ void CGrass::Build (long stop)
     r = WorldRegionFromPosition (world_x, world_y);
     index = world_x + world_y * GRASS_SIZE;
     this_tuft = &tuft_list[index % MAX_TUFTS];
-    root.x = (float)world_x + (WorldNoisef (index) -0.5f) * 2.0f;
-    root.y = (float)world_y + (WorldNoisef (index) -0.5f) * 2.0f;
+    root.x = (float)world_x + (WorldNoisef (index) -0.5f);
+    root.y = (float)world_y + (WorldNoisef (index) -0.5f);
     root.z = 0.0f;
     height = 0.05f + r.moisture * r.temperature;
     size.x = 0.4f + WorldNoisef (index) * 0.5f;
