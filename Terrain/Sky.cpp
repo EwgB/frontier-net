@@ -207,7 +207,7 @@ void SkyRender ()
   glDisable (GL_LIGHTING);
   glDisable (GL_BLEND);
   glDisable (GL_CULL_FACE);
-  glDisable (GL_TEXTURE_2D);
+  glBindTexture (GL_TEXTURE_2D, 0);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
   //Draw the cone, which forms the horizon.  The tip is darker than the edge.
@@ -220,7 +220,6 @@ void SkyRender ()
   glEnd ();
   //Render the skydome
   glEnable (GL_BLEND);
-  glEnable (GL_TEXTURE_2D);
   glBlendFunc (GL_ONE, GL_ONE);
   glBindTexture (GL_TEXTURE_2D, texture_stars);
   glColor3f (star_fade,star_fade,star_fade);

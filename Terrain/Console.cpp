@@ -37,14 +37,11 @@ void ConsoleInit ()
 
 void ConsoleToggle ()
 {
-
-  
+    
   con.ToggleConsole();
   con.m_fOverlayPercent = 0.75f;
   con.SetHelpColor (0, 255, 255);
   
-
-
 }
 
 void ConsoleInput (int key, int char_code)

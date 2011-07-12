@@ -93,7 +93,7 @@ static void fshader_select (int select_in)
   Env*          e;
    
   fshader_selected = select_in - FSHADER_BASE;
-  if (fshader_selected == -1) {
+  if (fshader_selected == -1 || !CVarUtils::GetCVar<bool> ("render.textured")) {
     cgGLDisableProfile (cgp_fragment);
     return;
   }
@@ -191,9 +191,6 @@ void CgCompile ()
   }
   
 
-  cgGLSetManageTextureParameters (cgContext,  CG_TRUE);
-
-
 
 
 
@@ -261,7 +258,11 @@ void CgUpdate ()
 
   elapsed = SdlElapsed ();
   wind += elapsed * 0.001f;
- 
+  if (!CVarUtils::GetCVar<bool> ("render.textured"))
+    cgGLSetManageTextureParameters (cgContext,  CG_TRUE);
+  else
+    cgGLSetManageTextureParameters (cgContext,  CG_FALSE);
+
 }
 
 void CgUpdateMatrix ()

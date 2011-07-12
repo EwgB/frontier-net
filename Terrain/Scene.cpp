@@ -207,11 +207,12 @@ void SceneRender ()
     glDisable(GL_TEXTURE_2D);
   else
     glEnable(GL_TEXTURE_2D);
-  SkyRender ();
+  //SkyRender ();
   glDisable(GL_CULL_FACE);
   CgShaderSelect (VSHADER_TREES);
   CgShaderSelect (FSHADER_GREEN);
   glColor3f (1,1,1);
+  glDisable(GL_TEXTURE_2D);
   gm_forest.Render ();
   glEnable(GL_CULL_FACE);
   CgShaderSelect (VSHADER_NORMAL);
