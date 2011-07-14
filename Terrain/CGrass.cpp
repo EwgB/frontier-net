@@ -180,7 +180,7 @@ void CGrass::Build (long stop)
     if (do_flower) //flowers are shorter than grass
       size.y /= 2;
     size.y = max (size.y, 0.3f);
-    color = CacheSurfaceColor (world_x, world_y, SURFACE_COLOR_GRASS);
+    color = CacheSurfaceColor (world_x, world_y);
     color.alpha = 1.0f;
     //Now we construct our grass panels
     for (i = 0; i < 4; i++) { 

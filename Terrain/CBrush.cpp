@@ -150,8 +150,8 @@ void CBrush::Build (long stop)
     height = 0.25f + (r.moisture * r.temperature) * 2.0f;
     size.x = 1.0f + WorldNoisef (index) * 1.0f;
     size.y = 1.0f + WorldNoisef (index) * height;
-    size.y = max (size.x, size.y);//Don't lest bushes get wider than they are tall
-    color = CacheSurfaceColor (world_x, world_y, SURFACE_COLOR_GRASS);
+    size.y = max (size.x, size.y);//Don't let bushes get wider than they are tall
+    color = CacheSurfaceColor (world_x, world_y);
     color *= 0.75f;
     color.alpha = 1.0f;
     //Now we construct our grass panels

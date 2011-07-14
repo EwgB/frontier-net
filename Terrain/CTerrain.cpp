@@ -148,11 +148,11 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
       world_x = _origin.x + x;
       world_y = _origin.y + y;
       glTexCoord2f ((float)x / 8, (float)y / 8);
-      surface_color = CacheSurfaceColor (world_x, world_y, SURFACE_COLOR_ROCK);
+      surface_color = CacheSurfaceColor (world_x, world_y);
       glColor3fv (&surface_color.red);
       glVertex2f ((float)x, (float)y);
       glTexCoord2f ((float)x / 8, (float)(y + 1) / 8);
-      surface_color = CacheSurfaceColor (world_x, world_y + 1, SURFACE_COLOR_ROCK);
+      surface_color = CacheSurfaceColor (world_x, world_y + 1);
       glColor3fv (&surface_color.red);
       glVertex2f ((float)x, (float)(y + 1));
     }
@@ -201,7 +201,7 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
         if (layers[stage].color == SURFACE_COLOR_BLACK)
           surface_color = glRgba (0.0f);
         else
-          surface_color = CacheSurfaceColor (world_x, world_y, layers[stage].color);
+          surface_color = CacheSurfaceColor (world_x, world_y);
         col = surface_color * layers[stage].luminance;
         col.alpha = layers[stage].opacity;
         glColor4fv (&col.red);

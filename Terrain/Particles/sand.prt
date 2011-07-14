@@ -1,0 +1,24 @@
+<cvars>
+    <particle.texture>  sand.png    </particle.texture>
+    <particle.acceleration>  [ 0,  3,  0 ]    </particle.acceleration>
+    <particle.blend>  0    </particle.blend>
+    <particle.emitter_lifespan>  10000    </particle.emitter_lifespan>
+    <particle.emit_count>  2    </particle.emit_count>
+    <particle.emit_interval>  150    </particle.emit_interval>
+    <particle.fade_in>  2000    </particle.fade_in>
+    <particle.fade_out>  2000    </particle.fade_out>
+    <particle.interpolate>  204    </particle.interpolate>
+    <particle.lifespan>  6000    </particle.lifespan>
+    <particle.origin>  [ 0,  0,  0.3 ]    </particle.origin>
+    <particle.panel_type>  3    </particle.panel_type>
+    <particle.rotation>  [ 0,  15,  0 ]    </particle.rotation>
+    <particle.size.min>  [ 8.01,  15.01,  0.01 ]    </particle.size.min>
+    <particle.size.max>  [ 15.05,  8.05,  0.05 ]    </particle.size.max>
+    <particle.speed.min>  [ 0,  0,  -10 ]    </particle.speed.min>
+    <particle.speed.max>  [ 0,  0,  -10 ]    </particle.speed.max>
+    <particle.spin>  [ 0,  0,  95 ]    </particle.spin>
+    <particle.volume.min>  [ -5.0,  -0.9,  -1 ]    </particle.volume.min>
+    <particle.volume.max>  [ 5.0,  0.9,  0.0 ]    </particle.volume.max>
+    <particle.wind>  204    </particle.wind>
+    <particle.z_buffer>  204    </particle.z_buffer>
+</cvars>

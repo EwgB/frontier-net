@@ -185,7 +185,7 @@ unsigned CacheTree (int world_x, int world_y)
 
 }
 
-GLrgba CacheSurfaceColor (int world_x, int world_y, SurfaceColor sc)
+GLrgba CacheSurfaceColor (int world_x, int world_y)
 {
 
   CPage*   p;

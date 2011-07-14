@@ -20,6 +20,7 @@
 #include "input.h"
 #include "main.h"
 #include "math.h"
+#include "particle.h"
 #include "render.h"
 #include "sdl.h"
 #include "Text.h"
@@ -72,6 +73,8 @@ static float            last_time;
 static float            current_speed;
 static float            current_angle;
 static float            velocity;
+static ParticleSet      dust_particle;
+static float            last_step_tracking;
 
 /*-----------------------------------------------------------------------------
 
@@ -176,6 +179,7 @@ void AvatarUpdate (void)
   float     desired_angle;
   float     lean_angle;
   float     angle_adjust;
+  float     step_tracking;
 
   if (!GameRunning ())
     return;
@@ -296,6 +300,18 @@ void AvatarUpdate (void)
   avatar.PositionSet (position);
   avatar.RotationSet (avatar_facing);
   avatar.Update ();
+  step_tracking = fmod (movement_animation, 1.0f);
+  if (anim_id == ANIM_RUN || anim_id == ANIM_SPRINT) {
+    if (step_tracking < last_step_tracking || (step_tracking > 0.5f && last_step_tracking < 0.5f)) {
+      dust_particle.colors.clear ();
+      if (position.z < 0.0f)
+        dust_particle.colors.push_back (glRgba (0.4f, 0.7f, 1.0f));
+      else
+        dust_particle.colors.push_back (CacheSurfaceColor ((int)position.x, (int)position.y));
+      ParticleAdd (&dust_particle, position);
+    }
+  }
+  last_step_tracking = step_tracking;
   time_passed = GameTime () - last_time;
   last_time = GameTime ();
   TextPrint ("%s elapsed: %f", anim_names[anim_id], elapsed);
@@ -319,6 +335,7 @@ void AvatarInit (void)
     anim[i].LoadBvh (IniString ("Animations", anim_names[i]));
     IniStringSet ("Animations", anim_names[i], IniString ("Animations", anim_names[i]));
   }
+  ParticleLoad ("step", &dust_particle);
 
 }
 

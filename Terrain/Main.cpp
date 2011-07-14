@@ -71,6 +71,7 @@ static void init ()
 
   ConsoleLog ("%s: Begin startup.", APP);
   ConsoleInit ();
+  ParticleInit ();
   ilInit ();
   RandomInit (11);
   SdlInit ();
@@ -79,7 +80,6 @@ static void init ()
   GameInit ();
   PlayerInit ();
   AvatarInit ();
-  ParticleInit ();
   TextureInit ();
   WorldInit ();
   SceneInit ();
@@ -154,8 +154,10 @@ bool MainIsQuit ()
 
 bool ConsoleCgCompile (vector<string> *args) 
 {
+
   CgCompile ();
   return true;
+
 }
 
 /*-----------------------------------------------------------------------------
@@ -185,6 +187,7 @@ int PASCAL WinMain (HINSTANCE instance_in, HINSTANCE previous_instance, LPSTR co
   CVarUtils::CreateCVar ("cache.dump", CacheDump, "Clear all saved data from memory & disk.");
   CVarUtils::CreateCVar ("cache.size", CacheSize, "Returns the current size of the cache.");
   CVarUtils::CreateCVar ("game", GameCmd, "Usage: Game [ new | quit ]");
+  CVarUtils::CreateCVar ("particle", ParticleCmd, "Usage: particle <filename>");
   CVarUtils::Load (SETTINGS_FILE);
 
   init ();
