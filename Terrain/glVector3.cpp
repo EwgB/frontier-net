@@ -276,3 +276,21 @@ void GLvector::Normalize ()
   z *= norm;
 
 }
+
+std::ostream &operator<<(std::ostream &stream, GLvector &v)
+{
+  stream << "[ " << v.x << ",  " << v.y << ",  " << v.z << " ]";
+  return stream;
+}
+
+/**
+ * Overloaded stream in for Point3D. Converts it from a string
+ */
+std::istream &operator>>(std::istream &stream, GLvector &v)
+{
+    char str[NAME_MAX] = {0};
+    stream.readsome( str, NAME_MAX );
+    sscanf( str, "[ %f, %f, %f ]", &v.x, &v.y, &v.z );
+
+    return stream;
+}

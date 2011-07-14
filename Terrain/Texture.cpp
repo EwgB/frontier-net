@@ -25,7 +25,7 @@ static GLtexture*   head_texture;
                            t e x t u r e   i d
 -----------------------------------------------------------------------------*/
 
-static GLtexture* LoadTexture (char* name)
+static GLtexture* LoadTexture (const char* name)
 {
 
   GLtexture*        t;
@@ -68,7 +68,7 @@ void TexturePurge ()
 
 }
 
-GLtexture* TextureFromName (char* name)
+GLtexture* TextureFromName (const char* name)
 {
 
   GLtexture*       t;
@@ -82,7 +82,7 @@ GLtexture* TextureFromName (char* name)
 
 }
 
-unsigned TextureIdFromName (char* name)
+unsigned TextureIdFromName (const char* name)
 {
 
   GLtexture*       t;

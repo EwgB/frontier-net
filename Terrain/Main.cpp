@@ -7,19 +7,16 @@
 
 TODO:
 
-x Fix canopy trees
-x Fix UV mapping on trees.
-x Clouds
 * More biomes
 x World saving
-* Undergrowth
-x Terrains eat less CPU cycles per frame
-x Grass rotate
-x Fix avatar rendering
+x Undergrowth
 ? Fix opaque trees on mike's PC
 * shadows
 * Collision
 * Particles
+* Weather
+
+http://awesomium.com/
 
 http://www.bramstein.com/projects/gui/
 
@@ -82,6 +79,7 @@ static void init ()
   GameInit ();
   PlayerInit ();
   AvatarInit ();
+  ParticleInit ();
   TextureInit ();
   WorldInit ();
   SceneInit ();

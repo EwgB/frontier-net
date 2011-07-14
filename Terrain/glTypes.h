@@ -84,6 +84,9 @@ struct GLvector
   OPERATORS(GLvector);
 };
 
+std::ostream &operator<<(std::ostream &stream, GLvector &point);
+std::istream &operator>>(std::istream &stream, GLvector &point);
+
 typedef GLvector       GLvector3;
 
 struct GLvector2
