@@ -298,7 +298,7 @@ void AvatarUpdate (void)
   avatar.Update ();
   time_passed = GameTime () - last_time;
   last_time = GameTime ();
-  TextPrint ("%s %1.2f", anim_names[anim_id], elapsed);
+  TextPrint ("%s elapsed: %f", anim_names[anim_id], elapsed);
   region = WorldRegionGet ((int)(position.x + REGION_HALF) / REGION_SIZE, (int)(position.y + REGION_HALF) / REGION_SIZE);
   do_camera ();
   do_location ();

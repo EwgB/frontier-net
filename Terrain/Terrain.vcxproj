@@ -111,6 +111,7 @@
     <ClCompile Include="glQuat.cpp" />
     <ClCompile Include="glRgba.cpp" />
     <ClCompile Include="glUvbox.cpp" />
+    <ClCompile Include="Particle.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="Region.cpp" />
@@ -155,6 +156,7 @@
     <ClInclude Include="Input.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="Math.h" />
+    <ClInclude Include="Particle.h" />
     <ClInclude Include="Random.h" />
     <ClInclude Include="Region.h" />
     <ClInclude Include="Render.h" />

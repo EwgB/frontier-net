@@ -23,6 +23,7 @@
 #include "ini.h"
 #include "input.h"
 #include "math.h"
+#include "particle.h"
 #include "render.h"
 #include "scene.h"
 #include "sky.h"
@@ -207,7 +208,7 @@ void SceneRender ()
     glDisable(GL_TEXTURE_2D);
   else
     glEnable(GL_TEXTURE_2D);
-  //SkyRender ();
+  SkyRender ();
   glDisable(GL_CULL_FACE);
   CgShaderSelect (VSHADER_TREES);
   CgShaderSelect (FSHADER_GREEN);
@@ -232,6 +233,8 @@ void SceneRender ()
   CgShaderSelect (VSHADER_NORMAL);
   AvatarRender ();
   CgShaderSelect (FSHADER_NONE);
+  CgShaderSelect (VSHADER_NONE);
+  ParticleRender ();
 
 }
 

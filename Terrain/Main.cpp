@@ -19,6 +19,7 @@ x Fix avatar rendering
 ? Fix opaque trees on mike's PC
 * shadows
 * Collision
+* Particles
 
 http://www.bramstein.com/projects/gui/
 
@@ -38,6 +39,7 @@ http://www.bramstein.com/projects/gui/
 #include "sdl.h"
 #include "il\il.h"
 #include "main.h"
+#include "particle.h"
 #include "player.h"
 #include "random.h"
 #include "render.h"
@@ -123,6 +125,7 @@ static void run ()
     SkyUpdate ();
     SceneUpdate (stop);
     CacheUpdate (stop);
+    ParticleUpdate ();
     RenderUpdate ();
     Render ();	
     remaining = stop - SdlTick ();

@@ -21,7 +21,7 @@
 #include "world.h"
 
 //The number of regions around the edge which should be ocean.
-#define OCEAN_BUFFER      (WORLD_GRID / 6) 
+#define OCEAN_BUFFER      (WORLD_GRID / 10) 
 //This affects the mapping of the coastline.  Higher = busier, more repetitive coast.
 #define FREQUENCY         3 
 //How many different colors of flowers are available
@@ -634,11 +634,13 @@ void TerraformClimate ()
     //Oceans are ALWAYS WET.
     if (r.climate == CLIMATE_OCEAN) 
       rainfall = 1.0f;
+    rain_loss = 0.0f;
     //We lose rainfall as we move inland.
-    rain_loss = 1.0f / WORLD_GRID_CENTER;
+    if (r.climate != CLIMATE_OCEAN && r.climate != CLIMATE_COAST && r.climate != CLIMATE_LAKE)
+      rain_loss = 1.0f / WORLD_GRID_CENTER;
     //We lose rainfall more slowly as it gets colder.
     if (temp < 0.5f)
-      rain_loss *= temp * 1.0f;
+      rain_loss *= temp;
     rainfall -= rain_loss;
     //Mountains block rainfall
     if (r.climate == CLIMATE_MOUNTAIN) 
@@ -1088,8 +1090,8 @@ void TerraformZones ()
       if (r.moisture > 0.8f && r.temperature > 0.5f)
         climates.push_back (CLIMATE_SWAMP);
       //mountains only appear in the middle
-      //if (abs (x - WORLD_GRID_CENTER) < 10 && radius > 1)
-        //climates.push_back (CLIMATE_MOUNTAIN);
+      if (abs (x - WORLD_GRID_CENTER) < 10 && radius > 1)
+        climates.push_back (CLIMATE_MOUNTAIN);
       //Deserts are HOT and DRY. Duh.
       if (r.temperature > TEMP_HOT && r.moisture < 0.05f && radius > 1)
         climates.push_back (CLIMATE_DESERT);
