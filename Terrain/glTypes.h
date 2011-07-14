@@ -36,6 +36,10 @@ enum
   bool    operator!= (const type& c);\
   bool    operator== (const type& c);
 
+/*-----------------------------------------------------------------------------
+GLcoord
+-----------------------------------------------------------------------------*/
+
 struct GLcoord
 {
   int         x;
@@ -66,13 +70,21 @@ struct GLcoord
 
 };
 
-struct GLquat
+/*-----------------------------------------------------------------------------
+GLcoord
+-----------------------------------------------------------------------------*/
+
+struct GLquatx
 {
   float       x;
   float       y;
   float       z;
   float       w;
 };
+
+/*-----------------------------------------------------------------------------
+GLvector
+-----------------------------------------------------------------------------*/
 
 struct GLvector
 {
@@ -89,6 +101,19 @@ std::istream &operator>>(std::istream &stream, GLvector &point);
 
 typedef GLvector       GLvector3;
 
+GLvector  glVector (float x, float y, float z);
+GLvector  glVectorCrossProduct (GLvector v1, GLvector v2);
+float     glVectorDotProduct (GLvector v1, GLvector v2);
+void      glVectorGl (GLvector v);
+GLvector  glVectorInterpolate (GLvector v1, GLvector v2, float scalar);
+float     glVectorLength (GLvector v);
+GLvector  glVectorNormalize (GLvector v);
+GLvector  glVectorReflect (GLvector3 ray, GLvector3 normal);
+
+/*-----------------------------------------------------------------------------
+GLvector2
+-----------------------------------------------------------------------------*/
+
 struct GLvector2
 {
   float       x;
@@ -98,7 +123,17 @@ struct GLvector2
   OPERATORS(GLvector2);
 };
 
+GLvector2 glVector (float x, float y);
+GLvector2 glVectorAdd (GLvector2 val1, GLvector2 val2);
+GLvector2 glVectorSubtract (GLvector2 val1, GLvector2 val2);
+GLvector2 glVectorNormalize (GLvector2 v);
+GLvector2 glVectorInterpolate (GLvector2 v1, GLvector2 v2, float scalar);
+GLvector2 glVectorSinCos (float angle);
+float     glVectorLength (GLvector2 v);
 
+/*-----------------------------------------------------------------------------
+GLuvbox
+-----------------------------------------------------------------------------*/
 
 struct GLuvbox
 {
@@ -112,6 +147,10 @@ struct GLuvbox
 
 };
 
+/*-----------------------------------------------------------------------------
+GLrgba
+-----------------------------------------------------------------------------*/
+
 struct GLrgba
 {
   float       red;
@@ -124,7 +163,23 @@ struct GLrgba
   OPERATORS(GLrgba);
 };
 
+GLrgba    glRgba (char* string);
+GLrgba    glRgba (float red, float green, float blue);
+GLrgba    glRgba (float luminance);
+GLrgba    glRgba (float red, float green, float blue, float alpha);
+GLrgba    glRgba (long c);
+GLrgba    glRgba (int red, int green, int blue);
+GLrgba    glRgbaAdd (GLrgba c1, GLrgba c2);
+GLrgba    glRgbaSubtract (GLrgba c1, GLrgba c2);
+GLrgba    glRgbaInterpolate (GLrgba c1, GLrgba c2, float delta);
+GLrgba    glRgbaScale (GLrgba c, float scale);
+GLrgba    glRgbaMultiply (GLrgba c1, GLrgba c2);
+GLrgba    glRgbaUnique (int i);
+GLrgba    glRgbaFromHsl (float h, float s, float l);
 
+/*-----------------------------------------------------------------------------
+GLmatrix
+-----------------------------------------------------------------------------*/
 
 struct GLmatrix
 {
@@ -134,6 +189,20 @@ struct GLmatrix
   void        Multiply (GLmatrix m);
   GLvector    TransformPoint (GLvector pt);
 };
+
+
+GLmatrix  glMatrixIdentity (void);
+void      glMatrixElementsSet (GLmatrix* m, float* in);
+GLmatrix  glMatrixMultiply (GLmatrix a, GLmatrix b);
+GLmatrix  glMatrixScale (GLmatrix m, GLvector in);
+GLvector  glMatrixTransformPoint (GLmatrix m, GLvector in);
+GLmatrix  glMatrixTranslate (GLmatrix m, GLvector in);
+GLmatrix  glMatrixRotate (GLmatrix m, float theta, float x, float y, float z);
+GLvector  glMatrixToEuler (GLmatrix mat, int order);
+
+/*-----------------------------------------------------------------------------
+GLbbox
+-----------------------------------------------------------------------------*/
 
 struct GLbbox
 {
@@ -147,31 +216,9 @@ struct GLbbox
   GLvector    Size ();
 };
 
-struct GLvertex
-{
-  GLvector3   position;
-  GLvector3   normal;
-  GLvector2   uv;
-  GLrgba      color;
-};
-
-struct GLrect
-{
-  float       left;
-  float       top;
-  float       right;
-  float       bottom;
-};
-
-struct GLtriangle
-{
-  int         v[3];
-};
-
-struct GLquad
-{
-  int         v[4];
-};
+/*-----------------------------------------------------------------------------
+GLfont
+-----------------------------------------------------------------------------*/
 
 struct GLglyph
 {
@@ -199,6 +246,10 @@ public:
   int             LineHeight () const { return _line_height;}
 };
 
+/*-----------------------------------------------------------------------------
+GLmesh
+-----------------------------------------------------------------------------*/
+
 struct GLmesh
 {
   GLbbox            _bbox;
@@ -223,53 +274,6 @@ struct GLmesh
   void    operator+= (const GLmesh& c);
 
 };
-
-GLbbox    glBboxClear (void);
-GLbbox    glBboxContainPoint (GLbbox box, GLvector point);
-bool      glBboxTestPoint (GLbbox box, GLvector point);
-
-GLrgba    glRgba (char* string);
-GLrgba    glRgba (float red, float green, float blue);
-GLrgba    glRgba (float luminance);
-GLrgba    glRgba (float red, float green, float blue, float alpha);
-GLrgba    glRgba (long c);
-GLrgba    glRgba (int red, int green, int blue);
-GLrgba    glRgbaAdd (GLrgba c1, GLrgba c2);
-GLrgba    glRgbaSubtract (GLrgba c1, GLrgba c2);
-GLrgba    glRgbaInterpolate (GLrgba c1, GLrgba c2, float delta);
-GLrgba    glRgbaScale (GLrgba c, float scale);
-GLrgba    glRgbaMultiply (GLrgba c1, GLrgba c2);
-GLrgba    glRgbaUnique (int i);
-GLrgba    glRgbaFromHsl (float h, float s, float l);
-
-GLmatrix  glMatrixIdentity (void);
-void      glMatrixElementsSet (GLmatrix* m, float* in);
-GLmatrix  glMatrixMultiply (GLmatrix a, GLmatrix b);
-GLmatrix  glMatrixScale (GLmatrix m, GLvector in);
-GLvector  glMatrixTransformPoint (GLmatrix m, GLvector in);
-GLmatrix  glMatrixTranslate (GLmatrix m, GLvector in);
-GLmatrix  glMatrixRotate (GLmatrix m, float theta, float x, float y, float z);
-GLvector  glMatrixToEuler (GLmatrix mat, int order);
-
-GLquat    glQuat (float x, float y, float z, float w);
-GLvector  glQuatToEuler (GLquat q, int order);
-
-GLvector  glVector (float x, float y, float z);
-GLvector  glVectorCrossProduct (GLvector v1, GLvector v2);
-float     glVectorDotProduct (GLvector v1, GLvector v2);
-void      glVectorGl (GLvector v);
-GLvector  glVectorInterpolate (GLvector v1, GLvector v2, float scalar);
-float     glVectorLength (GLvector v);
-GLvector  glVectorNormalize (GLvector v);
-GLvector  glVectorReflect (GLvector3 ray, GLvector3 normal);
-
-GLvector2 glVector (float x, float y);
-GLvector2 glVectorAdd (GLvector2 val1, GLvector2 val2);
-GLvector2 glVectorSubtract (GLvector2 val1, GLvector2 val2);
-GLvector2 glVectorNormalize (GLvector2 v);
-GLvector2 glVectorInterpolate (GLvector2 v1, GLvector2 v2, float scalar);
-GLvector2 glVectorSinCos (float angle);
-float     glVectorLength (GLvector2 v);
 
 
 #endif

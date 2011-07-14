@@ -16,6 +16,10 @@
 
 #define MAX_VALUE               999999999999999.9f
 
+/*-----------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------*/
+
 GLvector GLbbox::Center ()
 {
 
@@ -85,53 +89,3 @@ void GLbbox::Render ()
   glEnd ();
 
 }
-
-/*-----------------------------------------------------------------------------
-Does the given point fall within the given Bbox?
------------------------------------------------------------------------------*/
-
-bool glBboxTestPoint (GLbbox box, GLvector point)
-{
-
-  if (point.x > box.pmax.x || point.x < box.pmin.x)
-    return false;
-  if (point.y > box.pmax.y || point.y < box.pmin.y)
-    return false;
-  if (point.z > box.pmax.z || point.z < box.pmin.z)
-    return false;
-  return true;
-
-}
-
-/*-----------------------------------------------------------------------------
-Expand Bbox (if needed) to contain given point
------------------------------------------------------------------------------*/
-
-GLbbox glBboxContainPoint (GLbbox box, GLvector point)
-{
-
-  box.pmin.x = min (box.pmin.x, point.x);
-  box.pmin.y = min (box.pmin.y, point.y);
-  box.pmin.z = min (box.pmin.z, point.z);
-  box.pmax.x = max (box.pmax.x, point.x);
-  box.pmax.y = max (box.pmax.y, point.y);
-  box.pmax.z = max (box.pmax.z, point.z);
-  return box;
-  
-}
-
-/*-----------------------------------------------------------------------------
-This will invalidate the bbox. 
------------------------------------------------------------------------------*/
-
-GLbbox glBboxClear (void)
-{
-
-  GLbbox      result;
-
-  result.pmax = glVector (-MAX_VALUE, -MAX_VALUE, -MAX_VALUE);
-  result.pmin = glVector ( MAX_VALUE,  MAX_VALUE,  MAX_VALUE);
-  return result;
-
-}
-
