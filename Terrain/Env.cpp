@@ -49,6 +49,8 @@
 #define SUN_ANGLE_AFTERNOON 165
 #define SUN_ANGLE_SUNSET    190
 
+
+
 static Env        desired;
 static Env        current;
 static int        update;
@@ -70,15 +72,22 @@ static void do_cycle ()
   GLrgba    atmosphere;
   float     fade;
   float     late_fade;
-  float     humid_fog;
+  //float     humid_fog;
   float     decimal_time;
   float     max_distance;
+  Range     time_fog;
+  Range     humid_fog;
 
   max_distance = SceneVisibleRange ();
   r = (Region*)AvatarRegion ();
   atmosphere = r->color_atmosphere;
-  humid_fog = (1.5f - r->moisture * 2) * max_distance;
-  humid_fog = clamp (humid_fog, 1, max_distance);
+  humid_fog.rmax = MathInterpolate (max_distance, max_distance / 3, r->moisture);
+  humid_fog.rmin = humid_fog.rmax / 2.0f;
+  if (r->climate == CLIMATE_SWAMP) {
+    humid_fog.rmax /= 2.0f;
+    humid_fog.rmin /= 2.0f;
+  }
+  desired.cloud_cover = clamp (r->moisture, 0.15f, 0.85f);
   desired.sunrise_fade = desired.sunset_fade = 0.0f;
   decimal_time = fmod (GameTime (), 24.0f);
   if (decimal_time >= TIME_DAWN && decimal_time < TIME_DAY) { //sunrise
@@ -87,8 +96,8 @@ static void do_cycle ()
     base_color = glRgbaInterpolate (NIGHT_COLOR, DAY_COLOR, late_fade);
     atmosphere = glRgbaInterpolate (glRgba (0,0,0), atmosphere, late_fade);
     //base_color = glRgbaInterpolate (NIGHT_COLOR, DAY_COLOR, fade);
-    desired.fog_max = MathInterpolate (NIGHT_FOG, max_distance, fade);
-    desired.fog_min = min (humid_fog, fade * max_distance);
+    time_fog.rmax = MathInterpolate (NIGHT_FOG, max_distance, fade);
+    time_fog.rmin = time_fog.rmax / 2.0f;
     desired.star_fade = max (1.0f - fade * 2.0f, 0.0f);
     //Sunrise fades in, then back out
     desired.sunrise_fade = 1.0f - abs (fade -0.5f) * 2.0f;
@@ -105,8 +114,8 @@ static void do_cycle ()
   } else if (decimal_time >= TIME_DAY && decimal_time < TIME_SUNSET)  { //day
     fade = (decimal_time - TIME_DAY) / (TIME_SUNSET - TIME_DAY);
     base_color = DAY_COLOR;
-    desired.fog_max = max_distance;
-    desired.fog_min = humid_fog;
+    time_fog.rmax = max_distance;
+    time_fog.rmin = time_fog.rmax / 2.0f;
     desired.star_fade = 0.0f;
     color_scaling = DAY_SCALING;
     desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f) + r->color_atmosphere;
@@ -119,8 +128,8 @@ static void do_cycle ()
   } else if (decimal_time >= TIME_SUNSET && decimal_time < TIME_DUSK) { // sunset
     fade = (decimal_time - TIME_SUNSET) / (TIME_DUSK - TIME_SUNSET);
     base_color = glRgbaInterpolate (DAY_COLOR, NIGHT_COLOR, fade);
-    desired.fog_max = MathInterpolate (max_distance, NIGHT_FOG, fade);
-    desired.fog_min = min (humid_fog, (1.0f - fade) * max_distance);
+    time_fog.rmax = MathInterpolate (max_distance, NIGHT_FOG, fade);
+    time_fog.rmin = time_fog.rmax / 2.0f;
     if (fade > 0.5f)
       desired.star_fade = (fade - 0.5f) * 2.0f;
     //Sunset fades in, then back out
@@ -136,8 +145,8 @@ static void do_cycle ()
    atmosphere = glRgba (0,0,0);
     color_scaling = NIGHT_SCALING;
     base_color = NIGHT_COLOR;
-    desired.fog_min = 1;
-    desired.fog_max = NIGHT_FOG;
+    time_fog.rmin = 1;
+    time_fog.rmax = NIGHT_FOG;
     desired.star_fade = 1.0f;
     desired.color[ENV_COLOR_LIGHT] = glRgba (0.1f, 0.3f, 0.7f);
     desired.color[ENV_COLOR_AMBIENT] = glRgba (0.0f, 0.0f, 0.4f);
@@ -145,7 +154,8 @@ static void do_cycle ()
     desired.sun_angle = -90.0f;
     desired.draw_sun = false;
   }
-  desired.fog_min = min (desired.fog_min, humid_fog);
+  desired.fog.rmax = min (humid_fog.rmax, time_fog.rmax);
+  desired.fog.rmin = min (humid_fog.rmin, time_fog.rmin);
   for (i = 0; i < ENV_COLOR_COUNT; i++) {
     if (i == ENV_COLOR_LIGHT) 
       continue;
@@ -170,13 +180,14 @@ static void do_time (float delta)
   last_decimal_time = GameTime ();     
   for (int i = 0; i < ENV_COLOR_COUNT; i++) 
     current.color[i] = glRgbaInterpolate (current.color[i], desired.color[i], delta);
-  current.fog_min = MathInterpolate (current.fog_min, desired.fog_min, delta);
-  current.fog_max = MathInterpolate (current.fog_max, desired.fog_max, delta);
+  current.fog.rmin = MathInterpolate (current.fog.rmin, desired.fog.rmin, delta);
+  current.fog.rmax = MathInterpolate (current.fog.rmax, desired.fog.rmax, delta);
   current.star_fade = MathInterpolate (current.star_fade, desired.star_fade, delta);
   current.sunset_fade = MathInterpolate (current.sunset_fade, desired.sunset_fade, delta);
   current.sunrise_fade = MathInterpolate (current.sunrise_fade, desired.sunrise_fade, delta);
   current.light = glVectorInterpolate (current.light, desired.light, delta);
   current.sun_angle = MathInterpolate (current.sun_angle, desired.sun_angle, delta);
+  current.cloud_cover = MathInterpolate (current.cloud_cover, desired.cloud_cover, delta);
   current.draw_sun = desired.draw_sun;
   current.light.Normalize ();
 

@@ -25,7 +25,7 @@
 #define SKY_GRID    12
 #define SKY_EDGE    (SKY_GRID + 1)
 #define SKY_HALF    (SKY_GRID / 2)
-#define SKY_DOME    0.5f
+#define SKY_DOME    0.3f
 #define SKY_TILE    5
 //How big the sunrise / set is. Higher = smaller. Don't set lower than near clip plane. 
 #define SUNSET_SIZE 0.35f
@@ -84,6 +84,7 @@ static void build_sky ()
   vector<unsigned>    index;
   int                 x, y;
   float               dist;
+  float               alpha;
   GLvector2           distance;
   GLvector2           uv_step;
   GLvector2           uv_map;
@@ -102,11 +103,11 @@ static void build_sky ()
       uv_map.x += uv_step.x + 0.1f;
       distance = glVector ((float)x - SKY_HALF, (float)y - SKY_HALF);
       dist = glVectorLength (distance) / SKY_HALF;
-      dist = 1 - dist;
-      dist = clamp (dist, 0, 1);
-      color.push_back (glRgba (dist, dist, dist, dist));
+      alpha = 1 - dist;
+      alpha = clamp (alpha, 0, 1);
+      color.push_back (glRgba (alpha, alpha, alpha, alpha));
       dist = 1.0f - glVectorLength (distance) / (SKY_HALF - 3);
-      v = glVector ((float)x - SKY_HALF, (float)y - SKY_HALF, dist * SKY_DOME);
+      v = glVector ((float)x - SKY_HALF, (float)y - SKY_HALF, 0.1f + dist * SKY_DOME);
       vert.push_back (v);
       normal.push_back (glVector (0.0f, 0.0f, 1.0f));
       uv.push_back (uv_map * 4);

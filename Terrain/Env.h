@@ -9,16 +9,22 @@ enum eEnvColor
   ENV_COLOR_COUNT
 };
 
+struct Range
+{
+  float   rmin;
+  float   rmax;
+};
+
 struct Env
 {
   GLrgba      color[ENV_COLOR_COUNT];
   GLvector    light;
-  float       fog_min;
-  float       fog_max;
+  Range       fog;
   float       star_fade;
   float       sunrise_fade;
   float       sunset_fade;
   float       sun_angle;
+  float       cloud_cover;
   bool        draw_sun;
 };
 

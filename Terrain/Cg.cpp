@@ -109,7 +109,7 @@ static void fshader_select (int select_in)
   } else
     cgGLSetParameter3f (s->fogcolor, e->color[ENV_COLOR_FOG].red, e->color[ENV_COLOR_FOG].green, e->color[ENV_COLOR_FOG].blue);
   cgGLSetTextureParameter (s->texture, TextureIdFromName ("clouds.png"));
-  cgGLSetParameter4f (s->data, wind, 0.5f, 1 - e->star_fade, 0);
+  cgGLSetParameter4f (s->data, wind, e->cloud_cover, 1 - e->star_fade, 0);
   cgGLEnableTextureParameter (s->texture);
 
 }
@@ -148,7 +148,7 @@ static void vshader_select (int select)
   p = AvatarCameraPosition ();
   cgGLSetParameter3f (s->eyepos, p.x, p.y, p.z);
   cgGLSetStateMatrixParameter(s->matrix, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MODELVIEW_MATRIX);
-  cgGLSetParameter2f (s->fog, e->fog_min, e->fog_max);
+  cgGLSetParameter2f (s->fog, e->fog.rmin, e->fog.rmax);
   cgGLSetParameter4f (s->data, SceneVisibleRange (), SceneVisibleRange () * 0.05, val1, val2);
   glColor3f (1,1,1);
 

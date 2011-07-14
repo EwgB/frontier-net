@@ -319,16 +319,10 @@ void RenderUpdate (void)
   current_diffuse = e->color[ENV_COLOR_LIGHT];
   current_ambient = e->color[ENV_COLOR_AMBIENT];
   current_fog = e->color[ENV_COLOR_FOG];
-  fog_min = e->fog_min;
-  fog_max = e->fog_max;
-  /*
-  if (InputKeyPressed (SDLK_BACKQUOTE)) {
-    draw_console = !draw_console;
-  }
-  */
+  fog_min = e->fog.rmin;
+  fog_max = e->fog.rmax;
   if (InputKeyPressed (SDLK_TAB)) 
     show_map = !show_map;
-
 
 }
 
@@ -381,8 +375,8 @@ void Render (void)
     //cfog = (current_diffuse + glRgba (0.0f, 0.0f, 1.0f)) / 2;
     //glFogf(GL_FOG_START, RENDER_DISTANCE / 2);				// Fog Start Depth
     //glFogf(GL_FOG_END, RENDER_DISTANCE);				// Fog End Depth
-    glFogf(GL_FOG_START, e->fog_min);				// Fog Start Depth
-    glFogf(GL_FOG_END, e->fog_max);				// Fog End Depth
+    glFogf(GL_FOG_START, e->fog.rmin);				// Fog Start Depth
+    glFogf(GL_FOG_END, e->fog.rmax);				// Fog End Depth
   } else {
     //cfog = glRgba (0.0f, 0.5f, 0.8f);
     glFogf(GL_FOG_START, 1);				// Fog Start Depth
