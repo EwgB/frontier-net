@@ -28,6 +28,6 @@ struct Env
   bool        draw_sun;
 };
 
-void      EnvInit ();
-void      EnvUpdate ();
-Env*      EnvGet ();
+void          EnvInit ();
+void          EnvUpdate ();
+Env*          EnvGet ();

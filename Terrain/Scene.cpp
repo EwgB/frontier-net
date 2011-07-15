@@ -18,6 +18,7 @@
 #include "cforest.h"
 #include "cg.h"
 #include "cgrass.h"
+#include "cparticlearea.h"
 #include "cterrain.h"
 #include "game.h"
 #include "ini.h"
@@ -41,6 +42,8 @@
 #define GRASS_HALF      (GRASS_GRID / 2)
 #define TERRAIN_GRID    9
 
+#define PARTICLE_GRID   3
+
 static int              cached;
 static int              texture_bytes;
 static int              texture_bytes_counter;
@@ -49,15 +52,16 @@ static int              polygons_counter;
 
 /*                  *************************************************************/
 
-static GridManager        gm_terrain;
-static vector<CTerrain>   il_terrain;
-static GridManager        gm_forest;
-static vector<CForest>    il_forest;
-static GridManager        gm_grass;
-static vector<CGrass>     il_grass;
-static GridManager        gm_brush;
-static vector<CBrush>     il_brush;
-//static unsigned           world_seed = 2;
+static GridManager            gm_terrain;
+static vector<CTerrain>       il_terrain;
+static GridManager            gm_forest;
+static vector<CForest>        il_forest;
+static GridManager            gm_grass;
+static vector<CGrass>         il_grass;
+static GridManager            gm_brush;
+static vector<CBrush>         il_brush;
+static GridManager            gm_particle;
+static vector<CParticleArea>  il_particle;
 
 /* Module Functions *************************************************************/
 
@@ -102,7 +106,6 @@ void SceneGenerate ()
   il_brush.resize (BRUSH_GRID * BRUSH_GRID);
   gm_brush.Init (&il_brush[0], BRUSH_GRID, BRUSH_SIZE);
 
-
 }
 
 
@@ -125,6 +128,10 @@ void SceneTexturePurge ()
   il_brush.clear ();
   il_brush.resize (BRUSH_GRID * BRUSH_GRID);
   gm_brush.Init (&il_brush[0], BRUSH_GRID, BRUSH_SIZE);
+
+  il_particle.clear ();
+  il_particle.resize (PARTICLE_GRID * PARTICLE_GRID);
+  gm_particle.Init (&il_particle[0], PARTICLE_GRID, PARTICLE_AREA_SIZE);
 
 }
 
@@ -191,6 +198,7 @@ void SceneUpdate (long stop)
   case 3: gm_brush.Update (stop); break;
   }
   //any time left over goes to the losers...
+  gm_particle.Update (stop);
   gm_terrain.Update (stop);
   gm_grass.Update (stop);
   gm_forest.Update (stop);
@@ -235,6 +243,7 @@ void SceneRender ()
   CgShaderSelect (FSHADER_NONE);
   CgShaderSelect (VSHADER_NONE);
   ParticleRender ();
+  gm_particle.Render ();
 
 }
 

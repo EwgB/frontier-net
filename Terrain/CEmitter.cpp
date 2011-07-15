@@ -22,10 +22,18 @@
 #define MAX_PARTICLES       1000
 
 static UINT       cycler;
+static UINT       id_pool;
 
 /*-----------------------------------------------------------------------------
                               
 -----------------------------------------------------------------------------*/
+
+CEmitter::CEmitter ()
+{
+
+  _id = ++id_pool;
+
+}
 
 void CEmitter::Emit (UINT count)
 {
@@ -96,6 +104,15 @@ void CEmitter::Set (ParticleSet* ps)
 
 }
 
+void CEmitter::RenderBbox ()
+{
+
+  glBindTexture (GL_TEXTURE_2D, 0);
+  _settings.volume.Render ();
+
+
+}
+
 void CEmitter::Render ()
 {
 
@@ -107,7 +124,7 @@ void CEmitter::Render ()
     glBlendFunc (GL_ONE, GL_ONE);
   else
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glBindTexture (GL_TEXTURE_2D, 0);
+  //glBindTexture (GL_TEXTURE_2D, 0);
   //_settings.volume.Render ();
   glBindTexture (GL_TEXTURE_2D, TextureIdFromName (_settings.texture.c_str ()));
 

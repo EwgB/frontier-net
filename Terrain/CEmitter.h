@@ -53,6 +53,7 @@ struct Particle
 
 class CEmitter 
 {
+  UINT              _id;
   ParticleSet       _settings;
   UINT              _die;
   UINT              _last_update;
@@ -64,9 +65,12 @@ class CEmitter
   void              Emit (UINT number);
 
 public:
+  CEmitter ();
+  UINT              Id () { return _id; };
   void              Set (ParticleSet* s);
   void              Update (float elapsed);
   void              Render ();
+  void              RenderBbox ();
   bool              Dead () { return _dead && _particle.empty (); };
 
 };

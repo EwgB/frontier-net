@@ -14,11 +14,13 @@
     <particle.rotation>  [ 0,  0,  0 ]    </particle.rotation>
     <particle.size.min>  [ 12,  25,  0.01 ]    </particle.size.min>
     <particle.size.max>  [ 25,  12,  0.05 ]    </particle.size.max>
-    <particle.speed.min>  [ 0,  0,  -10 ]    </particle.speed.min>
-    <particle.speed.max>  [ 0,  0,  -10 ]    </particle.speed.max>
+    <particle.speed.min>  [ -2,  -2,  0 ]    </particle.speed.min>
+    <particle.speed.max>  [  2,   2,  0 ]    </particle.speed.max>
     <particle.spin>  [ 0,  0,  10 ]    </particle.spin>
     <particle.volume.min>  [ -32.0,  -32,  0.5 ]    </particle.volume.min>
     <particle.volume.max>  [  32.0,   32,  0.5 ]    </particle.volume.max>
-    <particle.wind>  204    </particle.wind>
-    <particle.z_buffer>  204    </particle.z_buffer>
+    <particle.wind>  0    </particle.wind>
+    <particle.gravity>  0    </particle.wind>
+    <particle.z_buffer>  0    </particle.z_buffer>
+
 </cvars>

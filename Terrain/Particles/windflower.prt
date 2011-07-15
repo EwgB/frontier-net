@@ -1,0 +1,25 @@
+<cvars>
+    <particle.texture>  particle_flower.png    </particle.texture>
+    <particle.acceleration>  [ 0,  0,  0.0 ]    </particle.acceleration>
+    <particle.blend>  0 </particle.blend>
+    <particle.emitter_lifespan>  0   </particle.emitter_lifespan>
+    <particle.emit_count>  1    </particle.emit_count>
+    <particle.emit_interval>  400    </particle.emit_interval>
+    <particle.fade_in>  5    </particle.fade_in>
+    <particle.fade_out>  500    </particle.fade_out>
+    <particle.interpolate>  0    </particle.interpolate>
+    <particle.lifespan>  3000    </particle.lifespan>
+    <particle.origin>  [ 0,  0,  -0.25 ]    </particle.origin>
+    <particle.panel_type>  3    </particle.panel_type>
+    <particle.rotation>  [ 0,  0,  0 ]    </particle.rotation>
+    <particle.size.min>  [ 0.07,  0.07, 0.07 ]    </particle.size.min>
+    <particle.size.max>  [ 0.17,  0.17, 0.17 ]    </particle.size.max>
+    <particle.speed.min>  [ 2,  -1,  0.05 ]    </particle.speed.min>
+    <particle.speed.max>  [ 3,   1,  0.25 ]    </particle.speed.max>
+    <particle.spin>  [ 20,  40,  0 ]    </particle.spin>
+    <particle.volume.min>  [ -2,  -2,  1.0 ]    </particle.volume.min>
+    <particle.volume.max>  [  2,   2,  1.1 ]    </particle.volume.max>
+    <particle.wind>  0    </particle.wind>
+    <particle.gravity>  0    </particle.wind>
+    <particle.z_buffer>  0    </particle.z_buffer>
+</cvars>

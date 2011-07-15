@@ -1,6 +1,6 @@
 <cvars>
     <particle.texture>  sand.png    </particle.texture>
-    <particle.acceleration>  [ 0,  2,  0 ]    </particle.acceleration>
+    <particle.acceleration>  [ 2,  0,  0 ]    </particle.acceleration>
     <particle.blend>  0    </particle.blend>
     <particle.emitter_lifespan>  0    </particle.emitter_lifespan>
     <particle.emit_count>  3    </particle.emit_count>

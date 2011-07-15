@@ -95,6 +95,7 @@
     <ClCompile Include="CGrid.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="CPage.cpp" />
+    <ClCompile Include="CParticleArea.cpp" />
     <ClCompile Include="CTerrain.cpp" />
     <ClCompile Include="CTree.cpp" />
     <ClCompile Include="Entropy.cpp" />
@@ -145,6 +146,7 @@
     <ClInclude Include="CGrid.h" />
     <ClInclude Include="Console.h" />
     <ClInclude Include="Cpage.h" />
+    <ClInclude Include="CParticleArea.h" />
     <ClInclude Include="CTerrain.h" />
     <ClInclude Include="CTree.h" />
     <ClInclude Include="Entropy.h" />

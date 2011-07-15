@@ -44,7 +44,7 @@ void place_emitter ()
                               
 -----------------------------------------------------------------------------*/
 
-void ParticleAdd (ParticleSet* p_in, GLvector position)
+UINT ParticleAdd (ParticleSet* p_in, GLvector position)
 {
   
   CEmitter*   e;
@@ -57,6 +57,23 @@ void ParticleAdd (ParticleSet* p_in, GLvector position)
   elist.resize (elist.size () + 1);
   e = &elist[elist.size () - 1];
   e->Set (&p);
+  return e->Id ();
+
+}
+
+void ParticleDestroy (UINT id)
+{
+
+  unsigned    i;
+
+  for (i = 0; i < elist.size (); i++) {
+    if (elist[i].Id () == id) {
+      ConsoleLog ("ParticleDestroy: Removing effect #%d.", id);
+      elist.erase (elist.begin () + i);
+      return;
+    }
+  }
+  ConsoleLog ("ParticleDestroy: Effect #%d not found.", id);
 
 }
 
