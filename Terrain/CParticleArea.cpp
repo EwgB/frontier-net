@@ -14,11 +14,14 @@
 #include "stdafx.h"
 #include "cache.h"
 #include "cparticlearea.h"
+#include "game.h"
 #include "particle.h"
+#include "sdl.h"
 #include "world.h"
 
-#define STEP_SIZE     8
-#define STEP_GRID     (PARTICLE_AREA_SIZE / STEP_SIZE)
+#define REFRESH_INTERVAL  15000
+#define STEP_SIZE         8
+#define STEP_GRID         (PARTICLE_AREA_SIZE / STEP_SIZE)
 
 /*-----------------------------------------------------------------------------
 
@@ -50,6 +53,22 @@ void CParticleArea::Invalidate ()
 
 }
 
+//Every so often, we drop and re-build our emitters
+//We retire them so their particles can expire normally, as opposed to 
+//DESTROYING them and having the particles vanish abruptly. 
+void CParticleArea::Refresh ()
+{
+
+  UINT    i;
+
+  for (i = 0; i < _emitter.size (); i++) 
+    ParticleRetire (_emitter[i]);
+  _emitter.clear ();
+  _stage = PARTICLE_STAGE_BEGIN;
+
+}
+
+
 void CParticleArea::DoFog (GLcoord world)
 {
 
@@ -59,6 +78,23 @@ void CParticleArea::DoFog (GLcoord world)
   ParticleLoad ("groundfog", &p);
   pos = CachePosition(world.x, world.y);
   p.colors.push_back (glRgba (1.0f, 1.0f, 1.0f));
+  _emitter.push_back (ParticleAdd (&p, pos));
+
+}
+
+void CParticleArea::DoFireflies (GLcoord world)
+{
+
+  ParticleSet   p;
+  GLvector      pos;
+  float         hour;
+
+  hour = fmod (GameTime (), 24.0f);
+  if (hour < 19.5f || hour > 22.0f)
+    return;
+  ParticleLoad ("fireflies", &p);
+  pos = CachePosition(world.x, world.y);
+  p.colors.push_back (glRgba (0.8f, 1.0f, 0.0f));
   _emitter.push_back (ParticleAdd (&p, pos));
 
 }
@@ -132,8 +168,12 @@ void CParticleArea::Update (long stop)
   Region        region;
   GLvector      pos;
 
-  if (Ready ())
-    return;
+  if (Ready ()) {
+    if ((UINT)SdlTick () > _refresh) 
+      Refresh ();
+    else
+      return;
+  }
   if (!ZoneCheck ())
     return;
   world.x = _grid_position.x * PARTICLE_AREA_SIZE + PARTICLE_AREA_SIZE / 2;
@@ -144,9 +184,12 @@ void CParticleArea::Update (long stop)
     DoSandStorm (world);
   else if (region.climate == CLIMATE_SWAMP)
     DoFog (world);
-  else
+  else if (region.has_flowers)
     DoWindFlower ();
-  _stage++;
+  else if (region.temperature > TEMP_TEMPERATE && region.temperature < TEMP_HOT && region.moisture > 0.4f)
+    DoFireflies (world);
+  _refresh = SdlTick () + REFRESH_INTERVAL;
+  _stage = PARTICLE_STAGE_DONE;
 
 }
 

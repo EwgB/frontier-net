@@ -71,6 +71,7 @@ public:
   void              Update (float elapsed);
   void              Render ();
   void              RenderBbox ();
+  void              Retire () { _dead = true; };
   bool              Dead () { return _dead && _particle.empty (); };
 
 };

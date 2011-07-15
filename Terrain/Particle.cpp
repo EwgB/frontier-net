@@ -77,6 +77,24 @@ void ParticleDestroy (UINT id)
 
 }
 
+
+void ParticleRetire (UINT id)
+{
+
+  unsigned    i;
+
+  for (i = 0; i < elist.size (); i++) {
+    if (elist[i].Id () == id) {
+      ConsoleLog ("ParticleRetire: Disabling effect #%d.", id);
+      elist[i].Retire ();
+      return;
+    }
+  }
+  ConsoleLog ("ParticleRetire: Effect #%d not found.", id);
+
+}
+
+
 void ParticleInit ()
 {
 

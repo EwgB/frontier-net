@@ -16,13 +16,16 @@ class CParticleArea : public GridData
   int               _stage;
   vector<UINT>      _emitter;
   GLcoord           _origin;
+  UINT              _refresh;
 
   void              DoFog (GLcoord pos);
   void              DoSandStorm (GLcoord pos);
   void              DoWindFlower ();
+  void              DoFireflies (GLcoord pos);
   bool              ZoneCheck ();
 
 public:
+  void              Refresh ();
   unsigned          Sizeof () { return sizeof (CParticleArea); }; 
   void              Set (int x, int y, int distance);
   void              Render ();
