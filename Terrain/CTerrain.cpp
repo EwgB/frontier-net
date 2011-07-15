@@ -39,7 +39,7 @@ static struct LayerAttributes
   {7,     0.8f,  0.3f,   1.2f,  SURFACE_SAND,       SURFACE_COLOR_SAND},
   {7,     1.0f,  1.0f,   1.1f,  SURFACE_SAND,       SURFACE_COLOR_SAND},
 
-  {7,     0.6f,  1.0f,   1.5f,  SURFACE_SAND_DARK,  SURFACE_COLOR_SAND},
+  {4,     0.6f,  1.0f,   1.5f,  SURFACE_SAND_DARK,  SURFACE_COLOR_SAND},
   {4,    1.0f,  1.0f,   1.4f,   SURFACE_DIRT,       SURFACE_COLOR_DIRT},
   {4,    0.6f,  1.0f,   1.6f,   SURFACE_DIRT_DARK,  SURFACE_COLOR_DIRT},
 
