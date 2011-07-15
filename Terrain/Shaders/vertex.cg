@@ -50,7 +50,7 @@ output TransformAndLight (appdata IN, UNIFORM_DATA)
   //Specular lighting
   float3 V = normalize(eyepos - P);
   float3 H = normalize(lightpos + V);
-  float specular = pow(max(dot(N, H), 0), 10);
+  float specular = pow(max(dot(N, H), 0), 10) * lightcol.r;
   float3 speccol = specular * lightcol;
   if (diffuse <= 0)
     specular = 0;
@@ -58,7 +58,7 @@ output TransformAndLight (appdata IN, UNIFORM_DATA)
 	OUT.pos = mul(ModelViewProj, IN.position);
 //	OUT.world_pos.xyz = IN.position.xyz;
 	// Set The Color To The Value Specified In IN.color
-	OUT.color.rgb = (IN.color.xyz * ambientcol) + (IN.color.xyz * diffusecol) + (IN.color.xyz * specular);
+	OUT.color.rgb = (IN.color.xyz * ambientcol) + (IN.color.xyz * diffusecol) + speccol;//(IN.color.xyz * specular);
   OUT.color.a = 1;
   OUT.uv = IN.uv;
 	return OUT;
