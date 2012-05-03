@@ -2,9 +2,6 @@
 
   File.cpp
 
-                     Copyright 2001-2007 Activeworlds Inc.
-          Licensed Material -- Program Property of Activeworlds Inc.
-
 -------------------------------------------------------------------------------
 
   Various useful file i/o functions.
@@ -21,9 +18,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/utime.h>
-
-#define max_BUF_SIZE            8192
-#define max_FILENAME_LEN        256
 
 /*-----------------------------------------------------------------------------
 
@@ -165,65 +159,9 @@ void FileTouch (char *filename)
 
 }
 
-
-/*-----------------------------------------------------------------------------
-                      f i l e   i s   d i r e c t o r y
------------------------------------------------------------------------------*/
-
-bool FileIsDirectory (char* name)
-{
-
-  DWORD attributes;
-
-  attributes = GetFileAttributes (name);
-  if (attributes != 0xffffffff && (attributes & FILE_ATTRIBUTE_DIRECTORY)) {
-    return true;
-  }
-  return false;
-
-}
-
 /*-----------------------------------------------------------------------------
                        f i l e  c r e a t e  f o l d e r
 -----------------------------------------------------------------------------*/
-
-void FileCreateFolder (char* folder)
-{
-
-  char  dir[max_FILENAME_LEN];
-  char* p;
-  char* p1;
-  int errcode;
-
-  if (!folder)
-    return;
-  if (FileIsDirectory (folder))
-    return;
-  if (strlen (folder) >= sizeof (dir))
-    return;
-  strcpy (dir, folder);
-  if (!(p = strchr (dir, '\\')))
-    p = strchr (dir, '/');
-  p1 = p;
-  while (p && p1) {
-    *p = '\0';
-    _mkdir (dir);
-    *p = '\\';
-    p1++;
-    if (p == NULL || p1 == NULL
-    ||  *p == 0x0 || *p1 == 0x0)
-      break;
-    if (!(p = strchr (p1, '\\')))
-      if (!(p = strchr (p1, '/')))
-        break;
-    p1 = p;
-  }
-
-  errcode = 0;
-  _mkdir (folder);
-
-}
-
 
 void FileMakeDirectory (char* folder)
 {
