@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 
-#include <math.h>
+#include <math.h> 
 #include "avatar.h"
 #include "cache.h"
 #include "cg.h"

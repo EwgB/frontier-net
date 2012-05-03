@@ -23,7 +23,7 @@
 //The number of regions around the edge which should be ocean.
 #define OCEAN_BUFFER      (WORLD_GRID / 10) 
 //This affects the mapping of the coastline.  Higher = busier, more repetitive coast.
-#define FREQUENCY         3 
+#define FREQUENCY         1 
 //How many different colors of flowers are available
 #define FLOWER_PALETTE    (sizeof (flower_palette) / sizeof (GLrgba))
 
@@ -256,7 +256,7 @@ static void do_plains (int x, int y, int size)
       r = WorldRegionGet (xx + x, yy + y);
       sprintf (r.title, "Plains");
       r.climate = CLIMATE_PLAINS;
-      r.color_atmosphere = glRgba (0.0f, 0.5f, 0.0f);
+      r.color_atmosphere = glRgba (0.9f, 0.9f, 0.6f);
       r.geo_water = water;
       r.geo_bias = 8.0f;
       r.moisture = 1.0f;
@@ -286,7 +286,7 @@ static void do_swamp (int x, int y, int size)
       r = WorldRegionGet (xx + x, yy + y);
       sprintf (r.title, "Swamp");
       r.climate = CLIMATE_SWAMP;
-      r.color_atmosphere = glRgba (0.0f, 0.5f, 0.0f);
+      r.color_atmosphere = glRgba (0.4f, 1.0f, 0.6f);
       r.geo_water = water;
       r.moisture = 1.0f;
       r.geo_detail = 8.0f;
@@ -311,20 +311,7 @@ static void do_field (int x, int y, int size)
       sprintf (r.title, "Field");
       r.climate = CLIMATE_FIELD;
       add_flowers (&r, 4);
-      /*
-      r.has_flowers = RandomVal () % 4 == 0;
-      shape = RandomVal ();
-      c = flower_palette[RandomVal () % FLOWER_PALETTE];
-      for (int i = 0; i < FLOWERS; i++) {
-        r.color_flowers[i] = c;
-        r.flower_shape[i] = shape;
-        if ((RandomVal () % 15) == 0) {
-          shape = RandomVal ();
-          c = flower_palette[RandomVal () % FLOWER_PALETTE];
-        }
-      }
-      */
-      r.color_atmosphere = glRgba (0.7f, 0.6f, 0.4f);
+      r.color_atmosphere = glRgba (0.8f, 0.7f, 0.2f);
       r.geo_detail = 8.0f;
       r.flags_shape |= REGION_FLAG_NOBLEND;
       WorldRegionSet (x + xx, y + yy, r);
@@ -334,7 +321,7 @@ static void do_field (int x, int y, int size)
 }
 
 
-//Place a field of flowers
+//Place a forest
 static void do_forest (int x, int y, int size)
 {
 
@@ -346,7 +333,7 @@ static void do_forest (int x, int y, int size)
       r = WorldRegionGet (xx + x, yy + y);
       sprintf (r.title, "Forest");
       r.climate = CLIMATE_FOREST;
-      r.color_atmosphere = glRgba (0.1f, 0.6f, 0.3f);
+      r.color_atmosphere = glRgba (0.0f, 0.0f, 0.5f);
       r.geo_detail = 8.0f;
       r.tree_threshold = 0.66f;
       //r.flags_shape |= REGION_FLAG_NOBLEND;
@@ -773,11 +760,11 @@ void TerraformColors ()
       r.color_dirt = TerraformColorGenerate (SURFACE_COLOR_DIRT, r.moisture, r.temperature, r.grid_pos.x + r.grid_pos.y * WORLD_GRID);
       r.color_rock = TerraformColorGenerate (SURFACE_COLOR_ROCK, r.moisture, r.temperature, r.grid_pos.x + r.grid_pos.y * WORLD_GRID);
       //"atmosphere" is the overall color of the lighting & fog. 
-      humid_air = glRgba (1.0f, 1.0f, 0.3f);
-      dry_air = glRgba (1.0f, 0.7f, 0.3f);
-      warm_air = glRgbaInterpolate (dry_air, humid_air, r.moisture);
-      cold_air = glRgba (0.3f, 0.7f, 1.0f);
-      r.color_atmosphere = glRgbaInterpolate (cold_air, warm_air, r.temperature);
+      warm_air = glRgba (0.0f, 0.2f, 1.0f);
+      cold_air = glRgba (0.7f, 0.9f, 1.0f);
+      //Only set the atmosphere color if it wasn't set elsewhere
+      if (r.color_atmosphere == glRgba (0.0f, 0.0f, 0.0f))
+        r.color_atmosphere = glRgbaInterpolate (cold_air, warm_air, r.temperature);
       //Color the map
       switch (r.climate) {
       case CLIMATE_MOUNTAIN:
@@ -823,6 +810,7 @@ void TerraformColors ()
         r.color_map = r.color_grass * 0.8f;
         r.color_map += r.color_rock * 0.2f;
         r.color_map.Normalize ();
+        r.color_map = r.color_rock;
         break;
       case CLIMATE_CANYON:
         r.color_map = r.color_rock * 0.3f;
@@ -835,6 +823,7 @@ void TerraformColors ()
         r.color_map *= (r.geo_scale * 0.5f + 0.5f);
       //if (r.geo_scale >= 0.0f)
         //r.color_map = glRgbaUnique (r.tree_type);
+      //r.color_map = r.color_atmosphere;
       WorldRegionSet (x, y, r);
     }
   }
@@ -939,6 +928,7 @@ void TerraformOceans ()
         r.moisture = 1.0f;
         r.geo_water = 0.0f;
         r.flags_shape = REGION_FLAG_NOBLEND;
+        r.color_atmosphere = glRgba (0.7f, 0.7f, 1.0f);
         r.climate = CLIMATE_OCEAN;
         sprintf (r.title, "%s Ocean", get_direction_name (x, y));
         WorldRegionSet (x, y, r);
@@ -1077,8 +1067,10 @@ void TerraformZones ()
   int             radius;
   Climate         c;
   GLcoord         walk;
+  UINT            spinner;
 
   walk.Clear ();
+  spinner = 0;
   do {
     x = walk.x;
     y = walk.y;// + WorldNoisei (walk.x + walk.y * WORLD_GRID) % 4;
@@ -1103,8 +1095,8 @@ void TerraformZones ()
       //Rocky wastelands favor cold areas
       if (r.temperature < TEMP_TEMPERATE)
         climates.push_back (CLIMATE_ROCKY);
-      //if (radius > 1)
-        //climates.push_back (CLIMATE_CANYON);
+      if (radius > 1 && !(WorldNoisei (spinner++) % 10))
+        climates.push_back (CLIMATE_CANYON);
       if (r.temperature > TEMP_TEMPERATE && r.temperature < TEMP_HOT && r.moisture > 0.5f)
         climates.push_back (CLIMATE_FOREST);
       if (climates.empty ()) {
@@ -1233,19 +1225,20 @@ void TerraformPrepare ()
       r.tree_threshold = 0.15f;
       from_center.x = abs (x - WORLD_GRID_CENTER);
       from_center.y = abs (y - WORLD_GRID_CENTER);
-      //Geo scale is a number from -1 to 1. -1 is lowest ovean. 0 is sea level. 
+      //Geo scale is a number from -1 to 1. -1 is lowest ocean. 0 is sea level. 
       //+1 is highest elevation on the island. This is used to guide other derived numbers.
       r.geo_scale = glVectorLength (glVector ((float)from_center.x, (float)from_center.y));
       r.geo_scale /= (WORLD_GRID_CENTER - OCEAN_BUFFER);
       //Create a steep drop around the edge of the world
       if (r.geo_scale > 1.0f)
-        r.geo_scale = 1.0f + (r.geo_scale - 1.0f) * 2.0f;
+        r.geo_scale = 1.0f + (r.geo_scale - 1.0f) * 4.0f;
       r.geo_scale = 1.0f - r.geo_scale;
       r.geo_scale += (Entropy ((x + offset.x), (y + offset.y)) - 0.5f);
       r.geo_scale += (Entropy ((x + offset.x) * FREQUENCY, (y + offset.y) * FREQUENCY) - 0.2f);
       r.geo_scale = clamp (r.geo_scale, -1.0f, 1.0f);
       if (r.geo_scale > 0.0f)
         r.geo_water = 1.0f + r.geo_scale * 16.0f;
+      r.color_atmosphere = glRgba (0.0f, 0.0f, 0.0f);
       r.geo_bias = 0.0f;
       r.geo_detail = 0.0f;
       r.color_map = glRgba (0.0f);

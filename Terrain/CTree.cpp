@@ -467,7 +467,7 @@ void CTree::DoTrunk (GLmesh* m, unsigned local_seed, LOD lod)
       (ring + 0) + (segment_count - 1) * radial_edge);
   }
   DoFoliage (m, m->_vertex[m->_vertex.size () - 1] + glVector (0.0f, 0.0f, -0.0f), _current_height / 2, 0.0f);
-  if (!_canopy) {
+  //if (!_canopy) {
     //DoFoliage (TrunkPosition (vertical_pos, NULL), vertical_pos * _height, 0.0f);
     if (_evergreen) { //just rings of foliage, like an evergreen
       for (i = 0; i < (int)branch_list.size (); i++) {
@@ -480,7 +480,7 @@ void CTree::DoTrunk (GLmesh* m, unsigned local_seed, LOD lod)
         DoBranch (m, branch_list[i], angle, lod);
       }
     } 
-  }
+  //}
 
 }
 

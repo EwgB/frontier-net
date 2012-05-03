@@ -22,9 +22,9 @@
 #define REGION_FLAG_RIVERSW     (REGION_FLAG_RIVERS | REGION_FLAG_RIVERW)
 #define REGION_FLAG_RIVER_ANY   (REGION_FLAG_RIVERNS | REGION_FLAG_RIVEREW)
 
-#define REGION_SIZE             64
+#define REGION_SIZE             128
 #define REGION_HALF             (REGION_SIZE / 2)
-#define WORLD_GRID              128
+#define WORLD_GRID              256
 #define WORLD_GRID_EDGE         (WORLD_GRID + 1)
 #define WORLD_GRID_CENTER       (WORLD_GRID / 2)
 #define WORLD_SIZE_METERS       (REGION_SIZE * WORLD_GRID)

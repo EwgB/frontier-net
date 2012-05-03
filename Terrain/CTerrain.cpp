@@ -449,7 +449,7 @@ void CTerrain::DoQuad (int x1, int y1, int size)
   //look for a delta between the center point and the average elevation
   delta = abs (average - center);
   //scale the delta based on the size of the quad we are dealing with
-  delta /= (float)size;
+  //delta /= (float)size;
   if (delta > TOLERANCE)
     PointActivate (xc, yc);
 

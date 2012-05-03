@@ -476,6 +476,7 @@ void WorldSave ()
   char      filename[256];
   WHeader   header;
 
+  return;
   sprintf (filename, "%sworld.sav", GameDirectory ());
   if (!(f = fopen (filename, "wb"))) {
     ConsoleLog ("WorldSave: Could not open file %s", filename);
@@ -501,6 +502,7 @@ void WorldLoad (unsigned seed_in)
   FILE*     f;
   char      filename[256];
   WHeader   header;
+
 
   sprintf (filename, "%sworld.sav", GameDirectory ());
   if (!(f = fopen (filename, "rb"))) {
@@ -532,7 +534,7 @@ void    WorldGenerate (unsigned seed_in)
   build_trees ();
   planet.wind_from_west = (RandomVal () % 2) ? true : false;
   planet.northern_hemisphere = (RandomVal () % 2) ? true : false;
-  planet.river_count = 1 + RandomVal () % 4;
+  planet.river_count = 4 + RandomVal () % 4;
   planet.lake_count = 1 + RandomVal () % 4;
   TerraformPrepare ();
   TerraformOceans ();

@@ -33,7 +33,7 @@
 #define TIME_DUSK           20.5f // 8:30pm
 
 #define NIGHT_COLOR         glRgba (0.0f, 0.0f, 0.3f)
-#define DAY_COLOR           glRgba (0.4f, 0.7f, 1.0f)
+#define DAY_COLOR           glRgba (1.0f, 1.0f, 1.0f)
 
 #define NIGHT_SCALING       glRgba (0.0f, 0.1f, 0.4f)
 #define DAY_SCALING         glRgba (1.0f)
@@ -80,22 +80,21 @@ static void do_cycle ()
 
   max_distance = SceneVisibleRange ();
   r = (Region*)AvatarRegion ();
-  atmosphere = r->color_atmosphere;
-  humid_fog.rmax = MathInterpolate (max_distance, max_distance / 3, r->moisture);
-  humid_fog.rmin = humid_fog.rmax / 2.0f;
+  //atmosphere = r->color_atmosphere;
+  humid_fog.rmax = MathInterpolate (max_distance, max_distance * 0.75f, r->moisture);
+  humid_fog.rmin = MathInterpolate (max_distance * 0.85f, max_distance * 0.25f, r->moisture);
   if (r->climate == CLIMATE_SWAMP) {
     humid_fog.rmax /= 2.0f;
     humid_fog.rmin /= 2.0f;
   }
-  desired.cloud_cover = clamp (r->moisture, 0.15f, 0.85f);
+  desired.cloud_cover = clamp (r->moisture, 0.20f, 0.6f);
   desired.sunrise_fade = desired.sunset_fade = 0.0f;
   decimal_time = fmod (GameTime (), 24.0f);
   if (decimal_time >= TIME_DAWN && decimal_time < TIME_DAY) { //sunrise
     fade = (decimal_time - TIME_DAWN) / (TIME_DAY - TIME_DAWN);
     late_fade = max ((fade -0.5f) * 2.0f, 0);
     base_color = glRgbaInterpolate (NIGHT_COLOR, DAY_COLOR, late_fade);
-    atmosphere = glRgbaInterpolate (glRgba (0,0,0), atmosphere, late_fade);
-    //base_color = glRgbaInterpolate (NIGHT_COLOR, DAY_COLOR, fade);
+    atmosphere = glRgbaInterpolate (glRgba (0.0f), glRgba (1.0f), late_fade);
     time_fog.rmax = MathInterpolate (NIGHT_FOG, max_distance, fade);
     time_fog.rmin = time_fog.rmax / 2.0f;
     desired.star_fade = max (1.0f - fade * 2.0f, 0.0f);
@@ -112,6 +111,7 @@ static void do_cycle ()
     desired.draw_sun = true;
     desired.color[ENV_COLOR_AMBIENT] = glRgba (0.3f, 0.3f, 0.6f);
   } else if (decimal_time >= TIME_DAY && decimal_time < TIME_SUNSET)  { //day
+    atmosphere = glRgba (1.0f);
     fade = (decimal_time - TIME_DAY) / (TIME_SUNSET - TIME_DAY);
     base_color = DAY_COLOR;
     time_fog.rmax = max_distance;
@@ -124,7 +124,7 @@ static void do_cycle ()
     desired.light = glVectorInterpolate (VECTOR_MORNING, VECTOR_AFTERNOON, fade);
     desired.sun_angle = MathInterpolate (SUN_ANGLE_MORNING, SUN_ANGLE_AFTERNOON, fade);
     desired.draw_sun = true;
-    desired.color[ENV_COLOR_AMBIENT] = glRgba (0.3f, 0.3f, 0.6f);
+    desired.color[ENV_COLOR_AMBIENT] = glRgba (0.4f, 0.4f, 0.4f);
   } else if (decimal_time >= TIME_SUNSET && decimal_time < TIME_DUSK) { // sunset
     fade = (decimal_time - TIME_SUNSET) / (TIME_DUSK - TIME_SUNSET);
     base_color = glRgbaInterpolate (DAY_COLOR, NIGHT_COLOR, fade);
@@ -133,6 +133,7 @@ static void do_cycle ()
     if (fade > 0.5f)
       desired.star_fade = (fade - 0.5f) * 2.0f;
     //Sunset fades in, then back out
+    atmosphere = glRgbaInterpolate (glRgba (1.0f), glRgba (0.0f), min (1.0f, fade * 2.0f));
     desired.sunset_fade = 1.0f - abs (fade -0.5f) * 2.0f;
     color_scaling = glRgbaInterpolate (DAY_SCALING, NIGHT_SCALING, fade);
     desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 0.5f, 0.5f);
@@ -142,7 +143,7 @@ static void do_cycle ()
     desired.draw_sun = true;
     desired.color[ENV_COLOR_AMBIENT] = glRgba (0.3f, 0.3f, 0.6f);
  } else { //night
-   atmosphere = glRgba (0,0,0);
+   atmosphere = glRgba (0.0f);
     color_scaling = NIGHT_SCALING;
     base_color = NIGHT_COLOR;
     time_fog.rmin = 1;
@@ -157,16 +158,20 @@ static void do_cycle ()
   desired.fog.rmax = min (humid_fog.rmax, time_fog.rmax);
   desired.fog.rmin = min (humid_fog.rmin, time_fog.rmin);
   for (i = 0; i < ENV_COLOR_COUNT; i++) {
-    if (i == ENV_COLOR_LIGHT) 
+    if (i == ENV_COLOR_LIGHT || i == ENV_COLOR_AMBIENT) 
       continue;
-    average = base_color + atmosphere;
-    average.Normalize ();
+    average = base_color * atmosphere;
+    //average.Normalize ();
+    //average /= 3;
     desired.color[i] = average;
     if (i == ENV_COLOR_SKY) 
       desired.color[i] = base_color * 0.75f;
     desired.color[i] *= color_scaling;
   }   
+  desired.color[ENV_COLOR_SKY] = r->color_atmosphere;
+  desired.color[ENV_COLOR_HORIZON] = (desired.color[ENV_COLOR_SKY] + atmosphere + atmosphere) / 3.0f;
   desired.color[ENV_COLOR_FOG] = desired.color[ENV_COLOR_HORIZON];//desired.color[ENV_COLOR_SKY];
+  //desired.color[ENV_COLOR_SKY] = desired.color[ENV_COLOR_HORIZON] * glRgba (0.2f, 0.2f, 0.8f);
 
 }
 

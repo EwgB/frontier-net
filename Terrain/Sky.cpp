@@ -22,11 +22,11 @@
 #define UP          glVector (0,0,1)
 #define STAR_TILE   3
 #define DISC        8
-#define SKY_GRID    12
+#define SKY_GRID    16
 #define SKY_EDGE    (SKY_GRID + 1)
 #define SKY_HALF    (SKY_GRID / 2)
-#define SKY_DOME    0.3f
-#define SKY_TILE    5
+#define SKY_DOME    0.5f
+#define SKY_TILE    3
 //How big the sunrise / set is. Higher = smaller. Don't set lower than near clip plane. 
 #define SUNSET_SIZE 0.35f
 //The size of the sun itself
@@ -265,7 +265,7 @@ void SkyRender ()
     glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("sun.bmp"));
     draw_sun (e->sun_angle, SUN_SIZE);  
   }
-  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("clouds.png"));
+  //glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("clouds3.bmp"));
   CgShaderSelect (VSHADER_CLOUDS);
   CgShaderSelect (FSHADER_CLOUDS);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

@@ -60,7 +60,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Work\SDK\SDL\lib;H:\SDK\Cg\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>H:\SDK\SDL\lib;H:\SDK\Cg\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

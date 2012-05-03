@@ -39,7 +39,7 @@ void SdlInit ()
   }
   SDL_WM_SetIcon (SDL_LoadBMP("textures/f.bmp"), NULL);
   SDL_WM_SetCaption ("", "");
-  RenderCreate (1600, 1024, 32, false);
+  RenderCreate (1400, 800, 32, false);
   //RenderCreate (1920, 1200, 32, true);
   //Here we initialize SDL as we would do with any SDL application.
 	SDL_Init(SDL_INIT_VIDEO);
