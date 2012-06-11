@@ -1,0 +1,10 @@
+syntax: regexp
+exe$
+log$
+lastbuildstate$
+unsuccessfulbuild$
+idb$
+pdb$
+user$
+bak$
+cache$
