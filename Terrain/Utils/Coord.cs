@@ -30,8 +30,8 @@ namespace Frontier {
 		public static Coord operator *(Coord a, Coord b)	{ return new Coord(a.X * b.X, a.Y * b.Y); }
 		public static Coord operator *(Coord c, int i)		{ return new Coord(c.X * i, c.Y * i); }
 
-		bool Walk(int size) { return Walk (size, size); }
-		bool Walk(int x, int y) {
+		public bool Walk(int size) { return Walk (size, size); }
+		public bool Walk(int x, int y) {
 			X++;
 			if (X >= x) {
 				Y++;
@@ -44,6 +44,6 @@ namespace Frontier {
 			return false;
 		}
 
-		void Clear() { X = Y = 0; }
+		public void Clear() { X = Y = 0; }
 	}
 }
