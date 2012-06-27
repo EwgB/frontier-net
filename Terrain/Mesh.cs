@@ -16,17 +16,15 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Frontier {
 	struct Mesh {
-		GLbbox        bbox;
-		List<int>     indices;
-		List<Vector3>	vertices, normals;
-		List<GLrgba>  colors;
-		List<Vector2> uvs;
+		public GLbbox        bbox;
+		public List<int>     indices;
+		public List<Vector3> vertices, normals;
+		public List<GLrgba>  colors;
+		public List<Vector2> uvs;
 
-		public void CalculateNormalsSeamless();
-		public void Render();
-
-		public int Triangles { get { return indices.Count / 3; } }
-		public int Vertices { get { return vertices.Count; } }
+		public int TriangleCount { get { return indices.Count / 3; } }
+		public int VertexCount { get { return vertices.Count; } }
+		public int NormalCount { get { return normals.Count; } }
 
 		public static Mesh operator +(Mesh a, Mesh b);
 
@@ -86,7 +84,7 @@ namespace Frontier {
 				normals[i] = Vector3.Zero;
 
 			//For each triangle... 
-			for (int i = 0; i < Triangles; i++) {
+			for (int i = 0; i < TriangleCount; i++) {
 				int index = i * 3;
 				int i0 = indices[index];
 				int i1 = indices[index + 1];
@@ -156,7 +154,7 @@ namespace Frontier {
 					}
 				}
 
-				// Vertices not found, so add another
+				// VertexCount not found, so add another
 				if (found == -1) {
 					merge_index.Add(verts_merged.Count);
 					verts_merged.Add(vertices[i]);
@@ -164,7 +162,7 @@ namespace Frontier {
 			}
 
 			//For each triangle... 
-			for (int i = 0; i < Triangles; i++) {
+			for (int i = 0; i < TriangleCount; i++) {
 				int index = i * 3;
 				int i0 = merge_index[indices[index]];
 				int i1 = merge_index[indices[index + 1]];

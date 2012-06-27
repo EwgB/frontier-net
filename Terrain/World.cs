@@ -7,7 +7,7 @@ using OpenTK;
 using OpenTK.Graphics;
 
 namespace Frontier {
-	class World {
+	class FWorld {
 		enum Climate {
 		  CLIMATE_INVALID,		CLIMATE_OCEAN,		CLIMATE_COAST,
 		  CLIMATE_MOUNTAIN,		CLIMATE_RIVER,		CLIMATE_RIVER_BANK,
@@ -42,14 +42,14 @@ namespace Frontier {
 				moisture,
 				cliff_threshold;
 
-			Color4
+			GLrgba
 				color_map,
 				color_rock,
 				color_dirt,
 				color_grass,
 				color_atmosphere;
 
-			Color4[] color_flowers = new Color4[FLOWERS];
+			GLrgba[] color_flowers = new GLrgba[FLOWERS];
 		};
 
 		//Only one of these is ever instanced.  This is everything that goes into a "save file".
@@ -114,7 +114,7 @@ namespace Frontier {
 		#endregion
 
 		Cell WorldCell (int world_x, int world_y);
-		Color4 WorldColorGet (int world_x, int world_y, SurfaceColor c);
+		GLrgba WorldColorGet(int world_x, int world_y, SurfaceColor c);
 		char* WorldLocationName (int world_x, int world_y);
 		Region WorldRegionFromPosition (int world_x, int world_y);
 		Region WorldRegionFromPosition (int world_x, int world_y);

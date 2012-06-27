@@ -8,7 +8,7 @@ using OpenTK;
 namespace Frontier {
 	//A virtual class.  Anything to be managed should be a subclass of this
 	interface GridData {
-		//protected GLbbox _bbox;
+		//protected GLbbox bbox;
 
 		Coord GridPosition { get; }
 		bool Ready();
