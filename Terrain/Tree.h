@@ -44,7 +44,7 @@ struct BranchAnchor
 struct Leaf
 {
 
-  GLvector2     position;
+  Vector2     position;
   float         angle;
   float         size;
   //float         brightness;
