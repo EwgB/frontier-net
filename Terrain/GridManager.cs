@@ -9,7 +9,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 using OpenTK;
@@ -48,8 +47,7 @@ namespace Frontier {
 
 		#endregion
 
-		#region Class method definitions and declarations
-
+		#region Class methods
 		protected Coord ViewPosition(Vector2 eye) { return new Coord((int) eye.X / itemSize, (int) eye.Y / itemSize); }
 
 		protected GridData Item(int index)	{ return items[index]; }
@@ -190,7 +188,6 @@ namespace Frontier {
 					ItemsReady = 0;
 			}
 		}
-
 		#endregion
 
 	}
