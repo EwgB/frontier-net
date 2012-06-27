@@ -673,22 +673,10 @@ namespace Frontier {
 			GL.Begin(BeginMode.Quads);
 
 			Vector2 uv;
-
-			uv = uvframe.Corner(3);
-			GL.TexCoord2(uv);
-			GL.Vertex2(0, 0);
-		
-			uv = uvframe.Corner(0);
-			GL.TexCoord2(uv);
-			GL.Vertex2(TEXTURE_SIZE, 0);
-			
-			uv = uvframe.Corner(1);
-			GL.TexCoord2(uv);
-			GL.Vertex2(TEXTURE_SIZE, TEXTURE_SIZE);
-			
-			uv = uvframe.Corner(2);
-			GL.TexCoord2(uv);
-			GL.Vertex2(0, TEXTURE_SIZE);
+			uv = uvframe.Corner(3);		GL.TexCoord2(uv);		GL.Vertex2(0, 0);
+			uv = uvframe.Corner(0);		GL.TexCoord2(uv);		GL.Vertex2(TEXTURE_SIZE, 0);
+			uv = uvframe.Corner(1);		GL.TexCoord2(uv);		GL.Vertex2(TEXTURE_SIZE, TEXTURE_SIZE);
+			uv = uvframe.Corner(2);		GL.TexCoord2(uv);		GL.Vertex2(0, TEXTURE_SIZE);
 
 			GL.End();
 		}
@@ -737,22 +725,10 @@ namespace Frontier {
 				GL.Begin(BeginMode.Quads);
 
 				Vector2   uv;
-				
-				uv = uvframe.Corner(0);
-				GL.TexCoord2(uv);
-				GL.Vertex2(l.position.X - l.size, l.position.Y - l.size);
-
-				uv = uvframe.Corner(1);
-				GL.TexCoord2(uv);
-				GL.Vertex2(l.position.X + l.size, l.position.Y - l.size);
-
-				uv = uvframe.Corner(2);
-				GL.TexCoord2(uv);
-				GL.Vertex2(l.position.X + l.size, l.position.Y + l.size);
-
-				uv = uvframe.Corner(3);
-				GL.TexCoord2(uv);
-				GL.Vertex2(l.position.X - l.size, l.position.Y + l.size);
+				uv = uvframe.Corner(0);		GL.TexCoord2(uv);		GL.Vertex2(l.position.X - l.size, l.position.Y - l.size);
+				uv = uvframe.Corner(1);		GL.TexCoord2(uv);		GL.Vertex2(l.position.X + l.size, l.position.Y - l.size);
+				uv = uvframe.Corner(2);		GL.TexCoord2(uv);		GL.Vertex2(l.position.X + l.size, l.position.Y + l.size);
+				uv = uvframe.Corner(3);		GL.TexCoord2(uv);		GL.Vertex2(l.position.X - l.size, l.position.Y + l.size);
 
 				GL.End();
 				GL.PopMatrix();
@@ -760,65 +736,65 @@ namespace Frontier {
 		}
 
 		private void DrawBark() {
-			GLtexture*  t;
+			GLtexture   t;
 			GLuvbox     uvframe;
 			int         frames;
 			int         frame;
 			float       frame_size;
 			Vector2   uv;
 
-			glColor3fv(&mBarkColor1.red);
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glBegin(GL_QUADS);
-			glTexCoord2f(0, 0); glVertex2i(0, 0);
-			glTexCoord2f(1, 0); glVertex2i(TEXTURE_SIZE, 0);
-			glTexCoord2f(1, 1); glVertex2i(TEXTURE_SIZE, TEXTURE_SIZE);
-			glTexCoord2f(0, 1); glVertex2i(0, TEXTURE_SIZE);
-			glEnd();
+			GL.Color4(mBarkColor1);
+			GL.BindTexture(TextureTarget.Texture2D, 0);
+			GL.Begin(BeginMode.Quads);
+			GL.TexCoord2(0, 0);		GL.Vertex2(0, 0);
+			GL.TexCoord2(1, 0);		GL.Vertex2(TEXTURE_SIZE, 0);
+			GL.TexCoord2(1, 1);		GL.Vertex2(TEXTURE_SIZE, TEXTURE_SIZE);
+			GL.TexCoord2(0, 1);		GL.Vertex2(0, TEXTURE_SIZE);
+			GL.End();
 
 			t = TextureFromName("bark1.bmp");
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			frames = max(t.height / t.width, 1);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Nearest);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Nearest);
+			frames = Math.Max(t.height / t.width, 1);
 			frame_size = 1.0f / (float) frames;
 			frame = WorldNoisei(mSeedCurrent++) % frames;
-			uvframe.Set(Vector3(0.0f, (float) frame * frame_size), Vector3(1.0f, (float) (frame + 1) * frame_size));
-			glBindTexture(GL_TEXTURE_2D, t.id);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glColorMask(true, true, true, false);
-			glColor3fv(&mBarkColor2.red);
-			glBegin(GL_QUADS);
-			uv = uvframe.Corner(0); glTexCoord2fv(&uv.x); glVertex2i(0, 0);
-			uv = uvframe.Corner(1); glTexCoord2fv(&uv.x); glVertex2i(TEXTURE_SIZE, 0);
-			uv = uvframe.Corner(2); glTexCoord2fv(&uv.x); glVertex2i(TEXTURE_SIZE, TEXTURE_SIZE);
-			uv = uvframe.Corner(3); glTexCoord2fv(&uv.x); glVertex2i(0, TEXTURE_SIZE);
-			glEnd();
-			glColorMask(true, true, true, true);
+			uvframe.Set(new Vector2(0.0f, (float) frame * frame_size), new Vector2(1.0f, (float) (frame + 1) * frame_size));
+
+			GL.BindTexture(TextureTarget.Texture2D, t.id);
+			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+			GL.ColorMask(true, true, true, false);
+			GL.Color4(mBarkColor2);
+			GL.Begin(BeginMode.Quads);
+			uv = uvframe.Corner(0);		GL.TexCoord2(uv);		GL.Vertex2(0, 0);
+			uv = uvframe.Corner(1);		GL.TexCoord2(uv);		GL.Vertex2(TEXTURE_SIZE, 0);
+			uv = uvframe.Corner(2);		GL.TexCoord2(uv);		GL.Vertex2(TEXTURE_SIZE, TEXTURE_SIZE);
+			uv = uvframe.Corner(3);		GL.TexCoord2(uv);		GL.Vertex2(0, TEXTURE_SIZE);
+			GL.End();
+			GL.ColorMask(true, true, true, true);
 		}
 
 		private void DoTexture() {
-			int  i;
+			GL.Disable(EnableCap.CullFace);
+			GL.Disable(EnableCap.Fog);
+			GL.Disable(EnableCap.Lighting);
+			GL.Enable(EnableCap.Blend);
+			GL.Enable(EnableCap.Texture2D);
+			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Nearest);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Nearest);
 
-			glDisable(GL_CULL_FACE);
-			glDisable(GL_FOG);
-			glDisable(GL_LIGHTING);
-			glEnable(GL_BLEND);
-			glEnable(GL_TEXTURE_2D);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			if (_texture)
-				glDeleteTextures(1, Texture);
-			glGenTextures(1, Texture);
-			glBindTexture(GL_TEXTURE_2D, Texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEXTURE_SIZE * 4, TEXTURE_SIZE, 0, GL_RGBA, GL_int_BYTE, NULL);
+			if (Texture != 0)
+				GL.DeleteTextures(1, Texture);
+			GL.GenTextures(1, Texture);
+			GL.BindTexture(TextureTarget.Texture2D, Texture);
+			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, TEXTURE_SIZE * 4, TEXTURE_SIZE, 0, PixelFormat.Rgba, PixelType.Byte, null);
 			RenderCanvasBegin(0, TEXTURE_SIZE, 0, TEXTURE_SIZE, TEXTURE_SIZE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Nearest);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Nearest);
 			char* buffer = new char[TEXTURE_SIZE * TEXTURE_SIZE * 4];
-			for (i = 0; i < 4; i++) {
-				glClearColor(1.0f, 0.0f, 1.0f, 0.0f);
-				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			for (int i = 0; i < 4; i++) {
+				GL.ClearColor(1.0f, 0.0f, 1.0f, 0.0f);
+				GL.Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				if (i == 0)
 					DrawBark();
 				else if (i == 1)
@@ -828,13 +804,13 @@ namespace Frontier {
 				else
 					DrawFacer();
 				//CgShaderSelect (FSHADER_MASK_TRANSFER);
-				glBindTexture(GL_TEXTURE_2D, Texture);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				//glCopyTexSubImage2D (GL_TEXTURE_2D, 0, TEXTURE_SIZE * i, 0, 0, 0, TEXTURE_SIZE, TEXTURE_SIZE);
-				glReadPixels(0, 0, TEXTURE_SIZE, TEXTURE_SIZE, GL_RGBA, GL_int_BYTE, buffer);
+				GL.BindTexture(TextureTarget.Texture2D, Texture);
+				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Nearest);
+				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Nearest);
+				//GL.CopyTexSubImage2D (GL_TEXTURE_2D, 0, TEXTURE_SIZE * i, 0, 0, 0, TEXTURE_SIZE, TEXTURE_SIZE);
+				GL.ReadPixels(0, 0, TEXTURE_SIZE, TEXTURE_SIZE, GL_RGBA, GL_int_BYTE, buffer);
 				//CgShaderSelect (FSHADER_MASK_TRANSFER);
-				glTexSubImage2D(GL_TEXTURE_2D, 0, TEXTURE_SIZE * i, 0, TEXTURE_SIZE, TEXTURE_SIZE, GL_RGBA, GL_int_BYTE, buffer);
+				GL.TexSubImage2D(TextureTarget.Texture2D, 0, TEXTURE_SIZE * i, 0, TEXTURE_SIZE, TEXTURE_SIZE, GL_RGBA, GL_int_BYTE, buffer);
 				//CgShaderSelect (FSHADER_NONE);
 			}
 			delete buffer;
@@ -845,7 +821,7 @@ namespace Frontier {
 		#region Public methods
 		public void Create(bool is_canopy, float moisture, float temp_in, int seed_in) {
 			//Prepare, clear the tables, etc.
-			mLeafList.clear();
+			mLeafList.Clear();
 			mSeed = seed_in;
 			mSeedCurrent = mSeed;
 			mMoisture = moisture;
@@ -907,20 +883,17 @@ namespace Frontier {
 
 		//Render a single tree. Very slow. Used for debugging. 
 		public void Render(Vector3 pos, int alt, LOD lod) {
-
-			glEnable(GL_BLEND);
-			glEnable(GL_TEXTURE_2D);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glBindTexture(GL_TEXTURE_2D, _texture);
-			glPushMatrix();
-			glTranslatef(pos.x, pos.y, pos.z);
+			GL.Enable(GL_BLEND);
+			GL.Enable(GL_TEXTURE_2D);
+			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+			GL.BindTexture(GL_TEXTURE_2D, _texture);
+			GL.PushMatrix();
+			GL.Translatef(pos.x, pos.y, pos.z);
 			mMeshes[alt][lod].Render();
-			glPopMatrix();
+			GL.PopMatrix();
 		}
 
-		public void Info() {
-			TextPrint("TREE:\nSeed:%d Moisture: %f Temp: %f", mSeed, mMoisture, mTemperature);
-		}
+		public void Info() { TextPrint("TREE:\nSeed:%d Moisture: %f Temp: %f", mSeed, mMoisture, mTemperature); }
 
 		public void TexturePurge() {
 			if (Texture)
