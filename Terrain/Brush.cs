@@ -44,7 +44,7 @@ namespace Frontier {
 		// List<UINT>      index;
 		private Mesh        mesh;
 		private static VBO  vbo;
-		private GLbbox      bbox;
+		private BBox      bbox;
 
 		public bool Valid { get; set; }
 		public bool Ready { get { return stage == BrushStage.BRUSH_STAGE_DONE; } }

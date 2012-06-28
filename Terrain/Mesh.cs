@@ -15,7 +15,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Frontier {
 	struct Mesh {
-		public GLbbox        bbox;
+		public BBox        bbox;
 		public List<int>     indices;
 		public List<Vector3> vertices, normals;
 		public List<Color4>  colors;

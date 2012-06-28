@@ -636,7 +636,7 @@ namespace Frontier {
 
 			// We get the bounding box for the high-res tree, but we cut off the roots. No reason to waste texture pixels on that.
 			mMeshes[0, LOD_HIGH].RecalculateBoundingBox();
-			GLbbox box = mMeshes[0, LOD_HIGH]._bbox;
+			BBox box = mMeshes[0, LOD_HIGH]._bbox;
 			box.pmin.z = 0.0f;//Cuts off roots
 			Vector3 center = box.Center();
 			Vector3 size = box.Size();

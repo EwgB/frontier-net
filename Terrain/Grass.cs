@@ -33,7 +33,7 @@ namespace Frontier {
 		private List<int>      _index;
 		private static VBO         _vbo;
 		private GrassStage        _stage;
-		private GLbbox            _bbox;
+		private BBox            _bbox;
 
 		private static UVBox[]        box_grass = new UVBox[GRASS_TYPES];
 		private static UVBox[]        box_flower = new UVBox[GRASS_TYPES];
