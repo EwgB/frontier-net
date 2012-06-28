@@ -8,15 +8,13 @@ using OpenTK.Graphics;
 namespace Frontier {
 	class FWorld {
 		enum Climate {
-		  CLIMATE_INVALID,		CLIMATE_OCEAN,		CLIMATE_COAST,
-		  CLIMATE_MOUNTAIN,		CLIMATE_RIVER,		CLIMATE_RIVER_BANK,
-		  CLIMATE_SWAMP,			CLIMATE_ROCKY,		CLIMATE_LAKE,
-		  CLIMATE_DESERT,			CLIMATE_FIELD,		CLIMATE_PLAINS,
-		  CLIMATE_CANYON,			CLIMATE_FOREST,		CLIMATE_TYPES,
+		  Invalid,		Ocean,		Coast,	Mountain,		River,		RiverBank,
+		  Swamp,			Rocky,		Lake,		Desert,			Field,		Plains,
+		  Canyon,			Forest,		Types,
 		};
 
 		struct Region {
-		  char[]    title = new char[50];
+		  string    title;
 		  Climate   climate;
 		  Coord     grid_pos;
 		  bool      has_flowers;
@@ -41,28 +39,24 @@ namespace Frontier {
 				moisture,
 				cliff_threshold;
 
-			GLrgba
+			Color4
 				color_map,
 				color_rock,
 				color_dirt,
 				color_grass,
 				color_atmosphere;
 
-			GLrgba[] color_flowers = new GLrgba[FLOWERS];
+			Color4[] color_flowers = new Color4[FLOWERS];
+
 		};
 
 		//Only one of these is ever instanced.  This is everything that goes into a "save file".
 		//Using only this, the entire world can be re-created.
 		struct World {
-		  int
-				seed,
-				river_count,
-				lake_count;
 		  int[] noisei = new int[NOISE_BUFFER];
+		  int seed, river_count, lake_count;
 
-			bool
-				wind_from_west,
-				northern_hemisphere;
+			bool wind_from_west, northern_hemisphere;
 		  
 			float[] noisef = new float[NOISE_BUFFER];
 		  Region[,] map = new Region[WORLD_GRID, WORLD_GRID];
@@ -113,7 +107,7 @@ namespace Frontier {
 		#endregion
 
 		Cell WorldCell (int world_x, int world_y);
-		GLrgba WorldColorGet(int world_x, int world_y, SurfaceColor c);
+		Color4 WorldColorGet(int world_x, int world_y, SurfaceColor c);
 		char* WorldLocationName (int world_x, int world_y);
 		Region WorldRegionFromPosition (int world_x, int world_y);
 		Region WorldRegionFromPosition (int world_x, int world_y);
@@ -133,7 +127,7 @@ namespace Frontier {
 		void WorldRegionSet (int index_x, int index_y, Region val);
 		void WorldSave ();
 		int WorldTreeType (float moisture, float temperature);
-		static CTree WorldTree (int id);
+		static Tree WorldTree (int id);
 		void WorldTexturePurge ();
 	}
 }

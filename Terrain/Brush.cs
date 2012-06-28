@@ -27,9 +27,9 @@ namespace Frontier {
 			MAX_TUFTS   = 9;
 		private const int BRUSH_SIZE = 32;
 
-		private static GLuvbox[]
-			box = new GLuvbox[BRUSH_TYPES],
-			boxFlower = new GLuvbox[BRUSH_TYPES];
+		private static UVBox[]
+			box = new UVBox[BRUSH_TYPES],
+			boxFlower = new UVBox[BRUSH_TYPES];
 		private static bool prep_done;
 		private static tuft[] tuftList = new tuft[MAX_TUFTS];
 
@@ -84,9 +84,9 @@ namespace Frontier {
 		}
 
 		private static void do_prep() {
-			int           i, j;
-			GLmatrix      m;
-			float         angle_step;
+			int      i, j;
+			Matrix4  m;
+			float    angle_step;
 
 			for (i = 0; i < BRUSH_TYPES; i++) {
 				box[i].Set (i, 0, BRUSH_TYPES, 2);
@@ -132,7 +132,7 @@ namespace Frontier {
 				Vector2 size			= new Vector2(1.0f + WorldNoisef (index) * 1.0f, 1.0f + WorldNoisef (index) * height);
 				size.Y						= Math.Max (size.X, size.Y);		// Don't let bushes get wider than they are tall
 				
-				GLrgba color;
+				Color4 color;
 				color = CacheSurfaceColor (world_x, world_y);
 				color *= 0.75f;
 				color.alpha = 1.0f;

@@ -145,7 +145,7 @@ namespace Frontier {
 		}
 
 		private void DoFoliage(Mesh m, Vector3 pos, float fsize, float angle) {
-			GLuvbox uv = new GLuvbox();
+			UVBox uv = new UVBox();
 
 			fsize *= mFoliageSize;
 			uv.Set(new Vector2(0.25f, 0.0f), new Vector2(0.5f, 1.0f));
@@ -203,7 +203,7 @@ namespace Frontier {
 					 *     \/   */
 					float level1   = fsize * -0.4f;
 					float level2   = fsize * -1.2f;
-					GLuvbox   uv_inner;
+					UVBox   uv_inner;
 
 					uv_inner.Set(new Vector2(0.25f + 1.25f, 0.125f), new Vector2(0.5f - 0.125f, 1.0f - 0.125f));
 					// Center
@@ -427,7 +427,7 @@ namespace Frontier {
 			if (lod == LOD.LOD_LOW) {
 				#region Just make a 2-panel facer
 				//Use the fourth frame of our texture
-				GLuvbox uv;
+				UVBox uv;
 				uv.Set(new Vector2(0.75f, 0.0f), new Vector2(1.0f, 1.0f));
 				float height = mCurrentHeight;
 				float width = mCurrentHeight / 2.0f;
@@ -662,7 +662,7 @@ namespace Frontier {
 			int frames = Math.Max(t.height / t.width, 1);
 			float frameSize = 1.0f / (float) frames;
 			int frame = WorldNoisei(mSeedCurrent++) % frames;
-			GLuvbox uvframe;
+			UVBox uvframe;
 			uvframe.Set(new Vector2(0.0f, (float) frame * frameSize), new Vector2(1.0f, (float) (frame + 1) * frameSize));
 
 			GL.BindTexture(TextureTarget.Texture2D, t.id);
@@ -702,7 +702,7 @@ namespace Frontier {
 			int frames = Math.Max(t.height / t.width, 1);
 			float frame_size = 1.0f / (float) frames;
 			int frame = WorldNoisei(mSeedCurrent++) % frames;
-			GLuvbox uvframe;
+			UVBox uvframe;
 			uvframe.Set(new Vector2(0.0f, (float) frame * frame_size), new Vector2(1.0f, (float) (frame + 1) * frame_size));
 
 			GL.BindTexture(TextureTarget.Texture2D, t.id);
@@ -737,7 +737,7 @@ namespace Frontier {
 
 		private void DrawBark() {
 			GLtexture   t;
-			GLuvbox     uvframe;
+			UVBox     uvframe;
 			int         frames;
 			int         frame;
 			float       frame_size;

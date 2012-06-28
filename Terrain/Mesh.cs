@@ -18,7 +18,7 @@ namespace Frontier {
 		public GLbbox        bbox;
 		public List<int>     indices;
 		public List<Vector3> vertices, normals;
-		public List<GLrgba>  colors;
+		public List<Color4>  colors;
 		public List<Vector2> uvs;
 
 		public int TriangleCount { get { return indices.Count / 3; } }
@@ -45,7 +45,7 @@ namespace Frontier {
 			uvs.Add(uv);
 		}
 
-		public void PushVertex (Vector3 vert, Vector3 normal, GLrgba color, Vector2 uv) {
+		public void PushVertex (Vector3 vert, Vector3 normal, Color4 color, Vector2 uv) {
 			bbox.ContainPoint(vert);
 			vertices.Add(vert);
 			normals.Add(normal);
