@@ -12,17 +12,17 @@ using OpenTK;
 
 namespace Frontier {
 	struct UVBox {
-		enum UV { TopLeft, TopRight, BottomRight, BottomLeft, LeftEdge, RightEdge, TopEdge, BottomEdge }
+		public enum UV { TopLeft, TopRight, BottomRight, BottomLeft, LeftEdge, RightEdge, TopEdge, BottomEdge }
 
-		Vector2 ul, lr;
-		Vector2 Center { get { return (ul + lr) / 2; } }
+		public Vector2 ul, lr;
+		public Vector2 Center { get { return (ul + lr) / 2; } }
 
-		void Set(float repeats) {
+		public void Set(float repeats) {
 			ul = Vector2.Zero;
 			lr = new Vector2(repeats, repeats);
 		}
 
-		void Set(int x, int y, int columns, int rows) {
+		public void Set(int x, int y, int columns, int rows) {
 			Vector2   frame_size;
 
 			frame_size.X = 1.0f / (float) columns;
@@ -32,12 +32,13 @@ namespace Frontier {
 			lr = new Vector2((float) (x + 1) * frame_size.X, (float) (y + 1) * frame_size.Y);
 		}
 
-		void Set(Vector2 ul_in, Vector2 lr_in) {
+		public void Set(Vector2 ul_in, Vector2 lr_in) {
 			ul = ul_in;
 			lr = lr_in;
 		}
 
-		Vector2 Corner(UV index) {
+		public Vector2 Corner(int index) { return Corner((UV) index); }
+		public Vector2 Corner(UV index) {
 			switch (index) {
 				case UV.TopLeft:			return ul;
 				case UV.TopRight:			return new Vector2(lr.X, ul.Y);

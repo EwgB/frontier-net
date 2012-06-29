@@ -310,11 +310,11 @@ namespace Frontier {
 
 				int segmentCount, radialSteps;
 				switch (lod) {
-					case LOD.LOD_LOW:
+					case LOD.Low:
 						segmentCount = 2;
 						radialSteps = 2;
 						break;
-					case LOD.LOD_MED:
+					case LOD.Med:
 						radialSteps = 2;
 						segmentCount = 3;
 						break;
@@ -401,7 +401,7 @@ namespace Frontier {
 				DoFoliage(m, pos, anchor.length * 0.56f, branch_angle);
 
 				// We saved the points on the underside of the branch. Use these to hang vines on the branch
-				if (lod == LOD.LOD_HIGH)
+				if (lod == LOD.High)
 					DoVines(m, underside);
 			}
 		}
@@ -424,7 +424,7 @@ namespace Frontier {
 			}
 			#endregion
 
-			if (lod == LOD.LOD_LOW) {
+			if (lod == LOD.Low) {
 				#region Just make a 2-panel facer
 				//Use the fourth frame of our texture
 				UVBox uv;
@@ -452,7 +452,7 @@ namespace Frontier {
 				// The texture will repeat ONCE horizontally around the tree. Set the vertical to repeat in the same distance.
 				mTextureTile = 1;	//(float)((int)circumference + 0.5f); 
 				int radialSteps = 3;
-				if (lod == LOD.LOD_HIGH)
+				if (lod == LOD.High)
 					radialSteps = 7;
 				int radialEdge = radialSteps + 1;
 				int segmentCount = 0;
@@ -509,7 +509,7 @@ namespace Frontier {
 
 				DoFoliage(m, m.vertices[m.VertexCount - 1], mCurrentHeight / 2, 0.0f);
 				//if (!mCanopy) {
-				//DoFoliage (TrunkPosition (vertical_pos, NULL), vertical_pos * _height, 0.0f);
+				//DoFoliage (TrunkPosition (vertical_pos, Null), vertical_pos * _height, 0.0f);
 				if (mEvergreen) { //just rings of foliage, like an evergreen
 					for (int i = 0; i < (int) BranchList.Count; i++) {
 						float angle = (float) i * ((360.0f / (float) BranchList.Count));
@@ -541,7 +541,7 @@ namespace Frontier {
 					mMeshes[alt, lod].Clear();
 					DoTrunk(mMeshes[alt, lod], mSeedCurrent + alt, (LOD) lod);
 					//The facers use hand-made normals, so don't recalculate them.
-					if ((LOD) lod != LOD.LOD_LOW)
+					if ((LOD) lod != LOD.Low)
 						mMeshes[alt,lod].CalculateNormalsSeamless();
 				}
 			}
