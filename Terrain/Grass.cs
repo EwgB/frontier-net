@@ -189,7 +189,7 @@ namespace Frontier {
 		public void Set (int x, int y, int density) {
 			//density = max (density, 1); //detail 0 and 1 are the same level. (Maximum density.)
 			density = 1;
-			if (_origin.X == x * GRASS_SIZE & _origin.Y == y * GRASS_SIZE & density == _current_distance)
+			if (_origin.X == x * GRASS_SIZE && _origin.Y == y * GRASS_SIZE && density == _current_distance)
 				return;
 			_grid_position.X = x;
 			_grid_position.Y = y;
@@ -216,8 +216,8 @@ namespace Frontier {
 					Build (stop);
 					break;
 				case GrassStage.Compile:
-					if (!_vertex.empty ())
-						_vbo.Create (GL_QUADS, _index.size (), _vertex.size (), &_index[0], &_vertex[0], &_normal[0], &_color[0], &_uv[0]);
+					if (_vertex.Count != 0)
+						_vbo.Create (GL_QUADS, _index.Count, _vertex.Count, _index, _vertex, _normal, _color, _uv);
 					else
 						_vbo.Clear ();
 					_stage++;

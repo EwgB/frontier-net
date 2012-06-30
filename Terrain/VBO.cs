@@ -46,7 +46,7 @@ namespace Frontier {
 		}
 
 		public void Create(int polygon, int index_count, int vert_count, int index_list,
-								 Vector3 vert_list, Vector3 normal_list, Color4 color_list, Vector2 uv_list) {
+								 List<Vector3> vert_list, List<Vector3> normal_list, List<Color4> color_list, List<Vector2> uv_list) {
 			char*     buffer;
 
 			if (_id_vertex != 0) GL.DeleteBuffers(1, ref _id_vertex);
@@ -95,9 +95,9 @@ namespace Frontier {
 
 		public void Create(Mesh m) {
 			if (m.colors.Count != 0)
-				Create(GL_TRIANGLES, m._index.size(), m.Vertices(), &m._index[0], &m._vertex[0], &m._normal[0], &m._color[0], &m._uv[0]);
+				Create(GL_TRIANGLES, m.indices.Count, m.VertexCount, m.indices, m.vertices, m.normals, m.colors, m.uvs);
 			else
-				Create(GL_TRIANGLES, m._index.size(), m.Vertices(), &m._index[0], &m._vertex[0], &m._normal[0], NULL, &m._uv[0]);
+				Create(GL_TRIANGLES, m.indices.Count, m.VertexCount, m.indices, m.vertices, m.normals, null, m.uvs);
 		}
 
 		public void Render() {

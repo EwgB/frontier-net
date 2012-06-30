@@ -311,19 +311,19 @@ namespace Frontier {
 
 			for (int i = 0; i < TERRAIN_EDGE; i++) {
 				int b = Boundary (i);
-				if ((w != null) & w.GetPoint(TERRAIN_SIZE, i)) {
+				if ((w != null) && w.GetPoint(TERRAIN_SIZE, i)) {
 					PointActivate(0, i);
 					PointActivate(b, i);
 				}
-				if ((e != null) & e.GetPoint(0, i)) {
+				if ((e != null) && e.GetPoint(0, i)) {
 					PointActivate(TERRAIN_SIZE - b, i);
 					PointActivate(TERRAIN_SIZE, i);
 				}
-				if ((s != null) & s.GetPoint(i, 0)) {
+				if ((s != null) && s.GetPoint(i, 0)) {
 					PointActivate(i, TERRAIN_SIZE);
 					PointActivate(i, TERRAIN_SIZE - b);
 				}
-				if ((n != null) & n.GetPoint (i, TERRAIN_SIZE)) {
+				if ((n != null) && n.GetPoint (i, TERRAIN_SIZE)) {
 					PointActivate(i, b);
 					PointActivate(i, 0);
 				}
@@ -346,10 +346,10 @@ namespace Frontier {
 			Terrain s = SceneTerrainGet (mGridPosition.X, mGridPosition.Y + 1);
 			Terrain n = SceneTerrainGet (mGridPosition.X, mGridPosition.Y - 1);
 
-			if ((w != null) & w.PointsCount != mNeighbors[(int) Neighbor.West])		return true;
-			if ((s != null) & s.PointsCount != mNeighbors[(int) Neighbor.South])	return true;
-			if ((e != null) & e.PointsCount != mNeighbors[(int) Neighbor.East])		return true;
-			if ((n != null) & n.PointsCount != mNeighbors[(int) Neighbor.North])	return true;
+			if ((w != null) && w.PointsCount != mNeighbors[(int) Neighbor.West])		return true;
+			if ((s != null) && s.PointsCount != mNeighbors[(int) Neighbor.South])	return true;
+			if ((e != null) && e.PointsCount != mNeighbors[(int) Neighbor.East])		return true;
+			if ((n != null) && n.PointsCount != mNeighbors[(int) Neighbor.North])	return true;
 			return false;
 		}
 
@@ -502,7 +502,7 @@ namespace Frontier {
 			} 
 
 			// If the Edges are inactive, we need 4 triangles (fig b)
-			if (!GetPoint(xc, y) & !GetPoint(xc, y2) & !GetPoint(x, yc) & !GetPoint(x2, yc)) {
+			if (!GetPoint(xc, y) && !GetPoint(xc, y2) && !GetPoint(x, yc) && !GetPoint(x2, yc)) {
 					TrianglePush (n0, n4, n2); //North
 					TrianglePush (n2, n4, n8); //East
 					TrianglePush (n8, n4, n6); //South
@@ -511,7 +511,7 @@ namespace Frontier {
 			}
 
 			// If the top & bottom Edges are inactive, it is impossible to have sub-blocks.
-			if (!GetPoint(xc, y) & !GetPoint(xc, y2)) {
+			if (!GetPoint(xc, y) && !GetPoint(xc, y2)) {
 				TrianglePush (n0, n4, n2); //North
 				TrianglePush (n8, n4, n6); //South
 				if (GetPoint (x, yc)) {
@@ -528,7 +528,7 @@ namespace Frontier {
 			}
   
 			// If the left & right Edges are inactive, it is impossible to have sub-blocks.
-			if (!GetPoint(x, yc) & !GetPoint(x2, yc)) {
+			if (!GetPoint(x, yc) && !GetPoint(x2, yc)) {
 				TrianglePush (n2, n4, n8); //East
 				TrianglePush (n6, n4, n0); //West
 				if (GetPoint(xc, y)) {
@@ -576,13 +576,13 @@ namespace Frontier {
 			}
 
 			// Now that the various triangles have been added, we add the various sub-blocks. This is recursive.
-			if (GetPoint (xc, y) & GetPoint (x, yc)) 
+			if (GetPoint (xc, y) && GetPoint (x, yc)) 
 				CompileBlock (x, y, next_size); //Sub-block A
-			if (GetPoint (xc, y) & GetPoint (x2, yc)) 
+			if (GetPoint (xc, y) && GetPoint (x2, yc)) 
 				CompileBlock (x + next_size, y, next_size); //Sub-block B
-			if (GetPoint (x, yc) & GetPoint (xc, y2)) 
+			if (GetPoint (x, yc) && GetPoint (xc, y2)) 
 				CompileBlock (x, y + next_size, next_size); //Sub-block C
-			if (GetPoint (x2, yc) & GetPoint (xc, y2)) 
+			if (GetPoint (x2, yc) && GetPoint (xc, y2)) 
 				CompileBlock (x + next_size, y + next_size, next_size); //Sub-block D
 		}
 
@@ -686,7 +686,7 @@ namespace Frontier {
 				case Stage.VBO:
 					if (mVBO.Ready())
 						mVBO.Clear();
-					mVBO.Create(GL.Triangles, mIndexBuffer.Count, mVertexList.Count, &mIndexBuffer[0], &mVertexList[0], &mNormalList[0], null, &mUVList[0]);
+					mVBO.Create(GL.Triangles, mIndexBuffer.Count, mVertexList.Count, mIndexBuffer, mVertexList, mNormalList, null, mUVList);
 					mStage++;
 					break;
 				case Stage.Texture: 
@@ -756,7 +756,7 @@ namespace Frontier {
 			if (distance < 2)		new_lod = LOD.High;
 			else								new_lod = LOD.Low;
 
-			if (grid_x == mGridPosition.X & grid_y == mGridPosition.Y & mLOD == new_lod)
+			if (grid_x == mGridPosition.X && grid_y == mGridPosition.Y && mLOD == new_lod)
 				return;
 
 			// If this terrain is now in a new location, we have to kill it entirely
@@ -783,7 +783,7 @@ namespace Frontier {
 		}
 
 		void Render() {
-			if ((mFrontTexture != 0) & Valid) {
+			if ((mFrontTexture != 0) && Valid) {
 				//GL.Color3fv (&mColor.red);
 				GL.BindTexture(TextureTarget.Texture2D, mFrontTexture);
 				mVBO.Render ();

@@ -303,7 +303,7 @@ namespace Frontier {
 		}
 
 		private void DoBranch(Mesh m, BranchAnchor anchor, float branch_angle, LOD lod) {
-			if ((anchor.length >= 2.0f) & (anchor.radius >= MIN_RADIUS)) {
+			if ((anchor.length >= 2.0f) && (anchor.radius >= MIN_RADIUS)) {
 				//int segmentCount = Math.Max((int) (anchor.length * SEGMENTS_PER_METER), MIN_SEGMENTS) + 3;
 				int baseIndex = m.VertexCount;
 				Matrix4 mat = Matrix4.CreateRotationZ(branch_angle);

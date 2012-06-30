@@ -179,7 +179,7 @@ namespace Frontier {
 		}
 
 		/*
-		public static float MathInterpolateQuad (float y0, float y1, float y2, float y3, GLvector2 offset) {
+		public static float MathInterpolateQuad (float y0, float y1, float y2, float y3, Vector2 offset) {
 			MathInterpolateQuad (y0, y1, y2, y3, offset, false);
 		} */
 	}
