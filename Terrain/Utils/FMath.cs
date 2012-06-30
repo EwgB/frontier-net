@@ -151,10 +151,8 @@ namespace Frontier {
 		 *  |     |
 		 * y2-----y3
 		 */
-		public static float InterpolateQuad(float y0, float y1, float y2, float y3, Vector2 offset, bool left) {
-			float   a;
-			float   b;
-			float   c;
+		public static float InterpolateQuad(float y0, float y1, float y2, float y3, Vector2 offset, bool left = false) {
+			float a, b, c;
 
 			if (left) {
 				if (offset.X + offset.Y < 1) {

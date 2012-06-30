@@ -14,7 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Frontier.Utils {
+namespace Frontier {
 	class Random {
 		private const int
 			M	               = 397,
@@ -28,16 +28,16 @@ namespace Frontier.Utils {
 			UPPER_MASK       = 0x80000000;
 
 		private static int   k = 1;
-		private static ulong[] mag01 = { 0x0, MATRIX_A };
-		private static ulong[] ptgfsr = new ulong[N];
+		private static uint[] mag01 = { 0x0, MATRIX_A };
+		private static int[] ptgfsr = new int[N];
 
-		private ulong TEMPERING_SHIFT_L(ulong y) { return (y >> 18); }
-		private ulong TEMPERING_SHIFT_S(ulong y) { return (y << 7); }
-		private ulong TEMPERING_SHIFT_T(ulong y) { return (y << 15); }
-		private ulong TEMPERING_SHIFT_U(ulong y) { return (y >> 11); }
+		private int TEMPERING_SHIFT_L(int y) { return (y >> 18); }
+		private int TEMPERING_SHIFT_S(int y) { return (y << 7); }
+		private int TEMPERING_SHIFT_T(int y) { return (y << 15); }
+		private int TEMPERING_SHIFT_U(int y) { return (y >> 11); }
 
 
-		public static ulong RandomVal() {
+		public static int Value() {
 			int		kk;
 			ulong	y;
 
@@ -61,15 +61,15 @@ namespace Frontier.Utils {
 			return y ^= TEMPERING_SHIFT_L(y);
 		}
 
-		public static ulong RandomVal(ulong range) {
-			return (range != 0) ? (RandomVal() % range) : 0;
+		public static int Value(int range) {
+			return (range != 0) ? (Value() % range) : 0;
 		}
 
-		public static float RandomFloat() {
-			return (float) RandomVal(10000) / 10000;
+		public static float Float() {
+			return (float) Value(10000) / 10000;
 		}
 
-		public static void RandomInit(ulong seed) {
+		public static void Init(int seed) {
 			mag01[0] = 0;
 			mag01[1] = MATRIX_A;
 			ptgfsr[0] = seed;
@@ -79,7 +79,7 @@ namespace Frontier.Utils {
 		}
 
 		public static bool CoinFlip() {
-			return (RandomVal(2) == 0);
+			return (Value(2) == 0);
 		}
 	}
 }

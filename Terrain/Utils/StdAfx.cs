@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Frontier {
 	enum SurfaceColor { Black, Sand, Dirt, Grass, Rock, Snow }
@@ -9,9 +8,5 @@ namespace Frontier {
 	enum LOD { Low, Med, High }
 	enum DIRS { North, South, East, West }
 
-	struct Cell {
-		float elevation;
-		float water_level;
-		float detail;
-	};
+	struct Cell { public float elevation, water_level, detail; }
 }
