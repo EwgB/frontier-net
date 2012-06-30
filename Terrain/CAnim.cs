@@ -219,8 +219,8 @@ namespace Frontier {
 					channels = atoi(find + 8);
 					//Six channels means first 3 are position.  Ignore.
 					if (channels == 6)
-						dem_bones.push_back(BoneId.Invalid);
-					dem_bones.push_back(current_id);
+						dem_bones.Add(BoneId.Invalid);
+					dem_bones.Add(current_id);
 				}
 				if (find = strstr(token, "JOINT")) {
 					find += 5; //skip the word joint
@@ -246,7 +246,7 @@ namespace Frontier {
 							joint.rotation.z = -(float) atof(find);
 							find = strchr(find, 32) + 1;
 							if (joint.id != BoneId.Invalid) {
-								mFrame[frame].joint.push_back(joint);
+								mFrame[frame].joint.Add(joint);
 							}
 						}
 					}

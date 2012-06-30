@@ -120,7 +120,7 @@ namespace Frontier {
 
 			bw.index = index;
 			bw.weight = weight;
-			mBones[mBoneIndices[id]].vertex_weights.push_back(bw);
+			mBones[mBoneIndices[id]].vertex_weights.Add(bw);
 		}
 
 		public void PushBone(BoneId id, int parent, Vector3 pos) {
