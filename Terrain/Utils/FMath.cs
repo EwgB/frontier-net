@@ -13,6 +13,7 @@ using OpenTK;
 
 namespace Frontier {
 	class FMath {
+		#region Constants
 		private const float
 			FREEZING = 0.32f,
 			TEMP_COLD = 0.45f,
@@ -28,9 +29,10 @@ namespace Frontier {
 			// This is used to scale the z value of normals
 			// Lower numbers make the normals more extreme, exaggerate the lighting
 			NORMAL_SCALING = 0.6f;
+		#endregion
 
 		// Keep an angle between 0 and 360
-		public static float MathAngle(float angle) {
+		public static float Angle(float angle) {
 			if (angle < 0.0f)
 				angle = 360.0f - (Math.Abs(angle) % 360);
 			else
@@ -39,7 +41,7 @@ namespace Frontier {
 		}
 
 		// Get an angle between two given points on a grid
-		public static float MathAngle(float x1, float y1, float x2, float y2) {
+		public static float Angle(float x1, float y1, float x2, float y2) {
 			float x_delta, z_delta, angle;
 
 			z_delta = (y1 - y2);
@@ -65,7 +67,7 @@ namespace Frontier {
 		}
 
 		// Get distance (squared) between 2 points on a plane
-		public static float MathDistance2(float x1, float y1, float x2, float y2) {
+		public static float Distance2(float x1, float y1, float x2, float y2) {
 			float dx, dy;
 
 			dx = x1 - x2;
@@ -73,8 +75,8 @@ namespace Frontier {
 			return dx * dx + dy * dy;
 		}
 
-		// Get distance between 2 points on a plane. This is slightly slower than MathDistance2
-		public static float MathDistance(float x1, float y1, float x2, float y2) {
+		// Get distance between 2 points on a plane. This is slightly slower than Distance2
+		public static float Distance(float x1, float y1, float x2, float y2) {
 			float dx, dy;
 
 			dx = x1 - x2;
@@ -83,7 +85,7 @@ namespace Frontier {
 		}
 
 		// Difference between two angles
-		public static float MathAngleDifference(float a1, float a2) {
+		public static float AngleDifference(float a1, float a2) {
 			float result;
 
 			result = (a1 - a2) % 360;
@@ -95,12 +97,12 @@ namespace Frontier {
 		}
 
 		// Interpolate between two values
-		public static float MathInterpolate(float n1, float n2, float delta) {
+		public static float Interpolate(float n1, float n2, float delta) {
 			return n1 * (1.0f - delta) + n2 * delta;
 		}
 
 		// Return a scalar of 0.0 to 1.0, based an the given values position within a range
-		public static float MathSmoothStep(float val, float a, float b) {
+		public static float SmoothStep(float val, float a, float b) {
 			if (b == a)
 				return 0.0f;
 			val -= a;
@@ -109,13 +111,13 @@ namespace Frontier {
 		}
 
 		// Average two values
-		public static float MathAverage(float n1, float n2) {
+		public static float Average(float n1, float n2) {
 			return (n1 + n2) / 2.0f;
 		}
 
 		/* This will take linear input values from 0.0 to 1.0 and convert them to values along a curve.
 		 * This could also be acomplished with sin(), but this way avoids converting to radians and back. */
-		public static float MathScalarCurve(float val) {
+		public static float ScalarCurve(float val) {
 			float sign;
 
 			val = (val - 0.5f) * 2.0f;
@@ -134,7 +136,7 @@ namespace Frontier {
 		}
 
 		// This will take values between low and high and return a value from 0 to 1.
-		public static float MathScalar(float val, float low, float high) {
+		public static float Scalar(float val, float low, float high) {
 			val = Math.Max(val, low);
 			val = Math.Min(val, high);
 			return (val - low) / (high - low);
@@ -149,7 +151,7 @@ namespace Frontier {
 		 *  |     |
 		 * y2-----y3
 		 */
-		public static float MathInterpolateQuad(float y0, float y1, float y2, float y3, Vector2 offset, bool left) {
+		public static float InterpolateQuad(float y0, float y1, float y2, float y3, Vector2 offset, bool left) {
 			float   a;
 			float   b;
 			float   c;
@@ -179,8 +181,10 @@ namespace Frontier {
 		}
 
 		/*
-		public static float MathInterpolateQuad (float y0, float y1, float y2, float y3, Vector2 offset) {
-			MathInterpolateQuad (y0, y1, y2, y3, offset, false);
+		public static float InterpolateQuad (float y0, float y1, float y2, float y3, Vector2 offset) {
+			InterpolateQuad (y0, y1, y2, y3, offset, false);
 		} */
+
+		public static int Clamp(int val, int min, int max) { return (val < min) ? min : (val > max) ? max : val; }
 	}
 }

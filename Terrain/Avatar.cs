@@ -193,14 +193,14 @@ namespace Frontier {
 			desired_angle = current_angle;
 
 			if (moving) { // We're trying to accelerate
-				desired_angle = MathAngle(0.0f, 0.0f, desired_movement.x, desired_movement.y);
+				desired_angle = FMath.Angle(0.0f, 0.0f, desired_movement.x, desired_movement.y);
 				current_speed += elapsed * MOVE_SPEED * ACCEL;
 			} else //We've stopped pushing forward
 				current_speed -= elapsed * MOVE_SPEED * DECEL;
-			current_speed = clamp(current_speed, min_speed, max_speed);
+			current_speed = FMath.Clamp(current_speed, min_speed, max_speed);
 
 			// Now figure out the angle of movement
-			angle_adjust = MathAngleDifference(current_angle, desired_angle);
+			angle_adjust = FMath.AngleDifference(current_angle, desired_angle);
 			// If we're trying to reverse direction, don't do a huge, arcing turn.  Just slow and double back
 			lean_angle = 0.0f;
 
@@ -213,7 +213,7 @@ namespace Frontier {
 			} else {
 				if (Math.Abs(angle_adjust) < 135) {
 					current_angle -= angle_adjust * elapsed * 2.0f;
-					lean_angle = clamp(angle_adjust / 4.0f, -15, 15);
+					lean_angle = FMath.Clamp(angle_adjust / 4.0f, -15, 15);
 				}
 			}
 
@@ -224,11 +224,11 @@ namespace Frontier {
 			current_movement *= current_speed * elapsed;
 			mPosition.X += current_movement.X;
 			mPosition.Y += current_movement.Y;
-			desired_cam_distance = clamp(desired_cam_distance, CAM_MIN, CAM_MAX);
-			cam_distance = MathInterpolate(cam_distance, desired_cam_distance, elapsed);
+			desired_cam_distance = FMath.Clamp(desired_cam_distance, CAM_MIN, CAM_MAX);
+			cam_distance = FMath.Interpolate(cam_distance, desired_cam_distance, elapsed);
 			ground = CacheElevation(mPosition.X, mPosition.Y);
 			water = WorldWaterLevel((int) mPosition.X, (int) mPosition.Y);
-			avatar_facing.Y = MathInterpolate(avatar_facing.Y, lean_angle, elapsed);
+			avatar_facing.Y = FMath.Interpolate(avatar_facing.Y, lean_angle, elapsed);
 
 			if (!flying) {
 				velocity -= GRAVITY * elapsed;
@@ -252,7 +252,7 @@ namespace Frontier {
 				distance_walked += current_speed * elapsed;
 		
 			if (current_movement.X != 0.0f && current_movement.Y != 0.0f)
-				avatar_facing.Z = -MathAngle(0.0f, 0.0f, current_movement.X, current_movement.Y);
+				avatar_facing.Z = -FMath.Angle(0.0f, 0.0f, current_movement.X, current_movement.Y);
 			
 			if (flying)
 				AvatarAnim = Flying;
@@ -316,16 +316,16 @@ namespace Frontier {
 			mouse_sense = CVarUtils.GetCVar<float>("mouse.sensitivity");
 			angle.X -= (float) x * mouse_sense;
 			angle.Z += (float) y * mouse_sense;
-			angle.X = clamp(angle.x, 0.0f, 180.0f);
+			angle.X = FMath.Clamp(angle.x, 0.0f, 180.0f);
 			angle.Z = fmod(angle.z, 360.0f);
 			if (angle.Z < 0.0f)
 				angle.Z += 360.0f;
 		}
 
 		private void PositionSet(Vector3 new_pos) {
-			new_pos.Z = clamp(new_pos.z, -25, 2048);
-			new_pos.X = clamp(new_pos.x, 0, (REGION_SIZE * WORLD_GRID));
-			new_pos.Y = clamp(new_pos.y, 0, (REGION_SIZE * WORLD_GRID));
+			new_pos.Z = FMath.Clamp(new_pos.z, -25, 2048);
+			new_pos.X = FMath.Clamp(new_pos.x, 0, (REGION_SIZE * WORLD_GRID));
+			new_pos.Y = FMath.Clamp(new_pos.y, 0, (REGION_SIZE * WORLD_GRID));
 			mPosition = new_pos;
 			AvatarCameraPosition = mPosition;
 			angle = AvatarCameraAngle = Vector3(90.0f, 0.0f, 0.0f);

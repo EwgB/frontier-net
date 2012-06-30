@@ -272,7 +272,7 @@ namespace Frontier {
 					break;
 					#endregion
 			}
-			//angle = MathAngle (pos.x, pos.y, 0.0f, 0.0f);
+			//angle = FMath.Angle (pos.x, pos.y, 0.0f, 0.0f);
 			//angle += 45.0f;
 			Matrix4 mat = Matrix4.CreateRotationZ(angle);
 			for (int i = base_index; i < m.vertices.Count; i++) {
@@ -562,7 +562,7 @@ namespace Frontier {
 						l.size = size;
 						l.position.X = (float) (TEXTURE_HALF + Math.Sin(rad) * l.size);
 						l.position.Y = (float) (TEXTURE_HALF + Math.Cos(rad) * l.size);
-						l.angle = -FMath.MathAngle(TEXTURE_HALF, TEXTURE_HALF, l.position.X, l.position.Y);
+						l.angle = -FMath.Angle(TEXTURE_HALF, TEXTURE_HALF, l.position.X, l.position.Y);
 						//l.brightness = 1.0f - (currentSteps / (float)totalSteps) * WorldNoisef (mSeedCurrent++) * 0.5f;
 						//l.brightness = 1.0f - WorldNoisef (mSeedCurrent++) * 0.2f;
 						//l.color = ColorInterpolate (mLeafColor, Color (0.0f, 0.5f, 0.0f), WorldNoisef (mSeedCurrent++) * 0.25f);
@@ -620,7 +620,7 @@ namespace Frontier {
 				for (int i = 1; i < mLeafList.Count; i++) {
 					int j = mLeafList[i].neighbor;
 					Leaf l_i = mLeafList[i];
-					l_i.angle = -FMath.MathAngle(
+					l_i.angle = -FMath.Angle(
 						mLeafList[j].position.X, mLeafList[j].position.Y,
 						mLeafList[i].position.X, mLeafList[i].position.Y);
 				}
