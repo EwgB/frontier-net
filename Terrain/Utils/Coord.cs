@@ -20,16 +20,16 @@ namespace Frontier {
 		public static bool operator ==(Coord a, Coord b)	{ return  (a.X == b.X && a.Y == b.Y); }
 		public static bool operator !=(Coord a, Coord b)	{ return !(a.X == b.X && a.Y == b.Y); }
 
-		public static Coord operator +(Coord a, Coord b) { return new Coord(a.X + b.X, a.Y + b.Y); }
-		public static Coord operator +(Coord c, int i) { return new Coord(c.X + i, c.Y + i); }
+		public static Coord operator +(Coord a, Coord b)	{ return new Coord(a.X + b.X, a.Y + b.Y); }
+		public static Coord operator +(Coord c, int i)		{ return new Coord(c.X + i, c.Y + i); }
 
-		public static Coord operator -(Coord a, Coord b) { return new Coord(a.X - b.X, a.Y - b.Y); }
+		public static Coord operator -(Coord a, Coord b)	{ return new Coord(a.X - b.X, a.Y - b.Y); }
 		public static Coord operator -(Coord c, int i)		{ return new Coord(c.X - i, c.Y - i);}
 
 		public static Coord operator *(Coord a, Coord b)	{ return new Coord(a.X * b.X, a.Y * b.Y); }
 		public static Coord operator *(Coord c, int i)		{ return new Coord(c.X * i, c.Y * i); }
 
-		public bool Walk(int size) { return Walk (size, size); }
+		public bool Walk(int size) { return Walk(size, size); }
 		public bool Walk(int x, int y) {
 			X++;
 			if (X >= x) {
@@ -44,5 +44,21 @@ namespace Frontier {
 		}
 
 		public void Clear() { X = Y = 0; }
+
+		public bool Equals(Coord p) { return (X == p.X) && (Y == p.Y); }
+		public override bool Equals(Object obj) {
+			// If parameter is null return false.
+			if (obj == null)
+				return false;
+
+			// If parameter cannot be cast to Point return false.
+			if (obj is Coord)
+				// Return true if the fields match:
+				return (X == ((Coord) obj).X) && (Y == ((Coord) obj).Y);
+			else
+				return false;
+		}
+
+		public override int GetHashCode() { return X ^ Y; }
 	}
 }

@@ -18,10 +18,10 @@ namespace Frontier {
 		Vector3   pmin;
 		Vector3   pmax;
 
-		Vector3 Center { get { return (pmin + pmax) / 2.0f; } }
-		Vector3 Size { get { return pmax - pmin; } }
+		public Vector3 Center { get { return (pmin + pmax) / 2.0f; } }
+		public Vector3 Size { get { return pmax - pmin; } }
 
-		void ContainPoint(Vector3 point) {
+		public void ContainPoint(Vector3 point) {
 			pmin.X = Math.Min(pmin.X, point.X);
 			pmin.Y = Math.Min(pmin.Y, point.Y);
 			pmin.Z = Math.Min(pmin.Z, point.Z);
@@ -31,12 +31,12 @@ namespace Frontier {
 			pmax.Z = Math.Max(pmax.Z, point.Z);
 		}
 
-		void Clear() {
+		public void Clear() {
 			pmax = new Vector3(-MAX_VALUE, -MAX_VALUE, -MAX_VALUE);
 			pmin = new Vector3 (MAX_VALUE,  MAX_VALUE,  MAX_VALUE);
 		}
 
-		void Render() {
+		public void Render() {
 			// Bottom of box (Assuming z = up)
 			GL.Begin(BeginMode.LineStrip);
 			GL.Vertex3(pmin.X, pmin.Y, pmin.Z);
