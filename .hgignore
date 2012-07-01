@@ -8,3 +8,6 @@ pdb$
 user$
 bak$
 cache$
+syntax: glob
+Terrain/obj/x86/Release/Frontier.csproj.FileListAbsolute.txt
+Terrain/obj/x86/Debug/Frontier.csproj.FileListAbsolute.txt

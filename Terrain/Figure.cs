@@ -9,24 +9,48 @@ using OpenTK;
 using OpenTK.Graphics;
 
 namespace Frontier {
+	#region Structs
 	struct BWeight {
-		public int   index;
-		public float weight;
+		public int Index { get; set; }
+		public float Weight { get; set; }
 	}
 
 	struct PWeight {
-		public BoneId bone;
-		public float  weight;
+		public BoneId Bone { get; set; }
+		public float Weight { get; set; }
 	}
 
 	struct Bone {
-		public BoneId					id, idParent;
-		public Vector3				origin, position, rotation;
-		public Color4					color;
-		public List<int>			children;
-		public List<BWeight>	vertex_weights;
-		public Matrix4				matrix;
+		public BoneId	Id { get; set; }
+		public BoneId	IdParent { get; set; }
+
+		public Vector3 Origin { get; set; }
+		public Vector3 Position { get; set; }
+		public Vector3 Rotation { get; set; }
+
+		public Color4 Color { get; set; }
+		public List<int> Children { get; set; }
+		public List<BWeight> VertexWeights { get; set; }
+		public Matrix4 Matrix { get; set; }
 	}
+
+	struct BoneListElement {
+		public Vector3 Pos { get; set; }
+		public BoneId Id { get; set; }
+		public BoneId IdParent { get; set; }
+
+		public BoneListElement(Vector3 pos, BoneId id, BoneId idParent) {
+			Pos = pos;
+			Id = id;
+			IdParent = idParent;
+		}
+		public BoneListElement(float x, float y, float z, BoneId id, BoneId idParent) {
+			Pos = new Vector3(x, y, z);
+			Id = id;
+			IdParent = idParent;
+		}
+	}
+	#endregion
 
 	class Figure {
 		#region Member fields, constants and properties
@@ -35,7 +59,7 @@ namespace Frontier {
 		private List<Bone> mBones;
 		private Vector3 mPosition, mRotation;
 		private int[] mBoneIndices = new int[BONE_COUNT];
-		private int             mUnknownCount;
+		private int mUnknownCount;
 
 		private Mesh
 			mSkinStatic,		//The original, "read only"
@@ -44,6 +68,38 @@ namespace Frontier {
 
 		public Vector3 Position { get; set; }
 		public Mesh Skin { get { return mSkinStatic; } }
+
+		private static BoneListElement[] boneList = {
+			new BoneListElement(  0.0f, 0.0f, 0.0f,     BoneId.Root,      BoneId.Root),
+			new BoneListElement(  0.0f, 0.0f, 1.1f,     BoneId.Pelvis,    BoneId.Root),
+			new BoneListElement(  0.1f, 0.0f, 1.0f,     BoneId.RHip,      BoneId.Pelvis),
+			new BoneListElement(  0.1f, 0.0f, 0.5f,     BoneId.RKnee,     BoneId.RHip),
+			new BoneListElement(  0.1f, 0.0f, 0.0f,     BoneId.RAnkle,    BoneId.RKnee),
+			new BoneListElement(  0.1f,-0.1f, 0.0f,     BoneId.RToe,      BoneId.RAnkle),
+
+			new BoneListElement( -0.1f, 0.0f, 1.0f,     BoneId.LHip,      BoneId.Pelvis),
+			new BoneListElement( -0.1f, 0.0f, 0.5f,     BoneId.LKnee,     BoneId.LHip),
+			new BoneListElement( -0.1f, 0.0f, 0.0f,     BoneId.LAnkle,    BoneId.LKnee),
+			new BoneListElement( -0.1f,-0.1f, 0.0f,     BoneId.LToe,      BoneId.LAnkle),
+
+			new BoneListElement(  0.0f, 0.0f, 1.55f,    BoneId.Spine1,    BoneId.Pelvis),
+
+			new BoneListElement(  0.1f, 0.0f, 1.5f,     BoneId.RShoulder, BoneId.Spine1),
+			new BoneListElement(  0.2f, 0.0f, 1.5f,     BoneId.RArm,      BoneId.RShoulder),
+			new BoneListElement(  0.4f, 0.0f, 1.5f,     BoneId.RElbow,    BoneId.RArm),
+			new BoneListElement(  0.8f, 0.0f, 1.5f,     BoneId.RWrist,    BoneId.RElbow),
+
+			new BoneListElement( -0.1f, 0.0f, 1.5f,     BoneId.LShoulder, BoneId.Spine1),
+			new BoneListElement( -0.2f, 0.0f, 1.5f,     BoneId.LArm,      BoneId.LShoulder),
+			new BoneListElement( -0.4f, 0.0f, 1.5f,     BoneId.LElbow,    BoneId.LArm),
+			new BoneListElement( -0.8f, 0.0f, 1.5f,     BoneId.LWrist,    BoneId.LElbow),
+
+			new BoneListElement(  0.0f, 0.0f, 1.6f,     BoneId.Neck,      BoneId.Spine1),
+			new BoneListElement(  0.0f, 0.0f, 1.65f,    BoneId.Head,      BoneId.Neck),
+			new BoneListElement(  0.0f,-0.2f, 1.65f,    BoneId.Face,      BoneId.Head),
+			new BoneListElement(  0.0f, 0.0f, 1.8f,     BoneId.Crown,     BoneId.Face)
+		};
+
 		#endregion
 
 		#region Public methods
@@ -74,9 +130,9 @@ namespace Frontier {
 			BoneId    bid;
 
 			bid = CAnim.BoneFromString (name);
-			//If CAnim couldn't make sense of the name, or if that id is already in use...
+			//If CAnim couldn't make sense of the name, or if that Id is already in use...
 			if (bid == BONE_INVALID || mBoneIndices[bid] != BONE_INVALID) {
-				//ConsoleLog ("Couldn't id Bone '%s'.", name);
+				//ConsoleLog ("Couldn't Id Bone '%s'.", name);
 				bid = (BoneId)(BONE_UNKNOWN0 + mUnknownCount);
 				mUnknownCount++;
 			}
@@ -97,7 +153,7 @@ namespace Frontier {
 
 			mSkinRender = mSkinDeform;
 			for (i = 1; i < mBones.size (); i++) 
-				mBones[i].mPosition = mBones[i].origin;
+				mBones[i].mPosition = mBones[i].Origin;
 			for (rit = mBones.rbegin(); rit < mBones.rend(); ++rit) {
 				b = &(*rit);
 				if (b.mRotation == Vector3 (0.0f, 0.0f, 0.0f))
@@ -118,36 +174,36 @@ namespace Frontier {
 		public void PushWeight(int id, int index, float weight) {
 			BWeight   bw;
 
-			bw.index = index;
-			bw.weight = weight;
-			mBones[mBoneIndices[id]].vertex_weights.Add(bw);
+			bw.Index = index;
+			bw.Weight = weight;
+			mBones[mBoneIndices[id]].VertexWeights.Add(bw);
 		}
 
 		public void PushBone(BoneId id, int parent, Vector3 pos) {
 			Bone    b;
 
 			mBoneIndices[(int) id] = mBones.Count;
-			b.id = (BoneId) id;
-			b.idParent = (BoneId) parent;
-			b.position = pos;
-			b.origin = pos;
-			b.rotation = Vector3.Zero;
-			b.children.Clear();
-			b.color = glRgbaUnique(id + 1);
+			b.Id = (BoneId) id;
+			b.IdParent = (BoneId) parent;
+			b.Position = pos;
+			b.Origin = pos;
+			b.Rotation = Vector3.Zero;
+			b.Children.Clear();
+			b.Color = glRgbaUnique(id + 1);
 			mBones.Add(b);
-			mBones[mBoneIndices[parent]].children.Add((int) id);
+			mBones[mBoneIndices[parent]].Children.Add((int) id);
 		}
 
 		public void BoneInflate(BoneId id, float distance, bool do_children) {
 			Bone b = mBones[mBoneIndices[(int) id]];
-			for (int i = 0; i < b.vertex_weights.Count; i++) {
-				int index = b.vertex_weights[i].index;
+			for (int i = 0; i < b.VertexWeights.Count; i++) {
+				int index = b.VertexWeights[i].Index;
 				mSkinDeform.vertices[index] = mSkinStatic.vertices[index] + mSkinStatic.normals[index] * distance;
 			}
 			if (!do_children)
 				return;
-			for (int c = 0; c < b.children.Count; c++)
-				BoneInflate((BoneId) b.children[c], distance, do_children);
+			for (int c = 0; c < b.Children.Count; c++)
+				BoneInflate((BoneId) b.Children[c], distance, do_children);
 		}
 
 		public void RotationSet(Vector3 rot) { mBones[mBoneIndices[BONE_ROOT]].mRotation = rot; }
@@ -176,10 +232,10 @@ namespace Frontier {
 			glDisable(GL_TEXTURE_2D);
 			glDisable(GL_LIGHTING);
 			for (i = 0; i < mBones.size(); i++) {
-				parent = mBoneIndices[mBones[i].idParent];
+				parent = mBoneIndices[mBones[i].IdParent];
 				if (!parent)
 					continue;
-				glColor3fv(&mBones[i].color.red);
+				glColor3fv(&mBones[i].Color.red);
 				glBegin(GL_LINES);
 				Vector3 p = mBones[i].mPosition;
 				glVertex3fv(&mBones[i].mPosition.x);
@@ -214,10 +270,10 @@ namespace Frontier {
 				index = b._vertex_weights[i]._index;
 				mSkinRender._vertex[index] = Matrix4TransformPoint(m, mSkinRender._vertex[index] - offset) + offset;
 				/*
-				from = mSkinRender._vertex[index] - offset;
+				from = mSkinRender._vertex[Index] - offset;
 				to = Matrix4TransformPoint (m, from);
-				//movement = movement - mSkinStatic._vertex[index]; 
-				mSkinRender._vertex[index] = Vector3Interpolate (from, to, b.vertex_weights[i].weight) + offset;
+				//movement = movement - mSkinStatic._vertex[Index]; 
+				mSkinRender._vertex[Index] = Vector3Interpolate (from, to, b.VertexWeights[i].Weight) + offset;
 				*/
 			}
 		}

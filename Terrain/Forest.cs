@@ -47,8 +47,7 @@ namespace Frontier {
 		public void Invalidate() { mValid = false; }
 		#endregion
 
-// public int          Sizeof () { return sizeof (Forest); }
-		//}
+// public int Sizeof () { return sizeof (Forest); }
 
 		#region Private methods
 		private int MeshFromTexture(int texture_id) {
