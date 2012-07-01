@@ -9,17 +9,15 @@ using OpenTK.Graphics;
 namespace Frontier {
 	class Tree {
 		#region Enums and structs
-		enum TreeTrunkStyle { Normal, Jagged, Bent };
-		enum TreeFoliageStyle { Umbrella, Bowl, Shield, Panel, Sag };
-		enum TreeLiftStyle { Straight, In, Out };
-		enum TreeLeafStyle { Fan, Scatter };
+		enum TreeTrunkStyle { Normal, Jagged, Bent }
+		enum TreeFoliageStyle { Umbrella, Bowl, Shield, Panel, Sag }
+		enum TreeLiftStyle { Straight, In, Out }
+		enum TreeLeafStyle { Fan, Scatter }
 
 		struct BranchAnchor {
-			public Vector3       root;
-			public float         radius;
-			public float         length;
-			public float         lift;
-		};
+			public Vector3 root;
+			public float radius, length, lift;
+		}
 
 		struct Leaf {
 			public Vector2     position;
@@ -29,7 +27,7 @@ namespace Frontier {
 			public Color4     color;
 			public float       dist;
 			public int         neighbor;
-		};
+		}
 		#endregion
 
 		#region Member variables and properties
@@ -99,7 +97,7 @@ namespace Frontier {
 			return 0;
 		}
 
-		private Mesh Mesh(int alt, LOD lod) { return mMeshes[alt % TREE_ALTS, (int) lod]; }
+		public Mesh Mesh(int alt, LOD lod) { return mMeshes[alt % TREE_ALTS, (int) lod]; }
 
 		//Given the value of 0.0 (root) to 1.0f (top), return the center of the trunk at that height.
 		private Vector3 TrunkPosition(float delta, ref float radius_in) {

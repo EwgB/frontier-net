@@ -12,14 +12,9 @@ using OpenTK;
 using OpenTK.Graphics;
 
 namespace Frontier {
-	struct tuft {
-		public Vector3[] v = new Vector3[4];};
+	struct tuft { public Vector3[] v = new Vector3[4]; }
 
-	enum BrushStage {
-		BRUSH_STAGE_BEGIN,
-		BRUSH_STAGE_BUILD,
-		BRUSH_STAGE_COMPILE,
-		BRUSH_STAGE_DONE};
+	enum BrushStage { Begin, Build, Compile, Done }
 
 	class Brush : GridData {
 		private const int
@@ -47,7 +42,7 @@ namespace Frontier {
 		private BBox      bbox;
 
 		public bool Valid { get; set; }
-		public bool Ready { get { return stage == BrushStage.BRUSH_STAGE_DONE; } }
+		public bool Ready { get { return stage == BrushStage.Done; } }
 
 		private void VertexPush (Vector3 vert, Vector3 normal, Color4 color, Vector2 uv);
 		private void QuadPush (int n1, int n2, int n3, int n4);
@@ -62,7 +57,7 @@ namespace Frontier {
 			gridPosition.Clear();
 			walk.Clear();
 			mesh.Clear();
-			stage = BrushStage.BRUSH_STAGE_BEGIN;
+			stage = BrushStage.Begin;
   
 			if (!prep_done)
 				do_prep ();
@@ -78,7 +73,7 @@ namespace Frontier {
 			currentDistance = (uint) Math.Abs(density);
 			origin.X = x * BRUSH_SIZE;
 			origin.Y = y * BRUSH_SIZE;
-			stage = BrushStage.BRUSH_STAGE_BEGIN;
+			stage = BrushStage.Begin;
 			mesh.Clear ();
 			bbox.Clear ();
 		}

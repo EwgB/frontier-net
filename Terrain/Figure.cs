@@ -12,12 +12,12 @@ namespace Frontier {
 	struct BWeight {
 		public int   index;
 		public float weight;
-	};
+	}
 
 	struct PWeight {
 		public BoneId bone;
 		public float  weight;
-	};
+	}
 
 	struct Bone {
 		public BoneId					id, idParent;
@@ -26,9 +26,9 @@ namespace Frontier {
 		public List<int>			children;
 		public List<BWeight>	vertex_weights;
 		public Matrix4				matrix;
-	};
+	}
 
-	class CFigure {
+	class Figure {
 		#region Member fields, constants and properties
 		private const char NEWLINE = '\n';
 
@@ -47,7 +47,7 @@ namespace Frontier {
 		#endregion
 
 		#region Public methods
-		public CFigure() { Clear(); }
+		public Figure() { Clear(); }
 
 		public void Clear() {
 			for (int i = 0; i < BONE_COUNT; i++)
@@ -244,5 +244,5 @@ namespace Frontier {
 			}
 		}
 		#endregion
-	};
+	}
 }

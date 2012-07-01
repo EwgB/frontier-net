@@ -13,9 +13,9 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Frontier {
 	class Grass {
-		enum GrassStage { Begin, Build, Compile, Done };
+		enum GrassStage { Begin, Build, Compile, Done }
 
-		struct tuft { public Vector3[] v = new Vector3[4]; };
+		struct tuft { public Vector3[] v = new Vector3[4]; }
 
 		private const int
 			GRASS_SIZE = 32,
@@ -41,7 +41,7 @@ namespace Frontier {
 		private static tuft[]         tuft_list = new tuft[MAX_TUFTS];
 
 
-		//unsigned          Sizeof () { return sizeof (Grass); }; 
+		//int          Sizeof () { return sizeof (Grass); }
 		private bool            Ready  { get { return _stage == GrassStage.Done;} }
 		private bool            Valid { get; private set; }
 

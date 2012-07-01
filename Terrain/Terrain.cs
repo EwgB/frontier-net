@@ -613,7 +613,7 @@ namespace Frontier {
 
 		#region Public methods
 		//public Terrain() : base() {}
-		//public int Sizeof () { return sizeof (CTerrain); }; 
+		//public int Sizeof () { return sizeof (CTerrain); }
 
 		public bool GetPoint(int x, int y) { return mPoint[x, y]; }
 

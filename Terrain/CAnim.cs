@@ -19,14 +19,14 @@ namespace Frontier {
 		LWrist, RFingers1, LFingers1, RFingers2, LFingers2, RThumb1, LThumb1, RThumb2, LThumb2, Neck,
 		Head, Face, Crown, Unknown0, Unknown1, Unknown2, Unknown3, Unknown4, Unknown5, Unknown6,
 		Unknown7, Unknown8, Unknown9, Unknown10, Unknown11, Unknown12, Unknown13, Unknown14, Unknown15, Invalid
-	};
+	}
 
 	struct AnimJoint {
 		public BoneId id;
 		public Vector3 rotation;
-	};
+	}
 
-	struct AnimFrame { public List<AnimJoint> joint; };
+	struct AnimFrame { public List<AnimJoint> joint; }
 	#endregion
 
 	class CAnim {
@@ -194,7 +194,7 @@ namespace Frontier {
 			//char*           buffer;
 			//char*           token;
 			//char*           find;
-			//vector<BoneId>  dem_bones;
+			//List<BoneId>  dem_bones;
 			//int             channels;
 			//int        frames;
 			//int        frame;

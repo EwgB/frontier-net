@@ -9,8 +9,8 @@ using OpenTK;
 using OpenTK.Graphics;
 
 namespace Frontier {
-	class Avatar : CFigure {
-		public enum AnimType { Idle, Run, Sprint, Flying, Fall, Jump, Swim, Float };
+	class Avatar : Figure {
+		public enum AnimType { Idle, Run, Sprint, Flying, Fall, Jump, Swim, Float }
 
 		#region Member field, constants and properties
 		private const float
@@ -44,7 +44,7 @@ namespace Frontier {
 		private bool            sprinting;
 		private uint            last_update;
 		private Region           region;
-		private CFigure          avatar;
+		private Figure          avatar;
 		private CAnim[]          anim = new CAnim[ANIM_COUNT];
 		private float            distance_walked;
 		private float            last_time;
