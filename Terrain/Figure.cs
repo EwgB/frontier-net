@@ -15,11 +15,15 @@ namespace Frontier {
 	struct BWeight {
 		public int Index { get; set; }
 		public float Weight { get; set; }
+
+		public BWeight(int index, float weight) { Index = index;	weight = Weight; }
 	}
 
 	struct PWeight {
 		public BoneId Bone { get; set; }
 		public float Weight { get; set; }
+
+		public PWeight(BoneId bone, float weight) { Bone = bone;	weight = Weight; }
 	}
 
 	struct Bone {
@@ -31,9 +35,23 @@ namespace Frontier {
 		public Vector3 Rotation { get; set; }
 
 		public Color4 Color { get; set; }
+		public Matrix4 Matrix { get; set; }
+		
 		public List<int> Children { get; set; }
 		public List<BWeight> VertexWeights { get; set; }
-		public Matrix4 Matrix { get; set; }
+
+		public Bone(BoneId id, BoneId idParent, Vector3 origin, Vector3 position, Vector3 rotation, Color4 color) {
+			Id = id;
+			IdParent = idParent;
+			Origin = origin;
+			Position = position;
+			Rotation = rotation;
+			Color = color;
+			Matrix = Matrix4.Identity;
+
+			Children = new List<int>();
+			VertexWeights = new List<BWeight>();
+		}
 	}
 
 	struct BoneListElement {
@@ -123,21 +141,19 @@ namespace Frontier {
 			mBones.Clear();
 		}
 
-		public void Animate(CAnim anim, float delta) {
-			List<AnimJoint> aj;
+		public void Prepare() { mSkinDeform = mSkinStatic; }
 
+		public void Animate(CAnim anim, float delta) {
 			if (delta > 1.0f)
 				delta -= (float) ((int) delta);
-			aj = anim.GetFrame(delta);
+			List<AnimJoint> aj = anim.GetFrame(delta);
 			for (int i = 0; i < anim.JointCount; i++)
 				RotateBone(aj[i].id, aj[i].rotation);
 		}
 
 		//We take a string and turn it into a BoneId, using unknowns as needed
 		public BoneId IdentifyBone(string name) {
-			BoneId    bid;
-
-			bid = CAnim.BoneFromString(name);
+			BoneId bid = CAnim.BoneFromString(name);
 			//If CAnim couldn't make sense of the name, or if that Id is already in use...
 			if (bid == BoneId.Invalid || mBoneIndices[(int) bid] != BoneId.Invalid) {
 				//ConsoleLog ("Couldn't Id Bone '%s'.", name);
@@ -177,38 +193,28 @@ namespace Frontier {
 		}
 
 		public void PushWeight(int id, int index, float weight) {
-			BWeight bw;
-
-			bw.Index = index;
-			bw.Weight = weight;
+			BWeight bw = new BWeight(index, weight);
 			mBones[(int) mBoneIndices[id]].VertexWeights.Add(bw);
 		}
 
 		public void PushBone(BoneId id, BoneId parent, Vector3 pos) {
 			mBoneIndices[(int) id] = (BoneId) mBones.Count;
 
-			Bone b = new Bone();
-			b.Id = id;
-			b.IdParent = parent;
-			b.Position = pos;
-			b.Origin = pos;
-			b.Rotation = Vector3.Zero;
-			b.Children.Clear();
-			b.Color = GL.RgbaUnique(id + 1);
+			Bone b = new Bone(id, parent, pos, pos, Vector3.Zero, glRgbaUnique(id + 1));
 			mBones.Add(b);
 			mBones[(int) mBoneIndices[(int) parent]].Children.Add((int) id);
 		}
 
-		public void BoneInflate(BoneId id, float distance, bool do_children) {
-			Bone b = mBones[mBoneIndices[(int) id]];
+		public void BoneInflate(BoneId id, float distance, bool doChildren) {
+			Bone b = mBones[(int) mBoneIndices[(int) id]];
 			for (int i = 0; i < b.VertexWeights.Count; i++) {
 				int index = b.VertexWeights[i].Index;
 				mSkinDeform.vertices[index] = mSkinStatic.vertices[index] + mSkinStatic.normals[index] * distance;
 			}
-			if (!do_children)
+			if (!doChildren)
 				return;
 			for (int c = 0; c < b.Children.Count; c++)
-				BoneInflate((BoneId) b.Children[c], distance, do_children);
+				BoneInflate((BoneId) b.Children[c], distance, doChildren);
 		}
 
 		public void RotationSet(Vector3 rot) {
@@ -217,48 +223,43 @@ namespace Frontier {
 		}
 
 		public void Render() {
-			glColor3f(1, 1, 1);
-			glPushMatrix();
+			GL.Color3(1, 1, 1);
+			GL.PushMatrix();
 			CgSetOffset(mPosition);
-			glTranslatef(mPosition.X, mPosition.Y, mPosition.Z);
+			GL.Translate(mPosition);
 			CgVector3.UnitZdateMatrix();
 			mSkinRender.Render();
 			CgSetOffset(Vector3(0, 0, 0));
-			glPopMatrix();
+			GL.PopMatrix();
 			CgVector3.UnitZdateMatrix();
 		}
 
 		public void RenderSkeleton() {
-			int    i;
-			int    parent;
-
-			glLineWidth(12.0f);
-			glPushMatrix();
-			glTranslatef(mPosition.X, mPosition.Y, mPosition.Z);
+			GL.LineWidth(12);
+			GL.PushMatrix();
+			GL.Translate(mPosition);
 			CgVector3.UnitZdateMatrix();
-			glDisable(GL_DEPTH_TEST);
-			glDisable(GL_TEXTURE_2D);
-			glDisable(GL_LIGHTING);
-			for (i = 0; i < mBones.size(); i++) {
-				parent = mBoneIndices[mBones[i].IdParent];
-				if (!parent)
+			GL.Disable(EnableCap.DepthTest);
+			GL.Disable(EnableCap.Texture2D);
+			GL.Disable(EnableCap.Lighting);
+			for (int i = 0; i < mBones.Count; i++) {
+				BoneId parent = mBoneIndices[(int) mBones[i].IdParent];
+				if (parent == BoneId.Root)
 					continue;
-				glColor3fv(&mBones[i].Color.red);
-				glBegin(GL_LINES);
-				Vector3 p = mBones[i].mPosition;
-				glVertex3fv(&mBones[i].mPosition.X);
-				glVertex3fv(&mBones[parent].mPosition.X);
-				glEnd();
+				GL.Color4(mBones[i].Color);
+				GL.Begin(BeginMode.Lines);
+				Vector3 p = mBones[i].Position;
+				GL.Vertex3(mBones[i].Position);
+				GL.Vertex3(mBones[(int) parent].Position);
+				GL.End();
 			}
-			glLineWidth(1.0f);
-			glEnable(GL_LIGHTING);
-			glEnable(GL_TEXTURE_2D);
-			glEnable(GL_DEPTH_TEST);
-			glPopMatrix();
+			GL.LineWidth(1.0f);
+			GL.Enable(EnableCap.Lighting);
+			GL.Enable(EnableCap.Texture2D);
+			GL.Enable(EnableCap.DepthTest);
+			GL.PopMatrix();
 			CgVector3.UnitZdateMatrix();
 		}
-
-		public void Prepare() { mSkinDeform = mSkinStatic; }
 
 		public bool LoadX(string filename) {
 			FileXLoad(filename, this);
@@ -366,25 +367,21 @@ namespace Frontier {
 				index = b._vertex_weights[i]._index;
 				mSkinRender._vertex[index] = Matrix4TransformPoint(m, mSkinRender._vertex[index] - offset) + offset;
 				/*
-				from = mSkinRender._vertex[Index] - offset;
+				from = mSkinRender.mVertices[Index] - offset;
 				to = Matrix4TransformPoint (m, from);
-				//movement = movement - mSkinStatic._vertex[Index]; 
-				mSkinRender._vertex[Index] = Vector3Interpolate (from, to, b.VertexWeights[i].Weight) + offset;
+				//movement = movement - mSkinStatic.mVertices[Index]; 
+				mSkinRender.mVertices[Index] = Vector3Interpolate (from, to, b.VertexWeights[i].Weight) + offset;
 				*/
 			}
 		}
 
 		private void RotateHierarchy(int id, Vector3 offset, Matrix4 m) {
-			Bone*       b;
-			int    i;
-
-			b = &mBones[mBoneIndices[id]];
-			b.mPosition = Matrix4TransformPoint(m, b.mPosition - offset) + offset;
+			Bone b = mBones[(int) mBoneIndices[id]];
+			b.Position = Matrix4TransformPoint(m, b.Position - offset) + offset;
 			RotatePoints(id, offset, m);
-			for (i = 0; i < b._children.size(); i++) {
-				if (b._children[i])
-					RotateHierarchy(b._children[i], offset, m);
-			}
+			for (int i = 0; i < b.Children.Count; i++)
+				if (b.Children[i] != 0)
+					RotateHierarchy(b.Children[i], offset, m);
 		}
 
 		private void AddHull(Figure f, Vector3 p, float d, float h, BoneId id) {

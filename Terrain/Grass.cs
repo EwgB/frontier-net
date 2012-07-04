@@ -12,215 +12,205 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
 namespace Frontier {
-	class Grass {
+	class Grass : GridData {
 		enum GrassStage { Begin, Build, Compile, Done }
 
-		struct tuft { public Vector3[] v = new Vector3[4]; }
+		#region Constants, member variables and properties
+		private const int					GRASS_SIZE = 32;
+		private const int					GRASS_TYPES = 8;
+		private const int					MAX_TUFTS = 9;
 
-		private const int
-			GRASS_SIZE = 32,
-			GRASS_TYPES = 8,
-			MAX_TUFTS = 9;
+		private static UVBox[]		mBoxGrass = new UVBox[GRASS_TYPES];
+		private static UVBox[]		mBoxFlower = new UVBox[GRASS_TYPES];
+		private static bool				mPrepDone;
+		private static Vector3[,]	mTuftList = new Vector3[MAX_TUFTS, 4];
 
-		private Coord           _grid_position;
-		private Coord           _origin;
-		private Coord           _walk;
-		private int          _current_distance;
-		private List<Color4>    _color;
-		private List<Vector3>  _vertex;
-		private List<Vector3>  _normal;
-		private List<Vector2> _uv;
-		private List<int>      _index;
-		private static VBO         _vbo;
-		private GrassStage        _stage;
-		private BBox            _bbox;
+		private Coord							mGridPosition;
+		private Coord							mOrigin;
+		private Coord							mWalk;
+		private int								mCurrentDistance;
+		private List<Color4>			mColor;
+		private List<Vector3>			mVertices;
+		private List<Vector3>			mNormals;
+		private List<Vector2>			mUVs;
+		private List<int>					mIndices;
+		private static VBO				mVBO;
+		private GrassStage				mStage;
+		private BBox							mBBox;
 
-		private static UVBox[]        box_grass = new UVBox[GRASS_TYPES];
-		private static UVBox[]        box_flower = new UVBox[GRASS_TYPES];
-		private static bool           prep_done;
-		private static tuft[]         tuft_list = new tuft[MAX_TUFTS];
-
-
-		//int          Sizeof () { return sizeof (Grass); }
-		private bool            Ready  { get { return _stage == GrassStage.Done;} }
-		private bool            Valid { get; private set; }
+		private bool							Ready  { get { return mStage == GrassStage.Done;} }
+		private bool							Valid { get; private set; }
+		#endregion
 
 		#region Private methods
-		private static void do_prep() {
-			float         angle_step;
-
+		private static void DoPrep() {
 			for (int i = 0; i < GRASS_TYPES; i++) {
-				box_grass[i].Set (i, 2, GRASS_TYPES, 4);
-				box_flower[i].Set (i, 3, GRASS_TYPES, 4);
+				mBoxGrass[i].Set (i, 2, GRASS_TYPES, 4);
+				mBoxFlower[i].Set (i, 3, GRASS_TYPES, 4);
 			}
-			angle_step = 360.0f / MAX_TUFTS;
+
+			float angleStep = 360.0f / MAX_TUFTS;
 			for (int i = 0; i < MAX_TUFTS; i++) {
-				tuft_list[i].v[0] = new Vector3 (-1, -1, 0);
-				tuft_list[i].v[1] = new Vector3 ( 1, -1, 0);
-				tuft_list[i].v[2] = new Vector3 ( 1,  1, 0);
-				tuft_list[i].v[3] = new Vector3 (-1,  1, 0);
-				Matrix4 m = Matrix4.CreateRotationZ(angle_step * (float)i);
+				mTuftList[i, 0] = new Vector3(-1, -1, 0);
+				mTuftList[i, 1] = new Vector3( 1, -1, 0);
+				mTuftList[i, 2] = new Vector3( 1,  1, 0);
+				mTuftList[i, 3] = new Vector3(-1,  1, 0);
+				Matrix4 m = Matrix4.CreateRotationZ(angleStep * (float)i);
 				for (int j = 0; j < 4; j++)
-					tuft_list[i].v[j] = m.TransformPoint (tuft_list[i].v[j]);
+					mTuftList[i, j] = m.TransformPoint(mTuftList[i, j]);
 			}
-			prep_done = true;
+			mPrepDone = true;
 		}
 
 		private void VertexPush (Vector3 vert, Vector3 normal, Color4 color, Vector2 uv) {
-			_vertex.Add(vert);
-			_normal.Add(normal);
-			_color.Add(color);
-			_uv.Add(uv);
-			_bbox.ContainPoint(vert);
+			mVertices.Add(vert);
+			mNormals.Add(normal);
+			mColor.Add(color);
+			mUVs.Add(uv);
+			mBBox.ContainPoint(vert);
 		}
 
 		private void QuadPush (int n1, int n2, int n3, int n4) {
-			_index.Add (n1);
-			_index.Add (n2);
-			_index.Add (n3);
-			_index.Add (n4);
+			mIndices.Add (n1);
+			mIndices.Add (n2);
+			mIndices.Add (n3);
+			mIndices.Add (n4);
 		}
 
 		private bool ZoneCheck () {
-			if (!CachePointAvailable (_origin.X, _origin.Y))
+			if (!CachePointAvailable (mOrigin.X, mOrigin.Y))
 				return false;
-			if (!CachePointAvailable (_origin.X + GRASS_SIZE, _origin.Y))
+			if (!CachePointAvailable (mOrigin.X + GRASS_SIZE, mOrigin.Y))
 				return false;
-			if (!CachePointAvailable (_origin.X + GRASS_SIZE,_origin.Y + GRASS_SIZE))
+			if (!CachePointAvailable (mOrigin.X + GRASS_SIZE,mOrigin.Y + GRASS_SIZE))
 				return false;
-			if (!CachePointAvailable (_origin.X, _origin.Y + GRASS_SIZE))
+			if (!CachePointAvailable (mOrigin.X, mOrigin.Y + GRASS_SIZE))
 				return false;
 			return true;
 		}
 
 		private void Build (long stop) {
-			int       world_x, world_y;
-			bool      do_grass;
+			int worldX = mOrigin.X + mWalk.X;
+			int worldY = mOrigin.Y + mWalk.Y;
+			bool doGrass = CacheSurface (worldX, worldY) == SURFACE_GRASS;
 
-			world_x = _origin.X + _walk.X;
-			world_y = _origin.Y + _walk.Y;
-			do_grass = CacheSurface (world_x, world_y) == SURFACE_GRASS;
-			if (_walk.X % _current_distance || _walk.Y  % _current_distance)
-				do_grass = false;
-			if (do_grass) {
-				Vector3[] v = new Vector3[8];
-				Vector3    normal;
-				Color4      color;
-				int         current;
-				Vector3    root;
-				Vector2   size;
-				Region      r;
-				float       height;
-				int         index;
-				bool        do_flower;
-				int         patch;
-				tuft       this_tuft;
-				//Matrix4    mat;
+			if (mWalk.X % mCurrentDistance || mWalk.Y  % mCurrentDistance)
+				doGrass = false;
+			if (doGrass) {
+				Region r = FWorld.RegionFromPosition (worldX, worldY);
+				int index = worldX + worldY * GRASS_SIZE;
+				int this_tuft_index = index % MAX_TUFTS;
+				float height = 0.05f + r.moisture * r.temperature;
+				
+				Vector3 root = new Vector3(
+					worldX + (FWorld.NoiseFloat(index) -0.5f),
+					worldY + (FWorld.NoiseFloat(index) -0.5f),
+					0);
 
-				r = WorldRegionFromPosition (world_x, world_y);
-				index = world_x + world_y * GRASS_SIZE;
-				this_tuft = tuft_list[index % MAX_TUFTS];
-				root.X = (float) world_x + (WorldNoisef (index) -0.5f);
-				root.Y = (float) world_y + (WorldNoisef (index) -0.5f);
-				root.Z = 0.0f;
-				height = 0.05f + r.moisture * r.temperature;
-				size.X = 0.4f + WorldNoisef (index) * 0.5f;
-				size.Y = WorldNoisef (index) * height + (height / 2);
-				do_flower = r.has_flowers;
+				Vector2 size = new Vector2(
+					0.4f + FWorld.NoiseFloat(index) * 0.5f,
+					FWorld.NoiseFloat(index) * height + (height / 2));
+
+				bool do_flower = r.has_flowers;
 				if (do_flower) //flowers are shorter than grass
 					size.Y /= 2;
-				size.Y = Math.Max(size.y, 0.3f);
-				color = CacheSurfaceColor (world_x, world_y);
+				size.Y = Math.Max(size.Y, 0.3f);
+
+				Color4 color = CacheSurfaceColor(worldX, worldY);
 				color.A = 1.0f;
-				//Now we construct our grass panels
-				for (int i = 0; i < 4; i++) { 
-					v[i] = Vector3.Multiply(this_tuft.v[i], new Vector3 (size.X, size.X, 0.0f));
-					v[i + 4] = Vector3.Multiply(this_tuft.v[i], new Vector3 (size.X, size.X, 0.0f));
+
+				// Now we construct our grass panels
+				Vector3[] v = new Vector3[8];
+				for (int i = 0; i < 4; i++) {
+					v[i] = Vector3.Multiply(mTuftList[this_tuft_index, i], new Vector3(size.X, size.X, 0.0f));
+					v[i + 4] = Vector3.Multiply(mTuftList[this_tuft_index, i], new Vector3(size.X, size.X, 0.0f));
 					v[i + 4].Z += size.Y;
 				}
 				for (int i = 0; i < 8; i++) {
 					v[i] += root;
-					v[i].Z += CacheElevation (v[i].X, v[i].Y);
+					v[i].Z += CacheElevation(v[i].X, v[i].Y);
 				}
-				patch = r.flower_shape[index % FLOWERS] % GRASS_TYPES;
-				current = _vertex.Count;
-				normal = CacheNormal (world_x, world_y);
-				VertexPush (v[0], normal, color, box_grass[patch].Corner (1));
-				VertexPush (v[1], normal, color, box_grass[patch].Corner (1));
-				VertexPush (v[2], normal, color, box_grass[patch].Corner (0));
-				VertexPush (v[3], normal, color, box_grass[patch].Corner (0));
-				VertexPush (v[4], normal, color, box_grass[patch].Corner (2));
-				VertexPush (v[5], normal, color, box_grass[patch].Corner (2));
-				VertexPush (v[6], normal, color, box_grass[patch].Corner (3));
-				VertexPush (v[7], normal, color, box_grass[patch].Corner (3));
+
+				int patch = r.flower_shape[index % FLOWERS] % GRASS_TYPES;
+				int current = mVertices.Count;
+				Vector3 normal = CacheNormal (worldX, worldY);
+
+				VertexPush (v[0], normal, color, mBoxGrass[patch].Corner (1));
+				VertexPush (v[1], normal, color, mBoxGrass[patch].Corner (1));
+				VertexPush (v[2], normal, color, mBoxGrass[patch].Corner (0));
+				VertexPush (v[3], normal, color, mBoxGrass[patch].Corner (0));
+				VertexPush (v[4], normal, color, mBoxGrass[patch].Corner (2));
+				VertexPush (v[5], normal, color, mBoxGrass[patch].Corner (2));
+				VertexPush (v[6], normal, color, mBoxGrass[patch].Corner (3));
+				VertexPush (v[7], normal, color, mBoxGrass[patch].Corner (3));
 				QuadPush (current, current + 2, current + 6, current + 4);
 				QuadPush (current + 1, current + 3, current + 7, current + 5);
+
 				if (do_flower) {
-					current = _vertex.Count;
+					current = mVertices.Count;
 					color = r.color_flowers[index % FLOWERS];
 					normal = Vector3.UnitZ;
-					VertexPush (v[4], normal, color, box_flower[patch].Corner (0));
-					VertexPush (v[5], normal, color, box_flower[patch].Corner (1));
-					VertexPush (v[6], normal, color, box_flower[patch].Corner (2));
-					VertexPush (v[7], normal, color, box_flower[patch].Corner (3));
+					VertexPush (v[4], normal, color, mBoxFlower[patch].Corner (0));
+					VertexPush (v[5], normal, color, mBoxFlower[patch].Corner (1));
+					VertexPush (v[6], normal, color, mBoxFlower[patch].Corner (2));
+					VertexPush (v[7], normal, color, mBoxFlower[patch].Corner (3));
 					QuadPush (current, current + 1, current + 2, current + 3);
 				}
 			}
-			if (_walk.Walk (GRASS_SIZE)) 
-				_stage++;
+			if (mWalk.Walk (GRASS_SIZE)) 
+				mStage++;
 		}
 		#endregion
 
 		#region Public methods
-		public Grass () {
-			GridData ();
-			_origin.X = 0;
-			_origin.Y = 0;
-			_current_distance = 0;
+		public Grass() : base() {
+			mOrigin.X = 0;
+			mOrigin.Y = 0;
+			mCurrentDistance = 0;
 			Valid = false;
-			_bbox.Clear ();
-			_grid_position.Clear ();
-			_walk.Clear ();
-			_stage = GrassStage.Begin;
-			if (!prep_done) 
-				do_prep ();
+			mBBox.Clear ();
+			mGridPosition.Clear();
+			mWalk.Clear ();
+			mStage = GrassStage.Begin;
+			if (!mPrepDone) 
+				DoPrep ();
 		}
 
 		public void Set (int x, int y, int density) {
 			//density = max (density, 1); //detail 0 and 1 are the same level. (Maximum density.)
 			density = 1;
-			if (_origin.X == x * GRASS_SIZE && _origin.Y == y * GRASS_SIZE && density == _current_distance)
+			if (mOrigin.X == x * GRASS_SIZE && mOrigin.Y == y * GRASS_SIZE && density == mCurrentDistance)
 				return;
-			_grid_position.X = x;
-			_grid_position.Y = y;
-			_current_distance = density;
-			_origin.x = x * GRASS_SIZE;
-			_origin.y = y * GRASS_SIZE;
-			_stage = GrassStage.Begin;
-			_color.Clear();
-			_vertex.Clear();
-			_normal.Clear();
-			_uv.Clear();
-			_index.Clear();
-			_bbox.Clear();
+			mGridPosition.X = x;
+			mGridPosition.Y = y;
+			mCurrentDistance = density;
+			mOrigin.x = x * GRASS_SIZE;
+			mOrigin.y = y * GRASS_SIZE;
+			mStage = GrassStage.Begin;
+			mColor.Clear();
+			mVertices.Clear();
+			mNormals.Clear();
+			mUVs.Clear();
+			mIndices.Clear();
+			mBBox.Clear();
 		}
 
 		public void Update (long stop) {
 			while (SdlTick () < stop && !Ready) {
-				switch (_stage) {
+				switch (mStage) {
 				case GrassStage.Begin:
 					if (!ZoneCheck ())
 						return;
-					_stage++;
+					mStage++;
 				case GrassStage.Build:
 					Build (stop);
 					break;
 				case GrassStage.Compile:
-					if (_vertex.Count != 0)
-						_vbo.Create (GL_QUADS, _index.Count, _vertex.Count, _index, _vertex, _normal, _color, _uv);
+					if (mVertices.Count != 0)
+						mVBO.Create (GL_QUADS, mIndices.Count, mVertices.Count, mIndices, mVertices, mNormals, mColor, mUVs);
 					else
-						_vbo.Clear ();
-					_stage++;
+						mVBO.Clear ();
+					mStage++;
 					Valid = true;
 					break;
 				}
@@ -235,7 +225,7 @@ namespace Frontier {
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Nearest);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Nearest);
 			GL.Disable(EnableCap.CullFace);
-			_vbo.Render ();
+			mVBO.Render ();
 			return;
 
 			GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
@@ -243,7 +233,7 @@ namespace Frontier {
 			//glEnable (GL_BLEND);
 			//glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			//glDisable (GL_LIGHTING);
-			_vbo.Render ();
+			mVBO.Render ();
 
 			GL.Disable(EnableCap.Texture2D);
 			//glDisable (GL_FOG);
@@ -252,11 +242,11 @@ namespace Frontier {
 			GL.Enable(EnableCap.Blend);
 			GL.BlendFunc(BlendingFactorSrc.Zero, BlendingFactorDest.SrcColor);
 			GL.BlendFunc(BlendingFactorSrc.DstColor, BlendingFactorDest.SrcColor);
-			_vbo.Render ();
+			mVBO.Render ();
 			GL.DepthFunc(DepthFunction.Lequal);
 			if (false) {
 				GL.Color3(1,0,1);
-				_bbox.Render ();
+				mBBox.Render ();
 			}
 			GL.Enable(EnableCap.Texture2D);
 			GL.Enable(EnableCap.Lighting);

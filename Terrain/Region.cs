@@ -57,7 +57,7 @@ namespace Frontier {
 			BLEND_DISTANCE    = (REGION_SIZE / 4),
 			DITHER_SIZE       = (REGION_SIZE / 2),
 			OCEAN_BUFFER      = 20, // The number of regions around the edge which must be ocean
-			FLOWER_PALETTE    = (sizeof (flower_palette) / sizeof (Color4)),
+			FLOWER_PALETTE    = (flower_palette.Length / 4 ),
 			FREQUENCY         = 3; // Higher numbers make the overall map repeat more often
 
 		private const string

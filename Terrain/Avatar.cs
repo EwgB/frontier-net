@@ -122,7 +122,7 @@ namespace Frontier {
 			//oss << APP << " ";
 			////oss << WorldLocationName (region.grid_pos.x, region.grid_pos.y) << " (" << region.title << ") ";
 			//oss << WorldLocationName ((int)Position.X, (int)Position.Y) << " (" << region.title << ") ";
-			//oss << "Looking " << WorldDirectionFromAngle (angle.z);
+			//oss << "Looking " << FWorld.DirectionFromAngle (angle.z);
 			//SdlSetCaption (oss.str ().c_str ());
 		}
 

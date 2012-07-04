@@ -525,8 +525,8 @@ namespace Frontier {
 		}
 
 		private void Build() {
-			//_branches = 3 + WorldNoisei (mSeedCurrent++) % 3;
-			//_trunk_bend_frequency = 3.0f + WorldNoisef (mSeedCurrent++) * 4.0f;
+			//_branches = 3 + FWorld.NoiseInt (mSeedCurrent++) % 3;
+			//_trunk_bend_frequency = 3.0f + FWorld.NoiseFloat (mSeedCurrent++) * 4.0f;
 			mSeedCurrent = mSeed;
 			for (int alt = 0; alt < TREE_ALTS; alt++) {
 				mCurrentAngleOffset = WorldNoisef(mSeedCurrent++) * 360.0f;
@@ -561,9 +561,9 @@ namespace Frontier {
 						l.position.X = (float) (TEXTURE_HALF + Math.Sin(rad) * l.size);
 						l.position.Y = (float) (TEXTURE_HALF + Math.Cos(rad) * l.size);
 						l.angle = -FMath.Angle(TEXTURE_HALF, TEXTURE_HALF, l.position.X, l.position.Y);
-						//l.brightness = 1.0f - (currentSteps / (float)totalSteps) * WorldNoisef (mSeedCurrent++) * 0.5f;
-						//l.brightness = 1.0f - WorldNoisef (mSeedCurrent++) * 0.2f;
-						//l.color = ColorInterpolate (mLeafColor, Color (0.0f, 0.5f, 0.0f), WorldNoisef (mSeedCurrent++) * 0.25f);
+						//l.brightness = 1.0f - (currentSteps / (float)totalSteps) * FWorld.NoiseFloat (mSeedCurrent++) * 0.5f;
+						//l.brightness = 1.0f - FWorld.NoiseFloat (mSeedCurrent++) * 0.2f;
+						//l.color = ColorInterpolate (mLeafColor, Color (0.0f, 0.5f, 0.0f), NoiseFloat (mSeedCurrent++) * 0.25f);
 						mLeafList.Add(l);
 					}
 				}
@@ -581,7 +581,7 @@ namespace Frontier {
 
 				// Now scatter other leaves around
 				for (int i = 0; i < 50; i++) {
-					l.size = leafSize * 0.5f;//  * (0.5f + WorldNoisef (mSeedCurrent++);
+					l.size = leafSize * 0.5f;//  * (0.5f + FWorld.NoiseFloat (mSeedCurrent++);
 					l.position.X = TEXTURE_HALF + (WorldNoisef(mSeedCurrent++) - 0.5f) * (TEXTURE_HALF - l.size) * 2.0f;
 					l.position.Y = TEXTURE_HALF + (WorldNoisef(mSeedCurrent++) - 0.5f) * (TEXTURE_HALF - l.size) * 2.0f;
 					Vector2 delta = mLeafList[i].position - new Vector2(TEXTURE_HALF, TEXTURE_HALF);

@@ -24,24 +24,39 @@ namespace Frontier {
 	class FWorld {
 		#region Enums and structs
 		enum Climate {
-		  Invalid,		Ocean,		Coast,	Mountain,		River,		RiverBank,
-		  Swamp,			Rocky,		Lake,		Desert,			Field,		Plains,
-		  Canyon,			Forest,		Types,
+		  Invalid,		Ocean,		Coast,		Mountain,		River,		RiverBank,		Swamp,		Rocky,		Lake,
+			Desert,			Field,		Plains,		Canyon,			Forest,		Types
 		}
 
 		//Only one of these is ever instanced.  This is everything that goes into a "save file".
 		//UMath.Sing only this, the entire world can be re-created.
 		struct World {
-		  public int[] noisei = new int[NOISE_BUFFER];
-		  public int seed, river_count, lake_count;
+			public Region[,] Map { get; private set; }
 
-			public bool wind_from_west, northern_hemisphere;
-		  
-			public float[] noisef = new float[NOISE_BUFFER];
-		  public Region[,] map = new Region[WORLD_GRID, WORLD_GRID];
+			public int Seed { get; private set; }
+			public int RiverCount { get; private set; }
+			public int LakeCount { get; private set; }
+
+			public bool WindFromWest { get; private set; }
+			public bool NorthernHemisphere { get; private set; }
+
+			public int[] NoiseInt { get; private set; }
+			public float[] NoiseFloat { get; private set; }
+
+			public World(int seed, int riverCount, int lakeCount, bool windFromWest, bool northernHemisphere) {
+				Map = new Region[WORLD_GRID, WORLD_GRID];
+				NoiseInt = new int[NOISE_BUFFER];
+				NoiseFloat = new float[NOISE_BUFFER];
+
+				Seed = seed;
+				RiverCount = riverCount;
+				LakeCount = lakeCount;
+				WindFromWest = windFromWest;
+				NorthernHemisphere = northernHemisphere;
+			}
 		}
 
-		struct WHeader { int version, seed, world_grid, noise_buffer, tree_types, map_bytes; }
+		//struct WorldHeader { int version, seed, world_grid, noise_buffer, tree_types, map_bytes; }
 		#endregion
 
 		#region Constants, member variables and properties
@@ -86,7 +101,7 @@ namespace Frontier {
 			// is the square of this value, minus one. ("tree zero" is actually "no trees at all".)
 			TREE_TYPES              = 6,
 
-			//The dither map scatters surface data so that grass colorings end up in adjacent regions.
+			//The dither Map scatters surface data so that grass colorings end up in adjacent regions.
 			DITHER_SIZE             = (REGION_SIZE / 2),
 
 			//How much space in a region is spent interpolating between itself and its neighbors.
@@ -110,7 +125,7 @@ namespace Frontier {
 		#region The following functions are used when generating elevation data
 		// This modifies the passed elevation value AFTER region cross-fading is complete,
 		// For things that should not be mimicked by neighbors. (Like rivers.)
-		public static float do_height_noblend(float val, Region r, Vector2 offset, float water) {
+		public static float DoHeightNoBlend(float val, Region r, Vector2 offset, float water) {
 			if ((r.flags_shape & REGION_FLAG_RIVER_ANY) != 0) {
 				// If this river is strictly north / south
 				if (((r.flags_shape & REGION_FLAG_RIVERNS) != 0) && ((r.flags_shape & REGION_FLAG_RIVEREW) == 0)) {
@@ -198,7 +213,7 @@ namespace Frontier {
 
 		// This takes the given properties and generates a Math.Single unit of elevation data, according to the local region rules.
 		// Water is the water level.  Detail is the height of the rolling hills. Bias is a direct height added on to these.
-		public static float do_height(Region r, Vector2 offset, float water, float detail, float bias) {
+		public static float DoHeight(Region r, Vector2 offset, float water, float detail, float bias) {
 			// Modify the detail values before they are applied
 			if ((r.flags_shape & REGION_FLAG_CRATER) != 0) {
 				if (detail > 0.5f)
@@ -268,7 +283,7 @@ namespace Frontier {
 			return val;
 		}
 
-		public static void build_trees() {
+		public static void BuildTrees() {
 			int rotator = 0;
 			for (int m = 0; m < TREE_TYPES; m++) {
 				for (int t = 0; t < TREE_TYPES; t++) {
@@ -283,7 +298,7 @@ namespace Frontier {
 			}
 		}
 
-		public static void build_map_texture() {
+		public static void BuildMapTexture() {
 			if (map_id == 0)
 				GL.GenTextures (1, out map_id);
 			GL.BindTexture(TextureTarget.Texture2D, map_id);
@@ -296,7 +311,7 @@ namespace Frontier {
 				for (int y = 0; y < WORLD_GRID; y++) {
 					//Flip it vertically, because the OpenGL texture coord system is retarded.
 					int yy = (WORLD_GRID - 1) - y;
-					Region r = planet.map[x, yy];
+					Region r = planet.Map[x, yy];
 					int i = (x + y * WORLD_GRID) * 3;
 					pixels[i]			= (int) (r.color_map.R * 255.0f);
 					pixels[i + 1] = (int) (r.color_map.G * 255.0f);
@@ -307,8 +322,8 @@ namespace Frontier {
 		}
 		#endregion
 
-		public static float WorldNoisef(int index) { return planet.noisef[Math.Abs(index % NOISE_BUFFER)]; }
-		public static int WorldNoisei(int index) { return planet.noisei[Math.Abs(index % NOISE_BUFFER)]; }
+		public static float NoiseFloat(int index) { return planet.NoiseFloat[Math.Abs(index % NOISE_BUFFER)]; }
+		public static int NoiseInt(int index) { return planet.NoiseInt[Math.Abs(index % NOISE_BUFFER)]; }
 		
 		private float WorldWaterLevel(int world_x, int world_y) {
 			world_x += REGION_HALF;
@@ -323,10 +338,10 @@ namespace Frontier {
 				(float) (world_y % REGION_SIZE) / REGION_SIZE);
 
 			// Four corners: upper left, upper right, etc.
-			Region rul = WorldRegionGet(origin.X, origin.Y);
-			Region rur = WorldRegionGet(origin.X + 1, origin.Y);
-			Region rbl = WorldRegionGet(origin.X, origin.Y + 1);
-			Region rbr = WorldRegionGet(origin.X + 1, origin.Y + 1);
+			Region rul = RegionGet(origin.X, origin.Y);
+			Region rur = RegionGet(origin.X + 1, origin.Y);
+			Region rbl = RegionGet(origin.X, origin.Y + 1);
+			Region rbr = RegionGet(origin.X + 1, origin.Y + 1);
 
 			return FMath.InterpolateQuad(rul.geo_water, rur.geo_water, rbl.geo_water, rbr.geo_water, offset, ((origin.X + origin.Y) % 2) == 0);
 		}
@@ -344,10 +359,10 @@ namespace Frontier {
 				(float) (world_y % REGION_SIZE) / REGION_SIZE);
 
 			// Four corners: upper left, upper right, etc.
-			Region rul = WorldRegionGet(origin.X, origin.Y);
-			Region rur = WorldRegionGet(origin.X + 1, origin.Y);
-			Region rbl = WorldRegionGet(origin.X, origin.Y + 1);
-			Region rbr = WorldRegionGet(origin.X + 1, origin.Y + 1);
+			Region rul = RegionGet(origin.X, origin.Y);
+			Region rur = RegionGet(origin.X + 1, origin.Y);
+			Region rbl = RegionGet(origin.X, origin.Y + 1);
+			Region rbr = RegionGet(origin.X + 1, origin.Y + 1);
 
 			return FMath.InterpolateQuad(rul.geo_bias, rur.geo_bias, rbl.geo_bias, rbr.geo_bias, offset, ((origin.X + origin.Y) % 2) == 0);
 		}
@@ -384,25 +399,25 @@ namespace Frontier {
 				(world_y + BLEND_DISTANCE) / REGION_SIZE);
 
 			if (ul == br) {
-				rul = WorldRegionGet(ul.X, ul.Y);
-				result.elevation = do_height(rul, offset, water, detail, bias);
-				result.elevation = do_height_noblend(result.elevation, rul, offset, water);
+				rul = RegionGet(ul.X, ul.Y);
+				result.elevation = DoHeight(rul, offset, water, detail, bias);
+				result.elevation = DoHeightNoBlend(result.elevation, rul, offset, water);
 				return result;
 			}
 
 			// Four corners: upper left, upper right, etc.
-			Region rul = WorldRegionGet(ul.X, ul.Y);
-			Region rur = WorldRegionGet(br.X, ul.Y);
-			Region rbl = WorldRegionGet(ul.X, br.Y);
-			Region rbr = WorldRegionGet(br.X, br.Y);
+			Region rul = RegionGet(ul.X, ul.Y);
+			Region rur = RegionGet(br.X, ul.Y);
+			Region rbl = RegionGet(ul.X, br.Y);
+			Region rbr = RegionGet(br.X, br.Y);
 
-			float eul = do_height(rul, offset, water, detail, bias);
-			float eur = do_height(rur, offset, water, detail, bias);
-			float ebl = do_height(rbl, offset, water, detail, bias);
-			float ebr = do_height(rbr, offset, water, detail, bias);
+			float eul = DoHeight(rul, offset, water, detail, bias);
+			float eur = DoHeight(rur, offset, water, detail, bias);
+			float ebl = DoHeight(rbl, offset, water, detail, bias);
+			float ebr = DoHeight(rbr, offset, water, detail, bias);
 
 			result.elevation = FMath.InterpolateQuad(eul, eur, ebl, ebr, blend, left);
-			result.elevation = do_height_noblend(result.elevation, rul, offset, water);
+			result.elevation = DoHeightNoBlend(result.elevation, rul, offset, water);
 			return result;
 		}
 
@@ -455,7 +470,7 @@ namespace Frontier {
 		private void WorldSave() {
 			//FILE*     f;
 			//char      filename[256];
-			//WHeader   header;
+			//WorldHeader   header;
 
 			//return;
 			//sprintf (filename, "%sworld.sav", GameDirectory ());
@@ -464,7 +479,7 @@ namespace Frontier {
 			//  return;
 			//}
 			//header.version = FILE_VERSION;
-			//header.seed = planet.seed;
+			//header.Seed = planet.Seed;
 			//header.world_grid = WORLD_GRID;
 			//header.noise_buffer = NOISE_BUFFER;
 			//header.map_bytes = sizeof (planet);
@@ -478,43 +493,44 @@ namespace Frontier {
 		private void WorldLoad(int seed_in) {
 			//FILE     f;
 			//char      filename[256];
-			//WHeader   header;
+			//WorldHeader   header;
 
 			//sprintf (filename, "%sworld.sav", GameDirectory ());
 			//if (!(f = fopen (filename, "rb"))) {
 			//  ConsoleLog ("WorldLoad: Could not open file %s", filename);
-			//  WorldGenerate (seed_in);
+			//  Generate (seedIn);
 			//  return;
 			//}
 			//fread (&header, sizeof (header), 1, f);
 			//fread (&planet, sizeof (planet), 1, f);
 			//fclose (f);
 			////ConsoleLog ("WorldLoad: '%s' loaded.", filename);
-			//build_trees ();
-			//build_map_texture ();
+			//BuildTrees ();
+			//BuildMapTexture ();
 		}
 
-		private void WorldGenerate(int seed_in) {
-			Random.Init(seed_in);
-			planet.seed = seed_in;
+		private void Generate(int seedIn) {
+			Random.Init(seedIn);
+			BuildTrees();
+
+			planet = new World(
+				seedIn,
+				4 + Random.Value() % 4,			// RiverCount
+				1 + Random.Value() % 4,			// LakeCount
+				(Random.Value() % 2) != 0,	// WindFromWest
+				(Random.Value() % 2) != 0);	// NorthernHemisphere
 
 			for (int x = 0; x < NOISE_BUFFER; x++) {
-				planet.noisei[x] = Random.Value();
-				planet.noisef[x] = Random.Float();
+				planet.NoiseInt[x] = Random.Value();
+				planet.NoiseFloat[x] = Random.Float();
 			}
 		
-			build_trees();
-			planet.wind_from_west = ((Random.Value() % 2) != 0);
-			planet.northern_hemisphere = ((Random.Value() % 2) != 0);
-			planet.river_count = 4 + Random.Value() % 4;
-			planet.lake_count = 1 + Random.Value() % 4;
-
 			TerraformPrepare();
 			TerraformOceans();
 			TerraformCoast();
 			TerraformClimate();
-			TerraformRivers(planet.river_count);
-			TerraformLakes(planet.lake_count);
+			TerraformRivers(planet.RiverCount);
+			TerraformLakes(planet.LakeCount);
 			TerraformClimate(); // Do climate a second time now that rivers are in
 			TerraformZones();
 			TerraformClimate(); // Now again, since we have added climate-modifying features (Mountains, etc.)
@@ -522,18 +538,18 @@ namespace Frontier {
 			TerraformAverage();
 			TerraformFlora();
 			TerraformColors();
-			build_map_texture();
+			BuildMapTexture();
 		}
 
-		private Region WorldRegionGet(int index_x, int index_y) {
-			return planet.map[index_x][index_y];
+		private Region RegionGet(int index_x, int index_y) {
+			return planet.Map[index_x][index_y];
 		}
 
-		private void WorldRegionSet(int index_x, int index_y, Region val) {
-			planet.map[index_x][index_y] = val;
+		private void RegionSet(int index_x, int index_y, Region val) {
+			planet.Map[index_x][index_y] = val;
 		}
 
-		private Region WorldRegionFromPosition(int world_x, int world_y) {
+		public static Region RegionFromPosition(int world_x, int world_y) {
 			world_x = Math.Max(world_x, 0);
 			world_y = Math.Max(world_y, 0);
 			world_x += dithermap[world_x % DITHER_SIZE, world_y % DITHER_SIZE].X;
@@ -541,15 +557,15 @@ namespace Frontier {
 			world_x /= REGION_SIZE;
 			world_y /= REGION_SIZE;
 			if (world_x >= WORLD_GRID || world_y >= WORLD_GRID)
-				return planet.map[0, 0];
-			return planet.map[world_x, world_y];
+				return planet.Map[0, 0];
+			return planet.Map[world_x, world_y];
 		}
 
-		private Region WorldRegionFromPosition(float world_x, float world_y) {
-			return WorldRegionFromPosition((int) world_x, (int) world_y);
+		public static Region RegionFromPosition(float world_x, float world_y) {
+			return RegionFromPosition((int) world_x, (int) world_y);
 		}
 
-		private Color4 WorldColorGet(int world_x, int world_y, SurfaceColor c) {
+		private Color4 ColorGet(int world_x, int world_y, SurfaceColor c) {
 			int x = Math.Max(world_x % DITHER_SIZE, 0);
 			int y = Math.Max(world_y % DITHER_SIZE, 0);
 
@@ -564,10 +580,10 @@ namespace Frontier {
 				world_x / REGION_SIZE,
 				world_y / REGION_SIZE);
 
-			Region r0 = WorldRegionGet(origin.X, origin.Y);
-			Region r1 = WorldRegionGet(origin.X + 1, origin.Y);
-			Region r2 = WorldRegionGet(origin.X, origin.Y + 1);
-			Region r3 = WorldRegionGet(origin.X + 1, origin.Y + 1);
+			Region r0 = RegionGet(origin.X, origin.Y);
+			Region r1 = RegionGet(origin.X + 1, origin.Y);
+			Region r2 = RegionGet(origin.X, origin.Y + 1);
+			Region r3 = RegionGet(origin.X + 1, origin.Y + 1);
 
 			Color4 c0, c1, c2, c3;
 			switch (c) {
@@ -600,15 +616,15 @@ namespace Frontier {
 				1);
 		}
 
-		private void WorldTexturePurge() {
+		private void TexturePurge() {
 			for (int m = 0; m < TREE_TYPES; m++)
 				for (int t = 0; t < TREE_TYPES; t++)
 					tree[m, t].TexturePurge();
 
-			build_map_texture();
+			BuildMapTexture();
 		}
 
-		private string WorldDirectionFromAngle(float angle) {
+		public string DirectionFromAngle(float angle) {
 			string direction = "North";
 			if (angle < 22.5f)				direction = "North";
 			else if (angle < 67.5f)		direction = "Northwest";
@@ -624,7 +640,7 @@ namespace Frontier {
 		/* char* WorldDirectory () {
 			static char     dir[32];
 
-			sprintf (dir, "saves//seed%d//", planet.seed);
+			sprintf (dir, "saves//Seed%d//", planet.Seed);
 			return dir;
 		}
 		*/

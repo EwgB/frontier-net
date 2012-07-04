@@ -94,7 +94,7 @@ namespace Frontier {
 
 				for (int i = 0; i < tm.VertexCount; i++) {
 					newpos = Matrix4TransformPoint(mat, tm.vertices[i]);
-					//newpos.Z *= 0.5f + WorldNoisef (2 + mWalk.X + mWalk.Y * FOREST_SIZE) * 1.0f;
+					//newpos.Z *= 0.5f + FWorld.NoiseFloat (2 + mWalk.X + mWalk.Y * FOREST_SIZE) * 1.0f;
 					newnorm = Matrix4TransformPoint(mat, tm.normals[i]);
 					mMeshList[mesh_index].mesh.PushVertex(newpos + origin, newnorm, tm.uvs[i]);
 				}
@@ -203,7 +203,7 @@ namespace Frontier {
 				GL.BindTexture(TextureTarget.Texture2D, mVBOList[i].texture_id);
 				mVBOList[i].vbo.Render();
 				//glBindTexture (GL_TEXTURE_2D, 0);
-				//mVBOList[i]._bbox.Render ();
+				//mVBOList[i].mBBox.Render ();
 			}
 		}
 		#endregion
