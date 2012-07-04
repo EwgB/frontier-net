@@ -6,32 +6,32 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
 namespace Frontier {
+	#region Structs and enums
+	enum ParticleBlend { Alpha, Add }
+	enum ParticleType { Facer, PanelX, PanelY, PanelZ }
+
+	struct ParticleSet {
+		public string texture;
+		public BBox volume, speed, size;
+		public Vector3 acceleration, origin, rotation, spin;
+		public ParticleBlend blend;
+		public ParticleType  panel_type;
+		public int fade_in, fade_out, lifespan, emit_interval, emit_count, emitter_lifespan;
+		public bool gravity, wind, interpolate, z_buffer;
+		public List<Color4> colors;
+	}
+
+	struct Particle {
+		public Vector3 _position, _rotation, _velocity, _spin;
+		public Vector3[] _vertex = new Vector3[4];
+		public Color4 _base_color, _draw_color;
+		public Color4[] _panel = new Color4[4];
+		public int _released;
+		public bool _dead;
+	}
+	#endregion
+
 	class Emitter {
-		#region Structs and enums
-		enum ParticleBlend { Alpha, Add }
-		enum ParticleType { Facer, PanelX, PanelY, PanelZ }
-
-		struct ParticleSet {
-			public string texture;
-			public BBox volume, speed, size;
-			public Vector3 acceleration, origin, rotation, spin;
-			public ParticleBlend blend;
-			public ParticleType  panel_type;
-			public int fade_in, fade_out, lifespan, emit_interval, emit_count, emitter_lifespan;
-			public bool gravity, wind, interpolate, z_buffer;
-			public List<Color4> colors;
-		}
-
-		struct Particle {
-			public Vector3 _position, _rotation, _velocity, _spin;
-			public Vector3[] _vertex = new Vector3[4];
-			public Color4 _base_color, _draw_color;
-			public Color4[] _panel = new Color4[4];
-			public int _released;
-			public bool _dead;
-		}
-		#endregion
-
 		#region Constants, member variables and properties
 		//Maximum number of particles in play from a single emitter - because botching
 		//emitter properties can create millions if you're not careful!
