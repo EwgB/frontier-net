@@ -21,42 +21,6 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
 namespace Frontier {
-	struct Region {
-		public string    title;
-		public Climate   climate;
-		public Coord     grid_pos;
-		public bool      has_flowers;
-
-		public int
-			tree_type,
-			flags_shape,
-			mountain_height,
-			river_id,
-			river_segment;
-
-		public int[] flower_shape = new int[FLOWERS];
-
-		public float
-			tree_threshold,
-			river_width,
-			geo_scale,			//Number from -1 to 1, lowest to highest elevation. 0 is sea level
-			geo_water,
-			geo_detail,
-			geo_bias,
-			temperature,
-			moisture,
-			cliff_threshold;
-
-		public Color4
-			color_map,
-			color_rock,
-			color_dirt,
-			color_grass,
-			color_atmosphere;
-
-		public Color4[] color_flowers = new Color4[FLOWERS];
-	}
-
 	class FWorld {
 		#region Enums and structs
 		enum Climate {

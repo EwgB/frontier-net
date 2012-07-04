@@ -15,8 +15,7 @@ namespace Frontier {
 	struct BBox {
 		private const float MAX_VALUE = 999999999999999.9f;
 
-		Vector3   pmin;
-		Vector3   pmax;
+		public Vector3 pmin, pmax;
 
 		public Vector3 Center { get { return (pmin + pmax) / 2.0f; } }
 		public Vector3 Size { get { return pmax - pmin; } }

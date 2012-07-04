@@ -54,13 +54,13 @@ namespace Frontier {
 		private ParticleSet      dust_particle;
 		private float            last_step_tracking;
 
-		public AnimType AvatarAnim { get; private set; }
+		public static AnimType AvatarAnim { get; private set; }
 
-		private Vector3 mPosition;
-		public Vector3 Position { get { return mPosition; } }
+		private static Vector3 mPosition;
+		public static Vector3 Position { get { return mPosition; } }
 
-		public Vector3 AvatarCameraPosition { get; private set; }
-		private Vector3 AvatarCameraAngle { get; private set; }
+		public static Vector3 AvatarCameraPosition { get; private set; }
+		private static Vector3 AvatarCameraAngle { get; private set; }
 		#endregion
 
 		#region Private methods

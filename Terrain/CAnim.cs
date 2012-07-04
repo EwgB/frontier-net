@@ -31,6 +31,8 @@ namespace Frontier {
 
 	class CAnim {
 		#region Member fields and properties
+		public const int BoneIdCount = 49;
+
 		public List<AnimFrame> mFrame;
 		public AnimFrame       mCurrent;
 
