@@ -281,11 +281,11 @@ namespace Frontier {
 
 			if (AvatarAnim == AnimType.Run || AvatarAnim == AnimType.Sprint) {
 				if (step_tracking < last_step_tracking || (step_tracking > 0.5f && last_step_tracking < 0.5f)) {
-					dust_particle.colors.clear();
+					dust_particle.Colors.clear();
 					if (Position.Z < 0.0f)
-						dust_particle.colors.Add(new Color4(0.4f, 0.7f, 1, 1));
+						dust_particle.Colors.Add(new Color4(0.4f, 0.7f, 1, 1));
 					else
-						dust_particle.colors.Add(CacheSurfaceColor((int) Position.X, (int) Position.Y));
+						dust_particle.Colors.Add(CacheSurfaceColor((int) Position.X, (int) Position.Y));
 					ParticleAdd(dust_particle, Position);
 				}
 			}

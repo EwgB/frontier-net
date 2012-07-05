@@ -11,23 +11,41 @@ namespace Frontier {
 	enum ParticleType { Facer, PanelX, PanelY, PanelZ }
 
 	struct ParticleSet {
-		public string texture;
-		public BBox volume, speed, size;
-		public Vector3 acceleration, origin, rotation, spin;
-		public ParticleBlend blend;
-		public ParticleType  panel_type;
-		public int fade_in, fade_out, lifespan, emit_interval, emit_count, emitter_lifespan;
-		public bool gravity, wind, interpolate, z_buffer;
-		public List<Color4> colors;
+		public string Texture;
+		public BBox Volume, Speed, Size;
+		public Vector3 Acceleration, Origin, Rotation, Spin;
+		public ParticleBlend Blend;
+		public ParticleType PanelType;
+		public int FadeIn, FadeOut, Lifespan, EmitInterval, EmitCount, EmitterLifespan;
+		public bool Gravity, Wind, Interpolate, ZBuffer;
+		public List<Color4> Colors;
 	}
 
 	struct Particle {
-		public Vector3 _position, _rotation, _velocity, _spin;
-		public Vector3[] _vertex = new Vector3[4];
-		public Color4 _base_color, _draw_color;
-		public Color4[] _panel = new Color4[4];
-		public int _released;
-		public bool _dead;
+		public Vector3 Position, Rotation, Velocity, Spin;
+		public Vector3[] Vertices;
+
+		public Color4 BaseColor, DrawColor;
+		public Color4[] Panels;
+		
+		public int Released;
+		public bool IsDead;
+
+		public Particle(Vector3 position, Vector3 velocity, Vector3 rotation, Vector3 spin, Color4 baseColor, bool isDead, int released) {
+			Position	= position;
+			Velocity	= velocity;
+			Rotation	= rotation;
+			Spin			= spin;
+			BaseColor = baseColor;
+			IsDead		= isDead;
+			Released	= released;
+
+			// DrawColor will be set properly later, at the blending stage
+			DrawColor = Color4.White;
+
+			Vertices = new Vector3[4];
+			Panels = new Color4[4];
+		}
 	}
 	#endregion
 
@@ -39,110 +57,107 @@ namespace Frontier {
 
 		private static int cycler, id_pool;
 
-		private int _die, _last_update, _next_release;
-		private ParticleSet _settings;
-		private UVBox _uv;
-		private bool _dead;
-		private List<Particle> _particle;
+		private int mDie, mLastUpdate, mNextRelease;
+		private ParticleSet mSettings;
+		private UVBox mUV;
+		private bool mDead;
+		private List<Particle> mParticles;
 
 		public int Id { get; private set; }
-		public bool IsDead { get { return _dead && (_particle.Count == 0); } }
+		public bool IsDead { get { return mDead && (mParticles.Count == 0); } }
 		#endregion
 
 		#region Methods
-		public void Retire() { _dead = true; }
+		public void Retire() { mDead = true; }
 
 		public Emitter() { Id = ++id_pool; }
 
 		private void Emit(int count) {
-			for (int n = 0; n < count; n++) {
-				Particle  p;
-
-				Vector3 range = _settings.volume.Size;
-				p._position.X = _settings.volume.pmin.X + range.X * WorldNoisef(cycler++);
-				p._position.Y = _settings.volume.pmin.Y + range.Y * WorldNoisef(cycler++);
-				p._position.Z = _settings.volume.pmin.Z + range.Z * WorldNoisef(cycler++);
+			for (int n = 0; n < Math.Min(count, MAX_PARTICLES); n++) {
+				Vector3 range = mSettings.Volume.Size;
+				Vector3 position = new Vector3(
+					mSettings.Volume.pmin.X + range.X * FWorld.NoiseFloat(cycler++),
+					mSettings.Volume.pmin.Y + range.Y * FWorld.NoiseFloat(cycler++),
+					mSettings.Volume.pmin.Z + range.Z * FWorld.NoiseFloat(cycler++));
 		
-				range = _settings.speed.Size;
-				p._velocity.X = _settings.speed.pmin.X + range.X * WorldNoisef(cycler++);
-				p._velocity.Y = _settings.speed.pmin.Y + range.Y * WorldNoisef(cycler++);
-				p._velocity.Z = _settings.speed.pmin.Z + range.Z * WorldNoisef(cycler++);
-				p._base_color = _settings.colors[WorldNoisei(cycler++) % _settings.colors.size()];
+				range = mSettings.Speed.Size;
+				Vector3 velocity = new Vector3(
+					mSettings.Speed.pmin.X + range.X * FWorld.NoiseFloat(cycler++),
+					mSettings.Speed.pmin.Y + range.Y * FWorld.NoiseFloat(cycler++),
+					mSettings.Speed.pmin.Z + range.Z * FWorld.NoiseFloat(cycler++));
+
+				range = mSettings.Size.Size;
+				range.X = mSettings.Size.pmin.X + range.X * FWorld.NoiseFloat(cycler++);
+				range.Y = mSettings.Size.pmin.Y + range.Y * FWorld.NoiseFloat(cycler++);
+				range.Z = mSettings.Size.pmin.Z + range.Z * FWorld.NoiseFloat(cycler++);
 				
-				range = _settings.size.Size;
-				range.X = _settings.size.pmin.X + range.X * WorldNoisef(cycler++);
-				range.Y = _settings.size.pmin.Y + range.Y * WorldNoisef(cycler++);
-				range.Z = _settings.size.pmin.Z + range.Z * WorldNoisef(cycler++);
-				
-				p._rotation = _settings.rotation;
-				p._spin = _settings.spin;
-				
-				int i = 0;
-				for (int x = -1; x <= 1; x += 2) {
+				Particle p = new Particle(position, range, mSettings.Rotation, mSettings.Spin,
+					mSettings.Colors[FWorld.NoiseInt(cycler++) % mSettings.Colors.Count],					// Base color
+					false, SdlTick());
+
+				for (int x = -1, i = 0; x <= 1; x += 2) {
 					for (int y = -1; y <= 1; y += 2, i++) {
-						switch (_settings.panel_type) {
+						switch (mSettings.PanelType) {
 							case ParticleType.PanelX:
-								p._panel[i] = new Color4(0, x * range.Y, y * range.Z, 1);
+								p.Panels[i] = new Color4(0, x * range.Y, y * range.Z, 1);
 								break;
 							case ParticleType.PanelY:
-								p._panel[i] = new Color4(x * range.X, 0, y * range.Z, 1);
+								p.Panels[i] = new Color4(x * range.X, 0, y * range.Z, 1);
 								break;
 							case ParticleType.PanelZ:
-								p._panel[i] = new Color4(x * range.X, y * range.Y, 0, 1);
+								p.Panels[i] = new Color4(x * range.X, y * range.Y, 0, 1);
 								break;
 						}
-						p._panel[i].R += _settings.origin.X;
-						p._panel[i].G += _settings.origin.Y;
-						p._panel[i].B += _settings.origin.Z;
+						p.Panels[i].R += mSettings.Origin.X;
+						p.Panels[i].G += mSettings.Origin.Y;
+						p.Panels[i].B += mSettings.Origin.Z;
 					}
 				}
-				p._dead = false;
-				p._released = SdlTick();
-				if (_particle.Count < MAX_PARTICLES) //just make sure they don't get away from us
-					_particle.Add(p);
+
+				mParticles.Add(p);
 			}
 		}
 
 		public void Set(ParticleSet ps) {
-			_settings = ps;
-			if (_settings.colors.Count == 0)
-				_settings.colors.Add(Color4.White);
-			_last_update = SdlTick();
-			_next_release = _last_update;
-			if (_settings.emitter_lifespan != 0)
-				_die = _last_update + _settings.emitter_lifespan;
+			mSettings = ps;
+			if (mSettings.Colors.Count == 0)
+				mSettings.Colors.Add(Color4.White);
+			mLastUpdate = SdlTick();
+			mNextRelease = mLastUpdate;
+			if (mSettings.EmitterLifespan != 0)
+				mDie = mLastUpdate + mSettings.EmitterLifespan;
 			else
-				_die = 0;
-			_particle.Clear();
-			_uv.Set(1.0f);
-			_dead = false;
+				mDie = 0;
+			mParticles.Clear();
+			mUV.Set(1.0f);
+			mDead = false;
 		}
 
 		public void RenderBbox() {
 			GL.BindTexture(TextureTarget.Texture2D, 0);
-			_settings.volume.Render();
+			mSettings.Volume.Render();
 		}
 
 		public void Render() {
 			GL.DepthMask(false);
-			if (_settings.blend == ParticleBlend.Add)
+			if (mSettings.Blend == ParticleBlend.Add)
 				GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.One);
 			else
 				GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
 			//glBindTexture (GL_TEXTURE_2D, 0);
-			//_settings.volume.Render ();
-			GL.BindTexture(TextureTarget.Texture2D, TextureIdFromName(_settings.texture));
+			//_settings.Volume.Render ();
+			GL.BindTexture(TextureTarget.Texture2D, TextureIdFromName(mSettings.Texture));
 
 			GL.Begin(BeginMode.Quads);
 
 			Vector2     uv;
-			for (int i = 0; i < _particle.Count; i++) {
+			for (int i = 0; i < mParticles.Count; i++) {
 				GL.Color4(p._draw_color);
-				uv = _uv.Corner(0);		GL.TexCoord2(uv);		GL.Vertex3(p._vertex[0]);
-				uv = _uv.Corner(1);		GL.TexCoord2(uv);		GL.Vertex3(p._vertex[1]);
-				uv = _uv.Corner(2);		GL.TexCoord2(uv);		GL.Vertex3(p._vertex[3]);
-				uv = _uv.Corner(3);		GL.TexCoord2(uv);		GL.Vertex3(p._vertex[2]);
+				uv = mUV.Corner(0);		GL.TexCoord2(uv);		GL.Vertex3(p._vertex[0]);
+				uv = mUV.Corner(1);		GL.TexCoord2(uv);		GL.Vertex3(p._vertex[1]);
+				uv = mUV.Corner(2);		GL.TexCoord2(uv);		GL.Vertex3(p._vertex[3]);
+				uv = mUV.Corner(3);		GL.TexCoord2(uv);		GL.Vertex3(p._vertex[2]);
 			}
 			GL.End();
 			GL.DepthMask(true);
@@ -150,47 +165,47 @@ namespace Frontier {
 
 		public void Update(float elapsed) {
 			int now = SdlTick();
-			if (now >= _next_release && !_dead) {
-				Emit(_settings.emit_count);
-				_next_release = now + _settings.emit_interval;
+			if (now >= mNextRelease && !mDead) {
+				Emit(mSettings.EmitCount);
+				mNextRelease = now + mSettings.EmitInterval;
 			}
 
-			for (int i = 0; i < _particle.Count; i++) {
-				Particle p = _particle[i];
-				p._position += p._velocity * elapsed;
-				p._velocity += _settings.acceleration * elapsed;
-				if (_settings.gravity)
-					p._velocity.Z -= GRAVITY * elapsed;
-				p._rotation += p._spin * elapsed;
+			for (int i = 0; i < mParticles.Count; i++) {
+				Particle p = mParticles[i];
+				p.Position += p.Velocity * elapsed;
+				p.Velocity += mSettings.Acceleration * elapsed;
+				if (mSettings.Gravity)
+					p.Velocity.Z -= GRAVITY * elapsed;
+				p.Rotation += p.Spin * elapsed;
 
-				int fade = now - p._released;
+				int fade = now - p.Released;
 				float alpha = 1.0f;
-				if (fade > _settings.lifespan)
-					p._dead = true;
-				if (fade < _settings.fade_in)
-					alpha = (float) fade / (float) _settings.fade_in;
-				if (fade > _settings.lifespan - _settings.fade_out) {
-					fade -= _settings.lifespan - _settings.fade_out;
-					alpha = 1.0f - (float) fade / (float) _settings.fade_out;
+				if (fade > mSettings.Lifespan)
+					p.IsDead = true;
+				if (fade < mSettings.FadeIn)
+					alpha = (float) fade / (float) mSettings.FadeIn;
+				if (fade > mSettings.Lifespan - mSettings.FadeOut) {
+					fade -= mSettings.Lifespan - mSettings.FadeOut;
+					alpha = 1.0f - (float) fade / (float) mSettings.FadeOut;
 				}
 
-				if (_settings.blend == ParticleBlend.Add)
-					p._draw_color = p._base_color * alpha;
+				if (mSettings.Blend == ParticleBlend.Add)
+					p.DrawColor = p.BaseColor * alpha;
 				else {
-					p._draw_color = p._base_color;
-					p._draw_color.A = alpha;
+					p.DrawColor = p.BaseColor;
+					p.DrawColor.A = alpha;
 				}
-				Matrix4 m = Matrix4.CreateRotationX(p._rotation.X);
-				m = Matrix4.Rotate(Vector3.UnitY, p._rotation.Y);
-				m = Matrix4.Rotate(Vector3.UnitZ, p._rotation.Z);
+				Matrix4 m = Matrix4.CreateRotationX(p.Rotation.X);
+				m = Matrix4.Rotate(Vector3.UnitY, p.Rotation.Y);
+				m = Matrix4.Rotate(Vector3.UnitZ, p.Rotation.Z);
 				for (int v = 0; v < 4; v++)
-					p._vertex[v] = m.TransformPoint(p._panel[v]) + p._position;
+					p.Vertices[v] = m.TransformPoint(p.Panels[v]) + p.Position;
 			}
-			if ((_die != 0) && (_die < now))
-				_dead = true;
-			while ((_particle.Count > 0) && _particle[0]._dead)
-				_particle.Remove(_particle[0]);
-			_last_update = now;
+			if ((mDie != 0) && (mDie < now))
+				mDead = true;
+			while ((mParticles.Count > 0) && mParticles[0].IsDead)
+				mParticles.Remove(mParticles[0]);
+			mLastUpdate = now;
 		}
 		#endregion
 	}
