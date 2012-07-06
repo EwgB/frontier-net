@@ -87,7 +87,7 @@ namespace Frontier {
 				int index = world_x + world_y * BRUSH_SIZE;
 				int thisTuftIndex	= index % MAX_TUFTS;
 				Vector3 root = new Vector3(world_x, world_y, 0);
-				float height = 0.25f + (r.moisture * r.temperature) * 2.0f;
+				float height = 0.25f + (r.Moisture * r.Temperature) * 2.0f;
 
 				Vector2 size = new Vector2(
 					1.0f + FWorld.NoiseFloat(index) * 1.0f,
@@ -111,7 +111,7 @@ namespace Frontier {
 					v[i].Z += CacheElevation (v[i].X, v[i].Y);
 				}
 
-				int patch = r.flower_shape[index % FLOWERS] % BRUSH_TYPES;
+				int patch = r.FlowerShape[index % FLOWERS] % BRUSH_TYPES;
 				int current = mMesh.VertexCount;
 				Vector3 normal = CacheNormal(world_x, world_y);
 

@@ -25,7 +25,6 @@ namespace Frontier {
 		private static bool				mPrepDone;
 		private static Vector3[,]	mTuftList = new Vector3[MAX_TUFTS, 4];
 
-		private Coord							mGridPosition;
 		private Coord							mOrigin;
 		private Coord							mWalk;
 		private int								mCurrentDistance;
@@ -39,7 +38,6 @@ namespace Frontier {
 		private BBox							mBBox;
 
 		private bool							Ready  { get { return mStage == GrassStage.Done;} }
-		private bool							Valid { get; private set; }
 		#endregion
 
 		#region Private methods
@@ -92,15 +90,15 @@ namespace Frontier {
 		private void Build (long stop) {
 			int worldX = mOrigin.X + mWalk.X;
 			int worldY = mOrigin.Y + mWalk.Y;
-			bool doGrass = CacheSurface (worldX, worldY) == SURFACE_GRASS;
+			bool doGrass = (CacheSurface (worldX, worldY) == SurfaceType.Grass);
 
-			if (mWalk.X % mCurrentDistance || mWalk.Y  % mCurrentDistance)
+			if (((mWalk.X % mCurrentDistance) != 0) || ((mWalk.Y % mCurrentDistance) != 0))
 				doGrass = false;
 			if (doGrass) {
 				Region r = FWorld.RegionFromPosition (worldX, worldY);
 				int index = worldX + worldY * GRASS_SIZE;
 				int this_tuft_index = index % MAX_TUFTS;
-				float height = 0.05f + r.moisture * r.temperature;
+				float height = 0.05f + r.Moisture * r.Temperature;
 				
 				Vector3 root = new Vector3(
 					worldX + (FWorld.NoiseFloat(index) -0.5f),
@@ -111,7 +109,7 @@ namespace Frontier {
 					0.4f + FWorld.NoiseFloat(index) * 0.5f,
 					FWorld.NoiseFloat(index) * height + (height / 2));
 
-				bool do_flower = r.has_flowers;
+				bool do_flower = r.HasFlowers;
 				if (do_flower) //flowers are shorter than grass
 					size.Y /= 2;
 				size.Y = Math.Max(size.Y, 0.3f);
@@ -131,7 +129,7 @@ namespace Frontier {
 					v[i].Z += CacheElevation(v[i].X, v[i].Y);
 				}
 
-				int patch = r.flower_shape[index % FLOWERS] % GRASS_TYPES;
+				int patch = r.FlowerShape[index % FLOWERS] % GRASS_TYPES;
 				int current = mVertices.Count;
 				Vector3 normal = CacheNormal (worldX, worldY);
 
@@ -148,7 +146,7 @@ namespace Frontier {
 
 				if (do_flower) {
 					current = mVertices.Count;
-					color = r.color_flowers[index % FLOWERS];
+					color = r.ColorFlowers[index % FLOWERS];
 					normal = Vector3.UnitZ;
 					VertexPush (v[4], normal, color, mBoxFlower[patch].Corner (0));
 					VertexPush (v[5], normal, color, mBoxFlower[patch].Corner (1));
@@ -176,7 +174,7 @@ namespace Frontier {
 				DoPrep ();
 		}
 
-		public void Set (int x, int y, int density) {
+		public override void Set (int x, int y, int density) {
 			//density = max (density, 1); //detail 0 and 1 are the same level. (Maximum density.)
 			density = 1;
 			if (mOrigin.X == x * GRASS_SIZE && mOrigin.Y == y * GRASS_SIZE && density == mCurrentDistance)
@@ -195,7 +193,7 @@ namespace Frontier {
 			mBBox.Clear();
 		}
 
-		public void Update (long stop) {
+		public override void Update (long stop) {
 			while (SdlTick () < stop && !Ready) {
 				switch (mStage) {
 				case GrassStage.Begin:
@@ -217,7 +215,7 @@ namespace Frontier {
 			}
 		}
 
-		public void Render () {
+		public override void Render () {
 			// We need at least one successful build before we can draw.
 			if (!Valid)
 				return;

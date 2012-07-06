@@ -14,6 +14,11 @@ namespace Frontier {
 		public int X { get; set; }
 		public int Y { get; set; }
 
+		public static Coord North	= new Coord( 0, -1);
+		public static Coord South	= new Coord( 0,  1);
+		public static Coord East	= new Coord( 1,  0);
+		public static Coord West	= new Coord(-1,  0);
+
 		public Coord(int x, int y)	{ X = x;	Y = y; }
 		public Coord(Coord c)				{ X = c.X; Y = c.Y; }
 

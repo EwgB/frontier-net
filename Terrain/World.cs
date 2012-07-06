@@ -114,7 +114,7 @@ namespace Frontier {
 		private static World      planet;		// THE WHOLE THING!
 		private static Tree[,]    tree = new Tree[TREE_TYPES, TREE_TYPES];
 
-		private static int WorldCanopyTree { get; private set; }
+		public static int WorldCanopyTree { get; private set; }
 
 		private int WorldMap() {
 			return map_id;
@@ -126,11 +126,11 @@ namespace Frontier {
 		// This modifies the passed elevation value AFTER region cross-fading is complete,
 		// For things that should not be mimicked by neighbors. (Like rivers.)
 		public static float DoHeightNoBlend(float val, Region r, Vector2 offset, float water) {
-			if ((r.flags_shape & REGION_FLAG_RIVER_ANY) != 0) {
+			if ((r.FlagsShape & REGION_FLAG_RIVER_ANY) != 0) {
 				// If this river is strictly north / south
-				if (((r.flags_shape & REGION_FLAG_RIVERNS) != 0) && ((r.flags_shape & REGION_FLAG_RIVEREW) == 0)) {
+				if (((r.FlagsShape & REGION_FLAG_RIVERNS) != 0) && ((r.FlagsShape & REGION_FLAG_RIVEREW) == 0)) {
 					// This makes the river bend side-to-side
-					switch ((r.grid_pos.X + r.grid_pos.Y) % 6) {
+					switch ((r.GridPos.X + r.GridPos.Y) % 6) {
 						case 0:
 							offset.X += Math.Abs(Math.Sin(offset.Y * 180.0f * DEGREES_TO_RADIANS)) * 0.25f; break;
 						case 1:
@@ -147,9 +147,9 @@ namespace Frontier {
 				}
 
 				// If this river is strictly east / west
-				if (((r.flags_shape & REGION_FLAG_RIVEREW) != 0) && ((r.flags_shape & REGION_FLAG_RIVERNS) == 0)) {
+				if (((r.FlagsShape & REGION_FLAG_RIVEREW) != 0) && ((r.FlagsShape & REGION_FLAG_RIVERNS) == 0)) {
 					// This makes the river bend side-to-side
-					switch ((r.grid_pos.X + r.grid_pos.Y) % 4) {
+					switch ((r.GridPos.X + r.GridPos.Y) % 4) {
 						case 0:
 							offset.Y -= Math.Abs(Math.Sin(offset.X * 180.0f * DEGREES_TO_RADIANS)) * 0.25f; break;
 						case 1:
@@ -162,9 +162,9 @@ namespace Frontier {
 				}
 
 				// If this river curves around a bend
-				if (((r.flags_shape & REGION_FLAG_RIVERNW) != 0) && ((r.flags_shape & REGION_FLAG_RIVERSE) == 0))
+				if (((r.FlagsShape & REGION_FLAG_RIVERNW) != 0) && ((r.FlagsShape & REGION_FLAG_RIVERSE) == 0))
 					offset.X = offset.Y = offset.Length;
-				if (((r.flags_shape & REGION_FLAG_RIVERSE) != 0) && ((r.flags_shape & REGION_FLAG_RIVERNW) == 0)) {
+				if (((r.FlagsShape & REGION_FLAG_RIVERSE) != 0) && ((r.FlagsShape & REGION_FLAG_RIVERNW) == 0)) {
 					Vector2 new_off = new Vector2(
 						1.0f - offset.X,
 						1.0f - offset.Y);
@@ -172,7 +172,7 @@ namespace Frontier {
 					offset = new_off;
 				}
 
-				if (((r.flags_shape & REGION_FLAG_RIVERNE) != 0) && ((r.flags_shape & REGION_FLAG_RIVERSW) == 0)) {
+				if (((r.FlagsShape & REGION_FLAG_RIVERNE) != 0) && ((r.FlagsShape & REGION_FLAG_RIVERSW) == 0)) {
 					Vector2 new_off = new Vector2(
 						1.0f - offset.X,
 						offset.Y);
@@ -180,7 +180,7 @@ namespace Frontier {
 					offset = new_off;
 				}
 
-				if (((r.flags_shape & REGION_FLAG_RIVERSW) != 0) && ((r.flags_shape & REGION_FLAG_RIVERNE) == 0)) {
+				if (((r.FlagsShape & REGION_FLAG_RIVERSW) != 0) && ((r.FlagsShape & REGION_FLAG_RIVERNE) == 0)) {
 					Vector2 new_off = new Vector2(
 						offset.X,
 						1.0f - offset.Y);
@@ -193,18 +193,18 @@ namespace Frontier {
 					Math.Abs((offset.Y - 0.5f) * 2.0f));
 				float strength = cen.Length;
 
-				if (((r.flags_shape & REGION_FLAG_RIVERN) != 0) && (offset.Y < 0.5f))
+				if (((r.FlagsShape & REGION_FLAG_RIVERN) != 0) && (offset.Y < 0.5f))
 					strength = Math.Min(strength, cen.X);
-				if (((r.flags_shape & REGION_FLAG_RIVERS) != 0) && (offset.Y >= 0.5f))
+				if (((r.FlagsShape & REGION_FLAG_RIVERS) != 0) && (offset.Y >= 0.5f))
 					strength = Math.Min(strength, cen.X);
-				if (((r.flags_shape & REGION_FLAG_RIVERW) != 0) && (offset.X < 0.5f))
+				if (((r.FlagsShape & REGION_FLAG_RIVERW) != 0) && (offset.X < 0.5f))
 					strength = Math.Min(strength, cen.Y);
-				if (((r.flags_shape & REGION_FLAG_RIVERE) != 0) && (offset.X >= 0.5f))
+				if (((r.FlagsShape & REGION_FLAG_RIVERE) != 0) && (offset.X >= 0.5f))
 					strength = Math.Min(strength, cen.Y);
 
-				if (strength < (r.river_width / 2)) {
-					strength *= 1.0f / (r.river_width / 2);
-					float delta = (val - water) + 4.0f * r.river_width;
+				if (strength < (r.RiverWidth / 2)) {
+					strength *= 1.0f / (r.RiverWidth / 2);
+					float delta = (val - water) + 4.0f * r.RiverWidth;
 					val -= (delta) * (1.0f - strength);
 				}
 			}
@@ -215,22 +215,22 @@ namespace Frontier {
 		// Water is the water level.  Detail is the height of the rolling hills. Bias is a direct height added on to these.
 		public static float DoHeight(Region r, Vector2 offset, float water, float detail, float bias) {
 			// Modify the detail values before they are applied
-			if ((r.flags_shape & REGION_FLAG_CRATER) != 0) {
+			if ((r.FlagsShape & REGION_FLAG_CRATER) != 0) {
 				if (detail > 0.5f)
 					detail = 0.5f;
 			}
-			if ((r.flags_shape & REGION_FLAG_TIERED) != 0) {
+			if ((r.FlagsShape & REGION_FLAG_TIERED) != 0) {
 				if (detail < 0.2f)
 					detail += 0.2f;
 				else
 					if (detail < 0.5f)
 						detail -= 0.2f;
 			}
-			if ((r.flags_shape & REGION_FLAG_CRACK) != 0) {
+			if ((r.FlagsShape & REGION_FLAG_CRACK) != 0) {
 				if (detail > 0.2f && detail < 0.3f)
 					detail = 0.0f;
 			}
-			if ((r.flags_shape & REGION_FLAG_SINKHOLE) != 0) {
+			if ((r.FlagsShape & REGION_FLAG_SINKHOLE) != 0) {
 				float    x = Math.Abs(offset.X - 0.5f);
 				float    y = Math.Abs(offset.Y - 0.5f);
 				if (detail > Math.Max(x, y))
@@ -238,7 +238,7 @@ namespace Frontier {
 			}
 
 			// Soften up the banks of a river 
-			if ((r.flags_shape & REGION_FLAG_RIVER_ANY) != 0) {
+			if ((r.FlagsShape & REGION_FLAG_RIVER_ANY) != 0) {
 				Vector2 cen = new Vector2(
 					Math.Abs((offset.X - 0.5f) * 2.0f),
 					Math.Abs((offset.Y - 0.5f) * 2.0f));
@@ -248,33 +248,33 @@ namespace Frontier {
 			}
 
 			// Apply the values!
-			float val = water + detail * r.geo_detail + bias;
-			if (r.climate == Climate.Swamp) {
-				val -= r.geo_detail / 2.0f;
-				val = Math.Max(val, r.geo_water - 0.5f);
+			float val = water + detail * r.GeoDetail + bias;
+			if (r.Climate == Climate.Swamp) {
+				val -= r.GeoDetail / 2.0f;
+				val = Math.Max(val, r.GeoWater - 0.5f);
 			}
 
 			// Modify the final value.
-			if ((r.flags_shape & REGION_FLAG_MESAS) != 0) {
+			if ((r.FlagsShape & REGION_FLAG_MESAS) != 0) {
 				float x = Math.Abs(offset.X - 0.5f) / 5;
 				float y = Math.Abs(offset.Y - 0.5f) / 5;
 				if ((detail + 0.01f) < (x + y)) {
 					val += 5;
 				}
 			}
-			if ((r.flags_shape & REGION_FLAG_CANYON_NS) != 0) {
+			if ((r.FlagsShape & REGION_FLAG_CANYON_NS) != 0) {
 				float    x = Math.Abs(offset.X - 0.5f) * 2.0f; ;
 				if (x + detail < 0.5f)
-					val -= Math.Min(r.geo_detail, 10.0f);
+					val -= Math.Min(r.GeoDetail, 10.0f);
 			}
-			if (((r.flags_shape & REGION_FLAG_BEACH) != 0) && (val < r.cliff_threshold) && (val > 0)) {
+			if (((r.FlagsShape & REGION_FLAG_BEACH) != 0) && (val < r.cliff_threshold) && (val > 0)) {
 				val /= r.cliff_threshold;
 				val *= val;
 				val *= r.cliff_threshold;
 				val += 0.2f;
 			}
 
-			if (((r.flags_shape & REGION_FLAG_BEACH_CLIFF) != 0) && (val < r.cliff_threshold) && (val > -0.1f)) {
+			if (((r.FlagsShape & REGION_FLAG_BEACH_CLIFF) != 0) && (val < r.cliff_threshold) && (val > -0.1f)) {
 				val -= Math.Min(r.cliff_threshold, 10.0f);
 			}
 			// If a point dips below the water table, make sure it's not too close to the water, to avoid ugly z-fighting
@@ -313,9 +313,9 @@ namespace Frontier {
 					int yy = (WORLD_GRID - 1) - y;
 					Region r = planet.Map[x, yy];
 					int i = (x + y * WORLD_GRID) * 3;
-					pixels[i]			= (int) (r.color_map.R * 255.0f);
-					pixels[i + 1] = (int) (r.color_map.G * 255.0f);
-					pixels[i + 2] = (int) (r.color_map.B * 255.0f);
+					pixels[i]			= (int) (r.ColorMap.R * 255.0f);
+					pixels[i + 1] = (int) (r.ColorMap.G * 255.0f);
+					pixels[i + 2] = (int) (r.ColorMap.B * 255.0f);
 				}
 			}
 			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, WORLD_GRID, WORLD_GRID, 0, PixelFormat.Rgb, PixelType.Byte, pixels);
@@ -343,7 +343,7 @@ namespace Frontier {
 			Region rbl = RegionGet(origin.X, origin.Y + 1);
 			Region rbr = RegionGet(origin.X + 1, origin.Y + 1);
 
-			return FMath.InterpolateQuad(rul.geo_water, rur.geo_water, rbl.geo_water, rbr.geo_water, offset, ((origin.X + origin.Y) % 2) == 0);
+			return FMath.InterpolateQuad(rul.GeoWater, rur.GeoWater, rbl.GeoWater, rbr.GeoWater, offset, ((origin.X + origin.Y) % 2) == 0);
 		}
 
 		private float WorldBiasLevel(int world_x, int world_y) {
@@ -588,25 +588,25 @@ namespace Frontier {
 			Color4 c0, c1, c2, c3;
 			switch (c) {
 				case SurfaceColor.Dirt:
-					c0 = r0.color_dirt;
-					c1 = r1.color_dirt;
-					c2 = r2.color_dirt;
-					c3 = r3.color_dirt;
+					c0 = r0.ColorDirt;
+					c1 = r1.ColorDirt;
+					c2 = r2.ColorDirt;
+					c3 = r3.ColorDirt;
 					break;
 				case SurfaceColor.Rock:
-					c0 = r0.color_rock;
-					c1 = r1.color_rock;
-					c2 = r2.color_rock;
-					c3 = r3.color_rock;
+					c0 = r0.ColorRock;
+					c1 = r1.ColorRock;
+					c2 = r2.ColorRock;
+					c3 = r3.ColorRock;
 					break;
 				case SurfaceColor.Sand:
 					return new Color4(0.98f, 0.82f, 0.42f, 1);
 				case SurfaceColor.Grass:
 				default:
-					c0 = r0.color_grass;
-					c1 = r1.color_grass;
-					c2 = r2.color_grass;
-					c3 = r3.color_grass;
+					c0 = r0.ColorGrass;
+					c1 = r1.ColorGrass;
+					c2 = r2.ColorGrass;
+					c3 = r3.ColorGrass;
 					break;
 			}
 			return new Color4(

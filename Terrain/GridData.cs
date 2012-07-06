@@ -10,12 +10,14 @@ namespace Frontier {
 		//protected BBox bbox;
 
 		protected Coord mGridPosition;
-		public Coord GridPosition { get { return mGridPosition; } private set { mGridPosition = value; } }
+		public Coord GridPosition { get { return mGridPosition; } protected set { mGridPosition = value; } }
 
-		public bool Ready();
-		public void Render();
-		public void Set(int x, int y, int distance);
-		public void Update(long stop);
-		public void Invalidate();
+		public bool Valid { get; protected set; }
+		public void Invalidate() { Valid = false; }
+
+		public abstract bool IsReady { get; }
+		public abstract void Render();
+		public abstract void Set(int x, int y, int distance);
+		public abstract void Update(long stop);
 	}
 }

@@ -83,11 +83,10 @@ namespace Frontier {
 
 		public int PolygonsCount { get { return mIndexBuffer.Count / 3; } }
 		public int PointsCount { get {return mIndexBuffer.Count; } }
-		public bool Ready { get { return mStage == Stage.Done; } }
+		public override bool IsReady { get { return mStage == Stage.Done; } }
 		public int TerrainPatch { get { return (TERRAIN_SIZE / mPatchSteps); } }
 
 		public int TextureSize { get; private set; }
-		public bool Valid { get; private set; }
 
 		public int mTextureDesiredSize;
 		public int TextureDesiredSize {
@@ -617,7 +616,7 @@ namespace Frontier {
 
 		public bool GetPoint(int x, int y) { return mPoint[x, y]; }
 
-		public void Update(long stop) {
+		public override void Update(long stop) {
 			while (SdlTick () < stop) {
 				switch (mStage) {
 				case Stage.Begin: 
@@ -746,8 +745,8 @@ namespace Frontier {
 				mWalk.Clear();
 			}
 		}
-		
-		public void Set (int grid_x, int grid_y, int distance) {
+
+		public override void Set(int grid_x, int grid_y, int distance) {
 			LOD new_lod;
 
 			if (mStage == Stage.Texture)
@@ -782,7 +781,7 @@ namespace Frontier {
 			mWalk.Clear ();
 		}
 
-		void Render() {
+		public override void Render() {
 			if ((mFrontTexture != 0) && Valid) {
 				//GL.Color3fv (&mColor.red);
 				GL.BindTexture(TextureTarget.Texture2D, mFrontTexture);
