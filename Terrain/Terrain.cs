@@ -685,7 +685,7 @@ namespace Frontier {
 				case Stage.VBO:
 					if (mVBO.Ready())
 						mVBO.Clear();
-					mVBO.Create(GL.Triangles, mIndexBuffer.Count, mVertexList.Count, mIndexBuffer, mVertexList, mNormalList, null, mUVList);
+					mVBO.Create(BeginMode.Triangles, mIndexBuffer.Count, mVertexList.Count, mIndexBuffer, mVertexList, mNormalList, null, mUVList);
 					mStage++;
 					break;
 				case Stage.Texture: 

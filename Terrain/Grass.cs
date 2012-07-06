@@ -37,7 +37,7 @@ namespace Frontier {
 		private GrassStage				mStage;
 		private BBox							mBBox;
 
-		private bool							Ready  { get { return mStage == GrassStage.Done;} }
+		public override bool			IsReady  { get { return mStage == GrassStage.Done;} }
 		#endregion
 
 		#region Private methods

@@ -7,6 +7,7 @@ using System;
 
 using OpenTK;
 using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL;
 
 namespace Frontier {
 	class Avatar : Figure {
@@ -56,11 +57,8 @@ namespace Frontier {
 
 		public static AnimType AvatarAnim { get; private set; }
 
-		private static Vector3 mPosition;
-		public static Vector3 Position { get { return mPosition; } }
-
 		public static Vector3 AvatarCameraPosition { get; private set; }
-		private static Vector3 AvatarCameraAngle { get; private set; }
+		public static Vector3 AvatarCameraAngle { get; private set; }
 		#endregion
 
 		#region Private methods
@@ -81,14 +79,14 @@ namespace Frontier {
 			float       forward;
 
 			if (CVarUtils.GetCVar<bool>("flying")) {
-				forward = Math.Sin(angle.X * DEGREES_TO_RADIANS);
-				movement.X = Math.Cos(angle.Z * DEGREES_TO_RADIANS) * delta.X + Math.Sin(angle.Z * DEGREES_TO_RADIANS) * delta.Y * forward;
-				movement.Y = -Math.Sin(angle.Z * DEGREES_TO_RADIANS) * delta.X + Math.Cos(angle.Z * DEGREES_TO_RADIANS) * delta.Y * forward;
-				movement.Z = Math.Cos(angle.X * DEGREES_TO_RADIANS) * delta.Y;
+				forward = (float) Math.Sin(angle.X * FMath.DEGREES_TO_RADIANS);
+				movement.X = (float) (Math.Cos(angle.Z * FMath.DEGREES_TO_RADIANS) * delta.X + Math.Sin(angle.Z * FMath.DEGREES_TO_RADIANS) * delta.Y * forward);
+				movement.Y = (float) (-Math.Sin(angle.Z * FMath.DEGREES_TO_RADIANS) * delta.X + Math.Cos(angle.Z * FMath.DEGREES_TO_RADIANS) * delta.Y * forward);
+				movement.Z = (float) (Math.Cos(angle.X * FMath.DEGREES_TO_RADIANS) * delta.Y);
 				mPosition += movement;
 			} else {
-				desired_movement.X += Math.Cos(angle.Z * DEGREES_TO_RADIANS) * delta.X + Math.Sin(angle.Z * DEGREES_TO_RADIANS) * delta.Y;
-				desired_movement.Y += -Math.Sin(angle.Z * DEGREES_TO_RADIANS) * delta.X + Math.Cos(angle.Z * DEGREES_TO_RADIANS) * delta.Y;
+				desired_movement.X += (float) (Math.Cos(angle.Z * FMath.DEGREES_TO_RADIANS) * delta.X + Math.Sin(angle.Z * FMath.DEGREES_TO_RADIANS) * delta.Y);
+				desired_movement.Y += (float) (-Math.Sin(angle.Z * FMath.DEGREES_TO_RADIANS) * delta.X + Math.Cos(angle.Z * FMath.DEGREES_TO_RADIANS) * delta.Y);
 			}
 		}
 
@@ -99,15 +97,15 @@ namespace Frontier {
 			float     ground;
 			Vector2 rads;
 
-			rads.X = angle.X * DEGREES_TO_RADIANS;
+			rads.X = angle.X * FMath.DEGREES_TO_RADIANS;
 			vert_delta = (float) (Math.Cos(rads.X) * cam_distance);
 			horz_delta = (float) Math.Sin(rads.X);
 
 			cam = Position;
 			cam.Z += EYE_HEIGHT;
 
-			cam.X += Math.Sin(angle.Z * DEGREES_TO_RADIANS) * cam_distance * horz_delta;
-			cam.Y += Math.Cos(angle.Z * DEGREES_TO_RADIANS) * cam_distance * horz_delta;
+			cam.X += (float) (Math.Sin(angle.Z * FMath.DEGREES_TO_RADIANS) * cam_distance * horz_delta);
+			cam.Y += (float) (Math.Cos(angle.Z * FMath.DEGREES_TO_RADIANS) * cam_distance * horz_delta);
 			cam.Z += vert_delta;
 
 			ground = CacheElevation(cam.X, cam.Y) + 0.2f;
@@ -164,7 +162,7 @@ namespace Frontier {
 
 			//Joystick movement
 			AvatarLook((int) (InputJoystickGet(3) * 5.0f), (int) (InputJoystickGet(4) * -5.0f));
-			do_move(Vector3(InputJoystickGet(0), InputJoystickGet(1), 0.0f));
+			do_move(new Vector3(InputJoystickGet(0), InputJoystickGet(1), 0.0f));
 
 			if (InputMouselook()) {
 				if (InputKeyPressed(INPUT_MWHEEL_UP))			desired_cam_distance -= 1.0f;
@@ -217,8 +215,8 @@ namespace Frontier {
 				}
 			}
 
-			current_movement.X = -Math.Sin(current_angle * DEGREES_TO_RADIANS);
-			current_movement.Y = -Math.Cos(current_angle * DEGREES_TO_RADIANS);
+			current_movement.X = -Math.Sin(current_angle * FMath.DEGREES_TO_RADIANS);
+			current_movement.Y = -Math.Cos(current_angle * FMath.DEGREES_TO_RADIANS);
 
 			// Apply the movement
 			current_movement *= current_speed * elapsed;
@@ -255,23 +253,23 @@ namespace Frontier {
 				avatar_facing.Z = -FMath.Angle(0.0f, 0.0f, current_movement.X, current_movement.Y);
 			
 			if (flying)
-				AvatarAnim = Flying;
+				AvatarAnim = AnimType.Flying;
 			else if (swimming) {
 				if (current_speed == 0.0f)
-					AvatarAnim = Float;
+					AvatarAnim = AnimType.Float;
 				else
-					AvatarAnim = Swim;
+					AvatarAnim = AnimType.Swim;
 			} else if (!on_ground) {
 				if (velocity > 0.0f)
-					AvatarAnim = Jump;
+					AvatarAnim = AnimType.Jump;
 				else
-					AvatarAnim = Fall;
+					AvatarAnim = AnimType.Fall;
 			} else if (current_speed == 0.0f)
-				AvatarAnim = Idle;
+				AvatarAnim = AnimType.Idle;
 			else if (sprinting)
-				AvatarAnim = Sprint;
+				AvatarAnim = AnimType.Sprint;
 			else
-				AvatarAnim = Run;
+				AvatarAnim = AnimType.Run;
 			
 			avatar.Animate(anim[(int) AvatarAnim], movement_animation);
 			avatar.Position = Position;
@@ -281,7 +279,7 @@ namespace Frontier {
 
 			if (AvatarAnim == AnimType.Run || AvatarAnim == AnimType.Sprint) {
 				if (step_tracking < last_step_tracking || (step_tracking > 0.5f && last_step_tracking < 0.5f)) {
-					dust_particle.Colors.clear();
+					dust_particle.Colors.Clear();
 					if (Position.Z < 0.0f)
 						dust_particle.Colors.Add(new Color4(0.4f, 0.7f, 1, 1));
 					else
@@ -305,7 +303,7 @@ namespace Frontier {
 				anim[i].LoadBvh(IniString("Animations", anim_names[i]));
 				IniStringSet("Animations", anim_names[i], IniString("Animations", anim_names[i]));
 			}
-			ParticleLoad("step", &dust_particle);
+			ParticleLoad("step", dust_particle);
 		}
 
 		private void AvatarLook(int x, int y) {
@@ -316,25 +314,25 @@ namespace Frontier {
 			mouse_sense = CVarUtils.GetCVar<float>("mouse.sensitivity");
 			angle.X -= (float) x * mouse_sense;
 			angle.Z += (float) y * mouse_sense;
-			angle.X = FMath.Clamp(angle.x, 0.0f, 180.0f);
-			angle.Z = fmod(angle.z, 360.0f);
+			angle.X = FMath.Clamp(angle.X, 0.0f, 180.0f);
+			angle.Z = fmod(angle.Z, 360.0f);
 			if (angle.Z < 0.0f)
 				angle.Z += 360.0f;
 		}
 
 		private void PositionSet(Vector3 new_pos) {
-			new_pos.Z = FMath.Clamp(new_pos.z, -25, 2048);
-			new_pos.X = FMath.Clamp(new_pos.x, 0, (REGION_SIZE * WORLD_GRID));
-			new_pos.Y = FMath.Clamp(new_pos.y, 0, (REGION_SIZE * WORLD_GRID));
+			new_pos.Z = FMath.Clamp(new_pos.Z, -25, 2048);
+			new_pos.X = FMath.Clamp(new_pos.X, 0, (REGION_SIZE * WORLD_GRID));
+			new_pos.Y = FMath.Clamp(new_pos.Y, 0, (REGION_SIZE * WORLD_GRID));
 			mPosition = new_pos;
 			AvatarCameraPosition = mPosition;
-			angle = AvatarCameraAngle = Vector3(90.0f, 0.0f, 0.0f);
+			angle = AvatarCameraAngle = new Vector3(90, 0, 0;
 			last_time = GameTime();
 			do_model();
 		}
 
 		private void AvatarRender() {
-			glBindTexture(GL_TEXTURE_2D, TextureIdFromName("avatar.png"));
+			GL.BindTexture(TextureTarget.Texture2D, TextureIdFromName("avatar.png"));
 			//glBindTexture (GL_TEXTURE_2D, 0);
 			avatar.Render();
 			if (CVarUtils.GetCVar<bool>("show.skeleton"))

@@ -82,9 +82,10 @@ namespace Frontier {
 			mLeafColor;
 
 		List<Leaf> mLeafList;
-		Mesh[,] mMeshes = new Mesh[TREE_ALTS, LOD_LEVELS];
+		Mesh[,] mMeshes = new Mesh[TREE_ALTS, 3];		// 3 = number of LOD levels
 
-		public int Texture { get; private set; }
+		private int mTexture;
+		public int Texture { get { return mTexture; } private set { mTexture = value; } }
 		public bool GrowsHigh { get; private set; }
 		#endregion
 
@@ -174,12 +175,12 @@ namespace Frontier {
 					#endregion
 				case TreeFoliageStyle.Shield:
 					#region Shield style foliage
-					m.PushVertex(new Vector3(fsize / 2, 0.0f, 0.0f), Vector3.UnitZ, uv.Center());
+					m.PushVertex(new Vector3(fsize / 2, 0.0f, 0.0f), Vector3.UnitZ, uv.Center);
 					m.PushVertex(new Vector3(0.0f, -fsize, 0.0f), Vector3.UnitZ, uv.Corner(0));
 					m.PushVertex(new Vector3(0.0f, 0.0f, fsize), Vector3.UnitZ, uv.Corner(1));
 					m.PushVertex(new Vector3(0.0f, fsize, 0.0f), Vector3.UnitZ, uv.Corner(2));
 					m.PushVertex(new Vector3(0.0f, 0.0f, -fsize), Vector3.UnitZ, uv.Corner(3));
-					m.PushVertex(new Vector3(-fsize / 2, 0.0f, 0.0f), Vector3.UnitZ, uv.Center());
+					m.PushVertex(new Vector3(-fsize / 2, 0.0f, 0.0f), Vector3.UnitZ, uv.Center);
 					//Cap
 					m.PushTriangle(base_index, base_index + 1, base_index + 2);
 					m.PushTriangle(base_index, base_index + 2, base_index + 3);
@@ -205,7 +206,7 @@ namespace Frontier {
 
 					uv_inner.Set(new Vector2(0.25f + 1.25f, 0.125f), new Vector2(0.5f - 0.125f, 1.0f - 0.125f));
 					// Center
-					m.PushVertex(new Vector3(0.0f, 0.0f, 0.0f), Vector3.UnitZ, uv.Center());
+					m.PushVertex(new Vector3(0.0f, 0.0f, 0.0f), Vector3.UnitZ, uv.Center);
 					// First ring
 					m.PushVertex(new Vector3(-fsize / 2, -fsize / 2, level1), Vector3.UnitZ, uv.Corner(GLUV_TOP_EDGE));		// 1
 					m.PushVertex(new Vector3(fsize / 2, -fsize / 2, level1), Vector3.UnitZ, uv.Corner(GLUV_RIGHT_EDGE));	// 2
@@ -217,7 +218,7 @@ namespace Frontier {
 					m.PushVertex(new Vector3(0.0f, fsize, level2), Vector3.UnitZ, uv.Corner(3));	// 7
 					m.PushVertex(new Vector3(-fsize, 0.0f, level2), Vector3.UnitZ, uv.Corner(0));	// 8
 					// Center, but lower
-					m.PushVertex(new Vector3(0.0f, 0.0f, level1 / 16), Vector3.UnitZ, uv.Center());
+					m.PushVertex(new Vector3(0.0f, 0.0f, level1 / 16), Vector3.UnitZ, uv.Center);
 
 					// Cap
 					m.PushTriangle(base_index, base_index + 2, base_index + 1);
@@ -234,12 +235,12 @@ namespace Frontier {
 				case TreeFoliageStyle.Bowl:
 					#region Bowl style foliage
 					tip_height = fsize / -4.0f;
-					m.PushVertex(new Vector3(0.0f, 0.0f, tip_height), new Vector3(0.0f, 0.0f, 1.0f), uv.Center());
+					m.PushVertex(new Vector3(0.0f, 0.0f, tip_height), new Vector3(0.0f, 0.0f, 1.0f), uv.Center);
 					m.PushVertex(new Vector3(-fsize, -fsize, -tip_height), new Vector3(-0.5f, -0.5f, 0.0f), uv.Corner(0));
 					m.PushVertex(new Vector3(fsize, -fsize, -tip_height), new Vector3(0.5f, -0.5f, 0.0f), uv.Corner(1));
 					m.PushVertex(new Vector3(fsize, fsize, -tip_height), new Vector3(0.5f, 0.5f, 0.0f), uv.Corner(2));
 					m.PushVertex(new Vector3(-fsize, fsize, -tip_height), new Vector3(-0.5f, 0.5f, 0.0f), uv.Corner(3));
-					m.PushVertex(new Vector3(0.0f, 0.0f, tip_height / 2), new Vector3(0.0f, 0.0f, 1.0f), uv.Center());
+					m.PushVertex(new Vector3(0.0f, 0.0f, tip_height / 2), new Vector3(0.0f, 0.0f, 1.0f), uv.Center);
 					m.PushTriangle(base_index, base_index + 1, base_index + 2);
 					m.PushTriangle(base_index, base_index + 2, base_index + 3);
 					m.PushTriangle(base_index, base_index + 3, base_index + 4);
@@ -256,12 +257,12 @@ namespace Frontier {
 				case TreeFoliageStyle.Umbrella:
 					#region Umbrella style foliage
 					tip_height = fsize / 4.0f;
-					m.PushVertex(new Vector3(0.0f, 0.0f, tip_height), new Vector3(0.0f, 0.0f, 1.0f), uv.Center());
+					m.PushVertex(new Vector3(0.0f, 0.0f, tip_height), new Vector3(0.0f, 0.0f, 1.0f), uv.Center);
 					m.PushVertex(new Vector3(-fsize, -fsize, -tip_height), new Vector3(-0.5f, -0.5f, 0.0f), uv.Corner(0));
 					m.PushVertex(new Vector3(fsize, -fsize, -tip_height), new Vector3(0.5f, -0.5f, 0.0f), uv.Corner(1));
 					m.PushVertex(new Vector3(fsize, fsize, -tip_height), new Vector3(0.5f, 0.5f, 0.0f), uv.Corner(2));
 					m.PushVertex(new Vector3(-fsize, fsize, -tip_height), new Vector3(-0.5f, 0.5f, 0.0f), uv.Corner(3));
-					m.PushVertex(new Vector3(0.0f, 0.0f, tip_height / 2), new Vector3(0.0f, 0.0f, 1.0f), uv.Center());
+					m.PushVertex(new Vector3(0.0f, 0.0f, tip_height / 2), new Vector3(0.0f, 0.0f, 1.0f), uv.Center);
 					//Top
 					m.PushTriangle(base_index, base_index + 2, base_index + 1);
 					m.PushTriangle(base_index, base_index + 3, base_index + 2);
@@ -270,11 +271,10 @@ namespace Frontier {
 					break;
 					#endregion
 			}
-			//angle = FMath.Angle (pos.x, pos.y, 0.0f, 0.0f);
+			//angle = FMath.Angle (pos.X, pos.Y, 0.0f, 0.0f);
 			//angle += 45.0f;
 			Matrix4 mat = Matrix4.CreateRotationZ(angle);
 			for (int i = base_index; i < m.vertices.Count; i++) {
-				m.vertices[i] = Matrix4.
 				m.vertices[i] = glMatrixTransformPoint(mat, m.vertices[i]);
 				m.vertices[i] += pos;
 			}
@@ -364,10 +364,10 @@ namespace Frontier {
 								angle = 0.0f;
 							else
 								angle = (float) ring * (360.0f / (float) radialSteps);
-							angle *= DEGREES_TO_RADIANS;
-							pos.x = -Math.Sin(angle) * radius;
-							pos.y = anchor.length * horzPos;
-							pos.z = -Math.Cos(angle) * radius;
+							angle *= FMath.DEGREES_TO_RADIANS;
+							pos.X = (float) (-Math.Sin(angle) * radius);
+							pos.Y = anchor.length * horzPos;
+							pos.Z = (float) (-Math.Cos(angle) * radius);
 							pos = glMatrixTransformPoint(mat, pos);
 							m.PushVertex(pos + core, new Vector3(pos.X, 0.0f, pos.Z), new Vector2(((float) ring / (float) radialSteps) * 0.249f, pos.Y * mTextureTile));
 						}
@@ -413,7 +413,7 @@ namespace Frontier {
 				float vertical_pos = mCurrentLowestBranch + branch_spacing * (float) i;
 
 				BranchAnchor branch;
-				branch.root = TrunkPosition(vertical_pos, branch.radius);
+				branch.root = TrunkPosition(vertical_pos, ref branch.radius);
 				branch.length = (mCurrentHeight - branch.root.Z) * mBranchReach;
 				branch.length = Math.Min(branch.length, mCurrentHeight / 2);
 				branch.lift = (branch.length) / 2;
@@ -460,7 +460,7 @@ namespace Frontier {
 				Vector3 core;
 				for (int i = -1; i < (int) BranchList.Count; i++) {
 					if (i < 0) { //-1 is the bottom rung, the root. Put it underground, widen it a bit
-						core = TrunkPosition(0.0f, radius);
+						core = TrunkPosition(0.0f, ref radius);
 						radius *= 1.5f;
 						core.Z -= 2.0f;
 					} else {
@@ -475,7 +475,7 @@ namespace Frontier {
 							angle = 0.0f;
 						else
 							angle = (float) ring * (360.0f / (float) radialSteps);
-						angle *= DEGREES_TO_RADIANS;
+						angle *= FMath.DEGREES_TO_RADIANS;
 						x = (float) Math.Sin(angle);
 						y = (float) Math.Cos(angle);
 						m.PushVertex(core + new Vector3(x * radius, y * radius, 0.0f),
@@ -529,13 +529,13 @@ namespace Frontier {
 			//_trunk_bend_frequency = 3.0f + FWorld.NoiseFloat (mSeedCurrent++) * 4.0f;
 			mSeedCurrent = mSeed;
 			for (int alt = 0; alt < TREE_ALTS; alt++) {
-				mCurrentAngleOffset = WorldNoisef(mSeedCurrent++) * 360.0f;
-				mCurrentHeight = mDefaultHeight * (0.5f + WorldNoisef(mSeedCurrent++));
-				mCurrentBaseRadius = mDefaultBaseRadius * (0.5f + WorldNoisef(mSeedCurrent++));
-				mCurrentBranches = mDefaultBranches + WorldNoisei(mSeedCurrent++) % 3;
-				mCurrentBendFrequency = mDefaultBendFrequency + WorldNoisef(mSeedCurrent++);
-				mCurrentLowestBranch = mDefaultLowestBranch + WorldNoisef(mSeedCurrent++) * 0.2f;
-				for (int lod = 0; lod < LOD_LEVELS; lod++) {
+				mCurrentAngleOffset = FWorld.NoiseFloat(mSeedCurrent++) * 360.0f;
+				mCurrentHeight = mDefaultHeight * (0.5f + FWorld.NoiseFloat(mSeedCurrent++));
+				mCurrentBaseRadius = mDefaultBaseRadius * (0.5f + FWorld.NoiseFloat(mSeedCurrent++));
+				mCurrentBranches = mDefaultBranches + FWorld.NoiseInt(mSeedCurrent++) % 3;
+				mCurrentBendFrequency = mDefaultBendFrequency + FWorld.NoiseFloat(mSeedCurrent++);
+				mCurrentLowestBranch = mDefaultLowestBranch + FWorld.NoiseFloat(mSeedCurrent++) * 0.2f;
+				for (int lod = 0; lod < 3 /*LOD_LEVELS*/; lod++) {
 					mMeshes[alt, lod].Clear();
 					DoTrunk(mMeshes[alt, lod], mSeedCurrent + alt, (LOD) lod);
 					//The facers use hand-made normals, so don't recalculate them.
@@ -555,7 +555,7 @@ namespace Frontier {
 					float circ = (float) (Math.PI * radius * 2);
 					float stepSize = 360.0f / currentSteps;
 					for (float x = 0.0f; x < 360.0f; x += stepSize) {
-						float rad = x * DEGREES_TO_RADIANS;
+						float rad = x * FMath.DEGREES_TO_RADIANS;
 						Leaf l;
 						l.size = size;
 						l.position.X = (float) (TEXTURE_HALF + Math.Sin(rad) * l.size);
@@ -582,8 +582,8 @@ namespace Frontier {
 				// Now scatter other leaves around
 				for (int i = 0; i < 50; i++) {
 					l.size = leafSize * 0.5f;//  * (0.5f + FWorld.NoiseFloat (mSeedCurrent++);
-					l.position.X = TEXTURE_HALF + (WorldNoisef(mSeedCurrent++) - 0.5f) * (TEXTURE_HALF - l.size) * 2.0f;
-					l.position.Y = TEXTURE_HALF + (WorldNoisef(mSeedCurrent++) - 0.5f) * (TEXTURE_HALF - l.size) * 2.0f;
+					l.position.X = TEXTURE_HALF + (FWorld.NoiseFloat(mSeedCurrent++) - 0.5f) * (TEXTURE_HALF - l.size) * 2.0f;
+					l.position.Y = TEXTURE_HALF + (FWorld.NoiseFloat(mSeedCurrent++) - 0.5f) * (TEXTURE_HALF - l.size) * 2.0f;
 					Vector2 delta = mLeafList[i].position - new Vector2(TEXTURE_HALF, TEXTURE_HALF);
 					l.dist = delta.Length;
 					//Leaves get smaller as we move from the center of the texture
@@ -626,18 +626,18 @@ namespace Frontier {
 			}
 
 			for (int i = 0; i < mLeafList.Count; i++)
-				mLeafList[i].color = ColorInterpolate(mLeafColor, new Color4(0.0f, 0.5f, 0.0f, 0.0f), WorldNoisef(mSeedCurrent++) * 0.33f);
+				mLeafList[i].color = ColorInterpolate(mLeafColor, new Color4(0.0f, 0.5f, 0.0f, 0.0f), FWorld.NoiseFloat(mSeedCurrent++) * 0.33f);
 		}
 
 		private void DrawFacer() {
 			GL.Disable(EnableCap.Blend);
 
 			// We get the bounding box for the high-res tree, but we cut off the roots. No reason to waste texture pixels on that.
-			mMeshes[0, LOD_HIGH].RecalculateBoundingBox();
-			BBox box = mMeshes[0, LOD_HIGH]._bbox;
-			box.pmin.z = 0.0f;//Cuts off roots
-			Vector3 center = box.Center();
-			Vector3 size = box.Size();
+			mMeshes[0, (int) LOD.High].RecalculateBoundingBox();
+			BBox box = mMeshes[0, (int) LOD.High].bbox;
+			box.pmin.Z = 0.0f;//Cuts off roots
+			Vector3 center = box.Center;
+			Vector3 size = box.Size;
 
 			// Move our viewpoint to the middle of the texture frame 
 			GL.Translate(TEXTURE_HALF, TEXTURE_HALF, 0.0f);
@@ -647,7 +647,7 @@ namespace Frontier {
 			GL.Scale((1.0f / size.X) * TEXTURE_SIZE, 1.0f, (1.0f / size.Z) * TEXTURE_SIZE);
 			GL.Translate(-center.X, 0.0f, -center.Z);
 			GL.Color3(1, 1, 1);
-			Render(Vector3.Zero, 0, LOD_HIGH);
+			Render(Vector3.Zero, 0, LOD.High);
 		}
 
 		private void DrawVines() {
@@ -659,7 +659,7 @@ namespace Frontier {
 
 			int frames = Math.Max(t.height / t.width, 1);
 			float frameSize = 1.0f / (float) frames;
-			int frame = WorldNoisei(mSeedCurrent++) % frames;
+			int frame = FWorld.NoiseInt(mSeedCurrent++) % frames;
 			UVBox uvframe;
 			uvframe.Set(new Vector2(0.0f, (float) frame * frameSize), new Vector2(1.0f, (float) (frame + 1) * frameSize));
 
@@ -699,7 +699,7 @@ namespace Frontier {
 			GLtexture t = TextureFromName("foliage.png");
 			int frames = Math.Max(t.height / t.width, 1);
 			float frame_size = 1.0f / (float) frames;
-			int frame = WorldNoisei(mSeedCurrent++) % frames;
+			int frame = FWorld.NoiseInt(mSeedCurrent++) % frames;
 			UVBox uvframe;
 			uvframe.Set(new Vector2(0.0f, (float) frame * frame_size), new Vector2(1.0f, (float) (frame + 1) * frame_size));
 
@@ -755,7 +755,7 @@ namespace Frontier {
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Nearest);
 			frames = Math.Max(t.height / t.width, 1);
 			frame_size = 1.0f / (float) frames;
-			frame = WorldNoisei(mSeedCurrent++) % frames;
+			frame = FWorld.NoiseInt(mSeedCurrent++) % frames;
 			uvframe.Set(new Vector2(0.0f, (float) frame * frame_size), new Vector2(1.0f, (float) (frame + 1) * frame_size));
 
 			GL.BindTexture(TextureTarget.Texture2D, t.id);
@@ -782,14 +782,15 @@ namespace Frontier {
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Nearest);
 
 			if (Texture != 0)
-				GL.DeleteTextures(1, Texture);
-			GL.GenTextures(1, Texture);
+				GL.DeleteTextures(1, ref mTexture);
+			GL.GenTextures(1, out mTexture);
 			GL.BindTexture(TextureTarget.Texture2D, Texture);
 			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, TEXTURE_SIZE * 4, TEXTURE_SIZE, 0, PixelFormat.Rgba, PixelType.Byte, null);
 			RenderCanvasBegin(0, TEXTURE_SIZE, 0, TEXTURE_SIZE, TEXTURE_SIZE);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Nearest);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Nearest);
-			char* buffer = new char[TEXTURE_SIZE * TEXTURE_SIZE * 4];
+
+			int[] buffer = new int[TEXTURE_SIZE * TEXTURE_SIZE * 4];
 			for (int i = 0; i < 4; i++) {
 				GL.ClearColor(1.0f, 0.0f, 1.0f, 0.0f);
 				GL.Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -811,7 +812,6 @@ namespace Frontier {
 				GL.TexSubImage2D(TextureTarget.Texture2D, 0, TEXTURE_SIZE * i, 0, TEXTURE_SIZE, TEXTURE_SIZE, GL_RGBA, GL_int_BYTE, buffer);
 				//CgShaderSelect (FSHADER_NONE);
 			}
-			delete buffer;
 			RenderCanvasEnd();
 		}
 		#endregion
@@ -827,52 +827,49 @@ namespace Frontier {
 			mTemperature = temp_in;
 			mSeedCurrent = mSeed;
 			//We want our height to fall on a bell curve
-			mDefaultHeight = 8.0f + WorldNoisef(mSeedCurrent++) * 4.0f + WorldNoisef(mSeedCurrent++) * 4.0f;
-			mDefaultBendFrequency = 1.0f + WorldNoisef(mSeedCurrent++) * 2.0f;
-			mDefaultBaseRadius = 0.2f + (mDefaultHeight / 20.0f) * WorldNoisef(mSeedCurrent++);
-			mDefaultBranches = 2 + WorldNoisei(mSeedCurrent) % 2;
+			mDefaultHeight = 8.0f + FWorld.NoiseFloat(mSeedCurrent++) * 4.0f + FWorld.NoiseFloat(mSeedCurrent++) * 4.0f;
+			mDefaultBendFrequency = 1.0f + FWorld.NoiseFloat(mSeedCurrent++) * 2.0f;
+			mDefaultBaseRadius = 0.2f + (mDefaultHeight / 20.0f) * FWorld.NoiseFloat(mSeedCurrent++);
+			mDefaultBranches = 2 + FWorld.NoiseInt(mSeedCurrent) % 2;
 			//Keep branches away from the ground, since they don't have collision
 			mDefaultLowestBranch = (3.0f / mDefaultHeight);
 			//Funnel trunk trees taper off quickly at the base.
-			mFunnelTrunk = (WorldNoisei(mSeedCurrent++) % 6) == 0;
+			mFunnelTrunk = (FWorld.NoiseInt(mSeedCurrent++) % 6) == 0;
 			if (mFunnelTrunk) {//Funnel trees need to be bigger and taller to look right
 				mDefaultBaseRadius *= 1.2f;
 				mDefaultHeight *= 1.5f;
 			}
-			mTrunkStyle = (TreeTrunkStyle) (WorldNoisei(mSeedCurrent) % TREE_TRUNK_STYLES);
-			mFoliageStyle = (TreeFoliageStyle) (WorldNoisei(mSeedCurrent++) % TREE_FOLIAGE_STYLES);
-			mLiftStyle = (TreeLiftStyle) (WorldNoisei(mSeedCurrent++) % TREE_LIFT_STYLES);
-			mLeafStyle = (TreeLeafStyle) (WorldNoisei(mSeedCurrent++) % TREE_LEAF_STYLES);
-			mEvergreen = mTemperature + (WorldNoisef(mSeedCurrent++) * 0.25f) < 0.5f;
+			mTrunkStyle = (TreeTrunkStyle) (FWorld.NoiseInt(mSeedCurrent) % TREE_TRUNK_STYLES);
+			mFoliageStyle = (TreeFoliageStyle) (FWorld.NoiseInt(mSeedCurrent++) % TREE_FOLIAGE_STYLES);
+			mLiftStyle = (TreeLiftStyle) (FWorld.NoiseInt(mSeedCurrent++) % TREE_LIFT_STYLES);
+			mLeafStyle = (TreeLeafStyle) (FWorld.NoiseInt(mSeedCurrent++) % TREE_LEAF_STYLES);
+			mEvergreen = mTemperature + (FWorld.NoiseInt(mSeedCurrent++) * 0.25f) < 0.5f;
 			mHasVines = mMoisture > 0.6f && mTemperature > 0.5f;
 			//Narrow trees can gorw on top of hills. (Big ones will stick out over cliffs, so we place them low.)
-			if (mDefaultBaseRadius <= 1.0f)
-				_grows_high = true;
-			else
-				_grows_high = false;
-			mBranchReach = 1.0f + WorldNoisef(mSeedCurrent++) * 0.5f;
-			mBranchLift = 1.0f + WorldNoisef(mSeedCurrent++);
+			GrowsHigh = (mDefaultBaseRadius <= 1.0f);
+			mBranchReach = 1.0f + FWorld.NoiseFloat(mSeedCurrent++) * 0.5f;
+			mBranchLift = 1.0f + FWorld.NoiseFloat(mSeedCurrent++);
 			mFoliageSize = 1.0f;
 			mLeafSize = 0.125f;
 			mLeafColor = TerraformColorGenerate(SURFACE_COLOR_GRASS, moisture, mTemperature, mSeedCurrent++);
 			mBarkColor2 = TerraformColorGenerate(SURFACE_COLOR_DIRT, moisture, mTemperature, mSeedCurrent++);
 			mBarkColor1 = mBarkColor2 * 0.5f;
 			//1 in 8 non-tropical trees has white bark
-			if (!mHasVines && !(WorldNoisei(mSeedCurrent++) % 8))
+			if (!mHasVines && ((FWorld.NoiseInt(mSeedCurrent++) % 8) == 0))
 				mBarkColor2 = Color4(1.0f);
 			//These foliage styles don't look right on evergreens.
-			if (mEvergreen && mFoliageStyle == TREE_FOLIAGE_BOWL)
-				mFoliageStyle = TREE_FOLIAGE_UMBRELLA;
-			if (mEvergreen && mFoliageStyle == TREE_FOLIAGE_SHIELD)
-				mFoliageStyle = TREE_FOLIAGE_UMBRELLA;
-			if (mEvergreen && mFoliageStyle == TREE_FOLIAGE_PANEL)
-				mFoliageStyle = TREE_FOLIAGE_SAG;
+			if (mEvergreen && mFoliageStyle == TreeFoliageStyle.Bowl)
+				mFoliageStyle = TreeFoliageStyle.Umbrella;
+			if (mEvergreen && mFoliageStyle == TreeFoliageStyle.Shield)
+				mFoliageStyle = TreeFoliageStyle.Umbrella;
+			if (mEvergreen && mFoliageStyle == TreeFoliageStyle.Panel)
+				mFoliageStyle = TreeFoliageStyle.Sag;
 			if (mCanopy) {
-				mFoliageStyle = TREE_FOLIAGE_UMBRELLA;
-				mDefaultHeight = max(mDefaultHeight, 16.0f);
+				mFoliageStyle = TreeFoliageStyle.Umbrella;
+				mDefaultHeight = Math.Max(mDefaultHeight, 16.0f);
 				mDefaultBaseRadius = 1.5f;
 				mFoliageSize = 2.0f;
-				mTrunkStyle = TREE_TRUNK_NORMAL;
+				mTrunkStyle = TreeTrunkStyle.Normal;
 			}
 			Build();
 			DoLeaves();
@@ -881,20 +878,20 @@ namespace Frontier {
 
 		//Render a single tree. Very slow. Used for debugging. 
 		public void Render(Vector3 pos, int alt, LOD lod) {
-			GL.Enable(GL_BLEND);
-			GL.Enable(GL_TEXTURE_2D);
+			GL.Enable(EnableCap.Blend);
+			GL.Enable(EnableCap.Texture2D);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-			GL.BindTexture(GL_TEXTURE_2D, _texture);
+			GL.BindTexture(TextureTarget.Texture2D, Texture);
 			GL.PushMatrix();
-			GL.Translatef(pos.x, pos.y, pos.z);
-			mMeshes[alt][lod].Render();
+			GL.Translate(pos.X, pos.Y, pos.Z);
+			mMeshes[alt, (int) lod].Render();
 			GL.PopMatrix();
 		}
 
 		public void Info() { TextPrint("TREE:\nSeed:%d Moisture: %f Temp: %f", mSeed, mMoisture, mTemperature); }
 
 		public void TexturePurge() {
-			if (Texture)
+			if (Texture != 0)
 				DoTexture();
 		}
 		#endregion

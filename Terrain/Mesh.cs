@@ -25,7 +25,7 @@ namespace Frontier {
 		public int VertexCount { get { return vertices.Count; } }
 		public int NormalCount { get { return normals.Count; } }
 
-		public static Mesh operator +(Mesh a, Mesh b);
+		//public static Mesh operator +(Mesh a, Mesh b);
 
 		public void PushTriangle(int i1, int i2, int i3) {
 			indices.Add(i1);

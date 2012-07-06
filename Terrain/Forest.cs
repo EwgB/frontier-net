@@ -43,8 +43,7 @@ namespace Frontier {
 		private List<TreeMesh> mMeshList;
 		private List<TreeVBO> mVBOList;
 
-		public bool Ready { get { return mStage == ForestStage.Done; } }
-		public void Invalidate() { mValid = false; }
+		public override bool IsReady { get { return mStage == ForestStage.Done; } }
 		#endregion
 
 // public int Sizeof () { return sizeof (Forest); }
@@ -152,7 +151,7 @@ namespace Frontier {
 			mVBOList.Clear();
 		}
 
-		public void Set(int x, int y, int distance) {
+		public override void Set(int x, int y, int distance) {
 			if (mGridPosition.X == x && mGridPosition.Y == y && mCurrentDistance == distance)
 				return;
 			if (mStage == ForestStage.Build)
@@ -175,7 +174,7 @@ namespace Frontier {
 			mMeshList.Clear();
 		}
 
-		public void Update(long stop) {
+		public override void Update(long stop) {
 			while (SdlTick() < stop && !Ready()) {
 				switch (mStage) {
 					case ForestStage.Begin:
@@ -193,7 +192,7 @@ namespace Frontier {
 			}
 		}
 
-		public void Render() {
+		public override void Render() {
 			// We need at least one successful build before we can draw.
 			if (!mValid)
 				return;

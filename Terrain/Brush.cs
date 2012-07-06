@@ -29,7 +29,6 @@ namespace Frontier {
 		private BrushStage					mStage;
 		private int									mCurrentDistance;
 		private Coord								mOrigin;
-		private Coord								mGridPosition;
 		private Coord								mWalk;
 		private Mesh								mMesh;
 		private BBox								mBBox;
@@ -40,13 +39,12 @@ namespace Frontier {
 		// List<Vector2> uvs;
 		// List<UINT>      index;
 
-		public bool Valid { get; set; }
-		public bool Ready { get { return mStage == BrushStage.Done; } }
+		public override bool IsReady { get { return mStage == BrushStage.Done; } }
 		#endregion
 
 		#region Private methods
-		private void VertexPush(Vector3 vert, Vector3 normal, Color4 color, Vector2 uv);
-		private void QuadPush (int n1, int n2, int n3, int n4);
+		//protected void VertexPush(Vector3 vert, Vector3 normal, Color4 color, Vector2 uv);
+		//protected void QuadPush(int n1, int n2, int n3, int n4);
 
 		private static void DoPrep() {
 			for (int i = 0; i < BRUSH_TYPES; i++) {
@@ -148,7 +146,7 @@ namespace Frontier {
 				DoPrep ();
 		}
 
-		public void Set(int x, int y, int density) {
+		public override void Set(int x, int y, int density) {
 			if (mOrigin.X == x * BRUSH_SIZE && mOrigin.Y == y * BRUSH_SIZE)
 				return;
 
@@ -163,7 +161,7 @@ namespace Frontier {
 			mBBox.Clear();
 		}
 
-		public void Update(long stop) {
+		public override void Update(long stop) {
 			while (SdlTick() < stop && !Ready ()) {
 				switch (mStage) {
 					case BrushStage.Begin:
@@ -185,7 +183,7 @@ namespace Frontier {
 			}
 		}
 
-		public void Render() {
+		public override void Render() {
 			//We need at least one successful build before we can draw.
 			if (!Valid)
 				return;

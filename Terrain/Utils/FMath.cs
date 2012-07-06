@@ -14,17 +14,16 @@ using OpenTK;
 namespace Frontier {
 	class FMath {
 		#region Constants
-		private const float
+		public const float
 			FREEZING = 0.32f,
 			TEMP_COLD = 0.45f,
 			TEMP_TEMPERATE = 0.6f,
 			TEMP_HOT = 0.9f,
 			MIN_TEMP = 0.0f,
 			MAX_TEMP = 1.0f,
-			DEGREES_TO_RADIANS = .017453292f,
-			RADIANS_TO_DEGREES = 57.29577951f,
+			DEGREES_TO_RADIANS = (float) (Math.PI / 180),
+			RADIANS_TO_DEGREES = (float) (180 / Math.PI),
 			NEGLIGIBLE = 0.000000000001f,
-			//PI = (3.1415926535f),
 			GRAVITY = 9.5f,
 			// This is used to scale the z value of normals
 			// Lower numbers make the normals more extreme, exaggerate the lighting

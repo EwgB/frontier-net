@@ -14,90 +14,110 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Frontier {
 	class VBO {
-		private int _id_vertex, _id_index, _size_vertex, _size_uv, _size_normal, _size_buffer, _polygon, _index_count, _size_color;
-		private bool _use_color;
+		private int mIDVertex, mIDIndex, mSizeVertex, mSizeUV, mSizeNormal, mSizeBuffer, mIndexCount, mSizeColor;
+		private bool mUseColor;
+
+		private BeginMode mPolygon;
 
 		public bool Ready { get; private set; }
 
 		public VBO() {
-			_id_vertex = _id_index = _size_vertex = _size_uv = _size_normal = _size_buffer = _index_count = 0;
+			mIDVertex = mIDIndex = mSizeVertex = mSizeUV = mSizeNormal = mSizeBuffer = mIndexCount = 0;
 			Ready = false;
-			_id_vertex = 0;
-			_id_index = 0;
-			_use_color = false;
-			_size_color = 0;
-			_polygon = 0;
+			mIDVertex = 0;
+			mIDIndex = 0;
+			mUseColor = false;
+			mSizeColor = 0;
+			mPolygon = 0;
 		}
 
 		~VBO() {
-			if (_id_index != 0) GL.DeleteBuffers(1, ref _id_index);
-			if (_id_vertex != 0) GL.DeleteBuffers(1, ref _id_vertex);
+			if (mIDIndex != 0) GL.DeleteBuffers(1, ref mIDIndex);
+			if (mIDVertex != 0) GL.DeleteBuffers(1, ref mIDVertex);
 		}
 
 		public void Clear() {
-			if (_id_vertex != 0) GL.DeleteBuffers(1, ref _id_vertex);
-			if (_id_index != 0) GL.DeleteBuffers(1, ref _id_index);
-			_id_vertex = 0;
-			_id_index = 0;
-			_use_color = false;
-			_size_color = 0;
-			_polygon = 0;
+			if (mIDVertex != 0) GL.DeleteBuffers(1, ref mIDVertex);
+			if (mIDIndex != 0) GL.DeleteBuffers(1, ref mIDIndex);
+			mIDVertex = 0;
+			mIDIndex = 0;
+			mUseColor = false;
+			mSizeColor = 0;
+			mPolygon = 0;
 			Ready = false;
 		}
 
-		public void Create(int polygon, int index_count, int vert_count, int index_list,
-								 List<Vector3> vert_list, List<Vector3> normal_list, List<Color4> color_list, List<Vector2> uv_list) {
-			char*     buffer;
+		public void Create(BeginMode polygon, int indexCount, int vertCount, List<int> indexList, List<Vector3> vertList,
+				List<Vector3> normalList, List<Color4> colorList, List<Vector2> uvList) {
 
-			if (_id_vertex != 0) GL.DeleteBuffers(1, ref _id_vertex);
-			if (_id_index != 0) GL.DeleteBuffers(1, ref _id_index);
-			_id_vertex = 0;
-			_id_index = 0;
-			if (index_count == 0 | vert_count == 0)
+			if (mIDVertex != 0) GL.DeleteBuffers(1, ref mIDVertex);
+			if (mIDIndex != 0) GL.DeleteBuffers(1, ref mIDIndex);
+			mIDVertex = 0;
+			mIDIndex = 0;
+			if (indexCount == 0 | vertCount == 0)
 				return;
 
-			_polygon = polygon;
-			_use_color = (color_list != null);
-			_size_vertex = _size_normal = Vector3.SizeInBytes * vert_count;
-			_size_uv = Vector2.SizeInBytes * vert_count;
-			_size_buffer = _size_vertex + _size_normal + _size_uv;
+			mPolygon = polygon;
+			mUseColor = (colorList != null);
+			mSizeVertex = mSizeNormal = Vector3.SizeInBytes * vertCount;
+			mSizeUV = Vector2.SizeInBytes * vertCount;
+			mSizeBuffer = mSizeVertex + mSizeNormal + mSizeUV;
 
-			if (_use_color) {
-				_size_color = sizeof(Color4) * vert_count;
-				_size_buffer += _size_color;
+			if (mUseColor) {
+				mSizeColor = 4 * vertCount;
+				mSizeBuffer += mSizeColor;
 			} else
-				_size_color = 0;
+				mSizeColor = 0;
 
 			// Allocate the array and pack the bytes into it.
-			buffer = new char[_size_buffer];
-			memcpy(buffer, vert_list, _size_vertex);
-			memcpy(buffer + _size_vertex, normal_list, _size_normal);
+			float[] buffer = new float[mSizeBuffer];
 
-			if (_use_color)
-				memcpy(buffer + _size_vertex + _size_normal, color_list, _size_color);
-			memcpy(buffer + _size_vertex + _size_normal + _size_color, uv_list, _size_uv);
+			for (int i = 0, j = 0; j < vertList.Count; i += 3, j++) {
+				buffer[i + 0] = vertList[j].X;
+				buffer[i + 1] = vertList[j].Y;
+				buffer[i + 2] = vertList[j].Z;
+			}
+
+			for (int i = mSizeVertex, j = 0; j < normalList.Count; i += 3, j++) {
+				buffer[i + 0] = normalList[j].X;
+				buffer[i + 1] = normalList[j].Y;
+				buffer[i + 2] = normalList[j].Z;
+			}
+
+			if (mUseColor) {
+				for (int i = mSizeVertex + mSizeNormal, j = 0; j < colorList.Count; i += 3, j++) {
+					buffer[i + 0] = colorList[j].R;
+					buffer[i + 1] = colorList[j].G;
+					buffer[i + 2] = colorList[j].B;
+				}
+			}
+
+			for (int i = mSizeVertex + mSizeNormal + (mUseColor ? mSizeColor : 0), j = 0; j < uvList.Count; i += 2, j++) {
+				buffer[i + 0] = uvList[j].X;
+				buffer[i + 1] = uvList[j].Y;
+			}
 
 			// Create and load the buffer
-			GL.GenBuffers(1, out _id_vertex);
-			GL.BindBuffer(BufferTarget.ArrayBuffer, _id_vertex);			// Bind The Buffer
-			GL.BufferData(BufferTarget.ArrayBuffer, _size_buffer, buffer, BufferUsageHint.StaticDraw);
-			GL.BindBuffer(BufferTarget.ArrayBuffer, 0);			// Unbind The Buffer
+			GL.GenBuffers(1, out mIDVertex);
+			GL.BindBuffer(BufferTarget.ArrayBuffer, mIDVertex);			// Bind The Buffer
+			GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(mSizeBuffer), buffer, BufferUsageHint.StaticDraw);
+			//GL.BindBuffer(BufferTarget.ArrayBuffer, 0);			// Unbind The Buffer
 
 			// Create and load the indicies
-			GL.GenBuffers(1, out _id_index);
-			GL.BindBuffer(BufferTarget.ElementArrayBuffer, _id_index);
-			GL.BufferData(BufferTarget.ElementArrayBuffer, index_count * sizeof(int), index_list, BufferUsageHint.StaticDraw);
+			GL.GenBuffers(1, out mIDIndex);
+			GL.BindBuffer(BufferTarget.ElementArrayBuffer, mIDIndex);
+			GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(indexCount * 4), indexList.ToArray(), BufferUsageHint.StaticDraw);
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0); // Unbind
-			_index_count = index_count;
-			delete[] buffer;
+			mIndexCount = indexCount;
+
 			Ready = true;
 		}
 
 		public void Create(Mesh m) {
 			if (m.colors.Count != 0)
-				Create(GL_TRIANGLES, m.indices.Count, m.VertexCount, m.indices, m.vertices, m.normals, m.colors, m.uvs);
+				Create(BeginMode.Triangles, m.indices.Count, m.VertexCount, m.indices, m.vertices, m.normals, m.colors, m.uvs);
 			else
-				Create(GL_TRIANGLES, m.indices.Count, m.VertexCount, m.indices, m.vertices, m.normals, null, m.uvs);
+				Create(BeginMode.Triangles, m.indices.Count, m.VertexCount, m.indices, m.vertices, m.normals, null, m.uvs);
 		}
 
 		public void Render() {
@@ -105,28 +125,28 @@ namespace Frontier {
 				return;
 
 			// Bind VBOs for vertex array and index array
-			GL.BindBuffer(BufferTarget.ArrayBuffer, _id_vertex);
-			GL.EnableClientState(EnableCap.VertexArray);
-			GL.EnableClientState(EnableCap.NormalArray);
-			if (_use_color)
-				GL.EnableClientState(EnableCap.ColorArray);
+			GL.BindBuffer(BufferTarget.ArrayBuffer, mIDVertex);
+			GL.EnableClientState(ArrayCap.VertexArray);
+			GL.EnableClientState(ArrayCap.NormalArray);
+			if (mUseColor)
+				GL.EnableClientState(ArrayCap.ColorArray);
 			else
-				GL.DisableClientState(EnableCap.ColorArray);
-			GL.EnableClientState(EnableCap.TextureCoordArray);
+				GL.DisableClientState(ArrayCap.ColorArray);
+			GL.EnableClientState(ArrayCap.TextureCoordArray);
 
 			GL.VertexPointer(3, VertexPointerType.Float, 0, 0);
-			GL.NormalPointer(NormalPointerType.Float, 0, _size_vertex);
-			if (_use_color)
-				GL.ColorPointer(4, ColorPointerType.Float, 0, _size_vertex + _size_normal);
-			GL.TexCoordPointer(2, TexCoordPointerType.Float, 0, _size_vertex + _size_normal + _size_color);
+			GL.NormalPointer(NormalPointerType.Float, 0, mSizeVertex);
+			if (mUseColor)
+				GL.ColorPointer(4, ColorPointerType.Float, 0, mSizeVertex + mSizeNormal);
+			GL.TexCoordPointer(2, TexCoordPointerType.Float, 0, mSizeVertex + mSizeNormal + mSizeColor);
 
 			// Draw it
-			GL.BindBuffer(BufferTarget.ElementArrayBuffer, _id_index); // for indices
-			GL.EnableClientState(EnableCap.VertexArray);             // activate vertex coords array
-			GL.DrawElements(BeginMode.Polygon, _index_count, DrawElementsType.UnsignedInt, 0);
+			GL.BindBuffer(BufferTarget.ElementArrayBuffer, mIDIndex); // for indices
+			GL.EnableClientState(ArrayCap.VertexArray);             // activate vertex coords array
+			GL.DrawElements(BeginMode.Polygon, mIndexCount, DrawElementsType.UnsignedInt, 0);
 
 			// Deactivate vertex array and bind with 0, so, switch back to normal pointer operation
-			GL.DisableClientState(EnableCap.VertexArray);
+			GL.DisableClientState(ArrayCap.VertexArray);
 			GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
 		}

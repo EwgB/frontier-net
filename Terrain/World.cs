@@ -23,36 +23,43 @@ using OpenTK.Graphics.OpenGL;
 namespace Frontier {
 	class FWorld {
 		#region Enums and structs
-		enum Climate {
-		  Invalid,		Ocean,		Coast,		Mountain,		River,		RiverBank,		Swamp,		Rocky,		Lake,
-			Desert,			Field,		Plains,		Canyon,			Forest,		Types
-		}
-
-		//Only one of these is ever instanced.  This is everything that goes into a "save file".
-		//UMath.Sing only this, the entire world can be re-created.
+		// Only one of these is ever instanced.  This is everything that goes into a "save file".
+		// Using only this, the entire world can be re-created.
 		struct World {
-			public Region[,] Map { get; private set; }
+			private Region[,] map;
+			public Region[,] Map { get { return map; } }
 
-			public int Seed { get; private set; }
-			public int RiverCount { get; private set; }
-			public int LakeCount { get; private set; }
+			private int seed;
+			public int Seed { get { return seed; } }
 
-			public bool WindFromWest { get; private set; }
-			public bool NorthernHemisphere { get; private set; }
+			private int riverCount;
+			public int RiverCount { get { return riverCount; } }
 
-			public int[] NoiseInt { get; private set; }
-			public float[] NoiseFloat { get; private set; }
+			private int lakeCount;
+			public int LakeCount { get { return lakeCount; } }
+
+			private bool windFromWest;
+			public bool WindFromWest { get { return windFromWest; } }
+
+			private bool northernHemisphere;
+			public bool NorthernHemisphere { get { return northernHemisphere; } }
+
+			private int[] noiseInt;
+			public int[] NoiseInt { get { return noiseInt; } }
+
+			private float[] noiseFloat;
+			public float[] NoiseFloat { get { return noiseFloat; } }
 
 			public World(int seed, int riverCount, int lakeCount, bool windFromWest, bool northernHemisphere) {
-				Map = new Region[WORLD_GRID, WORLD_GRID];
-				NoiseInt = new int[NOISE_BUFFER];
-				NoiseFloat = new float[NOISE_BUFFER];
+				map = new Region[WORLD_GRID, WORLD_GRID];
+				noiseInt = new int[NOISE_BUFFER];
+				noiseFloat = new float[NOISE_BUFFER];
 
-				Seed = seed;
-				RiverCount = riverCount;
-				LakeCount = lakeCount;
-				WindFromWest = windFromWest;
-				NorthernHemisphere = northernHemisphere;
+				this.seed = seed;
+				this.riverCount = riverCount;
+				this.lakeCount = lakeCount;
+				this.windFromWest = windFromWest;
+				this.northernHemisphere = northernHemisphere;
 			}
 		}
 
@@ -132,17 +139,17 @@ namespace Frontier {
 					// This makes the river bend side-to-side
 					switch ((r.GridPos.X + r.GridPos.Y) % 6) {
 						case 0:
-							offset.X += Math.Abs(Math.Sin(offset.Y * 180.0f * DEGREES_TO_RADIANS)) * 0.25f; break;
+							offset.X += (float) Math.Abs(Math.Sin(offset.Y * Math.PI)) * 0.25f; break;
 						case 1:
-							offset.X -= Math.Abs(Math.Sin(offset.Y * 180.0f * DEGREES_TO_RADIANS)) * 0.25f; break;
+							offset.X -= (float) Math.Abs(Math.Sin(offset.Y * Math.PI)) * 0.25f; break;
 						case 2:
-							offset.X += Math.Abs(Math.Sin(offset.Y * 180.0f * DEGREES_TO_RADIANS)) * 0.1f; break;
+							offset.X += (float) Math.Abs(Math.Sin(offset.Y * Math.PI)) * 0.1f; break;
 						case 3:
-							offset.X -= Math.Abs(Math.Sin(offset.Y * 180.0f * DEGREES_TO_RADIANS)) * 0.1f; break;
+							offset.X -= (float) Math.Abs(Math.Sin(offset.Y * Math.PI)) * 0.1f; break;
 						case 4:
-							offset.X += Math.Sin(offset.Y * 360.0f * DEGREES_TO_RADIANS) * 0.1f; break;
+							offset.X += (float) Math.Sin(offset.Y * 2 * Math.PI) * 0.1f; break;
 						case 5:
-							offset.X += Math.Sin(offset.Y * 360.0f * DEGREES_TO_RADIANS) * 0.1f; break;
+							offset.X += (float) Math.Sin(offset.Y * 2 * Math.PI) * 0.1f; break;
 					}
 				}
 
@@ -151,13 +158,13 @@ namespace Frontier {
 					// This makes the river bend side-to-side
 					switch ((r.GridPos.X + r.GridPos.Y) % 4) {
 						case 0:
-							offset.Y -= Math.Abs(Math.Sin(offset.X * 180.0f * DEGREES_TO_RADIANS)) * 0.25f; break;
+							offset.Y -= (float) Math.Abs(Math.Sin(offset.X * Math.PI)) * 0.25f; break;
 						case 1:
-							offset.Y += Math.Abs(Math.Sin(offset.X * 180.0f * DEGREES_TO_RADIANS)) * 0.25f; break;
+							offset.Y += (float) Math.Abs(Math.Sin(offset.X * Math.PI)) * 0.25f; break;
 						case 2:
-							offset.Y -= Math.Abs(Math.Sin(offset.X * 180.0f * DEGREES_TO_RADIANS)) * 0.10f; break;
+							offset.Y -= (float) Math.Abs(Math.Sin(offset.X * Math.PI)) * 0.10f; break;
 						case 3:
-							offset.Y += Math.Abs(Math.Sin(offset.X * 180.0f * DEGREES_TO_RADIANS)) * 0.10f; break;
+							offset.Y += (float) Math.Abs(Math.Sin(offset.X * Math.PI)) * 0.10f; break;
 					}
 				}
 
@@ -398,15 +405,14 @@ namespace Frontier {
 				(world_x + BLEND_DISTANCE) / REGION_SIZE,
 				(world_y + BLEND_DISTANCE) / REGION_SIZE);
 
+			// Four corners: upper left, upper right, etc.
+			Region rul = RegionGet(ul.X, ul.Y);
 			if (ul == br) {
-				rul = RegionGet(ul.X, ul.Y);
 				result.elevation = DoHeight(rul, offset, water, detail, bias);
 				result.elevation = DoHeightNoBlend(result.elevation, rul, offset, water);
 				return result;
 			}
 
-			// Four corners: upper left, upper right, etc.
-			Region rul = RegionGet(ul.X, ul.Y);
 			Region rur = RegionGet(br.X, ul.Y);
 			Region rbl = RegionGet(ul.X, br.Y);
 			Region rbr = RegionGet(br.X, br.Y);
@@ -542,11 +548,11 @@ namespace Frontier {
 		}
 
 		private Region RegionGet(int index_x, int index_y) {
-			return planet.Map[index_x][index_y];
+			return planet.Map[index_x, index_y];
 		}
 
 		private void RegionSet(int index_x, int index_y, Region val) {
-			planet.Map[index_x][index_y] = val;
+			planet.Map[index_x, index_y] = val;
 		}
 
 		public static Region RegionFromPosition(int world_x, int world_y) {

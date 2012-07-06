@@ -74,20 +74,20 @@ namespace Frontier {
 
 	class Figure {
 		#region Member fields, constants and properties
-		private const char NEWLINE = '\n';
+		protected const char NEWLINE = '\n';
 
-		private Figure fig, fig2;
-		private CAnim anim, animStand;
-		private int frame;
-		private bool stand, moveit = true;
-		private float nn;
+		protected Figure fig, fig2;
+		protected CAnim anim, animStand;
+		protected int frame;
+		protected bool stand, moveit = true;
+		protected float nn;
 
-		private List<Bone> mBones;
-		private Vector3 mPosition, mRotation;
-		private BoneId[] mBoneIndices = new BoneId[CAnim.BoneIdCount];
-		private int mUnknownCount;
+		protected List<Bone> mBones;
+		protected Vector3 mPosition, mRotation;
+		protected BoneId[] mBoneIndices = new BoneId[CAnim.BoneIdCount];
+		protected int mUnknownCount;
 
-		private Mesh
+		protected Mesh
 			mSkinStatic,		//The original, "read only"
 			mSkinDeform,		//Altered
 			mSkinRender;		//Vector3.UnitZdated every frame
