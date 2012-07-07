@@ -113,89 +113,6 @@ namespace Frontier {
 			}
 		}
 
-		private Color4 WorldColorGet(int world_x, int world_y, SurfaceColor c) {
-			int x = Math.Max(world_x % DITHER_SIZE, 0);
-			int y = Math.Max(world_y % DITHER_SIZE, 0);
-
-			world_x += Dithermap[x, y].X;
-			world_y += Dithermap[x, y].Y;
-
-			Vector2 offset = new Vector2(
-				(world_x % REGION_SIZE) / REGION_SIZE,
-				(world_y % REGION_SIZE) / REGION_SIZE);
-
-			Coord origin = new Coord(
-				world_x / REGION_SIZE,
-				world_y / REGION_SIZE);
-
-			Region r0 = GetRegion(origin.X, origin.Y);
-			Region r1 = GetRegion(origin.X + 1, origin.Y);
-			Region r2 = GetRegion(origin.X, origin.Y + 1);
-			Region r3 = GetRegion(origin.X + 1, origin.Y + 1);
-			//return r0.color_grass;
-
-			Color4    c0, c1, c2, c3;
-			switch (c) {
-				case SurfaceColor.Grass:
-					c0 = r0.ColorGrass;
-					c1 = r1.ColorGrass;
-					c2 = r2.ColorGrass;
-					c3 = r3.ColorGrass;
-					break;
-				case SurfaceColor.Dirt:
-					c0 = r0.ColorDirt;
-					c1 = r1.ColorDirt;
-					c2 = r2.ColorDirt;
-					c3 = r3.ColorDirt;
-					break;
-				case SurfaceColor.Rock:
-				default:
-					c0 = r0.ColorRock;
-					c1 = r1.ColorRock;
-					c2 = r2.ColorRock;
-					c3 = r3.ColorRock;
-					break;
-			}
-
-			return new Color4(
-				FMath.InterpolateQuad(c0.R, c1.R, c2.R, c3.R, offset),
-				FMath.InterpolateQuad(c0.G, c1.G, c2.G, c3.G, offset),
-				FMath.InterpolateQuad(c0.B, c1.B, c2.B, c3.B, offset),
-				1);
-		}
-
-		private Color4 RegionAtmosphere(int world_x, int world_y) {
-			Vector2 offset = new Vector2(
-				(world_x % REGION_SIZE) / REGION_SIZE,
-				(world_y % REGION_SIZE) / REGION_SIZE);
-
-			Coord origin = new Coord(
-				world_x / REGION_SIZE,
-				world_y / REGION_SIZE);
-
-			return GetRegion(origin.X, origin.Y).ColorAtmosphere;
-		}
-
-		private float RegionWaterLevel(int world_x, int world_y) {
-			world_x += REGION_HALF;
-			world_y += REGION_HALF;
-
-			Coord origin = new Coord(
-				FMath.Clamp(world_x / REGION_SIZE, 0, WORLD_GRID - 1),
-				FMath.Clamp(world_y / REGION_SIZE, 0, WORLD_GRID - 1));
-
-			Vector2 offset = new Vector2(
-				((world_x) % REGION_SIZE) / REGION_SIZE,
-				((world_y) % REGION_SIZE) / REGION_SIZE);
-
-			// Four corners: upper left, upper right, etc.
-			Region rul = GetRegion(origin.X, origin.Y);
-			Region rur = GetRegion(origin.X + 1, origin.Y);
-			Region rbl = GetRegion(origin.X, origin.Y + 1);
-			Region rbr = GetRegion(origin.X + 1, origin.Y + 1);
-			return FMath.InterpolateQuad(rul.GeoWater, rur.GeoWater, rbl.GeoWater, rbr.GeoWater, offset, ((origin.X + origin.Y) % 2) == 0);
-		}
-
 		private Cell WorldCell(int world_x, int world_y) {
 			float esmall = Entropy(world_x, world_y);
 			float elarge = Entropy((float) world_x / LARGE_SCALE, (float) world_y / LARGE_SCALE);
@@ -396,6 +313,89 @@ namespace Frontier {
 			TerraformAverage();
 			TerraformColors();
 			DoMap();
+		}
+
+		private static Color4 WorldColorGet(int world_x, int world_y, SurfaceColor c) {
+			int x = Math.Max(world_x % DITHER_SIZE, 0);
+			int y = Math.Max(world_y % DITHER_SIZE, 0);
+
+			world_x += Dithermap[x, y].X;
+			world_y += Dithermap[x, y].Y;
+
+			Vector2 offset = new Vector2(
+				(world_x % REGION_SIZE) / REGION_SIZE,
+				(world_y % REGION_SIZE) / REGION_SIZE);
+
+			Coord origin = new Coord(
+				world_x / REGION_SIZE,
+				world_y / REGION_SIZE);
+
+			Region r0 = GetRegion(origin.X, origin.Y);
+			Region r1 = GetRegion(origin.X + 1, origin.Y);
+			Region r2 = GetRegion(origin.X, origin.Y + 1);
+			Region r3 = GetRegion(origin.X + 1, origin.Y + 1);
+			//return r0.color_grass;
+
+			Color4    c0, c1, c2, c3;
+			switch (c) {
+				case SurfaceColor.Grass:
+					c0 = r0.ColorGrass;
+					c1 = r1.ColorGrass;
+					c2 = r2.ColorGrass;
+					c3 = r3.ColorGrass;
+					break;
+				case SurfaceColor.Dirt:
+					c0 = r0.ColorDirt;
+					c1 = r1.ColorDirt;
+					c2 = r2.ColorDirt;
+					c3 = r3.ColorDirt;
+					break;
+				case SurfaceColor.Rock:
+				default:
+					c0 = r0.ColorRock;
+					c1 = r1.ColorRock;
+					c2 = r2.ColorRock;
+					c3 = r3.ColorRock;
+					break;
+			}
+
+			return new Color4(
+				FMath.InterpolateQuad(c0.R, c1.R, c2.R, c3.R, offset),
+				FMath.InterpolateQuad(c0.G, c1.G, c2.G, c3.G, offset),
+				FMath.InterpolateQuad(c0.B, c1.B, c2.B, c3.B, offset),
+				1);
+		}
+
+		private static Color4 RegionAtmosphere(int world_x, int world_y) {
+			Vector2 offset = new Vector2(
+				(world_x % REGION_SIZE) / REGION_SIZE,
+				(world_y % REGION_SIZE) / REGION_SIZE);
+
+			Coord origin = new Coord(
+				world_x / REGION_SIZE,
+				world_y / REGION_SIZE);
+
+			return GetRegion(origin.X, origin.Y).ColorAtmosphere;
+		}
+
+		private static float RegionWaterLevel(int world_x, int world_y) {
+			world_x += REGION_HALF;
+			world_y += REGION_HALF;
+
+			Coord origin = new Coord(
+				FMath.Clamp(world_x / REGION_SIZE, 0, WORLD_GRID - 1),
+				FMath.Clamp(world_y / REGION_SIZE, 0, WORLD_GRID - 1));
+
+			Vector2 offset = new Vector2(
+				((world_x) % REGION_SIZE) / REGION_SIZE,
+				((world_y) % REGION_SIZE) / REGION_SIZE);
+
+			// Four corners: upper left, upper right, etc.
+			Region rul = GetRegion(origin.X, origin.Y);
+			Region rur = GetRegion(origin.X + 1, origin.Y);
+			Region rbl = GetRegion(origin.X, origin.Y + 1);
+			Region rbr = GetRegion(origin.X + 1, origin.Y + 1);
+			return FMath.InterpolateQuad(rul.GeoWater, rur.GeoWater, rbl.GeoWater, rbr.GeoWater, offset, ((origin.X + origin.Y) % 2) == 0);
 		}
 
 		#region The following functions are used when generating elevation data

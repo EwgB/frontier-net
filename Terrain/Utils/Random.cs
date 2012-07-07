@@ -31,15 +31,14 @@ namespace Frontier {
 		private static uint[] mag01 = { 0x0, MATRIX_A };
 		private static int[] ptgfsr = new int[N];
 
-		private int TEMPERING_SHIFT_L(int y) { return (y >> 18); }
-		private int TEMPERING_SHIFT_S(int y) { return (y << 7); }
-		private int TEMPERING_SHIFT_T(int y) { return (y << 15); }
-		private int TEMPERING_SHIFT_U(int y) { return (y >> 11); }
+		private static int TEMPERING_SHIFT_L(int y) { return (y >> 18); }
+		private static int TEMPERING_SHIFT_S(int y) { return (y << 7); }
+		private static int TEMPERING_SHIFT_T(int y) { return (y << 15); }
+		private static int TEMPERING_SHIFT_U(int y) { return (y >> 11); }
 
 
 		public static int Value() {
-			int		kk;
-			ulong	y;
+			int		kk,	y;
 
 			if (k == N) {
 				for (kk = 0; kk < N - M; kk++) {

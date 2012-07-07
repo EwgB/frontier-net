@@ -120,9 +120,9 @@ namespace Frontier {
 
 				// Now weight each normal by the size of the angle so that the triangle with the largest angle
 				// at that vertex has the most influence over the direction of the normals.
-				normals[i0] += Vector3.Mult(normal, (float) angle[0]);
-				normals[i1] += Vector3.Mult(normal, (float) angle[1]);
-				normals[i2] += Vector3.Mult(normal, (float) angle[2]);
+				normals[i0] += Vector3.Multiply(normal, (float) angle[0]);
+				normals[i1] += Vector3.Multiply(normal, (float) angle[1]);
+				normals[i2] += Vector3.Multiply(normal, (float) angle[2]);
 			}
 
 			//Re-normalize. Done.
@@ -198,9 +198,9 @@ namespace Frontier {
 
 				// Now weight each normals by the size of the angle so that the triangle with the largest angle
 				// at that vertices has the most influence over the direction of the normals.
-				normals_merged[i0] += Vector3.Mult(normal, (float)angle[0]);
-				normals_merged[i1] += Vector3.Mult(normal, (float)angle[1]);
-				normals_merged[i2] += Vector3.Mult(normal, (float)angle[2]);
+				normals_merged[i0] += Vector3.Multiply(normal, (float) angle[0]);
+				normals_merged[i1] += Vector3.Multiply(normal, (float) angle[1]);
+				normals_merged[i2] += Vector3.Multiply(normal, (float) angle[2]);
 			}
 
 			//Re-normalize. Done.

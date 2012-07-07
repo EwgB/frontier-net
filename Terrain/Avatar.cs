@@ -63,7 +63,7 @@ namespace Frontier {
 
 		#region Private methods
 		private void do_model() {
-			avatar.LoadX("models//male.x");
+			avatar.LoadX("models//male.X");
 			if (CVarUtils.GetCVar<bool>("avatar.expand")) {
 				avatar.BoneInflate(BoneId.Pelvis, 0.02f, true);
 				avatar.BoneInflate(BoneId.Head, 0.025f, true);
@@ -118,9 +118,9 @@ namespace Frontier {
 			//ostringstream   oss(ostringstream.in);
 
 			//oss << APP << " ";
-			////oss << WorldLocationName (region.grid_pos.x, region.grid_pos.y) << " (" << region.title << ") ";
+			////oss << WorldLocationName (region.grid_pos.X, region.grid_pos.Y) << " (" << region.title << ") ";
 			//oss << WorldLocationName ((int)Position.X, (int)Position.Y) << " (" << region.title << ") ";
-			//oss << "Looking " << FWorld.DirectionFromAngle (angle.z);
+			//oss << "Looking " << FWorld.DirectionFromAngle (angle.Z);
 			//SdlSetCaption (oss.str ().c_str ());
 		}
 
@@ -191,7 +191,7 @@ namespace Frontier {
 			desired_angle = current_angle;
 
 			if (moving) { // We're trying to accelerate
-				desired_angle = FMath.Angle(0.0f, 0.0f, desired_movement.x, desired_movement.y);
+				desired_angle = FMath.Angle(0.0f, 0.0f, desired_movement.X, desired_movement.Y);
 				current_speed += elapsed * MOVE_SPEED * ACCEL;
 			} else //We've stopped pushing forward
 				current_speed -= elapsed * MOVE_SPEED * DECEL;

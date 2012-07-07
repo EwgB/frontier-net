@@ -11,8 +11,9 @@ using System.Collections.Generic;
 using OpenTK;
 
 namespace Frontier {
+	public enum UV { TopLeft, TopRight, BottomRight, BottomLeft, LeftEdge, RightEdge, TopEdge, BottomEdge }
+
 	struct UVBox {
-		public enum UV { TopLeft, TopRight, BottomRight, BottomLeft, LeftEdge, RightEdge, TopEdge, BottomEdge }
 
 		public Vector2 ul, lr;
 		public Vector2 Center { get { return (ul + lr) / 2; } }

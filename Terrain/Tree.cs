@@ -208,10 +208,10 @@ namespace Frontier {
 					// Center
 					m.PushVertex(new Vector3(0.0f, 0.0f, 0.0f), Vector3.UnitZ, uv.Center);
 					// First ring
-					m.PushVertex(new Vector3(-fsize / 2, -fsize / 2, level1), Vector3.UnitZ, uv.Corner(GLUV_TOP_EDGE));		// 1
-					m.PushVertex(new Vector3(fsize / 2, -fsize / 2, level1), Vector3.UnitZ, uv.Corner(GLUV_RIGHT_EDGE));	// 2
-					m.PushVertex(new Vector3(fsize / 2, fsize / 2, level1), Vector3.UnitZ, uv.Corner(GLUV_BOTTOM_EDGE));	// 3
-					m.PushVertex(new Vector3(-fsize / 2, fsize / 2, level1), Vector3.UnitZ, uv.Corner(GLUV_LEFT_EDGE));		// 4
+					m.PushVertex(new Vector3(-fsize / 2, -fsize / 2, level1), Vector3.UnitZ, uv.Corner(UV.TopEdge));	// 1
+					m.PushVertex(new Vector3(fsize / 2, -fsize / 2, level1), Vector3.UnitZ, uv.Corner(UV.RightEdge));	// 2
+					m.PushVertex(new Vector3(fsize / 2, fsize / 2, level1), Vector3.UnitZ, uv.Corner(UV.BottomEdge));	// 3
+					m.PushVertex(new Vector3(-fsize / 2, fsize / 2, level1), Vector3.UnitZ, uv.Corner(UV.LeftEdge));	// 4
 					// Tips
 					m.PushVertex(new Vector3(0.0f, -fsize, level2), Vector3.UnitZ, uv.Corner(1));	// 5
 					m.PushVertex(new Vector3(fsize, 0.0f, level2), Vector3.UnitZ, uv.Corner(2));	// 6
@@ -786,6 +786,7 @@ namespace Frontier {
 			GL.GenTextures(1, out mTexture);
 			GL.BindTexture(TextureTarget.Texture2D, Texture);
 			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, TEXTURE_SIZE * 4, TEXTURE_SIZE, 0, PixelFormat.Rgba, PixelType.Byte, null);
+
 			RenderCanvasBegin(0, TEXTURE_SIZE, 0, TEXTURE_SIZE, TEXTURE_SIZE);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Nearest);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Nearest);
