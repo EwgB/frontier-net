@@ -75,27 +75,6 @@ namespace Frontier {
 			FlowerShape = new int[FLOWERS];
 		}
 
-		#region Module functions
-		private Region RegionGet(float x, float y) {
-			x /= REGION_SIZE;
-			y /= REGION_SIZE;
-			if (x < 0 || y < 0 || x >= WORLD_GRID || y >= WORLD_GRID)
-				return Continent[0, 0];
-			return Continent[(int) x, (int) y];
-		}
-
-		private Region RegionGet(int x, int y) {
-			x = Math.Max(x, 0);
-			y = Math.Max(y, 0);
-			x += Dithermap[x % DITHER_SIZE, y % DITHER_SIZE].X;
-			y += Dithermap[x % DITHER_SIZE, y % DITHER_SIZE].Y;
-			x /= REGION_SIZE;
-			y /= REGION_SIZE;
-			if (x < 0 || y < 0 || x >= WORLD_GRID || y >= WORLD_GRID)
-				return Continent[0, 0];
-			return Continent[x, y];
-		}
-
 		private void RegionInit() {
 			// Fill in the dither table - a table of random offsets
 			for (int x = 0; x < DITHER_SIZE; x++) {
@@ -112,63 +91,10 @@ namespace Frontier {
 				}
 			}
 		}
-
-		private Cell WorldCell(int world_x, int world_y) {
-			float esmall = Entropy(world_x, world_y);
-			float elarge = Entropy((float) world_x / LARGE_SCALE, (float) world_y / LARGE_SCALE);
-			float bias = RegionWaterLevel(world_x, world_y);
-
-			Coord origin = new Coord(
-				FMath.Clamp(world_x / REGION_SIZE, 0, WORLD_GRID - 1),
-				FMath.Clamp(world_y / REGION_SIZE, 0, WORLD_GRID - 1));
-
-			// Get our offset from the region origin as a pair of scalars.
-			Vector2 blend = new Vector2(
-				(world_x % BLEND_DISTANCE) / BLEND_DISTANCE,
-				(world_y % BLEND_DISTANCE) / BLEND_DISTANCE);
-
-			Vector2 offset = new Vector2(
-				((world_x) % REGION_SIZE) / REGION_SIZE,
-				((world_y) % REGION_SIZE) / REGION_SIZE);
-
-			bool left = ((origin.X + origin.Y) % 2) == 0;
-
-			Cell result;
-			result.detail = esmall;
-			result.water_level = bias;
-
-			//Upper left and bottom-right corners
-			Coord ul = new Coord(origin.X, origin.Y);
-			Coord br = new Coord(
-				(world_x + BLEND_DISTANCE) / REGION_SIZE,
-				(world_y + BLEND_DISTANCE) / REGION_SIZE);
-
-			if (ul == br) {
-				Region rul = GetRegion(ul.X, ul.Y);
-				result.elevation = DoHeight(rul, offset, bias, esmall, elarge);
-				result.elevation = DoHeightNoBlend(result.elevation, rul, offset, bias);
-				return result;
-			} else {
-			  // Four corners: upper left, upper right, etc.
-				Region rul = GetRegion(ul.X, ul.Y);
-				Region rur = GetRegion(br.X, ul.Y);
-				Region rbl = GetRegion(ul.X, br.Y);
-				Region rbr = GetRegion(br.X, br.Y);
-
-				float eul = DoHeight(rul, offset, bias, esmall, elarge);
-				float eur = DoHeight(rur, offset, bias, esmall, elarge);
-				float ebl = DoHeight(rbl, offset, bias, esmall, elarge);
-				float ebr = DoHeight(rbr, offset, bias, esmall, elarge);
-
-				result.elevation = FMath.InterpolateQuad(eul, eur, ebl, ebr, blend, left);
-				result.elevation = DoHeightNoBlend(result.elevation, rul, offset, bias);
-				return result;
-			}
-		}
-		#endregion
 		#endregion
 	}
 
+	// Implemented as singleton
 	class RegionManager {
 		#region Constants
 		public const int
@@ -217,13 +143,22 @@ namespace Frontier {
 		#endregion
 
 		#region Member variables
-		private static Region[,] Continent = new Region[WORLD_GRID, WORLD_GRID];
-		private static Coord[,] Dithermap = new Coord[DITHER_SIZE, DITHER_SIZE];
+		private static RegionManager mInstance;
+		public static RegionManager Instance {
+			get {
+				if (mInstance == null)
+					mInstance = new RegionManager();
+				return mInstance;
+			}
+		}
 
-		private static int mapId;
-		public static int RegionMap { get { return mapId; } private set { mapId = value; } }
+		private Region[,] Continent = new Region[WORLD_GRID, WORLD_GRID];
+		private Coord[,] Dithermap = new Coord[DITHER_SIZE, DITHER_SIZE];
 
-		private static Color4[] FlowerPalette = {
+		private int mapId;
+		public int RegionMap { get { return mapId; } private set { mapId = value; } }
+
+		private readonly static Color4[] FlowerPalette = {
 			Color4.White, Color4.White, Color4.White,
 			Color4.Red, Color4.Red,
 			Color4.Yellow, Color4.Yellow,
@@ -232,13 +167,34 @@ namespace Frontier {
 			Color4.LightPink,
 			Color4.Maroon
 		};
+
+		public Region this[int x, int y] { get { return Continent[x, y]; } set { Continent[x, y] = value; } }
 		#endregion
 
 		#region Methods
-		public static Region WorldRegionGet(int x, int y) { return Continent[x, y]; }
-		public static void WorldRegionSet(int x, int y, Region region) { Continent[x, y] = region; }
+		private RegionManager() { }
 
-		private static void DoMap() {
+		public Region RegionGet(float x, float y) {
+			x /= REGION_SIZE;
+			y /= REGION_SIZE;
+			if (x < 0 || y < 0 || x >= WORLD_GRID || y >= WORLD_GRID)
+				return Continent[0, 0];
+			return Continent[(int) x, (int) y];
+		}
+
+		public Region RegionGet(int x, int y) {
+			x = Math.Max(x, 0);
+			y = Math.Max(y, 0);
+			x += Dithermap[x % DITHER_SIZE, y % DITHER_SIZE].X;
+			y += Dithermap[x % DITHER_SIZE, y % DITHER_SIZE].Y;
+			x /= REGION_SIZE;
+			y /= REGION_SIZE;
+			if (x < 0 || y < 0 || x >= WORLD_GRID || y >= WORLD_GRID)
+				return Continent[0, 0];
+			return Continent[x, y];
+		}
+
+		private void DoMap() {
 			if (mapId == 0)
 				GL.GenTextures(1, out mapId);
 			GL.BindTexture(TextureTarget.Texture2D, mapId);
@@ -261,7 +217,7 @@ namespace Frontier {
 				0, PixelFormat.Rgb, PixelType.Int, buffer);
 		}
 
-		private static void GenerateRegions() {
+		private void GenerateRegions() {
 			//Set some defaults
 			Coord offset = new Coord(
 				Random.Value() % 1024,
@@ -315,7 +271,7 @@ namespace Frontier {
 			DoMap();
 		}
 
-		private static Color4 WorldColorGet(int world_x, int world_y, SurfaceColor c) {
+		private Color4 WorldColorGet(int world_x, int world_y, SurfaceColor c) {
 			int x = Math.Max(world_x % DITHER_SIZE, 0);
 			int y = Math.Max(world_y % DITHER_SIZE, 0);
 
@@ -366,7 +322,60 @@ namespace Frontier {
 				1);
 		}
 
-		private static Color4 RegionAtmosphere(int world_x, int world_y) {
+		private Cell WorldCell(int world_x, int world_y) {
+			float esmall = Entropy(world_x, world_y);
+			float elarge = Entropy((float) world_x / LARGE_SCALE, (float) world_y / LARGE_SCALE);
+			float bias = RegionWaterLevel(world_x, world_y);
+
+			Coord origin = new Coord(
+				FMath.Clamp(world_x / REGION_SIZE, 0, WORLD_GRID - 1),
+				FMath.Clamp(world_y / REGION_SIZE, 0, WORLD_GRID - 1));
+
+			// Get our offset from the region origin as a pair of scalars.
+			Vector2 blend = new Vector2(
+				(world_x % BLEND_DISTANCE) / BLEND_DISTANCE,
+				(world_y % BLEND_DISTANCE) / BLEND_DISTANCE);
+
+			Vector2 offset = new Vector2(
+				((world_x) % REGION_SIZE) / REGION_SIZE,
+				((world_y) % REGION_SIZE) / REGION_SIZE);
+
+			bool left = ((origin.X + origin.Y) % 2) == 0;
+
+			Cell result;
+			result.detail = esmall;
+			result.water_level = bias;
+
+			//Upper left and bottom-right corners
+			Coord ul = new Coord(origin.X, origin.Y);
+			Coord br = new Coord(
+				(world_x + BLEND_DISTANCE) / REGION_SIZE,
+				(world_y + BLEND_DISTANCE) / REGION_SIZE);
+
+			if (ul == br) {
+				Region rul = GetRegion(ul.X, ul.Y);
+				result.elevation = DoHeight(rul, offset, bias, esmall, elarge);
+				result.elevation = DoHeightNoBlend(result.elevation, rul, offset, bias);
+				return result;
+			} else {
+				// Four corners: upper left, upper right, etc.
+				Region rul = GetRegion(ul.X, ul.Y);
+				Region rur = GetRegion(br.X, ul.Y);
+				Region rbl = GetRegion(ul.X, br.Y);
+				Region rbr = GetRegion(br.X, br.Y);
+
+				float eul = DoHeight(rul, offset, bias, esmall, elarge);
+				float eur = DoHeight(rur, offset, bias, esmall, elarge);
+				float ebl = DoHeight(rbl, offset, bias, esmall, elarge);
+				float ebr = DoHeight(rbr, offset, bias, esmall, elarge);
+
+				result.elevation = FMath.InterpolateQuad(eul, eur, ebl, ebr, blend, left);
+				result.elevation = DoHeightNoBlend(result.elevation, rul, offset, bias);
+				return result;
+			}
+		}
+
+		private Color4 RegionAtmosphere(int world_x, int world_y) {
 			Vector2 offset = new Vector2(
 				(world_x % REGION_SIZE) / REGION_SIZE,
 				(world_y % REGION_SIZE) / REGION_SIZE);
@@ -378,7 +387,7 @@ namespace Frontier {
 			return GetRegion(origin.X, origin.Y).ColorAtmosphere;
 		}
 
-		private static float RegionWaterLevel(int world_x, int world_y) {
+		private float RegionWaterLevel(int world_x, int world_y) {
 			world_x += REGION_HALF;
 			world_y += REGION_HALF;
 
@@ -401,7 +410,7 @@ namespace Frontier {
 		#region The following functions are used when generating elevation data
 		// This modifies the passed elevation value AFTER region cross-fading is complete,
 		// For things that should not be mimicked by neighbors. (Like rivers.)
-		private static float DoHeightNoBlend(float val, Region r, Vector2 offset, float bias) {
+		private float DoHeightNoBlend(float val, Region r, Vector2 offset, float bias) {
 			if ((r.FlagsShape & REGION_FLAG_RIVER_ANY) != 0) {
 				Vector2 cen;
 				float strength, delta;
@@ -411,13 +420,13 @@ namespace Frontier {
 					// This makes the river bend side-to-side
 					switch ((r.GridPos.X + r.GridPos.Y) % 4) {
 						case 0:
-							offset.X += Math.Abs(Math.Sin(offset.Y * 180.0f * DEGREES_TO_RADIANS)) * 0.25f; break;
+							offset.X += (float) (Math.Abs(Math.Sin(offset.Y * Math.PI)) * 0.25f); break;
 						case 1:
-							offset.X -= Math.Abs(Math.Sin(offset.Y * 180.0f * DEGREES_TO_RADIANS)) * 0.25f; break;
+							offset.X -= (float) (Math.Abs(Math.Sin(offset.Y * Math.PI)) * 0.25f); break;
 						case 2:
-							offset.X += Math.Abs(Math.Sin(offset.Y * 180.0f * DEGREES_TO_RADIANS)) * 0.1f; break;
+							offset.X += (float) (Math.Abs(Math.Sin(offset.Y * Math.PI)) * 0.1f); break;
 						case 3:
-							offset.X -= Math.Abs(Math.Sin(offset.Y * 180.0f * DEGREES_TO_RADIANS)) * 0.1f; break;
+							offset.X -= (float) (Math.Abs(Math.Sin(offset.Y * Math.PI)) * 0.1f); break;
 					}
 				}
 
@@ -426,13 +435,13 @@ namespace Frontier {
 					// This makes the river bend side-to-side
 					switch ((r.GridPos.X + r.GridPos.Y) % 4) {
 						case 0:
-							offset.Y -= Math.Abs(Math.Sin(offset.X * 180.0f * DEGREES_TO_RADIANS)) * 0.25f; break;
+							offset.Y -= (float) (Math.Abs(Math.Sin(offset.X * Math.PI)) * 0.25f); break;
 						case 1:
-							offset.Y += Math.Abs(Math.Sin(offset.X * 180.0f * DEGREES_TO_RADIANS)) * 0.25f; break;
+							offset.Y += (float) (Math.Abs(Math.Sin(offset.X * Math.PI)) * 0.25f); break;
 						case 2:
-							offset.Y -= Math.Abs(Math.Sin(offset.X * 180.0f * DEGREES_TO_RADIANS)) * 0.10f; break;
+							offset.Y -= (float) (Math.Abs(Math.Sin(offset.X * Math.PI)) * 0.10f); break;
 						case 3:
-							offset.Y += Math.Abs(Math.Sin(offset.X * 180.0f * DEGREES_TO_RADIANS)) * 0.10f; break;
+							offset.Y += (float) (Math.Abs(Math.Sin(offset.X * Math.PI)) * 0.10f); break;
 					}
 				}
 
@@ -457,7 +466,7 @@ namespace Frontier {
 		}
 
 		// This takes the given properties and generates a single unit of elevation data, according to the local region rules.
-		private static float DoHeight(Region r, Vector2 offset, float bias, float esmall, float elarge) {
+		private float DoHeight(Region r, Vector2 offset, float bias, float esmall, float elarge) {
 			float val;
 
 			// Modify the detail values before they are applied
@@ -532,7 +541,7 @@ namespace Frontier {
 			return val;
 		}
 
-		private static Region GetRegion(int x, int y) {
+		private Region GetRegion(int x, int y) {
 			if (x < 0 || y < 0 || x >= WORLD_GRID || y >= WORLD_GRID)
 				return Continent[0, 0];
 			return Continent[x, y];

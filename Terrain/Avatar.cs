@@ -215,8 +215,8 @@ namespace Frontier {
 				}
 			}
 
-			current_movement.X = -Math.Sin(current_angle * FMath.DEGREES_TO_RADIANS);
-			current_movement.Y = -Math.Cos(current_angle * FMath.DEGREES_TO_RADIANS);
+			current_movement.X = (float) -Math.Sin(current_angle * FMath.DEGREES_TO_RADIANS);
+			current_movement.Y = (float) -Math.Cos(current_angle * FMath.DEGREES_TO_RADIANS);
 
 			// Apply the movement
 			current_movement *= current_speed * elapsed;

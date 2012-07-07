@@ -275,7 +275,7 @@ namespace Frontier {
 			//angle += 45.0f;
 			Matrix4 mat = Matrix4.CreateRotationZ(angle);
 			for (int i = base_index; i < m.vertices.Count; i++) {
-				m.vertices[i] = glMatrixTransformPoint(mat, m.vertices[i]);
+				m.vertices[i] = Vector3.Transform(m.vertices[i], mat);
 				m.vertices[i] += pos;
 			}
 		}
@@ -354,7 +354,7 @@ namespace Frontier {
 						// If this is the last segment, don't make a ring of points. Make ONE, in the center.
 						// This is so the branch can end at a point.
 						pos = new Vector3(0.0f, anchor.length * horzPos, 0.0f);
-						pos = glMatrixTransformPoint(mat, pos);
+						pos = Vector3.Transform(pos, mat);
 						m.PushVertex(pos + core, new Vector3(pos.X, 0.0f, pos.Z), new Vector2(0.249f, pos.Y * mTextureTile));
 					} else {
 						for (int ring = 0; ring <= radialSteps; ring++) {
@@ -368,7 +368,7 @@ namespace Frontier {
 							pos.X = (float) (-Math.Sin(angle) * radius);
 							pos.Y = anchor.length * horzPos;
 							pos.Z = (float) (-Math.Cos(angle) * radius);
-							pos = glMatrixTransformPoint(mat, pos);
+							pos = Vector3.Transform(pos, mat);
 							m.PushVertex(pos + core, new Vector3(pos.X, 0.0f, pos.Z), new Vector2(((float) ring / (float) radialSteps) * 0.249f, pos.Y * mTextureTile));
 						}
 					}
@@ -794,7 +794,7 @@ namespace Frontier {
 			int[] buffer = new int[TEXTURE_SIZE * TEXTURE_SIZE * 4];
 			for (int i = 0; i < 4; i++) {
 				GL.ClearColor(1.0f, 0.0f, 1.0f, 0.0f);
-				GL.Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 				if (i == 0)
 					DrawBark();
 				else if (i == 1)
@@ -808,9 +808,9 @@ namespace Frontier {
 				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Nearest);
 				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Nearest);
 				//GL.CopyTexSubImage2D (GL_TEXTURE_2D, 0, TEXTURE_SIZE * i, 0, 0, 0, TEXTURE_SIZE, TEXTURE_SIZE);
-				GL.ReadPixels(0, 0, TEXTURE_SIZE, TEXTURE_SIZE, GL_RGBA, GL_int_BYTE, buffer);
+				GL.ReadPixels(0, 0, TEXTURE_SIZE, TEXTURE_SIZE, PixelFormat.Rgba, PixelType.Byte, buffer);
 				//CgShaderSelect (FSHADER_MASK_TRANSFER);
-				GL.TexSubImage2D(TextureTarget.Texture2D, 0, TEXTURE_SIZE * i, 0, TEXTURE_SIZE, TEXTURE_SIZE, GL_RGBA, GL_int_BYTE, buffer);
+				GL.TexSubImage2D(TextureTarget.Texture2D, 0, TEXTURE_SIZE * i, 0, TEXTURE_SIZE, TEXTURE_SIZE, PixelFormat.Rgba, PixelType.Byte, buffer);
 				//CgShaderSelect (FSHADER_NONE);
 			}
 			RenderCanvasEnd();
@@ -852,8 +852,8 @@ namespace Frontier {
 			mBranchLift = 1.0f + FWorld.NoiseFloat(mSeedCurrent++);
 			mFoliageSize = 1.0f;
 			mLeafSize = 0.125f;
-			mLeafColor = TerraformColorGenerate(SURFACE_COLOR_GRASS, moisture, mTemperature, mSeedCurrent++);
-			mBarkColor2 = TerraformColorGenerate(SURFACE_COLOR_DIRT, moisture, mTemperature, mSeedCurrent++);
+			mLeafColor = TerraformColorGenerate(SurfaceColor.Grass, moisture, mTemperature, mSeedCurrent++);
+			mBarkColor2 = TerraformColorGenerate(SurfaceColor.Dirt, moisture, mTemperature, mSeedCurrent++);
 			mBarkColor1 = mBarkColor2 * 0.5f;
 			//1 in 8 non-tropical trees has white bark
 			if (!mHasVines && ((FWorld.NoiseInt(mSeedCurrent++) % 8) == 0))
