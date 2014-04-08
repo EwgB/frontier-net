@@ -11,16 +11,19 @@ using System.Text;
 
 namespace Frontier {
 	struct Coord {
-		public int X { get; set; }
-		public int Y { get; set; }
+		private int x;
+		public int X { get { return x; } set { x = value; } }
+
+		private int y;
+		public int Y { get { return y; } set { y = value; } }
 
 		public static Coord North	= new Coord( 0, -1);
 		public static Coord South	= new Coord( 0,  1);
 		public static Coord East	= new Coord( 1,  0);
 		public static Coord West	= new Coord(-1,  0);
 
-		public Coord(int x, int y)	{ X = x;	Y = y; }
-		public Coord(Coord c)				{ X = c.X; Y = c.Y; }
+		public Coord(int x, int y)	{ this.x = x;	this.y = y; }
+		public Coord(Coord c)				{ this.x = c.X; this.y = c.Y; }
 
 		public static bool operator ==(Coord a, Coord b)	{ return  (a.X == b.X && a.Y == b.Y); }
 		public static bool operator !=(Coord a, Coord b)	{ return !(a.X == b.X && a.Y == b.Y); }

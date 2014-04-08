@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
+using CVars;
+
 namespace Frontier {
 	class Particles {
 		private static List<Emitter> elist;
@@ -20,7 +22,7 @@ namespace Frontier {
 			Vector3     v;
 			string      name;
 
-			name = CVarUtils.GetCVar<string>("current_particle");
+			name = CVars.GetCVar<string>("current_particle");
 			v = Avatar.Position;
 			ParticleLoad(name, p);
 			ParticleSave("test", p);
@@ -55,35 +57,35 @@ namespace Frontier {
 					return;
 				}
 			}
-			ConsoleLog("ParticleRetire: Effect #%d not found.", id);
+			Console.WriteLine("ParticleRetire: Effect #{0} not found.", id);
 		}
 
 		public static void ParticleInit() {
-			CVarUtils.CreateCVar<string>("particle.texture", "");
-			CVarUtils.CreateCVar("particle.acceleration", Vector3.Zero);
-			CVarUtils.CreateCVar("particle.blend", 0);
-			CVarUtils.CreateCVar("particle.emitter_lifespan", 0);
-			CVarUtils.CreateCVar("particle.emit_count", 0);
-			CVarUtils.CreateCVar("particle.emit_interval", 0);
-			CVarUtils.CreateCVar("particle.fade_in", 0);
-			CVarUtils.CreateCVar("particle.fade_out", 0);
-			CVarUtils.CreateCVar("particle.interpolate", 0);
-			CVarUtils.CreateCVar("particle.lifespan", 0);
-			CVarUtils.CreateCVar("particle.origin", Vector3.Zero);
-			CVarUtils.CreateCVar("particle.panel_type", 0);
-			CVarUtils.CreateCVar("particle.rotation", Vector3.Zero);
-			CVarUtils.CreateCVar("particle.size.min", Vector3.Zero);
-			CVarUtils.CreateCVar("particle.size.max", Vector3.Zero);
-			CVarUtils.CreateCVar("particle.speed.min", Vector3.Zero);
-			CVarUtils.CreateCVar("particle.speed.max", Vector3.Zero);
-			CVarUtils.CreateCVar("particle.spin", Vector3.Zero);
-			CVarUtils.CreateCVar("particle.volume.min", Vector3.Zero);
-			CVarUtils.CreateCVar("particle.volume.max", Vector3.Zero);
-			CVarUtils.CreateCVar<bool>("particle.wind", false);
-			CVarUtils.CreateCVar<bool>("particle.gravity", false);
-			CVarUtils.CreateCVar<bool>("particle.z_buffer", false);
+			CVars.CVars.CreateCVar("particle.texture", "");
+			CVars.CVars.CreateCVar("particle.acceleration", Vector3.Zero);
+			CVars.CVars.CreateCVar("particle.blend", 0);
+			CVars.CVars.CreateCVar("particle.emitter_lifespan", 0);
+			CVars.CVars.CreateCVar("particle.emit_count", 0);
+			CVars.CVars.CreateCVar("particle.emit_interval", 0);
+			CVars.CVars.CreateCVar("particle.fade_in", 0);
+			CVars.CVars.CreateCVar("particle.fade_out", 0);
+			CVars.CVars.CreateCVar("particle.interpolate", 0);
+			CVars.CVars.CreateCVar("particle.lifespan", 0);
+			CVars.CVars.CreateCVar("particle.origin", Vector3.Zero);
+			CVars.CVars.CreateCVar("particle.panel_type", 0);
+			CVars.CVars.CreateCVar("particle.rotation", Vector3.Zero);
+			CVars.CVars.CreateCVar("particle.size.min", Vector3.Zero);
+			CVars.CVars.CreateCVar("particle.size.max", Vector3.Zero);
+			CVars.CVars.CreateCVar("particle.speed.min", Vector3.Zero);
+			CVars.CVars.CreateCVar("particle.speed.max", Vector3.Zero);
+			CVars.CVars.CreateCVar("particle.spin", Vector3.Zero);
+			CVars.CVars.CreateCVar("particle.volume.min", Vector3.Zero);
+			CVars.CVars.CreateCVar("particle.volume.max", Vector3.Zero);
+			CVars.CVars.CreateCVar("particle.wind", false);
+			CVars.CVars.CreateCVar("particle.gravity", false);
+			CVars.CVars.CreateCVar("particle.z_buffer", false);
 
-			CVarUtils.CreateCVar<string>("current_particle", "");
+			CVars.CVars.CreateCVar("current_particle", "");
 		}
 
 		public static void ParticleUpdate() {
@@ -115,69 +117,69 @@ namespace Frontier {
 			List<string> sub_group = new List<string>();
 			sub_group.Add("particle");
 
-			CVarUtils.SetCVar<string>("particle.texture", p.Texture);
-			CVarUtils.SetCVar("particle.acceleration", p.Acceleration);
-			CVarUtils.SetCVar("particle.blend", p.Blend);
-			CVarUtils.SetCVar("particle.emitter_lifespan", p.EmitterLifespan);
-			CVarUtils.SetCVar("particle.emit_count", p.EmitCount);
-			CVarUtils.SetCVar("particle.emit_interval", p.EmitInterval);
-			CVarUtils.SetCVar("particle.fade_in", p.FadeIn);
-			CVarUtils.SetCVar("particle.fade_out", p.FadeOut);
-			CVarUtils.SetCVar("particle.interpolate", p.Interpolate);
-			CVarUtils.SetCVar("particle.lifespan", p.Lifespan);
-			CVarUtils.SetCVar("particle.origin", p.Origin);
-			CVarUtils.SetCVar("particle.panel_type", p.PanelType);
-			CVarUtils.SetCVar("particle.rotation", p.Rotation);
-			CVarUtils.SetCVar("particle.size.min", p.Size.pmin);
-			CVarUtils.SetCVar("particle.size.max", p.Size.pmax);
-			CVarUtils.SetCVar("particle.speed.min", p.Speed.pmin);
-			CVarUtils.SetCVar("particle.speed.max", p.Speed.pmax);
-			CVarUtils.SetCVar("particle.spin", p.Spin);
-			CVarUtils.SetCVar("particle.volume.min", p.Volume.pmin);
-			CVarUtils.SetCVar("particle.volume.max", p.Volume.pmax);
-			CVarUtils.SetCVar<bool>("particle.wind", p.Wind);
-			CVarUtils.SetCVar<bool>("particle.gravity", p.Gravity);
-			CVarUtils.SetCVar<bool>("particle.z_buffer", p.ZBuffer);
-			CVarUtils.Save(filename, sub_group);
+			CVars.CVars.SetCVar<string>("particle.texture", p.Texture);
+			CVars.CVars.SetCVar("particle.acceleration", p.Acceleration);
+			CVars.CVars.SetCVar("particle.blend", p.Blend);
+			CVars.CVars.SetCVar("particle.emitter_lifespan", p.EmitterLifespan);
+			CVars.CVars.SetCVar("particle.emit_count", p.EmitCount);
+			CVars.CVars.SetCVar("particle.emit_interval", p.EmitInterval);
+			CVars.CVars.SetCVar("particle.fade_in", p.FadeIn);
+			CVars.CVars.SetCVar("particle.fade_out", p.FadeOut);
+			CVars.CVars.SetCVar("particle.interpolate", p.Interpolate);
+			CVars.CVars.SetCVar("particle.lifespan", p.Lifespan);
+			CVars.CVars.SetCVar("particle.origin", p.Origin);
+			CVars.CVars.SetCVar("particle.panel_type", p.PanelType);
+			CVars.CVars.SetCVar("particle.rotation", p.Rotation);
+			CVars.CVars.SetCVar("particle.size.min", p.Size.pmin);
+			CVars.CVars.SetCVar("particle.size.max", p.Size.pmax);
+			CVars.CVars.SetCVar("particle.speed.min", p.Speed.pmin);
+			CVars.CVars.SetCVar("particle.speed.max", p.Speed.pmax);
+			CVars.CVars.SetCVar("particle.spin", p.Spin);
+			CVars.CVars.SetCVar("particle.volume.min", p.Volume.pmin);
+			CVars.CVars.SetCVar("particle.volume.max", p.Volume.pmax);
+			CVars.CVars.SetCVar<bool>("particle.wind", p.Wind);
+			CVars.CVars.SetCVar<bool>("particle.gravity", p.Gravity);
+			CVars.CVars.SetCVar<bool>("particle.z_buffer", p.ZBuffer);
+			CVars.CVars.Save(filename, sub_group);
 		}
 
 		public static void ParticleLoad(string filename, ParticleSet p) {
 			List<string> sub_group = new List<string>();
 			filename = "particles//" += filename + ".prt";
 			sub_group.Add("particle");
-			CVarUtils.Load(filename, sub_group);
-			p.Colors.clear();
-			p.Texture = CVarUtils.GetCVar<string>("particle.texture");
-			p.Acceleration = CVarUtils.GetCVar<Vector3>("particle.acceleration");
-			p.Blend = (PBlend) CVarUtils.GetCVar<int>("particle.blend");
-			p.EmitterLifespan = CVarUtils.GetCVar<int>("particle.emitter_lifespan");
-			p.EmitCount = CVarUtils.GetCVar<int>("particle.emit_count");
-			p.EmitInterval = CVarUtils.GetCVar<int>("particle.emit_interval");
-			p.FadeIn = CVarUtils.GetCVar<int>("particle.fade_in");
-			p.FadeOut = CVarUtils.GetCVar<int>("particle.fade_out");
-			p.Interpolate = CVarUtils.GetCVar<bool>("particle.interpolate");
-			p.Lifespan = CVarUtils.GetCVar<int>("particle.lifespan");
-			p.Origin = CVarUtils.GetCVar<Vector3>("particle.origin");
-			p.PanelType = (PType) CVarUtils.GetCVar<int>("particle.panel_type");
-			p.Rotation = CVarUtils.GetCVar<Vector3>("particle.rotation");
-			p.Size.pmin = CVarUtils.GetCVar<Vector3>("particle.size.min");
-			p.Size.pmax = CVarUtils.GetCVar<Vector3>("particle.size.max");
-			p.Speed.pmin = CVarUtils.GetCVar<Vector3>("particle.speed.min");
-			p.Speed.pmax = CVarUtils.GetCVar<Vector3>("particle.speed.max");
-			p.Spin = CVarUtils.GetCVar<Vector3>("particle.spin");
-			p.Volume.pmin = CVarUtils.GetCVar<Vector3>("particle.volume.min");
-			p.Volume.pmax = CVarUtils.GetCVar<Vector3>("particle.volume.max");
-			p.Wind = CVarUtils.GetCVar<bool>("particle.wind");
-			p.Gravity = CVarUtils.GetCVar<bool>("particle.gravity");
-			p.ZBuffer = CVarUtils.GetCVar<bool>("particle.z_buffer");
+			CVars.CVars.Load(filename, sub_group);
+			p.Colors.Clear();
+			p.Texture = CVars.CVars.GetCVar<string>("particle.texture");
+			p.Acceleration = CVars.CVars.GetCVar<Vector3>("particle.acceleration");
+			p.Blend = (PBlend) CVars.CVars.GetCVar<int>("particle.blend");
+			p.EmitterLifespan = CVars.CVars.GetCVar<int>("particle.emitter_lifespan");
+			p.EmitCount = CVars.CVars.GetCVar<int>("particle.emit_count");
+			p.EmitInterval = CVars.CVars.GetCVar<int>("particle.emit_interval");
+			p.FadeIn = CVars.CVars.GetCVar<int>("particle.fade_in");
+			p.FadeOut = CVars.CVars.GetCVar<int>("particle.fade_out");
+			p.Interpolate = CVars.CVars.GetCVar<bool>("particle.interpolate");
+			p.Lifespan = CVars.CVars.GetCVar<int>("particle.lifespan");
+			p.Origin = CVars.CVars.GetCVar<Vector3>("particle.origin");
+			p.PanelType = (PanelType) CVars.CVars.GetCVar<int>("particle.panel_type");
+			p.Rotation = CVars.CVars.GetCVar<Vector3>("particle.rotation");
+			p.Size.pmin = CVars.CVars.GetCVar<Vector3>("particle.size.min");
+			p.Size.pmax = CVars.CVars.GetCVar<Vector3>("particle.size.max");
+			p.Speed.pmin = CVars.CVars.GetCVar<Vector3>("particle.speed.min");
+			p.Speed.pmax = CVars.CVars.GetCVar<Vector3>("particle.speed.max");
+			p.Spin = CVars.CVars.GetCVar<Vector3>("particle.spin");
+			p.Volume.pmin = CVars.CVars.GetCVar<Vector3>("particle.volume.min");
+			p.Volume.pmax = CVars.CVars.GetCVar<Vector3>("particle.volume.max");
+			p.Wind = CVars.CVars.GetCVar<bool>("particle.wind");
+			p.Gravity = CVars.CVars.GetCVar<bool>("particle.gravity");
+			p.ZBuffer = CVars.CVars.GetCVar<bool>("particle.z_buffer");
 		}
 
 		public static bool ParticleCmd(List<string> args) {
 			if (args.Count == 0) {
-				ConsoleLog(CVarUtils.GetHelp("game").data());
+				Console.WriteLine(CVars.CVars.GetHelp("game"));
 				return true;
 			}
-			CVarUtils.SetCVar<string>("current_particle", args[0]);
+			CVars.CVars.SetCVar<string>("current_particle", args[0]);
 			place_emitter();
 			return true;
 		}

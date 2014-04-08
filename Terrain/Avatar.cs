@@ -326,7 +326,7 @@ namespace Frontier {
 			new_pos.Y = FMath.Clamp(new_pos.Y, 0, (REGION_SIZE * WORLD_GRID));
 			mPosition = new_pos;
 			AvatarCameraPosition = mPosition;
-			angle = AvatarCameraAngle = new Vector3(90, 0, 0;
+			angle = AvatarCameraAngle = new Vector3(90, 0, 0);
 			last_time = GameTime();
 			do_model();
 		}

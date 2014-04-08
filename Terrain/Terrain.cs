@@ -288,7 +288,7 @@ namespace Frontier {
 
 				//mPatchSteps = max (mPatchSteps, 1);//Avoid div by zero. Trust me, it's bad.
 				GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, TextureDesiredSize, TextureDesiredSize,
-					0, PixelFormat.Rgb, PixelType.Byte, null);
+					0, PixelFormat.Rgb, PixelType.Byte, System.IntPtr.Zero);
 			}
 
 			RenderCanvasBegin (mWalk.X * TerrainPatch, mWalk.X * TerrainPatch + TerrainPatch, mWalk.Y * TerrainPatch, mWalk.Y * TerrainPatch + TerrainPatch, mPatchSize);
@@ -683,7 +683,7 @@ namespace Frontier {
 						mStage++;
 					break;
 				case Stage.VBO:
-					if (mVBO.Ready())
+					if (mVBO.Ready)
 						mVBO.Clear();
 					mVBO.Create(BeginMode.Triangles, mIndexBuffer.Count, mVertexList.Count, mIndexBuffer, mVertexList, mNormalList, null, mUVList);
 					mStage++;

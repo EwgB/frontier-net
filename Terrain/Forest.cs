@@ -120,16 +120,20 @@ namespace Frontier {
 			mVBOList.Capacity = mMeshList.Count;
 			for (int i = 0; i < mMeshList.Count; i++) {
 				mVBOList[i].vbo.Clear();
-				mVBOList[i].bbox = mMeshList[i].mesh.bbox;
-				mVBOList[i].texture_id = mMeshList[i].textureID;
+
+				TreeVBO tree = mVBOList[i];
+				tree.bbox = mMeshList[i].mesh.bbox;
+				tree.texture_id = mMeshList[i].textureID;
+				mVBOList[i] = tree;
+
 				if (mMeshList[i].mesh.vertices.Count > 0)
-					mVBOList[i].vbo.Create(GL_TRIANGLES,
+					mVBOList[i].vbo.Create(BeginMode.Triangles,
 					mMeshList[i].mesh.TriangleCount * 3,
 					mMeshList[i].mesh.VertexCount,
-					mMeshList[i].mesh.indices[0],
-					mMeshList[i].mesh.vertices[0],
-					mMeshList[i].mesh.normals[0], null,
-					mMeshList[i].mesh.uvs[0]);
+					mMeshList[i].mesh.indices,
+					mMeshList[i].mesh.vertices,
+					mMeshList[i].mesh.normals, null,
+					mMeshList[i].mesh.uvs);
 			}
 
 			// Now purge the mesh list, so it can begin building again in the background when the time comes.

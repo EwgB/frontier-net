@@ -9,9 +9,16 @@ using OpenTK.Graphics;
 namespace Frontier {
 	class Tree {
 		#region Enums and structs
+		const int TREE_TRUNK_STYLES = 3;
 		enum TreeTrunkStyle { Normal, Jagged, Bent }
+
+		const int TREE_FOLIAGE_STYLES = 5;
 		enum TreeFoliageStyle { Umbrella, Bowl, Shield, Panel, Sag }
+
+		const int TREE_LIFT_STYLES = 3;
 		enum TreeLiftStyle { Straight, In, Out }
+
+		const int TREE_LEAF_STYLES = 2;
 		enum TreeLeafStyle { Fan, Scatter }
 
 		struct BranchAnchor {
@@ -202,7 +209,7 @@ namespace Frontier {
 					 *     \/   */
 					float level1   = fsize * -0.4f;
 					float level2   = fsize * -1.2f;
-					UVBox   uv_inner;
+					UVBox uv_inner = new UVBox();
 
 					uv_inner.Set(new Vector2(0.25f + 1.25f, 0.125f), new Vector2(0.5f - 0.125f, 1.0f - 0.125f));
 					// Center
@@ -425,33 +432,40 @@ namespace Frontier {
 			if (lod == LOD.Low) {
 				#region Just make a 2-panel facer
 				//Use the fourth frame of our texture
-				UVBox uv;
+				UVBox uv = new UVBox();
 				uv.Set(new Vector2(0.75f, 0.0f), new Vector2(1.0f, 1.0f));
 				float height = mCurrentHeight;
 				float width = mCurrentHeight / 2.0f;
+
 				//First panel
 				m.PushVertex(new Vector3(-width, -width, 0.0f), new Vector3(-width, -width, 0.0f), uv.Corner(0));
 				m.PushVertex(new Vector3(width, width, 0.0f), new Vector3(width, width, 0.0f), uv.Corner(1));
 				m.PushVertex(new Vector3(width, width, height), new Vector3(width, width, height), uv.Corner(2));
 				m.PushVertex(new Vector3(-width, -width, height), new Vector3(-width, -width, height), uv.Corner(3));
+
 				//Second Panel
 				m.PushVertex(new Vector3(-width, width, 0.0f), new Vector3(-width, width, 0.0f), uv.Corner(0));
 				m.PushVertex(new Vector3(width, -width, 0.0f), new Vector3(width, -width, 0.0f), uv.Corner(1));
 				m.PushVertex(new Vector3(width, -width, height), new Vector3(width, -width, height), uv.Corner(2));
 				m.PushVertex(new Vector3(-width, width, height), new Vector3(-width, width, height), uv.Corner(3));
+
 				for (int i = 0; i < (int) m.NormalCount; i++)
 					m.normals[i].Normalize();
+
 				m.PushQuad(0, 1, 2, 3);
 				m.PushQuad(4, 5, 6, 7);
 				#endregion
 			} else {
 				// Work out the circumference of the BASE of the tree
 				float circumference = mCurrentBaseRadius * mCurrentBaseRadius * (float) Math.PI;
+
 				// The texture will repeat ONCE horizontally around the tree. Set the vertical to repeat in the same distance.
 				mTextureTile = 1;	//(float)((int)circumference + 0.5f); 
 				int radialSteps = 3;
+
 				if (lod == LOD.High)
 					radialSteps = 7;
+
 				int radialEdge = radialSteps + 1;
 				int segmentCount = 0;
 
@@ -665,7 +679,7 @@ namespace Frontier {
 
 			GL.BindTexture(TextureTarget.Texture2D, t.id);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-			Color4 color = mLeafColor * 0.75f;
+			Color4 color = GLUtils.MultColor(mLeafColor, 0.75f);
 			GL.Color4(mLeafColor);
 
 			GL.Begin(BeginMode.Quads);
@@ -682,7 +696,10 @@ namespace Frontier {
 		private void DrawLeaves() {
 			if (mLeafStyle == TreeLeafStyle.Scatter) {
 				Color4 c = mBarkColor1;
-				c *= 0.5f;
+				c.R *= 0.5f;
+				c.G *= 0.5f;
+				c.B *= 0.5f;
+				c.A *= 0.5f;
 
 				GL.BindTexture(TextureTarget.Texture2D, 0);
 				GL.LineWidth(3.0f);
@@ -785,7 +802,7 @@ namespace Frontier {
 				GL.DeleteTextures(1, ref mTexture);
 			GL.GenTextures(1, out mTexture);
 			GL.BindTexture(TextureTarget.Texture2D, Texture);
-			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, TEXTURE_SIZE * 4, TEXTURE_SIZE, 0, PixelFormat.Rgba, PixelType.Byte, null);
+			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, TEXTURE_SIZE * 4, TEXTURE_SIZE, 0, PixelFormat.Rgba, PixelType.Byte, IntPtr.Zero);
 
 			RenderCanvasBegin(0, TEXTURE_SIZE, 0, TEXTURE_SIZE, TEXTURE_SIZE);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Nearest);
@@ -846,7 +863,7 @@ namespace Frontier {
 			mLeafStyle = (TreeLeafStyle) (FWorld.NoiseInt(mSeedCurrent++) % TREE_LEAF_STYLES);
 			mEvergreen = mTemperature + (FWorld.NoiseInt(mSeedCurrent++) * 0.25f) < 0.5f;
 			mHasVines = mMoisture > 0.6f && mTemperature > 0.5f;
-			//Narrow trees can gorw on top of hills. (Big ones will stick out over cliffs, so we place them low.)
+			//Narrow trees can grow on top of hills. (Big ones will stick out over cliffs, so we place them low.)
 			GrowsHigh = (mDefaultBaseRadius <= 1.0f);
 			mBranchReach = 1.0f + FWorld.NoiseFloat(mSeedCurrent++) * 0.5f;
 			mBranchLift = 1.0f + FWorld.NoiseFloat(mSeedCurrent++);
@@ -854,10 +871,10 @@ namespace Frontier {
 			mLeafSize = 0.125f;
 			mLeafColor = TerraformColorGenerate(SurfaceColor.Grass, moisture, mTemperature, mSeedCurrent++);
 			mBarkColor2 = TerraformColorGenerate(SurfaceColor.Dirt, moisture, mTemperature, mSeedCurrent++);
-			mBarkColor1 = mBarkColor2 * 0.5f;
+			mBarkColor1 = new Color4(mBarkColor2.R * 0.5f, mBarkColor2.G * 0.5f, mBarkColor2.B * 0.5f, mBarkColor2.A * 0.5f);
 			//1 in 8 non-tropical trees has white bark
 			if (!mHasVines && ((FWorld.NoiseInt(mSeedCurrent++) % 8) == 0))
-				mBarkColor2 = Color4(1.0f);
+				mBarkColor2 = new Color4(1, 1, 1, 1);
 			//These foliage styles don't look right on evergreens.
 			if (mEvergreen && mFoliageStyle == TreeFoliageStyle.Bowl)
 				mFoliageStyle = TreeFoliageStyle.Umbrella;

@@ -182,8 +182,8 @@ namespace Frontier {
 			mGridPosition.X = x;
 			mGridPosition.Y = y;
 			mCurrentDistance = density;
-			mOrigin.x = x * GRASS_SIZE;
-			mOrigin.y = y * GRASS_SIZE;
+			mOrigin.X = x * GRASS_SIZE;
+			mOrigin.Y = y * GRASS_SIZE;
 			mStage = GrassStage.Begin;
 			mColor.Clear();
 			mVertices.Clear();
@@ -205,7 +205,7 @@ namespace Frontier {
 					break;
 				case GrassStage.Compile:
 					if (mVertices.Count != 0)
-						mVBO.Create (GL_QUADS, mIndices.Count, mVertices.Count, mIndices, mVertices, mNormals, mColor, mUVs);
+						mVBO.Create(BeginMode.Quads, mIndices.Count, mVertices.Count, mIndices, mVertices, mNormals, mColor, mUVs);
 					else
 						mVBO.Clear ();
 					mStage++;

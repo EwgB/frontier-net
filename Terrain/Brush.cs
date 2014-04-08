@@ -49,7 +49,7 @@ namespace Frontier {
 		private static void DoPrep() {
 			for (int i = 0; i < BRUSH_TYPES; i++) {
 				mBox[i].Set (i, 0, BRUSH_TYPES, 2);
-				mBox[i].lr.y *= 0.99f;
+				mBox[i].lr.Y *= 0.99f;
 			}
 			float angleStep = 360.0f / MAX_TUFTS;
 			for (int i = 0; i < MAX_TUFTS; i++) {
@@ -80,7 +80,7 @@ namespace Frontier {
 			int world_x = mOrigin.X + mWalk.X;
 			int world_y = mOrigin.Y + mWalk.Y;
 
-			if (CacheSurface(world_x, world_y) == SURFACE_GRASS_EDGE) {
+			if (CacheSurface(world_x, world_y) == SurfaceType.GrassEdge) {
 				Region r = FWorld.RegionFromPosition(world_x, world_y);
 				int index = world_x + world_y * BRUSH_SIZE;
 				int thisTuftIndex	= index % MAX_TUFTS;
@@ -93,7 +93,9 @@ namespace Frontier {
 				size.Y = Math.Max (size.X, size.Y);		// Don't let bushes get wider than they are tall
 				
 				Color4 color = CacheSurfaceColor (world_x, world_y);
-				color *= 0.75f;
+				color.R *= 0.75f;
+				color.G *= 0.75f;
+				color.B *= 0.75f;
 				color.A = 1;
 
 				//Now we construct our grass panels

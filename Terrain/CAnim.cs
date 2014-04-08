@@ -204,7 +204,7 @@ namespace Frontier {
 			//BoneId          current_id;
 			//AnimJoint       joint;
 
-			buffer = FileLoad((char*) path.c_str(), &size);
+			buffer = FileLoad(path, size);
 			if (!buffer) {
 				//ConsoleLog("LoadBvh: Can't find %s", (char*) path.c_str());
 				SetDefaultAnimation();

@@ -218,7 +218,7 @@ namespace Frontier {
 			return val;
 		}
 
-		// This takes the given properties and generates a Math.Single unit of elevation data, according to the local region rules.
+		// This takes the given properties and generates a single unit of elevation data, according to the local region rules.
 		// Water is the water level.  Detail is the height of the rolling hills. Bias is a direct height added on to these.
 		public static float DoHeight(Region r, Vector2 offset, float water, float detail, float bias) {
 			// Modify the detail values before they are applied

@@ -13,61 +13,86 @@ using OpenTK.Graphics.OpenGL;
 namespace Frontier {
 	#region Structs
 	struct BWeight {
-		public int Index { get; set; }
-		public float Weight { get; set; }
+		private int index;
+		public int Index { get { return index; } set { index = value; } }
 
-		public BWeight(int index, float weight) { Index = index;	weight = Weight; }
+		private float weight;
+		public float Weight { get { return weight; } set { weight = value; } }
+
+		public BWeight(int index, float weight) { this.index = index;	this.weight = weight; }
 	}
 
 	struct PWeight {
-		public BoneId Bone { get; set; }
-		public float Weight { get; set; }
+		private BoneId bone;
+		public BoneId Bone { get { return bone; } set { bone = value; } }
 
-		public PWeight(BoneId bone, float weight) { Bone = bone;	weight = Weight; }
+		private float weight;
+		public float Weight { get { return weight; } set { weight = value; } }
+
+		public PWeight(BoneId bone, float weight) { this.bone = bone;	this.weight = weight; }
 	}
 
 	struct Bone {
-		public BoneId Id { get; set; }
-		public BoneId IdParent { get; set; }
+		private BoneId id;
+		public BoneId Id { get { return id; } set { id = value; } }
 
-		public Vector3 Origin { get; set; }
-		public Vector3 Position { get; set; }
-		public Vector3 Rotation { get; set; }
-
-		public Color4 Color { get; set; }
-		public Matrix4 Matrix { get; set; }
+		private BoneId idParent;
+		public BoneId IdParent { get { return idParent; } set { idParent = value; } }
 		
-		public List<int> Children { get; set; }
-		public List<BWeight> VertexWeights { get; set; }
+		private Vector3 origin;
+		public Vector3 Origin { get { return origin; } set { origin = value; } }
+		
+		private Vector3 position;
+		public Vector3 Position { get { return position; } set { position = value; } }
+		
+		private Vector3 rotation;
+		public Vector3 Rotation { get { return rotation; } set { rotation = value; } }
+		
+		private Color4 color;
+		public Color4 Color { get { return color; } set { color = value; } }
+
+		private Matrix4 matrix;
+		public Matrix4 Matrix { get { return matrix; } set { matrix = value; } }
+
+		private List<int> children;
+		public List<int> Children { get { return children; } }
+
+		private List<BWeight> vertexWeights;
+		public List<BWeight> VertexWeights { get { return vertexWeights; } }
 
 		public Bone(BoneId id, BoneId idParent, Vector3 origin, Vector3 position, Vector3 rotation, Color4 color) {
-			Id = id;
-			IdParent = idParent;
-			Origin = origin;
-			Position = position;
-			Rotation = rotation;
-			Color = color;
-			Matrix = Matrix4.Identity;
+			this.id = id;
+			this.idParent = idParent;
+			this.origin = origin;
+			this.position = position;
+			this.rotation = rotation;
+			this.color = color;
 
-			Children = new List<int>();
-			VertexWeights = new List<BWeight>();
+			matrix = Matrix4.Identity;
+			children = new List<int>();
+			vertexWeights = new List<BWeight>();
 		}
 	}
 
 	struct BoneListElement {
-		public Vector3 Pos { get; set; }
-		public BoneId Id { get; set; }
-		public BoneId IdParent { get; set; }
+		private Vector3 pos;
+		public Vector3 Pos { get { return pos; } set { pos = value; } }
+
+		private BoneId id;
+		public BoneId Id { get { return id; } set { id = value; } }
+
+		private BoneId idParent;
+		public BoneId IdParent { get { return idParent; } set { idParent = value; } }		
 
 		public BoneListElement(Vector3 pos, BoneId id, BoneId idParent) {
-			Pos = pos;
-			Id = id;
-			IdParent = idParent;
+			this.pos = pos;
+			this.id = id;
+			this.idParent = idParent;
 		}
 		public BoneListElement(float x, float y, float z, BoneId id, BoneId idParent) {
-			Pos = new Vector3(x, y, z);
-			Id = id;
-			IdParent = idParent;
+			this.pos = new Vector3(x, y, z);
+			this.id = id;
+			this.idParent = idParent;
 		}
 	}
 	#endregion
@@ -229,7 +254,7 @@ namespace Frontier {
 			GL.Translate(mPosition);
 			CgVector3.UnitZdateMatrix();
 			mSkinRender.Render();
-			CgSetOffset(Vector3(0, 0, 0));
+			CgSetOffset(Vector3.Zero);
 			GL.PopMatrix();
 			CgVector3.UnitZdateMatrix();
 		}
@@ -358,14 +383,10 @@ namespace Frontier {
 
 		#region Private methods
 		private void RotatePoints(int id, Vector3 offset, Matrix4 m) {
-			Bone*       b;
-			int    i;
-			int    index;
-
-			b = &mBones[mBoneIndices[id]];
-			for (i = 0; i < b._vertex_weights.size(); i++) {
-				index = b._vertex_weights[i]._index;
-				mSkinRender._vertex[index] = Matrix4TransformPoint(m, mSkinRender._vertex[index] - offset) + offset;
+			Bone b = mBones[(int) mBoneIndices[id]];
+			for (int i = 0; i < b.VertexWeights.Count; i++) {
+				int index = b.VertexWeights[i].Index;
+				mSkinRender.vertices[index] = Matrix4TransformPoint(m, mSkinRender.vertices[index] - offset) + offset;
 				/*
 				from = mSkinRender.mVertices[Index] - offset;
 				to = Matrix4TransformPoint (m, from);
