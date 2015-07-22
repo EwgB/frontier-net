@@ -9,11 +9,8 @@ namespace CVars {
 
 	using System.Collections.Generic;
 
-	using System.Linq;
-	using System.Linq.Expressions;
-
 	class TrieNode {
-		public object NodeData { get; }
+		public object NodeData { get; set; }
 		public IList<TrieNode> Children { get; }
 		public TrieNodeType NodeType { get; }
 

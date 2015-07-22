@@ -112,19 +112,6 @@ class Trie
     CVARS_STREAM_TYPE GetStreamType() { return m_StreamType; }
     void SetStreamType( const CVARS_STREAM_TYPE& streamType ) { m_StreamType = streamType; }
 
-    // CVar
-    int*   m_pVerboseCVarNamePaddingWidth;
-
-    // To avoid memory leaks, CVars should be created using the memory holder
-    CVarUtils::MemoryHolder mem;
-
- private:
-    TrieNode* root;
-    std::vector< std::string > m_vAcceptedSubstrings;
-    std::vector< std::string > m_vNotAcceptedSubstrings;
-    std::vector< std::string > m_vCVarNames; // Keep a list of CVar names
-    bool m_bVerbose;
-    CVARS_STREAM_TYPE m_StreamType;
 };
 
 std::ostream &operator<<(std::ostream &stream, Trie &rTrie );
