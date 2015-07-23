@@ -8,10 +8,11 @@ namespace CVars {
 	//using CVar;
 
 	using System.Collections.Generic;
+	using System.Linq;
 
 	class TrieNode {
 		public object NodeData { get; set; }
-		public IList<TrieNode> Children { get; }
+		public List<TrieNode> Children { get; }
 		public TrieNodeType NodeType { get; }
 
 		private string LeafText { get; set; }
@@ -39,50 +40,39 @@ namespace CVars {
 		/// Go through this node and see if this char is a branch, if so, simply return
 		/// the corresponding child, otherwise create a node and return its child.
 		///</summary>
-		TrieNode TraverseInsert(char addchar) {
-			foreach (var child in Children) {
-				//found child
-				if ((child.NodeType == TrieNodeType.Node) && (child.NodeChar == addchar)) {
-					return child;
-				}
-			}
+		public TrieNode TraverseInsert(char addchar) {
+			var child = Children.FirstOrDefault(c => (c.NodeType == TrieNodeType.Node) && (c.NodeChar == addchar));
 
-			TrieNode newNode = new TrieNode(addchar);
-			Children.Add(newNode);
-			return newNode;
+			if (child != default(TrieNode)) {
+				return child;
+			} else {
+				var newNode = new TrieNode(addchar);
+				Children.Add(newNode);
+				return newNode;
+			}
 		}
 
 		// See if there is a child with this character, if so, return it,
 		// otherwise return null.
-		TrieNode TraverseFind(char addchar) {
-			foreach (var child in Children) {
-				//found child
-				if ((child.NodeType == TrieNodeType.Node) && (child.NodeChar == addchar)) {
-					return child;
-				}
-			}
-			return null;
+		public TrieNode TraverseFind(char addchar) {
+			return Children.FirstOrDefault(c => (c.NodeType == TrieNodeType.Node) && (c.NodeChar == addchar));
 		}
 
 		// Recursively traverses
-		void PrintToVector(IList<string> vec) {
+		public void PrintToVector(IList<string> vec) {
 			if (NodeType == TrieNodeType.Leaf) {
 				vec.Add(LeafText);
 			} else {
-				foreach (var child in Children) {
-					child.PrintToVector(vec);
-				}
+				Children.ForEach(c => c.PrintToVector(vec));
 			}
 		}
 
 		// Recursively traverses
-		void PrintNodeToVector(IList<TrieNode> vec) {
+		public void PrintNodeToVector(IList<TrieNode> vec) {
 			if (NodeType == TrieNodeType.Leaf) {
 				vec.Add(this);
 			} else {
-				foreach (var child in Children) {
-					child.PrintNodeToVector(vec);
-				}
+				Children.ForEach(c => c.PrintNodeToVector(vec));
 			}
 		}
 	}
