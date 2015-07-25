@@ -9,6 +9,7 @@ namespace CVars {
 	using System.IO;
 	using System.Linq;
 	using System.Text;
+	using CVarTypes;
 
 	// Trie data structure implementation.
 	class Trie {
@@ -34,17 +35,17 @@ namespace CVars {
 				Root = new TrieNode(TrieNodeType.Root);
 
 				string varName = "console.VerbosePaddingWidth";
-				CVar<int> CVar1 = new CVar<int>(varName, 30);
+				CVar<IntVar> CVar1 = new CVar<IntVar>(varName, 30);
 				VerboseCVarNamePaddingWidth = CVar1.VarData;
 				Insert(varName, CVar1);
 
 				varName = "console.CVarIndent";
-				CVar<int> CVar2 = new CVar<int>(varName, 0);
+				CVar<IntVar> CVar2 = new CVar<IntVar>(varName, 0);
 				VerboseCVarNamePaddingWidth = CVar2.VarData;
 				Insert(varName, CVar2);
 
 				varName = "console.CVarIndentIncr";
-				CVar<int> CVar3 = new CVar<int>(varName, 4);
+				CVar<IntVar> CVar3 = new CVar<IntVar>(varName, 4);
 				VerboseCVarNamePaddingWidth = CVar3.VarData;
 				Insert(varName, CVar3);
 			}
@@ -170,17 +171,17 @@ namespace CVars {
 			var sb = new StringBuilder();
 			List<TrieNode> nodes = CollectAllNodes(Root);
 			foreach (var node in nodes) {
-				string sVal = ((CVar<int>) node.NodeData).GetValueAsString();
+				string sVal = ((CVar<IntVar>) node.NodeData).GetValueAsString();
 
 				if (sVal.Any()) {
-					string cVarName = ((CVar<int>) node.NodeData).sVarName;
+					string cVarName = ((CVar<IntVar>) node.NodeData).VarName;
 					if (!IsNameAcceptable(cVarName)) {
 						if (Verbose) {
 							//Log("NOT saving %s (not in acceptable name list).\n", cVarName);
 						}
 						continue;
 					}
-					if (!((CVar<int>) node.NodeData).bSerialise) {
+					if (!((CVar<IntVar>) node.NodeData).Serialise) {
 						if (Verbose) {
 							//Log("NOT saving %s (set as not savable at construction time).\n", cVarName);
 						}
@@ -201,17 +202,17 @@ namespace CVars {
 
 			sb.AppendLine(CVarSpc() << "<cvars>");
 			foreach (var node in nodes) {
-				string sVal = ((CVar<int>) node.NodeData).GetValueAsString();
+				string sVal = ((CVar<IntVar>) node.NodeData).GetValueAsString();
 
 				if (sVal.Any()) {
-					string sCVarName = ((CVar<int>) node.NodeData).sVarName;
+					string sCVarName = ((CVar<IntVar>) node.NodeData).VarName;
 					if (!IsNameAcceptable(sCVarName)) {
 						if (Verbose) {
 							//Log("NOT saving %s (not in acceptable name list).\n", sCVarName);
 						}
 						continue;
 					}
-					if (!((CVar<int>) node.NodeData).bSerialise) {
+					if (!((CVar<IntVar>) node.NodeData).Serialise) {
 						if (Verbose) {
 							//Log("NOT saving %s (set as not savable at construction time).\n", sCVarName);
 						}

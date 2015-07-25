@@ -40,7 +40,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CVarTypes\IntVar.cs" />
+    <Compile Include="Interfaces\ICVarValue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\CVar.cs" />
     <Compile Include="src\Trie.cs" />
     <Compile Include="src\TrieNodeType.cs" />
   </ItemGroup>
