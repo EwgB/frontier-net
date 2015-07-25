@@ -8,29 +8,29 @@ namespace CVars {
 	using System.Collections.Generic;
 	using System.Linq;
 
-	class TrieNode<T> where T : class {
-		public T NodeData { get; set; }
-		public List<TrieNode<T>> Children { get; }
-		public TrieNodeType NodeType { get; }
+	internal class TrieNode<T> where T : class {
+		internal T NodeData { get; set; }
+		internal List<TrieNode<T>> Children { get; }
+		internal TrieNodeType NodeType { get; }
 
 		private string LeafText { get; set; }
 		private char NodeChar { get; set; }
 
-		public TrieNode() {
+		internal TrieNode() {
 			NodeData = null;
 			NodeType = TrieNodeType.Leaf;
 			Children = new List<TrieNode<T>>();
 		}
 
-		public TrieNode(TrieNodeType nodeType) : this() {
+		internal TrieNode(TrieNodeType nodeType) : this() {
 			NodeType = nodeType;
 		}
 
-		public TrieNode(string leafText) : this() {
+		internal TrieNode(string leafText) : this() {
 			LeafText = leafText;
 		}
 
-		public TrieNode(char nodeChar) : this() {
+		internal TrieNode(char nodeChar) : this() {
 			NodeType = TrieNodeType.Node;
 		}
 
@@ -38,7 +38,7 @@ namespace CVars {
 		/// Go through this node and see if this char is a branch, if so, simply return
 		/// the corresponding child, otherwise create a node and return its child.
 		///</summary>
-		public TrieNode<T> TraverseInsert(char addchar) {
+		internal TrieNode<T> TraverseInsert(char addchar) {
 			var child = Children.FirstOrDefault(c => (c.NodeType == TrieNodeType.Node) && (c.NodeChar == addchar));
 
 			if (child != default(TrieNode<T>)) {
@@ -52,12 +52,12 @@ namespace CVars {
 
 		// See if there is a child with this character, if so, return it,
 		// otherwise return null.
-		public TrieNode<T> TraverseFind(char addchar) {
+		internal TrieNode<T> TraverseFind(char addchar) {
 			return Children.FirstOrDefault(c => (c.NodeType == TrieNodeType.Node) && (c.NodeChar == addchar));
 		}
 
 		// Recursively traverses
-		public void PrintToVector(IList<string> vec) {
+		internal void PrintToVector(IList<string> vec) {
 			if (NodeType == TrieNodeType.Leaf) {
 				vec.Add(LeafText);
 			} else {
@@ -66,7 +66,7 @@ namespace CVars {
 		}
 
 		// Recursively traverses
-		public void PrintNodeToVector(IList<TrieNode<T>> vec) {
+		internal void PrintNodeToVector(IList<TrieNode<T>> vec) {
 			if (NodeType == TrieNodeType.Leaf) {
 				vec.Add(this);
 			} else {

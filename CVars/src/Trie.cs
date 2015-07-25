@@ -12,10 +12,10 @@ namespace CVars {
 	using CVarTypes;
 
 	// Trie data structure implementation.
-	class Trie {
+	internal class Trie {
 		private enum CVarsStreamType { Xml, Text }
 
-		public int VerboseCVarNamePaddingWidth { get; set; }
+		internal int VerboseCVarNamePaddingWidth { get; set; }
 
 		private TrieNode<CVar> Root { get; set; }
 		private List<string> AcceptedSubstrings { get; set; }
@@ -24,13 +24,13 @@ namespace CVars {
 		private bool Verbose { get; set; }
 		private CVarsStreamType StreamType { get; set; }
 
-		public Trie() {
+		internal Trie() {
 			Root = null;
 			Verbose = false;
 			StreamType = CVarsStreamType.Xml;
 		}
 
-		public void Init() {
+		internal void Init() {
 			if (null != Root) {
 				Root = new TrieNode<CVar>(TrieNodeType.Root);
 
@@ -51,7 +51,7 @@ namespace CVars {
 			}
 		}
 
-		void Insert(string s, object data) {
+		void Insert(string s, CVar data) {
 			if (Root == null) {
 				//Log.Error( "ERROR in Insert, root == NULL!!!!!\n" );
 				return;
@@ -70,7 +70,7 @@ namespace CVars {
 			traverseNode.Children.Add(newNode); //create leaf node at end of chain
 		}
 
-		public TrieNode<CVar> Find(string s) {
+		internal TrieNode<CVar> Find(string s) {
 			TrieNode<CVar> node = FindSubStr(s);
 			if (node != null && node.NodeType == TrieNodeType.Leaf) {
 				return node;
@@ -78,11 +78,11 @@ namespace CVars {
 			return null;
 		}
 
-		public object FindData(string s) {
+		internal object FindData(string s) {
 			return Find(s).NodeData;
 		}
 
-		public bool Exists(string s) {
+		internal bool Exists(string s) {
 			return Find(s) != null;
 		}
 
@@ -196,7 +196,7 @@ namespace CVars {
 			return sb.ToString();
 		}
 
-		public string TrieToXML() {
+		internal string TrieToXML() {
 			var sb = new StringBuilder();
 			List<TrieNode<CVar>> nodes = CollectAllNodes(Root);
 
@@ -265,7 +265,7 @@ namespace CVars {
 		}
 
 		// TODO: convert stream operator
-		public string operator_out() {
+		internal string operator_out() {
 			switch (StreamType) {
 				case CVarsStreamType.Xml:
 					return TrieToXML();

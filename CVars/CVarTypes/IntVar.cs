@@ -1,5 +1,5 @@
 ﻿namespace CVars.CVarTypes {
-	class IntVar : Interfaces.ICVarValue {
+	internal class IntVar : Interfaces.ICVarValue {
 		private int Value { get; set; }
 
 		public IntVar(int i) {

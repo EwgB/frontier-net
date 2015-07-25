@@ -11,8 +11,8 @@ namespace CVars {
 	delegate void SerialisationFunction<T>(StringWriter sw, T val);
 	delegate void DeserialisationFunction<T>(StringReader sr, T val);
 
-	class CVar<T> : CVar where T : ICVarValue {
-		public T VarData { get; set; }
+	internal class CVar<T> : CVar where T : ICVarValue {
+		internal T VarData { get; set; }
 
 		private SerialisationFunction<T> Serialisation;
 		private DeserialisationFunction<T> Deserialisation;
@@ -20,7 +20,7 @@ namespace CVars {
 		///<summary>
 		/// If serialise false, this CVar will not be taken into account when serialising (eg saving) the Trie
 		///</summary>
-		public CVar(string varName, T varValue, string help = "No help available", bool serialise = true,
+		internal CVar(string varName, T varValue, string help = "No help available", bool serialise = true,
 				SerialisationFunction<T> serialisation = null, DeserialisationFunction<T> deserialisation = null)
 				: base(varName, help, serialise) {
 			Serialisation = serialisation;
@@ -33,7 +33,7 @@ namespace CVars {
 		/// Call the original function that was installed at object creation time,
 		/// regardless of current object class type T.
 		///</summary>
-		public string GetValueAsString() {
+		internal override string GetValueAsString() {
 			if (Serialisation != null) {
 				using (var sw = new StringWriter()) {
 					Serialisation(sw, VarData);
@@ -47,7 +47,7 @@ namespace CVars {
 		// Convert string representation to value
 		// Call the original function that was installed at object creation time,
 		// regardless of current object class type T.
-		void SetValueFromString(string value) {
+		internal override void SetValueFromString(string value) {
 			if (Deserialisation != null) {
 				using (var sr = new StringReader(value)) {
 					Deserialisation(sr, VarData);
