@@ -5,14 +5,12 @@ $Id: TrieNode.cpp 162 2010-02-15 19:11:05Z gsibley $
 */
 
 namespace CVars {
-	//using CVar;
-
 	using System.Collections.Generic;
 	using System.Linq;
 
-	class TrieNode {
-		public object NodeData { get; set; }
-		public List<TrieNode> Children { get; }
+	class TrieNode<T> where T : class {
+		public T NodeData { get; set; }
+		public List<TrieNode<T>> Children { get; }
 		public TrieNodeType NodeType { get; }
 
 		private string LeafText { get; set; }
@@ -21,7 +19,7 @@ namespace CVars {
 		public TrieNode() {
 			NodeData = null;
 			NodeType = TrieNodeType.Leaf;
-			Children = new List<TrieNode>();
+			Children = new List<TrieNode<T>>();
 		}
 
 		public TrieNode(TrieNodeType nodeType) : this() {
@@ -40,13 +38,13 @@ namespace CVars {
 		/// Go through this node and see if this char is a branch, if so, simply return
 		/// the corresponding child, otherwise create a node and return its child.
 		///</summary>
-		public TrieNode TraverseInsert(char addchar) {
+		public TrieNode<T> TraverseInsert(char addchar) {
 			var child = Children.FirstOrDefault(c => (c.NodeType == TrieNodeType.Node) && (c.NodeChar == addchar));
 
-			if (child != default(TrieNode)) {
+			if (child != default(TrieNode<T>)) {
 				return child;
 			} else {
-				var newNode = new TrieNode(addchar);
+				var newNode = new TrieNode<T>(addchar);
 				Children.Add(newNode);
 				return newNode;
 			}
@@ -54,7 +52,7 @@ namespace CVars {
 
 		// See if there is a child with this character, if so, return it,
 		// otherwise return null.
-		public TrieNode TraverseFind(char addchar) {
+		public TrieNode<T> TraverseFind(char addchar) {
 			return Children.FirstOrDefault(c => (c.NodeType == TrieNodeType.Node) && (c.NodeChar == addchar));
 		}
 
@@ -68,7 +66,7 @@ namespace CVars {
 		}
 
 		// Recursively traverses
-		public void PrintNodeToVector(IList<TrieNode> vec) {
+		public void PrintNodeToVector(IList<TrieNode<T>> vec) {
 			if (NodeType == TrieNodeType.Leaf) {
 				vec.Add(this);
 			} else {

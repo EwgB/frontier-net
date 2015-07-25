@@ -17,7 +17,7 @@ namespace CVars {
 
 		public int VerboseCVarNamePaddingWidth { get; set; }
 
-		private TrieNode Root { get; set; }
+		private TrieNode<CVar> Root { get; set; }
 		private List<string> AcceptedSubstrings { get; set; }
 		private List<string> NotAcceptedSubstrings { get; set; }
 		private List<string> CVarNames { get; set; } // Keep a list of CVar names
@@ -32,7 +32,7 @@ namespace CVars {
 
 		public void Init() {
 			if (null != Root) {
-				Root = new TrieNode(TrieNodeType.Root);
+				Root = new TrieNode<CVar>(TrieNodeType.Root);
 
 				string varName = "console.VerbosePaddingWidth";
 				CVar<IntVar> CVar1 = new CVar<IntVar>(varName, 30);
@@ -59,19 +59,19 @@ namespace CVars {
 
 			CVarNames.Add(s);
 
-			TrieNode traverseNode = Root;
+			TrieNode<CVar> traverseNode = Root;
 			foreach (var c in s) {
 				traverseNode = traverseNode.TraverseInsert(c);
 			}
 
 			//add leaf node
-			TrieNode newNode = new TrieNode(s);
+			TrieNode<CVar> newNode = new TrieNode<CVar>(s);
 			newNode.NodeData = data;
 			traverseNode.Children.Add(newNode); //create leaf node at end of chain
 		}
 
-		public TrieNode Find(string s) {
-			TrieNode node = FindSubStr(s);
+		public TrieNode<CVar> Find(string s) {
+			TrieNode<CVar> node = FindSubStr(s);
 			if (node != null && node.NodeType == TrieNodeType.Leaf) {
 				return node;
 			}
@@ -93,7 +93,7 @@ namespace CVars {
 
 		// Finds s in the tree and returns the node (may not be a leaf), returns null
 		// otherwise.
-		TrieNode FindSubStr(string s) {
+		TrieNode<CVar> FindSubStr(string s) {
 			if (Root == null) {
 				//Log.Error("ERROR in FindSubStr, root == NULL!!!!!\n");
 				return null;
@@ -102,7 +102,7 @@ namespace CVars {
 			if (s.Length == 0)
 				return Root;
 
-			TrieNode traverseNode = Root;
+			TrieNode<CVar> traverseNode = Root;
 
 			foreach (var c in s) {
 				traverseNode = traverseNode.TraverseFind(c);
@@ -154,22 +154,22 @@ namespace CVars {
 		}
 
 		// Does an in order traversal starting at node and printing all leaves to a list
-		List<string> CollectAllNames(TrieNode node) {
+		List<string> CollectAllNames(TrieNode<CVar> node) {
 			var res = new List<string>();
 			node.PrintToVector(res);
 			return res;
 		}
 
 		// Does an in order traversal starting at node and printing all leaves to a list
-		List<TrieNode> CollectAllNodes(TrieNode node) {
-			var res = new List<TrieNode>();
+		List<TrieNode<CVar>> CollectAllNodes(TrieNode<CVar> node) {
+			var res = new List<TrieNode<CVar>>();
 			node.PrintNodeToVector(res);
 			return res;
 		}
 
 		public override string ToString() {
 			var sb = new StringBuilder();
-			List<TrieNode> nodes = CollectAllNodes(Root);
+			List<TrieNode<CVar>> nodes = CollectAllNodes(Root);
 			foreach (var node in nodes) {
 				string sVal = ((CVar<IntVar>) node.NodeData).GetValueAsString();
 
@@ -198,7 +198,7 @@ namespace CVars {
 
 		public string TrieToXML() {
 			var sb = new StringBuilder();
-			List<TrieNode> nodes = CollectAllNodes(Root);
+			List<TrieNode<CVar>> nodes = CollectAllNodes(Root);
 
 			sb.AppendLine(CVarSpc() << "<cvars>");
 			foreach (var node in nodes) {

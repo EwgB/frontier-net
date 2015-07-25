@@ -11,12 +11,8 @@ namespace CVars {
 	delegate void SerialisationFunction<T>(StringWriter sw, T val);
 	delegate void DeserialisationFunction<T>(StringReader sr, T val);
 
-	class CVar<T> where T : ICVarValue {
-		public string VarName { get; set; }
+	class CVar<T> : CVar where T : ICVarValue {
 		public T VarData { get; set; }
-		public bool Serialise { get; set; }
-
-		private string Help { get; set; }
 
 		private SerialisationFunction<T> Serialisation;
 		private DeserialisationFunction<T> Deserialisation;
@@ -25,14 +21,11 @@ namespace CVars {
 		/// If serialise false, this CVar will not be taken into account when serialising (eg saving) the Trie
 		///</summary>
 		public CVar(string varName, T varValue, string help = "No help available", bool serialise = true,
-			SerialisationFunction<T> serialisation = null, DeserialisationFunction<T> deserialisation = null) {
+				SerialisationFunction<T> serialisation = null, DeserialisationFunction<T> deserialisation = null)
+				: base(varName, help, serialise) {
 			Serialisation = serialisation;
 			Deserialisation = deserialisation;
-
 			VarData = varValue;
-			VarName = varName;
-			Serialise = serialise;
-			Help = help;
 		}
 
 		///<summary>
