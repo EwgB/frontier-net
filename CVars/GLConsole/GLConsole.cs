@@ -16,21 +16,6 @@ namespace CVars.GLConsole {
 #define GLCONSOLE_SCRIPT_FILE "default.script"
 #define GLCONSOLE_INITIAL_SCRIPT_FILE "initial.script"
 
-////////////////////////////////////////////////////////////////////////////////
-///  A line of text contained in the console can be either inputted commands or
-//  log text from the application
-class ConsoleLine
-{
-    public:
-        ConsoleLine(std::string t, LineProperty p = LineProperty.Log, bool display = true ){
-            m_sText = t;
-            m_nOptions = p;
-            m_bDisplay = display;
-        }
-        std::string m_sText;        //actual text
-        LineProperty m_nOptions;    //see LineProperty
-        bool m_bDisplay;            // display on the console screen?
-};
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -65,14 +50,14 @@ inline void SetConsole( GLConsole* pFirstConsole )
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Return whether first element is greater than the second.
-inline bool StringIndexPairGreater( std::pair<std::string,int> e1, std::pair<std::string,int> e2 )
+inline bool StringIndexPairGreater( pair<string,int> e1, pair<string,int> e2 )
 {
     return e1.first < e2.first;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Utility function.
-inline std::string FindLevel( std::string sString, int iMinRecurLevel )
+inline string FindLevel( string sString, int iMinRecurLevel )
 {
     int level = 0;
     int index = sString.length();
@@ -89,7 +74,7 @@ inline std::string FindLevel( std::string sString, int iMinRecurLevel )
 
 ////////////////////////////////////////////////////////////////////////////////
 // remove all spaces from the front and back...
-inline std::string& RemoveSpaces( std::string &str )
+inline string& RemoveSpaces( string &str )
 {
     // remove them off the front
     int idx = str.find_first_not_of( ' ' );
@@ -172,23 +157,23 @@ class GLConsole
         /// clears all of the console's history.
         void HistoryClear();
 
-        bool HistorySave( std::string sFileName = "" );
-        bool HistoryLoad( std::string sFileName = "" );
+        bool HistorySave( string sFileName = "" );
+        bool HistoryLoad( string sFileName = "" );
 
-        bool SettingsSave(std::string sFileName = "");
-        bool SettingsLoad(std::string sFileName = "");
+        bool SettingsSave(string sFileName = "");
+        bool SettingsLoad(string sFileName = "");
 
         //script interface
         void ScriptRecordStart();
         void ScriptRecordStop();
         void ScriptRecordPause();
         void ScriptShow();
-        bool ScriptRun( std::string sFileName = "" );
-        bool ScriptSave( std::string sFileName = "" );
-        bool ScriptLoad( std::string sFileName = "" );
+        bool ScriptRun( string sFileName = "" );
+        bool ScriptSave( string sFileName = "" );
+        bool ScriptLoad( string sFileName = "" );
 
         //help
-        bool Help(std::vector<std::string> *vArgs);
+        bool Help(vector<string> *vArgs);
 
         GLFont * GetFont() const { return m_pGLFont; }
 
@@ -222,10 +207,10 @@ class GLConsole
         int&   m_nConsoleVerticalMargin;
         int&   m_nConsoleMaxLines;
         float& m_fOverlayPercent;
-        std::string& m_sHistoryFileName;
-        std::string& m_sScriptFileName;
-        std::string& m_sSettingsFileName;
-        std::string& m_sInitialScriptFileName;
+        string& m_sHistoryFileName;
+        string& m_sScriptFileName;
+        string& m_sSettingsFileName;
+        string& m_sInitialScriptFileName;
 
     protected:
         void _CheckInit();
@@ -235,13 +220,13 @@ class GLConsole
         void _RenderText();
         void _TabComplete();
         bool _ProcessCurrentCommand( bool bExecute = true );
-        bool _ExecuteFunction( CVarUtils::CVar<ConsoleFunc> * cvar, bool bExecute );
+        bool _ExecuteFunction( CVar<ConsoleFunc> * cvar, bool bExecute );
         bool _IsCursorOn();
         bool _IsConsoleFunc( TrieNode *node );
-        int  _FindRecursionLevel( std::string sCommand );
-        bool _LoadExecuteHistory( std::string sFileName = "", bool bExecute=false );
+        int  _FindRecursionLevel( string sCommand );
+        bool _LoadExecuteHistory( string sFileName = "", bool bExecute=false );
 
-        std::string _GetHistory();
+        string _GetHistory();
 
     protected:
         bool          m_bExecutingHistory; //Are we executing a script or not.
@@ -262,17 +247,17 @@ class GLConsole
         GLFont*       m_pGLFont;
 
         // Text colors
-        CVarUtils::Color&      m_logColor;
-        CVarUtils::Color&      m_commandColor;
-        CVarUtils::Color&      m_functionColor;
-        CVarUtils::Color&      m_errorColor;
-        CVarUtils::Color&      m_helpColor;
+        Color&      m_logColor;
+        Color&      m_commandColor;
+        Color&      m_functionColor;
+        Color&      m_errorColor;
+        Color&      m_helpColor;
 
         //CVar<GLColor> m_consoleColor;
-        CVarUtils::Color&      m_consoleColor;
+        Color&      m_consoleColor;
 
         //history variables
-        std::string   m_sOldCommand;
+        string   m_sOldCommand;
         char          m_cLastChar;
         unsigned int  m_nSuggestionNum;
 
@@ -284,11 +269,11 @@ class GLConsole
             int height;
         } m_Viewport;
 
-        //std::string m_sMaxPrefix; // max prefix
-        std::string m_sCurrentCommandBeg;      //current command being typed
-        std::string m_sCurrentCommandEnd;      //current command being typed
-        std::deque<ConsoleLine> m_consoleText; // all the console text
-        std::deque<ConsoleLine> m_ScriptText; // all the console text
+        //string m_sMaxPrefix; // max prefix
+        string m_sCurrentCommandBeg;      //current command being typed
+        string m_sCurrentCommandEnd;      //current command being typed
+        deque<ConsoleLine> m_consoleText; // all the console text
+        deque<ConsoleLine> m_ScriptText; // all the console text
 };
 
 
@@ -323,24 +308,24 @@ class GLConsole
  */
 inline GLConsole::GLConsole() :
     // Init our member cvars  (can't init the names in the class decleration)
-    m_fConsoleBlinkRate( CVarUtils::CreateCVar<float>(    "console.BlinkRate", 4.0 ) ), // cursor blinks per sec
-    m_fConsoleAnimTime( CVarUtils::CreateCVar<float>(     "console.AnimTime", 0.1 ) ),     // time the console animates
-    m_nConsoleMaxHistory( CVarUtils::CreateCVar<int>(     "console.history.MaxHistory", 100 ) ), // max lines ofconsole history
-    m_nConsoleLineSpacing( CVarUtils::CreateCVar<int>(    "console.LineSpacing", 2 ) ), // pixels between lines
-    m_nConsoleLeftMargin( CVarUtils::CreateCVar<int>(     "console.LeftMargin", 5 ) ),   // left margin in pixels
-    m_nConsoleVerticalMargin( CVarUtils::CreateCVar<int>( "console.VertMargin", 8 ) ),
-    m_nConsoleMaxLines( CVarUtils::CreateCVar<int>(       "console.MaxLines", 200 ) ),
-    m_fOverlayPercent( CVarUtils::CreateCVar<float>(      "console.OverlayPercent", 0.75 ) ),
-    m_sHistoryFileName( CVarUtils::CreateCVar<> (         "console.history.HistoryFileName", std::string( GLCONSOLE_HISTORY_FILE ) ) ),
-    m_sScriptFileName( CVarUtils::CreateCVar<> (          "script.ScriptFileName", std::string( GLCONSOLE_SCRIPT_FILE ) ) ),
-    m_sSettingsFileName( CVarUtils::CreateCVar<> (        "console.settings.SettingsFileName", std::string( GLCONSOLE_SETTINGS_FILE ) ) ),
-    m_sInitialScriptFileName( CVarUtils::CreateCVar<> (   "console.InitialScriptFileName", std::string( GLCONSOLE_INITIAL_SCRIPT_FILE ) ) ),
-    m_logColor( CVarUtils::CreateCVar<CVarUtils::Color>(           "console.colors.LogColor", CVarUtils::Color( 255, 255, 64 ) ) ),
-    m_commandColor( CVarUtils::CreateCVar<CVarUtils::Color>(       "console.colors.CommandColor", CVarUtils::Color( 255, 255, 255 ) ) ),
-    m_functionColor( CVarUtils::CreateCVar<CVarUtils::Color>(      "console.colors.FunctionColor", CVarUtils::Color( 64, 255, 64 ) ) ),
-    m_errorColor( CVarUtils::CreateCVar<CVarUtils::Color>(         "console.colors.ErrorColor", CVarUtils::Color( 255, 128, 64 ) ) ),
-    m_helpColor( CVarUtils::CreateCVar<CVarUtils::Color>(          "console.colors.HelpColor", CVarUtils::Color( 110, 130, 200 ) ) ),
-    m_consoleColor( CVarUtils::CreateCVar<CVarUtils::Color>(       "console.colors.ConsoleColor", CVarUtils::Color( 25, 60, 130, 120 ) ) )
+    m_fConsoleBlinkRate( CreateCVar<float>(    "console.BlinkRate", 4.0 ) ), // cursor blinks per sec
+    m_fConsoleAnimTime( CreateCVar<float>(     "console.AnimTime", 0.1 ) ),     // time the console animates
+    m_nConsoleMaxHistory( CreateCVar<int>(     "console.history.MaxHistory", 100 ) ), // max lines ofconsole history
+    m_nConsoleLineSpacing( CreateCVar<int>(    "console.LineSpacing", 2 ) ), // pixels between lines
+    m_nConsoleLeftMargin( CreateCVar<int>(     "console.LeftMargin", 5 ) ),   // left margin in pixels
+    m_nConsoleVerticalMargin( CreateCVar<int>( "console.VertMargin", 8 ) ),
+    m_nConsoleMaxLines( CreateCVar<int>(       "console.MaxLines", 200 ) ),
+    m_fOverlayPercent( CreateCVar<float>(      "console.OverlayPercent", 0.75 ) ),
+    m_sHistoryFileName( CreateCVar<> (         "console.history.HistoryFileName", string( GLCONSOLE_HISTORY_FILE ) ) ),
+    m_sScriptFileName( CreateCVar<> (          "script.ScriptFileName", string( GLCONSOLE_SCRIPT_FILE ) ) ),
+    m_sSettingsFileName( CreateCVar<> (        "console.settings.SettingsFileName", string( GLCONSOLE_SETTINGS_FILE ) ) ),
+    m_sInitialScriptFileName( CreateCVar<> (   "console.InitialScriptFileName", string( GLCONSOLE_INITIAL_SCRIPT_FILE ) ) ),
+    m_logColor( CreateCVar<Color>(           "console.colors.LogColor", Color( 255, 255, 64 ) ) ),
+    m_commandColor( CreateCVar<Color>(       "console.colors.CommandColor", Color( 255, 255, 255 ) ) ),
+    m_functionColor( CreateCVar<Color>(      "console.colors.FunctionColor", Color( 64, 255, 64 ) ) ),
+    m_errorColor( CreateCVar<Color>(         "console.colors.ErrorColor", Color( 255, 128, 64 ) ) ),
+    m_helpColor( CreateCVar<Color>(          "console.colors.HelpColor", Color( 110, 130, 200 ) ) ),
+    m_consoleColor( CreateCVar<Color>(       "console.colors.ConsoleColor", Color( 25, 60, 130, 120 ) ) )
 {
 
     SetConsole( this );
@@ -387,28 +372,28 @@ inline void GLConsole::Init()
     glGetIntegerv( GL_VIEWPORT, &m_Viewport.x );
 
     // add basic functions to the console
-    CVarUtils::CreateCVar( "console.version", ConsoleVersion, "The current version of GLConsole" );
-    CVarUtils::CreateCVar( "help", ConsoleHelp, "Gives help information about the console or more specifically about a CVar." );
-    CVarUtils::CreateCVar( "find", ConsoleFind, "find 'name' will return the list of CVars containing 'name' as a substring." );
-    CVarUtils::CreateCVar( "exit", ConsoleExit, "Close the application" );
-    CVarUtils::CreateCVar( "quit", ConsoleExit, "Close the application" );
-    CVarUtils::CreateCVar( "save", ConsoleSave, "Save the CVars to a file" );
-    CVarUtils::CreateCVar( "load", ConsoleLoad, "Load CVars from a file" );
+    CreateCVar( "console.version", ConsoleVersion, "The current version of GLConsole" );
+    CreateCVar( "help", ConsoleHelp, "Gives help information about the console or more specifically about a CVar." );
+    CreateCVar( "find", ConsoleFind, "find 'name' will return the list of CVars containing 'name' as a substring." );
+    CreateCVar( "exit", ConsoleExit, "Close the application" );
+    CreateCVar( "quit", ConsoleExit, "Close the application" );
+    CreateCVar( "save", ConsoleSave, "Save the CVars to a file" );
+    CreateCVar( "load", ConsoleLoad, "Load CVars from a file" );
 
-    CVarUtils::CreateCVar( "console.history.load", ConsoleHistoryLoad, "Load console history from a file" );
-    CVarUtils::CreateCVar( "console.history.save", ConsoleHistorySave, "Save the console history to a file" );
-    CVarUtils::CreateCVar( "console.history.clear", ConsoleHistoryClear, "Clear the current console history" );
+    CreateCVar( "console.history.load", ConsoleHistoryLoad, "Load console history from a file" );
+    CreateCVar( "console.history.save", ConsoleHistorySave, "Save the console history to a file" );
+    CreateCVar( "console.history.clear", ConsoleHistoryClear, "Clear the current console history" );
 
-    CVarUtils::CreateCVar( "console.settings.load", ConsoleSettingsLoad, "Load console settings from a file" );
-    CVarUtils::CreateCVar( "console.settings.save", ConsoleSettingsSave, "Save the console settings to a file" );
+    CreateCVar( "console.settings.load", ConsoleSettingsLoad, "Load console settings from a file" );
+    CreateCVar( "console.settings.save", ConsoleSettingsSave, "Save the console settings to a file" );
 
-    CVarUtils::CreateCVar( "script.record.start", ConsoleScriptRecordStart );
-    CVarUtils::CreateCVar( "script.record.stop", ConsoleScriptRecordStop );
-    CVarUtils::CreateCVar( "script.record.pause", ConsoleScriptRecordPause );
-    CVarUtils::CreateCVar( "script.show", ConsoleScriptShow );
-    CVarUtils::CreateCVar( "script.run", ConsoleScriptRun );
-    CVarUtils::CreateCVar( "script.save", ConsoleScriptSave );
-    CVarUtils::CreateCVar( "script.load", ConsoleScriptLoad );
+    CreateCVar( "script.record.start", ConsoleScriptRecordStart );
+    CreateCVar( "script.record.stop", ConsoleScriptRecordStop );
+    CreateCVar( "script.record.pause", ConsoleScriptRecordPause );
+    CreateCVar( "script.show", ConsoleScriptShow );
+    CreateCVar( "script.run", ConsoleScriptRun );
+    CreateCVar( "script.save", ConsoleScriptSave );
+    CreateCVar( "script.load", ConsoleScriptLoad );
 
     //load the default settings file
     SettingsLoad();
@@ -417,7 +402,7 @@ inline void GLConsole::Init()
     HistoryLoad();
 
     //load the initial execute script
-    std::ifstream ifs( m_sInitialScriptFileName.c_str() );
+    ifstream ifs( m_sInitialScriptFileName.c_str() );
 
     if( ifs.is_open() ) {
         ifs.close();
@@ -425,8 +410,8 @@ inline void GLConsole::Init()
     }
     else
     {
-//        std::cout << "Info: Initial script file, " << m_sInitialScriptFileName << ", not found." << std::endl;
-        ifs.clear(std::ios::failbit);
+//        cout << "Info: Initial script file, " << m_sInitialScriptFileName << ", not found." << endl;
+        ifs.clear(ios::failbit);
     }
 }
 
@@ -618,7 +603,7 @@ inline void GLConsole::HistoryClear()
  * @param sFilename save history to this file.
  * @return successor failure
  */
-inline bool GLConsole::HistorySave( std::string sFileName )
+inline bool GLConsole::HistorySave( string sFileName )
 {
     ///@TODO check filenames for validity - no spaces or illegal characters.
 
@@ -633,7 +618,7 @@ inline bool GLConsole::HistorySave( std::string sFileName )
             }
         }
 
-        std::ofstream ofs( sFileName.c_str() );
+        ofstream ofs( sFileName.c_str() );
 
         if( !ofs.is_open() ) {
             PrintError( "Error: could not open \"%s\" for saving.", sFileName.c_str() );
@@ -723,7 +708,7 @@ inline void GLConsole::ScriptShow()
  * Run the current script or the one specified on disk
  * @TODO currently overwrites the script in memory. need to allow multiple scripts to be held and ran for recursion
  */
-inline bool GLConsole::ScriptRun( std::string sFileName )
+inline bool GLConsole::ScriptRun( string sFileName )
 {
     if(!sFileName.empty()){
         bool bsuccess = ScriptLoad(sFileName);
@@ -756,7 +741,7 @@ inline bool GLConsole::ScriptRun( std::string sFileName )
 /**
  * Save the current script to a file
  */
-inline bool GLConsole::ScriptSave( std::string sFileName )
+inline bool GLConsole::ScriptSave( string sFileName )
 {
     if( !m_bExecutingHistory ) {
         m_bExecutingHistory = true;
@@ -767,10 +752,10 @@ inline bool GLConsole::ScriptSave( std::string sFileName )
         }
 
         if( sFileName == "" ) {
-            sFileName = CVarUtils::GetCVar<std::string>( "script.ScriptFileName" );
+            sFileName = GetCVar<string>( "script.ScriptFileName" );
         }
 
-        std::ofstream ofs( sFileName.c_str() );
+        ofstream ofs( sFileName.c_str() );
 
         if( !ofs.is_open() ) {
             PrintError( "Error: could not open \"%s\" for saving.", sFileName.c_str() );
@@ -799,7 +784,7 @@ inline bool GLConsole::ScriptSave( std::string sFileName )
  * @param sFileName Load history from this file, else use default
  * @return sucess or failure
  */
-inline bool GLConsole::HistoryLoad( std::string sFileName )
+inline bool GLConsole::HistoryLoad( string sFileName )
 {
     if( sFileName == "" ) {
         if(m_sHistoryFileName != "")
@@ -811,14 +796,14 @@ inline bool GLConsole::HistoryLoad( std::string sFileName )
     }
 
     //test if file exists
-    std::ifstream ifs( sFileName.c_str() );
+    ifstream ifs( sFileName.c_str() );
 
     if( ifs.is_open() ) {
         ifs.close();
         return _LoadExecuteHistory( sFileName, false );
     }
     else {
-//        std::cout << "Info: History file, " << sFileName << ", not found." << std::endl;
+//        cout << "Info: History file, " << sFileName << ", not found." << endl;
         return false;
     }
 }
@@ -827,7 +812,7 @@ inline bool GLConsole::HistoryLoad( std::string sFileName )
 /**
  * Load a script from a file
  */
-inline bool GLConsole::ScriptLoad( std::string sFileName )
+inline bool GLConsole::ScriptLoad( string sFileName )
 {
     if( sFileName == "") {
         if(m_sScriptFileName != "") {
@@ -840,14 +825,14 @@ inline bool GLConsole::ScriptLoad( std::string sFileName )
     }
 
     //test if file exists
-    std::ifstream ifs( sFileName.c_str() );
+    ifstream ifs( sFileName.c_str() );
 
     if( ifs.is_open() ) {
         ifs.close();
         return _LoadExecuteHistory( sFileName, true );
     }
     else {
-//        std::cout << "Info: Script file, " << sFileName << ", not found." << std::endl;
+//        cout << "Info: Script file, " << sFileName << ", not found." << endl;
         return false;
     }
 }
@@ -856,17 +841,17 @@ inline bool GLConsole::ScriptLoad( std::string sFileName )
 /**
  * Load history from a file and execute it if desired
  */
-inline bool GLConsole::_LoadExecuteHistory( std::string sFileName, bool bExecute )
+inline bool GLConsole::_LoadExecuteHistory( string sFileName, bool bExecute )
 {
     if( sFileName == "" ) {
-        std::cerr << "_LoadExecuteHistory: No file specified. There is a bug in GLConsole. Please report it." << std::endl;
+        cerr << "_LoadExecuteHistory: No file specified. There is a bug in GLConsole. Please report it." << endl;
         return false;
     }
 
     if( !m_bExecutingHistory ) {
         m_bExecutingHistory = true;
 
-        std::ifstream ifs( sFileName.c_str() );
+        ifstream ifs( sFileName.c_str() );
 
         if( !ifs.is_open() ) {
             PrintError("Error: could not open \"%s\" for loading.", sFileName.c_str());
@@ -1004,7 +989,7 @@ inline void GLConsole::_RenderText()
         m_pGLFont->glPrintf( m_nConsoleLeftMargin, lineLoc - m_nScrollPixels,
                 "> " + m_sCurrentCommandBeg );
         int size = m_sCurrentCommandBeg.length();
-        std::string em = "";
+        string em = "";
         for(int i=0;i<size;i++) {
             em = em+" ";
         }
@@ -1026,8 +1011,8 @@ inline void GLConsole::_RenderText()
                     continue;
                 }
 
-                std::deque<ConsoleLine>::iterator it = m_consoleText.begin() + i - 1;
-                std::string fulltext = (*it).m_sText;
+                deque<ConsoleLine>::iterator it = m_consoleText.begin() + i - 1;
+                string fulltext = (*it).m_sText;
 
                 //set the appropriate color
                 switch((*it).m_nOptions)
@@ -1185,7 +1170,7 @@ inline void GLConsole::SpecialFunc( int key )
     int nGlutModifiers = glutGetModifiers();
 
     //   unsigned char ckey = key;
-    //   std::cerr << "sf: key: " << ckey << ", " << key << " mod: " << nGlutModifiers << std::endl;
+    //   cerr << "sf: key: " << ckey << ", " << key << " mod: " << nGlutModifiers << endl;
 
 
     switch(nGlutModifiers)
@@ -1267,7 +1252,7 @@ inline void GLConsole::KeyboardFunc( unsigned char key)
 
     int nGlutModifiers = glutGetModifiers();
     //   int ikey = key;
-    //   std::cerr << "kf: key: " << key << ", " << ikey << " mod: " << nGlutModifiers << std::endl;
+    //   cerr << "kf: key: " << key << ", " << ikey << " mod: " << nGlutModifiers << endl;
 
     switch(nGlutModifiers)
     {
@@ -1375,20 +1360,20 @@ inline void GLConsole::EnterLogLine(const char *line, const LineProperty prop, b
     }
 
     if( line != NULL ) {
-        m_consoleText.push_front( ConsoleLine(std::string(line), prop, display) );
+        m_consoleText.push_front( ConsoleLine(string(line), prop, display) );
 
         if( m_bSavingScript && prop != LineProperty.Error ) {
-            m_ScriptText.push_front( ConsoleLine(std::string(line), prop, display) );
+            m_ScriptText.push_front( ConsoleLine(string(line), prop, display) );
         }
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //retreives command in history, if m_nCommandNum is invalid then m_sCurrentCommand is returned
-inline std::string GLConsole::_GetHistory()
+inline string GLConsole::_GetHistory()
 {
     _CheckInit();
-    std::deque<ConsoleLine>::iterator it;
+    deque<ConsoleLine>::iterator it;
     int commandCount = 1;
 
     if( m_nCommandNum <= 0 ) {
@@ -1420,7 +1405,7 @@ inline void GLConsole::HistoryBack()
         m_sOldCommand = m_sCurrentCommandBeg+m_sCurrentCommandEnd;
     }
     m_nCommandNum++;
-    std::string temp(m_sCurrentCommandBeg+m_sCurrentCommandEnd);
+    string temp(m_sCurrentCommandBeg+m_sCurrentCommandEnd);
     m_sCurrentCommandBeg = _GetHistory();
     m_sCurrentCommandEnd = "";
 }
@@ -1446,7 +1431,7 @@ inline void GLConsole::HistoryForward()
 inline bool GLConsole::_IsConsoleFunc( TrieNode *node )
 {
     if( typeid( ConsoleFunc ).name()
-            == ((CVarUtils::CVar<int>*)node->m_pNodeData)->type() ) {
+            == ((CVar<int>*)node->m_pNodeData)->type() ) {
         return true;
     }
 
@@ -1454,7 +1439,7 @@ inline bool GLConsole::_IsConsoleFunc( TrieNode *node )
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-inline int GLConsole::_FindRecursionLevel( std::string sCommand )
+inline int GLConsole::_FindRecursionLevel( string sCommand )
 {
     int level = 0;
     for( unsigned int ii = 0; ii < sCommand.length(); ii++ ) {
@@ -1471,23 +1456,23 @@ inline int GLConsole::_FindRecursionLevel( std::string sCommand )
 ////////////////////////////////////////////////////////////////////////////////
 void GLConsole::PrintAllCVars()
 {
-    Trie& trie = CVarUtils::TrieInstance();
+    Trie& trie = TrieInstance();
     TrieNode* node = trie.FindSubStr(  RemoveSpaces( m_sCurrentCommandBeg ) );
     if( !node ) {
         return;
     }
 
-    std::cout << "CVars:" << std::endl;
+    cout << "CVars:" << endl;
 
     // Retrieve suggestions (retrieve all leaves by traversing from current node)
-    std::vector<TrieNode*> suggest = trie.CollectAllNodes( node );
-    std::sort( suggest.begin(), suggest.end() );
+    vector<TrieNode*> suggest = trie.CollectAllNodes( node );
+    sort( suggest.begin(), suggest.end() );
     //output suggestions
     unsigned int nLongestName = 0;
     unsigned int nLongestVal = 0;
     for( unsigned int ii = 0; ii < suggest.size(); ii++ ){
-        std::string sName = ( (CVarUtils::CVar<int>*) suggest[ii]->m_pNodeData )->m_sVarName;
-        std::string sVal = CVarUtils::GetValueAsString( suggest[ii]->m_pNodeData );
+        string sName = ( (CVar<int>*) suggest[ii]->m_pNodeData )->m_sVarName;
+        string sVal = GetValueAsString( suggest[ii]->m_pNodeData );
         if( sName.length() > nLongestName ){
             nLongestName = sName.length();
         }
@@ -1498,9 +1483,9 @@ void GLConsole::PrintAllCVars()
 
     if( suggest.size() > 1) {
         for( unsigned int ii = 0; ii < suggest.size(); ii++ ){
-            std::string sName = ( (CVarUtils::CVar<int>*) suggest[ii]->m_pNodeData )->m_sVarName;
-            std::string sVal = CVarUtils::GetValueAsString( suggest[ii]->m_pNodeData );
-            std::string sHelp = CVarUtils::GetHelp( sName );
+            string sName = ( (CVar<int>*) suggest[ii]->m_pNodeData )->m_sVarName;
+            string sVal = GetValueAsString( suggest[ii]->m_pNodeData );
+            string sHelp = GetHelp( sName );
             sName.resize( nLongestName, ' ' );
             sVal.resize( nLongestVal, ' ' );
             printf( "%-s: Default value = %-30s   %-50s\n", sName.c_str(), sVal.c_str(), sHelp.empty() ? "" : sHelp.c_str() );
@@ -1512,13 +1497,13 @@ void GLConsole::PrintAllCVars()
 ////////////////////////////////////////////////////////////////////////////////
 inline void GLConsole::_TabComplete()
 {
-    Trie& trie = CVarUtils::TrieInstance();
+    Trie& trie = TrieInstance();
     TrieNode* node = trie.FindSubStr(  RemoveSpaces( m_sCurrentCommandBeg ) );
     if( !node ) {
         // Attempt to strip away '=' so that the value can be re-completed
         const size_t nEquals = m_sCurrentCommandBeg.rfind( "=" );
         if(nEquals != m_sCurrentCommandBeg.npos) {
-            std::string sCommandStripEq = m_sCurrentCommandBeg.substr( 0, nEquals );
+            string sCommandStripEq = m_sCurrentCommandBeg.substr( 0, nEquals );
             node = trie.FindSubStr( RemoveSpaces( sCommandStripEq ) );
             if( node != NULL ) { m_sCurrentCommandBeg = sCommandStripEq; }
         }
@@ -1529,57 +1514,57 @@ inline void GLConsole::_TabComplete()
     else if( node->m_nNodeType == TRIE_LEAF || (node->m_children.size() == 0) ) {
         node = trie.Find(m_sCurrentCommandBeg);
         if( !_IsConsoleFunc( node ) ) {
-            m_sCurrentCommandBeg += " = " + CVarUtils::GetValueAsString(node->m_pNodeData);
+            m_sCurrentCommandBeg += " = " + GetValueAsString(node->m_pNodeData);
         }
     } else {
         // Retrieve suggestions (retrieve all leaves by traversing from current node)
-        std::vector<TrieNode*> suggest = trie.CollectAllNodes(node);
+        vector<TrieNode*> suggest = trie.CollectAllNodes(node);
         //output suggestions
         if( suggest.size() > 1) {
-            std::vector<std::pair<std::string,int> > suggest_name_index_full;
-            std::vector<std::pair<std::string,int> > suggest_name_index_set;
+            vector<pair<string,int> > suggest_name_index_full;
+            vector<pair<string,int> > suggest_name_index_set;
             // Build list of names with index from suggest
             // Find lowest recursion level
             int iMinRecurLevel = 100000;
             for( unsigned int ii = 0; ii < suggest.size(); ii++ ) {
-                std::string sName = ( (CVarUtils::CVar<int>*) suggest[ii]->m_pNodeData )->m_sVarName;
-                suggest_name_index_full.push_back( std::pair<std::string,int>( sName, ii ) );
+                string sName = ( (CVar<int>*) suggest[ii]->m_pNodeData )->m_sVarName;
+                suggest_name_index_full.push_back( pair<string,int>( sName, ii ) );
                 if( _FindRecursionLevel( sName ) < iMinRecurLevel ) {
                     iMinRecurLevel = _FindRecursionLevel( sName );
                 }
             }
             // Sort alphabetically (this is useful for later removing
             // duplicate name at a given level and looks nice too...)
-            std::sort( suggest_name_index_full.begin(), suggest_name_index_full.end(), StringIndexPairGreater );
+            sort( suggest_name_index_full.begin(), suggest_name_index_full.end(), StringIndexPairGreater );
 
             // Remove suggestions at a higher level of recursion
-            std::string sCurLevel = "";
+            string sCurLevel = "";
             int iCurLevel;
             for( unsigned int ii = 0; ii < suggest_name_index_full.size() ; ii++ ) {
-                std::string sCurString = suggest_name_index_full[ii].first;
+                string sCurString = suggest_name_index_full[ii].first;
                 iCurLevel = _FindRecursionLevel( sCurString );
                 if( sCurLevel.length()==0 ) {
                     if( iCurLevel == iMinRecurLevel ) {
                         sCurLevel = "";
                         suggest_name_index_set.
-                            push_back( std::pair<std::string,int>( sCurString,suggest_name_index_full[ii].second ) );
+                            push_back( pair<string,int>( sCurString,suggest_name_index_full[ii].second ) );
                     } else {
                         // Add new substring at given level
                         sCurLevel = FindLevel( sCurString, iMinRecurLevel );
-                        suggest_name_index_set.push_back( std::pair<std::string,int>( sCurLevel,suggest_name_index_full[ii].second ) );
+                        suggest_name_index_set.push_back( pair<string,int>( sCurLevel,suggest_name_index_full[ii].second ) );
                     }
                 } else {
-                    if( sCurString.find( sCurLevel ) == std::string::npos ) {
+                    if( sCurString.find( sCurLevel ) == string::npos ) {
                         // Add new substring at given level
                         sCurLevel = FindLevel( sCurString, iMinRecurLevel );
-                        suggest_name_index_set.push_back( std::pair<std::string,int>( sCurLevel,suggest_name_index_full[ii].second ) );
+                        suggest_name_index_set.push_back( pair<string,int>( sCurLevel,suggest_name_index_full[ii].second ) );
                     }
                 }
             }
 
             // Get all commands and function separately
             // Print out all suggestions to the console
-            std::string commands, functions; //collect each type separately
+            string commands, functions; //collect each type separately
 
             unsigned int longest = 0;
             for( unsigned int ii = 0; ii < suggest_name_index_set.size(); ii++ ) {
@@ -1589,12 +1574,12 @@ inline void GLConsole::_TabComplete()
             }
             longest +=3;
 
-            std::vector<std::string> cmdlines;
-            std::vector<std::string> funclines;
+            vector<string> cmdlines;
+            vector<string> funclines;
 
             // add command lines
             for( unsigned int ii = 0; ii < suggest_name_index_set.size() ; ii++ ) {
-                std::string tmp = suggest_name_index_set[ii].first;
+                string tmp = suggest_name_index_set[ii].first;
                 tmp.resize( longest, ' ' );
 
                 if( (commands+tmp).length() > m_Viewport.width/m_pGLFont->CharWidth() ) {
@@ -1609,7 +1594,7 @@ inline void GLConsole::_TabComplete()
 
             // add function lines
             for( unsigned int ii = 0; ii < suggest_name_index_set.size() ; ii++ ) {
-                std::string tmp = suggest_name_index_set[ii].first;
+                string tmp = suggest_name_index_set[ii].first;
                 tmp.resize( longest, ' ' );
                 if( (functions+tmp).length() > m_Viewport.width/m_pGLFont->CharWidth() ) {
                     funclines.push_back( functions );
@@ -1643,7 +1628,7 @@ inline void GLConsole::_TabComplete()
         } else if( suggest.size() == 1 ) {
             // Is this what the use wants? Clear the left bit...
             m_sCurrentCommandEnd = "";
-            m_sCurrentCommandBeg = ((CVarUtils::CVar<int>*) suggest[0]->m_pNodeData)->m_sVarName;
+            m_sCurrentCommandBeg = ((CVar<int>*) suggest[0]->m_pNodeData)->m_sVarName;
         }
     }
 }
@@ -1658,11 +1643,11 @@ inline bool GLConsole::_ProcessCurrentCommand( bool bExecute )
     //trie version
     //int error = 0;
     TrieNode*node;
-    std::string sRes;
+    string sRes;
     bool bSuccess = true;
 
-    Trie& trie = CVarUtils::TrieInstance();
-    std::string m_sCurrentCommand = m_sCurrentCommandBeg+m_sCurrentCommandEnd;
+    Trie& trie = TrieInstance();
+    string m_sCurrentCommand = m_sCurrentCommandBeg+m_sCurrentCommandEnd;
 
     // remove leading and trailing spaces
     int pos = m_sCurrentCommand.find_first_not_of( " ", 0 );
@@ -1683,12 +1668,12 @@ inline bool GLConsole::_ProcessCurrentCommand( bool bExecute )
     if( ( node = trie.Find( m_sCurrentCommand ) ) ) {
         //execute function if this is a function cvar
         if( _IsConsoleFunc( node ) ) {
-            bSuccess &= CVarUtils::ExecuteFunction( m_sCurrentCommand, (CVarUtils::CVar<ConsoleFunc>*) node->m_pNodeData, sRes, bExecute );
+            bSuccess &= ExecuteFunction( m_sCurrentCommand, (CVar<ConsoleFunc>*) node->m_pNodeData, sRes, bExecute );
             EnterLogLine( m_sCurrentCommand.c_str(), LineProperty.Function );
         }
         else { //print value associated with this cvar
             EnterLogLine( ( m_sCurrentCommand + " = " +
-                        CVarUtils::GetValueAsString(node->m_pNodeData)).c_str(), LineProperty.Log );
+                        GetValueAsString(node->m_pNodeData)).c_str(), LineProperty.Log );
         }
     }
     //see if it is an assignment or a function execution (with arguments)
@@ -1696,22 +1681,22 @@ inline bool GLConsole::_ProcessCurrentCommand( bool bExecute )
         int eq_pos; //get the position of the equal sign
         //see if this an assignment
         if( ( eq_pos = m_sCurrentCommand.find( "=" ) ) != -1 ) {
-            std::string command, value;
-            std::string tmp = m_sCurrentCommand.substr(0, eq_pos ) ;
+            string command, value;
+            string tmp = m_sCurrentCommand.substr(0, eq_pos ) ;
             command = RemoveSpaces( tmp );
             value = m_sCurrentCommand.substr( eq_pos+1, m_sCurrentCommand.length() );
             if( !value.empty() ) {
                 value = RemoveSpaces( value );
                 if( ( node = trie.Find(command) ) ) {
                     if( bExecute ) {
-                        CVarUtils::SetValueFromString( node->m_pNodeData, value );
+                        SetValueFromString( node->m_pNodeData, value );
                     }
                     EnterLogLine( ( command + " = " + value ).c_str(), LineProperty.Log );
                 }
             }
             else {
                 if( bExecute ) {
-                    std::string out = "-glconsole: " + command + ": command not found";
+                    string out = "-glconsole: " + command + ": command not found";
                     EnterLogLine( out.c_str(), LineProperty.Error );
                 }
                 bSuccess = false;
@@ -1719,16 +1704,16 @@ inline bool GLConsole::_ProcessCurrentCommand( bool bExecute )
         }
         //check if this is a function
         else if( ( eq_pos = m_sCurrentCommand.find(" ") ) != -1 ) {
-            std::string function;
+            string function;
             function = m_sCurrentCommand.substr( 0, eq_pos );
             //check if this is a valid function name
             if( ( node = trie.Find( function ) ) && _IsConsoleFunc( node ) ) {
-                bSuccess &= CVarUtils::ExecuteFunction( m_sCurrentCommand, (CVarUtils::CVar<ConsoleFunc>*)node->m_pNodeData, sRes, bExecute );
+                bSuccess &= ExecuteFunction( m_sCurrentCommand, (CVar<ConsoleFunc>*)node->m_pNodeData, sRes, bExecute );
                 EnterLogLine( m_sCurrentCommand.c_str(), LineProperty.Function );
             }
             else {
                 if( bExecute ) {
-                    std::string out = "-glconsole: " + function + ": function not found";
+                    string out = "-glconsole: " + function + ": function not found";
                     EnterLogLine( out.c_str(), LineProperty.Error );
                 }
                 bSuccess = false;
@@ -1736,7 +1721,7 @@ inline bool GLConsole::_ProcessCurrentCommand( bool bExecute )
         }
         else if( !m_sCurrentCommand.empty() ) {
             if( bExecute ) {
-                std::string out = "-glconsole: " + m_sCurrentCommand + ": command not found";
+                string out = "-glconsole: " + m_sCurrentCommand + ": command not found";
                 EnterLogLine( out.c_str(), LineProperty.Error );
             }
             bSuccess = false;
@@ -1754,19 +1739,19 @@ inline bool GLConsole::_ProcessCurrentCommand( bool bExecute )
  * Help interpreter function
  * With no arguments prints out help from GLCONSOLE_HELPFILE
  */
-inline bool GLConsole::Help(std::vector<std::string> *vArgs)
+inline bool GLConsole::Help(vector<string> *vArgs)
 {
     if( vArgs && vArgs->size() != 0 )
     {
         for( size_t i = 0; i < vArgs->size(); i++ ) {
             try {
                 PrintHelp( "help for %s", vArgs->at(i).c_str() );
-                if(CVarUtils::GetHelp( vArgs->at(i) ).empty())
+                if(GetHelp( vArgs->at(i) ).empty())
                     PrintHelp( "No help available." );
                 else
-                    PrintHelp( "%s", CVarUtils::GetHelp( vArgs->at(i) ).c_str() );
+                    PrintHelp( "%s", GetHelp( vArgs->at(i) ).c_str() );
             }
-            catch( CVarUtils::CVarException e ) {
+            catch( CVarException e ) {
                 PrintHelp( "Unknown variable %s.", vArgs->at(i).c_str() );
                 return false;
             }
@@ -1775,7 +1760,7 @@ inline bool GLConsole::Help(std::vector<std::string> *vArgs)
     else {
         //try opening a default helpfile
         //else use the built in help
-        std::ifstream sIn(GLCONSOLE_HELP_FILE  );
+        ifstream sIn(GLCONSOLE_HELP_FILE  );
         if( sIn.is_open() ) {
             char s[1024];
             while(sIn.good()) {
@@ -1785,7 +1770,7 @@ inline bool GLConsole::Help(std::vector<std::string> *vArgs)
             sIn.close();
         }
         else{
-            std::cerr << "WARNING: No custom " << GLCONSOLE_HELP_FILE << ". Using default GLConsole help." << std::endl;
+            cerr << "WARNING: No custom " << GLCONSOLE_HELP_FILE << ". Using default GLConsole help." << endl;
 
             PrintHelp("");
             PrintHelp("----------------- HELP -----------------");
@@ -1812,7 +1797,7 @@ inline bool GLConsole::Help(std::vector<std::string> *vArgs)
  * @param sFileName the file to save to. if none given the one specified in console.SettingsFileName is used
  * @return sucess or failure
  */
-inline bool GLConsole::SettingsSave(std::string sFileName)
+inline bool GLConsole::SettingsSave(string sFileName)
 {
     if( !m_bExecutingHistory ) {
         if( sFileName == ""){
@@ -1825,14 +1810,14 @@ inline bool GLConsole::SettingsSave(std::string sFileName)
             }
         }
 
-        std::ofstream ofs( sFileName.c_str() );
+        ofstream ofs( sFileName.c_str() );
 
         if( !ofs.is_open() ) {
             PrintError("Error: could not open \"%s\" for saving.", sFileName.c_str());
             return false;
         }
 
-        std::vector<std::string> vSave;
+        vector<string> vSave;
         vSave.push_back(sFileName);
         vSave.push_back("console");
         vSave.push_back("script");
@@ -1850,7 +1835,7 @@ inline bool GLConsole::SettingsSave(std::string sFileName)
  * @param sFileName the file to load from. if none given the one specified in console.SettingsFileName is used
  * @return sucess or failure
  */
-inline bool GLConsole::SettingsLoad( std::string sFileName )
+inline bool GLConsole::SettingsLoad( string sFileName )
 {
     if( sFileName == "" ) {
         if( m_sSettingsFileName != "" ) {
@@ -1863,16 +1848,16 @@ inline bool GLConsole::SettingsLoad( std::string sFileName )
     }
 
     //test if file exists
-    std::ifstream ifs( sFileName.c_str() );
+    ifstream ifs( sFileName.c_str() );
 
     if( ifs.is_open() ) {
         ifs.close();
-        std::vector<std::string> v;
+        vector<string> v;
         v.push_back(sFileName);
         ConsoleLoad(&v);
     }
     else {
-//        std::cout << "Info: Settings file, " << sFileName << ", not found." << std::endl;
+//        cout << "Info: Settings file, " << sFileName << ", not found." << endl;
         return false;
     }
 
