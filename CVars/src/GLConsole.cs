@@ -1,4 +1,4 @@
-/*
+﻿/*
     Cross platform OpenGL console using the "CVars" functionality.
 
     This Code is covered under the LGPL.  See COPYING file for the license.
