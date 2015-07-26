@@ -4,19 +4,132 @@ This Code is covered under the LGPL.  See COPYING file for the license.
 $Id: GLConsole.h 192 2012-03-06 01:12:01Z gsibley $
 */
 
-#define CVAR_DEL_KEY 127
-#define GLCONSOLE_KEY 96
+//#define CVAR_DEL_KEY 127
+//#define GLCONSOLE_KEY 96
 
-#define GLCONSOLE_HELP_FILE "helpfile.txt"
-#define GLCONSOLE_HISTORY_FILE ".cvar_history"
-#define GLCONSOLE_SETTINGS_FILE ".glconsole_settings"
-#define GLCONSOLE_SCRIPT_FILE "default.script"
-#define GLCONSOLE_INITIAL_SCRIPT_FILE "initial.script"
+//#define GLCONSOLE_HELP_FILE "helpfile.txt"
+//#define GLCONSOLE_HISTORY_FILE ".cvar_history"
+//#define GLCONSOLE_SETTINGS_FILE ".glconsole_settings"
+//#define GLCONSOLE_SCRIPT_FILE "default.script"
+//#define GLCONSOLE_INITIAL_SCRIPT_FILE "initial.script"
 
 namespace CVars.GLConsole {
-	internal sealed class GLConsole {
+	public class GLConsole {
 		private static readonly GLConsole instance = new GLConsole();
 		public static GLConsole Instance { get { return instance; } }
+
+		// Member cvars accessible from console
+		public float ConsoleBlinkRate {get; set; }
+		public float ConsoleAnimTime {get; set; }
+		public int ConsoleMaxHistory {get; set; }
+		public int ConsoleLineSpacing {get; set; }
+		public int ConsoleLeftMargin {get; set; }
+		public int ConsoleVerticalMargin {get; set; }
+		public int ConsoleMaxLines {get; set; }
+		public float OverlayPercent {get; set; }
+		public string HistoryFileName {get; set; }
+		public string ScriptFileName {get; set; }
+		public string SettingsFileName {get; set; }
+		public string InitialScriptFileName {get; set; }
+
+		protected bool m_bExecutingHistory; //Are we executing a script or not.
+		protected bool m_bSavingScript; // Are we saving a script
+		protected bool m_bConsoleOpen; // whether the console is drawing or not
+		protected bool m_bIsChanging; // whether the console is currently transitioning
+		protected TimeStamp m_Timer;
+		protected TimeStamp m_BlinkTimer;
+		protected int m_nWidth;
+		protected int m_nHeight;
+		protected int m_nViewportX;
+		protected int m_nViewportY;
+		protected int m_nViewportWidth;
+		protected int m_nViewportHeight;
+		protected int m_nTextHeight;
+		protected int m_nScrollPixels;  //the number of pixels the text has been scrolled "up"
+		protected int m_nCommandNum;
+		protected GLFont m_pGLFont;
+
+		// Text colors
+		protected Color m_logColor;
+    protected Color m_commandColor;
+		protected Color m_functionColor;
+		protected Color m_errorColor;
+		protected Color m_helpColor;
+
+		//CVar<GLColor> m_consoleColor;
+		protected Color m_consoleColor;
+
+		//history variables
+		protected string m_sOldCommand;
+		protected char m_cLastChar;
+		protected uint m_nSuggestionNum;
+
+		///<summary>
+		///Initialise the console. Sets up all the default values.
+		///</summary>
+		///<remarks>
+		///Call this after OpenGL is up
+		///</remarks>
+		internal void Init() {
+			m_bExecutingHistory = false;
+			m_bSavingScript = false;
+			m_bConsoleOpen = false;
+			m_bIsChanging = false;
+			m_nTextHeight = 12;  // Hard coded for now???
+			m_nScrollPixels = 0;
+			m_nCommandNum = 0;
+
+			// setup member CVars
+			m_Timer.Stamp();
+			m_BlinkTimer.Stamp();
+			m_pGLFont = new GLFont();
+
+			// if the width and height ptrs aren't supplied then just extract the info
+			// from GL
+			glGetIntegerv(GL_VIEWPORT, &m_Viewport.x);
+
+			// add basic functions to the console
+			CreateCVar("console.version", ConsoleVersion, "The current version of GLConsole");
+			CreateCVar("help", ConsoleHelp, "Gives help information about the console or more specifically about a CVar.");
+			CreateCVar("find", ConsoleFind, "find 'name' will return the list of CVars containing 'name' as a substring.");
+			CreateCVar("exit", ConsoleExit, "Close the application");
+			CreateCVar("quit", ConsoleExit, "Close the application");
+			CreateCVar("save", ConsoleSave, "Save the CVars to a file");
+			CreateCVar("load", ConsoleLoad, "Load CVars from a file");
+
+			CreateCVar("console.history.load", ConsoleHistoryLoad, "Load console history from a file");
+			CreateCVar("console.history.save", ConsoleHistorySave, "Save the console history to a file");
+			CreateCVar("console.history.clear", ConsoleHistoryClear, "Clear the current console history");
+
+			CreateCVar("console.settings.load", ConsoleSettingsLoad, "Load console settings from a file");
+			CreateCVar("console.settings.save", ConsoleSettingsSave, "Save the console settings to a file");
+
+			CreateCVar("script.record.start", ConsoleScriptRecordStart);
+			CreateCVar("script.record.stop", ConsoleScriptRecordStop);
+			CreateCVar("script.record.pause", ConsoleScriptRecordPause);
+			CreateCVar("script.show", ConsoleScriptShow);
+			CreateCVar("script.run", ConsoleScriptRun);
+			CreateCVar("script.save", ConsoleScriptSave);
+			CreateCVar("script.load", ConsoleScriptLoad);
+
+			//load the default settings file
+			SettingsLoad();
+
+			//load the history file
+			HistoryLoad();
+
+			//load the initial execute script
+			ifstream ifs(InitialScriptFileName.c_str());
+
+			if (ifs.is_open()) {
+				ifs.close();
+				ScriptRun(InitialScriptFileName);
+			} else {
+				//        cout << "Info: Initial script file, " << InitialScriptFileName << ", not found." << endl;
+				ifs.clear(ios::failbit);
+			}
+		}
+
 
 		/// Utility function.
 		private string FindLevel(string s, int minRecurLevel) {
@@ -33,22 +146,12 @@ namespace CVars.GLConsole {
 			return s.substr(0, index);
 		}
 
+		//friend void GLConsoleCheckInit(GLConsole* pConsole);
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////
-///  The GLConsole class.
 class GLConsole
 {
-    friend void GLConsoleCheckInit( GLConsole* pConsole );
-
-    public:
-         GLConsole();
-        ~GLConsole();
-
-        // call this after OpenGL is up
-        void Init();
-
         //Prints to console using familiar printf style
         void Printf(const char *msg, ...);
         void Printf_All(const char *msg, ...);
@@ -141,20 +244,6 @@ class GLConsole
         }
         void RenderConsole();
 
-        // member cvars accessible from console
-        float& m_fConsoleBlinkRate;
-        float& m_fConsoleAnimTime;
-        int&   m_nConsoleMaxHistory;
-        int&   m_nConsoleLineSpacing;
-        int&   m_nConsoleLeftMargin;
-        int&   m_nConsoleVerticalMargin;
-        int&   m_nConsoleMaxLines;
-        float& m_fOverlayPercent;
-        string& m_sHistoryFileName;
-        string& m_sScriptFileName;
-        string& m_sSettingsFileName;
-        string& m_sInitialScriptFileName;
-
     protected:
         void _CheckInit();
 
@@ -171,38 +260,6 @@ class GLConsole
 
         string _GetHistory();
 
-    protected:
-        bool          m_bExecutingHistory; //Are we executing a script or not.
-        bool          m_bSavingScript; // Are we saving a script
-        bool          m_bConsoleOpen; // whether the console is drawing or not
-        bool          m_bIsChanging; // whether the console is currently transitioning
-        TimeStamp     m_Timer;
-        TimeStamp     m_BlinkTimer;
-        int           m_nWidth;
-        int           m_nHeight;
-        int           m_nViewportX;
-        int           m_nViewportY;
-        int           m_nViewportWidth;
-        int           m_nViewportHeight;
-        int           m_nTextHeight;
-        int           m_nScrollPixels;  //the number of pixels the text has been scrolled "up"
-        int           m_nCommandNum;
-        GLFont*       m_pGLFont;
-
-        // Text colors
-        Color&      m_logColor;
-        Color&      m_commandColor;
-        Color&      m_functionColor;
-        Color&      m_errorColor;
-        Color&      m_helpColor;
-
-        //CVar<GLColor> m_consoleColor;
-        Color&      m_consoleColor;
-
-        //history variables
-        string   m_sOldCommand;
-        char          m_cLastChar;
-        unsigned int  m_nSuggestionNum;
 
         // simplify getting gl viewport
         struct {
@@ -251,18 +308,18 @@ class GLConsole
  */
 inline GLConsole::GLConsole() :
     // Init our member cvars  (can't init the names in the class decleration)
-    m_fConsoleBlinkRate( CreateCVar<float>(    "console.BlinkRate", 4.0 ) ), // cursor blinks per sec
-    m_fConsoleAnimTime( CreateCVar<float>(     "console.AnimTime", 0.1 ) ),     // time the console animates
-    m_nConsoleMaxHistory( CreateCVar<int>(     "console.history.MaxHistory", 100 ) ), // max lines ofconsole history
-    m_nConsoleLineSpacing( CreateCVar<int>(    "console.LineSpacing", 2 ) ), // pixels between lines
-    m_nConsoleLeftMargin( CreateCVar<int>(     "console.LeftMargin", 5 ) ),   // left margin in pixels
-    m_nConsoleVerticalMargin( CreateCVar<int>( "console.VertMargin", 8 ) ),
-    m_nConsoleMaxLines( CreateCVar<int>(       "console.MaxLines", 200 ) ),
-    m_fOverlayPercent( CreateCVar<float>(      "console.OverlayPercent", 0.75 ) ),
-    m_sHistoryFileName( CreateCVar<> (         "console.history.HistoryFileName", string( GLCONSOLE_HISTORY_FILE ) ) ),
-    m_sScriptFileName( CreateCVar<> (          "script.ScriptFileName", string( GLCONSOLE_SCRIPT_FILE ) ) ),
-    m_sSettingsFileName( CreateCVar<> (        "console.settings.SettingsFileName", string( GLCONSOLE_SETTINGS_FILE ) ) ),
-    m_sInitialScriptFileName( CreateCVar<> (   "console.InitialScriptFileName", string( GLCONSOLE_INITIAL_SCRIPT_FILE ) ) ),
+    ConsoleBlinkRate( CreateCVar<float>(    "console.BlinkRate", 4.0 ) ), // cursor blinks per sec
+    ConsoleAnimTime( CreateCVar<float>(     "console.AnimTime", 0.1 ) ),     // time the console animates
+    ConsoleMaxHistory( CreateCVar<int>(     "console.history.MaxHistory", 100 ) ), // max lines ofconsole history
+    ConsoleLineSpacing( CreateCVar<int>(    "console.LineSpacing", 2 ) ), // pixels between lines
+    ConsoleLeftMargin( CreateCVar<int>(     "console.LeftMargin", 5 ) ),   // left margin in pixels
+    ConsoleVerticalMargin( CreateCVar<int>( "console.VertMargin", 8 ) ),
+    ConsoleMaxLines( CreateCVar<int>(       "console.MaxLines", 200 ) ),
+    OverlayPercent( CreateCVar<float>(      "console.OverlayPercent", 0.75 ) ),
+    HistoryFileName( CreateCVar<> (         "console.history.HistoryFileName", string( GLCONSOLE_HISTORY_FILE ) ) ),
+    ScriptFileName( CreateCVar<> (          "script.ScriptFileName", string( GLCONSOLE_SCRIPT_FILE ) ) ),
+    SettingsFileName( CreateCVar<> (        "console.settings.SettingsFileName", string( GLCONSOLE_SETTINGS_FILE ) ) ),
+    InitialScriptFileName( CreateCVar<> (   "console.InitialScriptFileName", string( GLCONSOLE_INITIAL_SCRIPT_FILE ) ) ),
     m_logColor( CreateCVar<Color>(           "console.colors.LogColor", Color( 255, 255, 64 ) ) ),
     m_commandColor( CreateCVar<Color>(       "console.colors.CommandColor", Color( 255, 255, 255 ) ) ),
     m_functionColor( CreateCVar<Color>(      "console.colors.FunctionColor", Color( 64, 255, 64 ) ) ),
@@ -288,74 +345,6 @@ inline GLConsole::~GLConsole()
     delete m_pGLFont;
     //HistorySave();
     //SettingsSave();
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/**
- * Initialise the console
- * Sets up all the default values.
- */
-inline void GLConsole::Init()
-{
-    m_bExecutingHistory = false;
-    m_bSavingScript = false;
-    m_bConsoleOpen = false;
-    m_bIsChanging = false;
-    m_nTextHeight = 12;  // Hard coded for now???
-    m_nScrollPixels = 0;
-    m_nCommandNum = 0;
-
-    // setup member CVars
-    m_Timer.Stamp();
-    m_BlinkTimer.Stamp();
-    m_pGLFont = new GLFont();
-
-    // if the width and height ptrs aren't supplied then just extract the info
-    // from GL
-    glGetIntegerv( GL_VIEWPORT, &m_Viewport.x );
-
-    // add basic functions to the console
-    CreateCVar( "console.version", ConsoleVersion, "The current version of GLConsole" );
-    CreateCVar( "help", ConsoleHelp, "Gives help information about the console or more specifically about a CVar." );
-    CreateCVar( "find", ConsoleFind, "find 'name' will return the list of CVars containing 'name' as a substring." );
-    CreateCVar( "exit", ConsoleExit, "Close the application" );
-    CreateCVar( "quit", ConsoleExit, "Close the application" );
-    CreateCVar( "save", ConsoleSave, "Save the CVars to a file" );
-    CreateCVar( "load", ConsoleLoad, "Load CVars from a file" );
-
-    CreateCVar( "console.history.load", ConsoleHistoryLoad, "Load console history from a file" );
-    CreateCVar( "console.history.save", ConsoleHistorySave, "Save the console history to a file" );
-    CreateCVar( "console.history.clear", ConsoleHistoryClear, "Clear the current console history" );
-
-    CreateCVar( "console.settings.load", ConsoleSettingsLoad, "Load console settings from a file" );
-    CreateCVar( "console.settings.save", ConsoleSettingsSave, "Save the console settings to a file" );
-
-    CreateCVar( "script.record.start", ConsoleScriptRecordStart );
-    CreateCVar( "script.record.stop", ConsoleScriptRecordStop );
-    CreateCVar( "script.record.pause", ConsoleScriptRecordPause );
-    CreateCVar( "script.show", ConsoleScriptShow );
-    CreateCVar( "script.run", ConsoleScriptRun );
-    CreateCVar( "script.save", ConsoleScriptSave );
-    CreateCVar( "script.load", ConsoleScriptLoad );
-
-    //load the default settings file
-    SettingsLoad();
-
-    //load the history file
-    HistoryLoad();
-
-    //load the initial execute script
-    ifstream ifs( m_sInitialScriptFileName.c_str() );
-
-    if( ifs.is_open() ) {
-        ifs.close();
-        ScriptRun(m_sInitialScriptFileName);
-    }
-    else
-    {
-//        cout << "Info: Initial script file, " << m_sInitialScriptFileName << ", not found." << endl;
-        ifs.clear(ios::failbit);
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -503,11 +492,11 @@ inline void GLConsole::PrintError(const char *msg, ... )
 inline int GLConsole::_GetConsoleHeight()
 {
     //determine dimensions of scissor region
-    float fConsoleHeight = m_Viewport.height * m_fOverlayPercent;
-    if( m_Timer.Elapsed() > m_fConsoleAnimTime ) {
+    float fConsoleHeight = m_Viewport.height * OverlayPercent;
+    if( m_Timer.Elapsed() > ConsoleAnimTime ) {
         m_bIsChanging = false;
         if( m_bConsoleOpen ) { // closing motion
-            fConsoleHeight = m_Viewport.height * m_fOverlayPercent;
+            fConsoleHeight = m_Viewport.height * OverlayPercent;
         }
         else{
             fConsoleHeight = 0;
@@ -517,12 +506,12 @@ inline int GLConsole::_GetConsoleHeight()
     if( m_bIsChanging ) {
         float elapsed = m_Timer.Elapsed();
         if( m_bConsoleOpen ) { // closing motion
-            fConsoleHeight = m_Viewport.height * (elapsed / m_fConsoleAnimTime)
-                * m_fOverlayPercent;
+            fConsoleHeight = m_Viewport.height * (elapsed / ConsoleAnimTime)
+                * OverlayPercent;
         }
         else {
             fConsoleHeight =  m_Viewport.height *  (1-(elapsed /
-                        m_fConsoleAnimTime)) * m_fOverlayPercent;
+                        ConsoleAnimTime)) * OverlayPercent;
         }
     }
     else {
@@ -552,12 +541,12 @@ inline bool GLConsole::HistorySave( string sFileName )
 
     if( !m_bExecutingHistory ) {
         if( sFileName == ""){
-            if(m_sHistoryFileName != "") {
-                sFileName = m_sHistoryFileName;
+            if(HistoryFileName != "") {
+                sFileName = HistoryFileName;
             }
             else {
                 PrintError( "Warning: No default name. Resetting history filename to: \"%s\".", GLCONSOLE_HISTORY_FILE );
-                sFileName = m_sHistoryFileName = GLCONSOLE_HISTORY_FILE;
+                sFileName = HistoryFileName = GLCONSOLE_HISTORY_FILE;
             }
         }
 
@@ -730,11 +719,11 @@ inline bool GLConsole::ScriptSave( string sFileName )
 inline bool GLConsole::HistoryLoad( string sFileName )
 {
     if( sFileName == "" ) {
-        if(m_sHistoryFileName != "")
-            sFileName = m_sHistoryFileName;
+        if(HistoryFileName != "")
+            sFileName = HistoryFileName;
         else {
             PrintError("Warning: No default name. Resetting history filename to: \"%s\".", GLCONSOLE_HISTORY_FILE);
-            sFileName = m_sHistoryFileName = GLCONSOLE_HISTORY_FILE;
+            sFileName = HistoryFileName = GLCONSOLE_HISTORY_FILE;
         }
     }
 
@@ -758,12 +747,12 @@ inline bool GLConsole::HistoryLoad( string sFileName )
 inline bool GLConsole::ScriptLoad( string sFileName )
 {
     if( sFileName == "") {
-        if(m_sScriptFileName != "") {
-            sFileName = m_sScriptFileName;
+        if(ScriptFileName != "") {
+            sFileName = ScriptFileName;
         }
         else {
             PrintError("Warning: No default name. Resetting script filename to: \"%s\".", GLCONSOLE_SCRIPT_FILE);
-            sFileName = m_sScriptFileName = GLCONSOLE_SCRIPT_FILE;
+            sFileName = ScriptFileName = GLCONSOLE_SCRIPT_FILE;
         }
     }
 
@@ -889,11 +878,11 @@ inline void GLConsole::RenderConsole()
 inline bool GLConsole::_IsCursorOn()
 {
     float elapsed = m_BlinkTimer.Elapsed();
-    if(elapsed > (1.0 / m_fConsoleBlinkRate)) {
+    if(elapsed > (1.0 / ConsoleBlinkRate)) {
         m_BlinkTimer.Stamp();
         return true;
     }
-    else if( elapsed > 0.50*(1.0 / m_fConsoleBlinkRate) ) {
+    else if( elapsed > 0.50*(1.0 / ConsoleBlinkRate) ) {
         return false;
     }
     else{
@@ -906,21 +895,21 @@ inline void GLConsole::_RenderText()
 {
     int consoleHeight = _GetConsoleHeight();
 
-    if( consoleHeight - m_nConsoleVerticalMargin < 0 ) {
+    if( consoleHeight - ConsoleVerticalMargin < 0 ) {
         return;
     }
 
     //set up a scissor region to draw the text in
     glScissor( 1 ,m_Viewport.height - _GetConsoleHeight() + 1, //bottom coord
             m_Viewport.width, //width
-            consoleHeight - m_nConsoleVerticalMargin ); //top coord
+            consoleHeight - ConsoleVerticalMargin ); //top coord
     glEnable( GL_SCISSOR_TEST ); {
         int lines = (consoleHeight / m_nTextHeight);
         int scrollLines = (m_nScrollPixels / m_nTextHeight);
         lines += scrollLines;
 
         //start drawing from bottom of console up...
-        int lineLoc = m_Viewport.height-1 - consoleHeight + m_nConsoleVerticalMargin;
+        int lineLoc = m_Viewport.height-1 - consoleHeight + ConsoleVerticalMargin;
 
         //draw command line first
         char blink = ' ';
@@ -929,23 +918,23 @@ inline void GLConsole::_RenderText()
             blink = '_';
         }
         glColor3f(m_commandColor.r, m_commandColor.g, m_commandColor.b);
-        m_pGLFont->glPrintf( m_nConsoleLeftMargin, lineLoc - m_nScrollPixels,
+        m_pGLFont->glPrintf( ConsoleLeftMargin, lineLoc - m_nScrollPixels,
                 "> " + m_sCurrentCommandBeg );
         int size = m_sCurrentCommandBeg.length();
         string em = "";
         for(int i=0;i<size;i++) {
             em = em+" ";
         }
-        m_pGLFont->glPrintf( m_nConsoleLeftMargin, lineLoc - m_nScrollPixels,
+        m_pGLFont->glPrintf( ConsoleLeftMargin, lineLoc - m_nScrollPixels,
                 "> " + em + blink );
-        m_pGLFont->glPrintf( m_nConsoleLeftMargin, lineLoc - m_nScrollPixels,
+        m_pGLFont->glPrintf( ConsoleLeftMargin, lineLoc - m_nScrollPixels,
                 "> " + em + m_sCurrentCommandEnd );
 
-        lineLoc += m_nTextHeight + m_nConsoleLineSpacing;
+        lineLoc += m_nTextHeight + ConsoleLineSpacing;
 
         int count = 0;
         for(  int i = 1 ; i < lines; i++ ) {
-            if( count >= m_nConsoleMaxLines)
+            if( count >= ConsoleMaxLines)
                 continue;
             if( (int)m_consoleText.size() > i - 1 ) {
                 //skip this line if it was marked not to be displayed
@@ -988,12 +977,12 @@ inline void GLConsole::_RenderText()
                     if( j < iterations - 1)
                     {
                         lines--;
-                        lineLoc += m_nTextHeight + m_nConsoleLineSpacing;
+                        lineLoc += m_nTextHeight + ConsoleLineSpacing;
                     }
                     count++;
                     int start = fulltext.substr(j*chars_per_line, chars_per_line).find_first_not_of( ' ' );
                     if( start >= 0  ) {
-                        m_pGLFont->glPrintfFast(m_nConsoleLeftMargin, lineLoc - m_nScrollPixels,
+                        m_pGLFont->glPrintfFast(ConsoleLeftMargin, lineLoc - m_nScrollPixels,
                                 fulltext.substr(j*chars_per_line+start, chars_per_line) );
                     }
                 }
@@ -1001,7 +990,7 @@ inline void GLConsole::_RenderText()
             else
                 break;
 
-            lineLoc += m_nTextHeight + m_nConsoleLineSpacing;
+            lineLoc += m_nTextHeight + ConsoleLineSpacing;
         }
     }
     glDisable(GL_SCISSOR_TEST);
@@ -1031,13 +1020,13 @@ inline void GLConsole::ScrollUp(int pixels)
 ////////////////////////////////////////////////////////////////////////////////
 inline void GLConsole::ScrollUpLine()
 {
-    ScrollUp( m_nTextHeight + m_nConsoleLineSpacing );
+    ScrollUp( m_nTextHeight + ConsoleLineSpacing );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 inline void GLConsole::ScrollDownLine()
 {
-    ScrollDown(m_nTextHeight + m_nConsoleLineSpacing);
+    ScrollDown(m_nTextHeight + ConsoleLineSpacing);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1088,13 +1077,13 @@ inline void GLConsole::CursorToEndOfLine()
 ////////////////////////////////////////////////////////////////////////////////
 inline void GLConsole::ScrollUpPage()
 {
-    ScrollUp( (int)((m_Viewport.height*m_fOverlayPercent) - 2*m_pGLFont->CharHeight()));
+    ScrollUp( (int)((m_Viewport.height*OverlayPercent) - 2*m_pGLFont->CharHeight()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 inline void GLConsole::ScrollDownPage()
 {
-    ScrollDown( (int)( (m_Viewport.height*m_fOverlayPercent) - 2*m_pGLFont->CharHeight() ) );
+    ScrollDown( (int)( (m_Viewport.height*OverlayPercent) - 2*m_pGLFont->CharHeight() ) );
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1298,7 +1287,7 @@ inline void GLConsole::ClearCurrentWord()
 inline void GLConsole::EnterLogLine(const char *line, const LineProperty prop, bool display)
 {
     _CheckInit();
-    if( (int)m_consoleText.size() >= m_nConsoleMaxHistory ) {
+    if( (int)m_consoleText.size() >= ConsoleMaxHistory ) {
         m_consoleText.pop_back();
     }
 
@@ -1744,12 +1733,12 @@ inline bool GLConsole::SettingsSave(string sFileName)
 {
     if( !m_bExecutingHistory ) {
         if( sFileName == ""){
-            if(m_sSettingsFileName != "") {
-                sFileName = m_sSettingsFileName;
+            if(SettingsFileName != "") {
+                sFileName = SettingsFileName;
             }
             else {
                 PrintError( "Warning: No default name. Resetting settings filename to: \"%s\".", GLCONSOLE_SETTINGS_FILE );
-                sFileName = m_sHistoryFileName = GLCONSOLE_SETTINGS_FILE;
+                sFileName = HistoryFileName = GLCONSOLE_SETTINGS_FILE;
             }
         }
 
@@ -1781,12 +1770,12 @@ inline bool GLConsole::SettingsSave(string sFileName)
 inline bool GLConsole::SettingsLoad( string sFileName )
 {
     if( sFileName == "" ) {
-        if( m_sSettingsFileName != "" ) {
-            sFileName = m_sSettingsFileName;
+        if( SettingsFileName != "" ) {
+            sFileName = SettingsFileName;
         }
         else {
             PrintError( "Warning: No default name. Resetting settigns filename to: \"%s\".", GLCONSOLE_SETTINGS_FILE );
-            sFileName = m_sSettingsFileName = GLCONSOLE_SETTINGS_FILE;
+            sFileName = SettingsFileName = GLCONSOLE_SETTINGS_FILE;
         }
     }
 

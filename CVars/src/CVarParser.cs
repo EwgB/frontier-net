@@ -131,12 +131,6 @@ namespace CVars {
 			return command.Where(c => c == '.').Count();
 		}
 
-		/// Return whether first element is greater than the second.
-		private static bool StringIndexPairGreater
-				(Tuple<string, int> e1, Tuple<string, int> e2 ) {
-			return e1.Item1 < e2.Item1;
-		}
-
 		private static bool TabComplete(uint maxNumCharactersPerLine, string command, List<string> result) {
 			Trie trie = TrieInstance();
 
