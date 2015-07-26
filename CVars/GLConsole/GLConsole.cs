@@ -1,27 +1,12 @@
 ﻿/*
-    Cross platform OpenGL console using the "CVars" functionality.
+Cross platform OpenGL console using the "CVars" functionality.
+This Code is covered under the LGPL.  See COPYING file for the license.
+$Id: GLConsole.h 192 2012-03-06 01:12:01Z gsibley $
+*/
 
-    This Code is covered under the LGPL.  See COPYING file for the license.
+namespace CVars.GLConsole {
 
-    $Id: GLConsole.h 192 2012-03-06 01:12:01Z gsibley $
- */
-
-#ifndef __GLCONSOLE_H__
-#define __GLCONSOLE_H__
-
-
-#include <CVars/CVar.h>
-#include <CVars/Timestamp.h>
-#include <CVars/glplatform.h>
-
-#include <GLConsole/GLFont.h>
-//#include <GLConsole/GLColor.h>
-
-#include <deque>
-#include <string>
-
-
-
+}
 #define CVAR_DEL_KEY 127
 #define GLCONSOLE_KEY 96
 
@@ -31,27 +16,13 @@
 #define GLCONSOLE_SCRIPT_FILE "default.script"
 #define GLCONSOLE_INITIAL_SCRIPT_FILE "initial.script"
 
-
-////////////////////////////////////////////////////////////////////////////////
-/// The type of line entered. Used to determine how each line is treated.
-enum LineProperty
-{
-    LINEPROP_LOG,         // text coming from a text being logged to the console
-    LINEPROP_COMMAND,     // command entered at the console
-    LINEPROP_FUNCTION,    // a function
-    LINEPROP_ERROR,       // an error
-    LINEPROP_HELP         //help text
-};
-
-class GLConsole;
-
 ////////////////////////////////////////////////////////////////////////////////
 ///  A line of text contained in the console can be either inputted commands or
 //  log text from the application
 class ConsoleLine
 {
     public:
-        ConsoleLine(std::string t, LineProperty p = LINEPROP_LOG, bool display = true ){
+        ConsoleLine(std::string t, LineProperty p = LineProperty.Log, bool display = true ){
             m_sText = t;
             m_nOptions = p;
             m_bDisplay = display;
@@ -190,7 +161,7 @@ class GLConsole
         void ClearCurrentWord();
 
         /// enter a full line of text to the log text.
-        void EnterLogLine(const char *line, LineProperty prop = LINEPROP_LOG, bool display = true);
+        void EnterLogLine(const char *line, LineProperty prop = LineProperty.Log, bool display = true);
 
         /// display previous command in history on command line.
         void HistoryBack();
@@ -574,7 +545,7 @@ inline void GLConsole::PrintHelp(const char *msg, ... )
     va_end( va_alist );
     msgBuf[1024 - 1] = '\0';
 
-    EnterLogLine( msgBuf, LINEPROP_HELP );
+    EnterLogLine( msgBuf, LineProperty.Help );
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -594,7 +565,7 @@ inline void GLConsole::PrintError(const char *msg, ... )
     va_end( va_alist );
     msgBuf[1024 - 1] = '\0';
 
-    EnterLogLine( msgBuf, LINEPROP_ERROR );
+    EnterLogLine( msgBuf, LineProperty.Error );
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -672,7 +643,7 @@ inline bool GLConsole::HistorySave( std::string sFileName )
 
         unsigned int nTextSize = m_consoleText.size();
         for( int ii = nTextSize-1; ii >= 0 ; --ii ) {
-            if( m_consoleText[ii].m_nOptions == LINEPROP_COMMAND ) {
+            if( m_consoleText[ii].m_nOptions == LineProperty.Command ) {
                 ofs << m_consoleText[ii].m_sText << "\n";
             }
         }
@@ -740,8 +711,8 @@ inline void GLConsole::ScriptShow()
     bool bWasSavingScript = m_bSavingScript;
     m_bSavingScript = false;
     for( int ii = m_ScriptText.size()-1; ii >= 0 ; --ii ) {
-        if( m_ScriptText[ii].m_nOptions == LINEPROP_COMMAND ) {
-            EnterLogLine( m_ScriptText[ii].m_sText.c_str(), LINEPROP_COMMAND );
+        if( m_ScriptText[ii].m_nOptions == LineProperty.Command ) {
+            EnterLogLine( m_ScriptText[ii].m_sText.c_str(), LineProperty.Command );
         }
     }
     m_bSavingScript = bWasSavingScript;
@@ -769,7 +740,7 @@ inline bool GLConsole::ScriptRun( std::string sFileName )
     bool bWasSavingScript = m_bSavingScript;
     m_bSavingScript = false;
     for( int ii = m_ScriptText.size()-1; ii >= 0 ; --ii ) {
-        if( m_ScriptText[ii].m_nOptions == LINEPROP_COMMAND ) {
+        if( m_ScriptText[ii].m_nOptions == LineProperty.Command ) {
             m_sCurrentCommandBeg = m_ScriptText[ii].m_sText;
             m_sCurrentCommandEnd = "";
             _ProcessCurrentCommand( true );
@@ -810,7 +781,7 @@ inline bool GLConsole::ScriptSave( std::string sFileName )
         unsigned int nTextSize = m_ScriptText.size();
 
         for( int ii = nTextSize-1; ii >= 0 ; --ii ) {
-            if( m_ScriptText[ii].m_nOptions == LINEPROP_COMMAND ) {
+            if( m_ScriptText[ii].m_nOptions == LineProperty.Command ) {
                 ofs << m_ScriptText[ii].m_sText << "\n";
             }
         }
@@ -1061,13 +1032,13 @@ inline void GLConsole::_RenderText()
                 //set the appropriate color
                 switch((*it).m_nOptions)
                 {
-                    case LINEPROP_FUNCTION:
+                    case LineProperty.Function:
                         glColor3f(m_functionColor.r, m_functionColor.g, m_functionColor.b);
                         break;
-                    case LINEPROP_ERROR:
+                    case LineProperty.Error:
                         glColor3f(m_errorColor.r, m_errorColor.g, m_errorColor.b);
                         break;
-                    case LINEPROP_HELP:
+                    case LineProperty.Help:
                         glColor3f(m_helpColor.r, m_helpColor.g, m_helpColor.b);
                         break;
                     default:
@@ -1406,7 +1377,7 @@ inline void GLConsole::EnterLogLine(const char *line, const LineProperty prop, b
     if( line != NULL ) {
         m_consoleText.push_front( ConsoleLine(std::string(line), prop, display) );
 
-        if( m_bSavingScript && prop != LINEPROP_ERROR ) {
+        if( m_bSavingScript && prop != LineProperty.Error ) {
             m_ScriptText.push_front( ConsoleLine(std::string(line), prop, display) );
         }
     }
@@ -1425,7 +1396,7 @@ inline std::string GLConsole::_GetHistory()
     }
 
     for( it = m_consoleText.begin() ; it != m_consoleText.end() ; it++ ) {
-        if( it->m_nOptions == LINEPROP_COMMAND ) {
+        if( it->m_nOptions == LineProperty.Command ) {
             if( commandCount == m_nCommandNum ) {
                 return it->m_sText;
             }
@@ -1652,13 +1623,13 @@ inline void GLConsole::_TabComplete()
 
             // enter the results
             if( cmdlines.size() + funclines.size() > 0 ) {
-                EnterLogLine( " ", LINEPROP_LOG );
+                EnterLogLine( " ", LineProperty.Log );
             }
             for( unsigned int ii = 0; ii < cmdlines.size(); ii++ ) {
-                EnterLogLine( cmdlines[ii].c_str(), LINEPROP_LOG );
+                EnterLogLine( cmdlines[ii].c_str(), LineProperty.Log );
             }
             for( unsigned int ii = 0; ii < funclines.size(); ii++ ) {
-                EnterLogLine( funclines[ii].c_str(), LINEPROP_FUNCTION );
+                EnterLogLine( funclines[ii].c_str(), LineProperty.Function );
             }
 
 
@@ -1705,7 +1676,7 @@ inline bool GLConsole::_ProcessCurrentCommand( bool bExecute )
 
     // Make sure the command gets added to the history
     if( !m_sCurrentCommand.empty() ) {
-        EnterLogLine( m_sCurrentCommand.c_str(), LINEPROP_COMMAND, false );
+        EnterLogLine( m_sCurrentCommand.c_str(), LineProperty.Command, false );
     }
 
     // Simply print value if the command is just a variable
@@ -1713,11 +1684,11 @@ inline bool GLConsole::_ProcessCurrentCommand( bool bExecute )
         //execute function if this is a function cvar
         if( _IsConsoleFunc( node ) ) {
             bSuccess &= CVarUtils::ExecuteFunction( m_sCurrentCommand, (CVarUtils::CVar<ConsoleFunc>*) node->m_pNodeData, sRes, bExecute );
-            EnterLogLine( m_sCurrentCommand.c_str(), LINEPROP_FUNCTION );
+            EnterLogLine( m_sCurrentCommand.c_str(), LineProperty.Function );
         }
         else { //print value associated with this cvar
             EnterLogLine( ( m_sCurrentCommand + " = " +
-                        CVarUtils::GetValueAsString(node->m_pNodeData)).c_str(), LINEPROP_LOG );
+                        CVarUtils::GetValueAsString(node->m_pNodeData)).c_str(), LineProperty.Log );
         }
     }
     //see if it is an assignment or a function execution (with arguments)
@@ -1735,13 +1706,13 @@ inline bool GLConsole::_ProcessCurrentCommand( bool bExecute )
                     if( bExecute ) {
                         CVarUtils::SetValueFromString( node->m_pNodeData, value );
                     }
-                    EnterLogLine( ( command + " = " + value ).c_str(), LINEPROP_LOG );
+                    EnterLogLine( ( command + " = " + value ).c_str(), LineProperty.Log );
                 }
             }
             else {
                 if( bExecute ) {
                     std::string out = "-glconsole: " + command + ": command not found";
-                    EnterLogLine( out.c_str(), LINEPROP_ERROR );
+                    EnterLogLine( out.c_str(), LineProperty.Error );
                 }
                 bSuccess = false;
             }
@@ -1753,12 +1724,12 @@ inline bool GLConsole::_ProcessCurrentCommand( bool bExecute )
             //check if this is a valid function name
             if( ( node = trie.Find( function ) ) && _IsConsoleFunc( node ) ) {
                 bSuccess &= CVarUtils::ExecuteFunction( m_sCurrentCommand, (CVarUtils::CVar<ConsoleFunc>*)node->m_pNodeData, sRes, bExecute );
-                EnterLogLine( m_sCurrentCommand.c_str(), LINEPROP_FUNCTION );
+                EnterLogLine( m_sCurrentCommand.c_str(), LineProperty.Function );
             }
             else {
                 if( bExecute ) {
                     std::string out = "-glconsole: " + function + ": function not found";
-                    EnterLogLine( out.c_str(), LINEPROP_ERROR );
+                    EnterLogLine( out.c_str(), LineProperty.Error );
                 }
                 bSuccess = false;
             }
@@ -1766,12 +1737,12 @@ inline bool GLConsole::_ProcessCurrentCommand( bool bExecute )
         else if( !m_sCurrentCommand.empty() ) {
             if( bExecute ) {
                 std::string out = "-glconsole: " + m_sCurrentCommand + ": command not found";
-                EnterLogLine( out.c_str(), LINEPROP_ERROR );
+                EnterLogLine( out.c_str(), LineProperty.Error );
             }
             bSuccess = false;
         }
         else { // just pressed enter
-            EnterLogLine( " ", LINEPROP_LOG );
+            EnterLogLine( " ", LineProperty.Log );
         }
     }
 
