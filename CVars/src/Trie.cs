@@ -1,4 +1,4 @@
-/*
+﻿/*
 Cross platform "CVars" functionality.
 This Code is covered under the LGPL.  See COPYING file for the license.
 $Id: Trie.cpp 162 2010-02-15 19:11:05Z gsibley $
@@ -87,13 +87,13 @@ namespace CVars {
 		}
 
 		// Finds all the CVarNames that contain s as a substring.
-		IEnumerable<string> FindListSubStr(string s) {
+		internal IEnumerable<string> FindListSubStr(string s) {
 			return CVarNames.Where(n => n.Contains(s));
 		}
 
 		// Finds s in the tree and returns the node (may not be a leaf), returns null
 		// otherwise.
-		TrieNode<CVar> FindSubStr(string s) {
+		internal TrieNode<CVar> FindSubStr(string s) {
 			if (Root == null) {
 				//Log.Error("ERROR in FindSubStr, root == NULL!!!!!\n");
 				return null;
@@ -120,7 +120,7 @@ namespace CVars {
 		}
 
 		// Chris, please comment this guy for me.  GTS
-		void SetAcceptedSubstrings(IList<string> filterSubstrings) {
+		internal void SetAcceptedSubstrings(IList<string> filterSubstrings) {
 			AcceptedSubstrings.Clear();
 			NotAcceptedSubstrings.Clear();
 
@@ -143,7 +143,7 @@ namespace CVars {
 			}
 		}
 
-		bool IsNameAcceptable(string varName) {
+		internal bool IsNameAcceptable(string varName) {
 			return
 				// Both lists are empty
 				(!(AcceptedSubstrings.Any() || NotAcceptedSubstrings.Any())) ||
@@ -154,14 +154,14 @@ namespace CVars {
 		}
 
 		// Does an in order traversal starting at node and printing all leaves to a list
-		List<string> CollectAllNames(TrieNode<CVar> node) {
+		internal List<string> CollectAllNames(TrieNode<CVar> node) {
 			var res = new List<string>();
 			node.PrintToVector(res);
 			return res;
 		}
 
 		// Does an in order traversal starting at node and printing all leaves to a list
-		List<TrieNode<CVar>> CollectAllNodes(TrieNode<CVar> node) {
+		internal List<TrieNode<CVar>> CollectAllNodes(TrieNode<CVar> node) {
 			var res = new List<TrieNode<CVar>>();
 			node.PrintNodeToVector(res);
 			return res;
