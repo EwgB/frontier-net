@@ -65,5 +65,33 @@
 			}
 			return success;
 		}
+
+		///<summary>
+		/// Parses the argument list and calls the function object associated with the
+		/// provided variable.
+		///</summary>
+		private bool ExecuteFunction(string command, CVar<ConsoleFunc> cvar, bool execute) {
+			bool success = true;
+
+			//extract arguments string
+			int pos = command.IndexOf(" ");
+			if (pos >= 0) {
+				string args = command.Substring(pos + 1);
+
+				//parse arguments into a list of strings
+				string[] argslist;
+				if (args.Length > 0) {
+					argslist = args.Split(' ');
+				} else {
+					argslist = new string[0];
+				}
+
+				if (execute) {
+					ConsoleFunc func = cvar.VarData;
+					success = func(argslist);
+				}
+			}
+			return success;
+		}
 	}
 }

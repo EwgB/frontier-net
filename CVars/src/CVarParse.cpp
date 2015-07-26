@@ -17,48 +17,6 @@ using namespace CVarUtils;
 ////////////////////////////////////////////////////////////////////////////////
 namespace CVarUtils 
 {
-    ////////////////////////////////////////////////////////////////////////////////
-    /// Parses the argument list and calls the function object associated with the
-    //  provided variable.
-    bool ExecuteFunction( 
-            const std::string& sCommand,         //< Input:
-            CVarUtils::CVar<ConsoleFunc> *cvar,  //< Input:
-            std::string& ,                //< Output:
-            bool bExecute                        //< Input:
-            )
-    {
-        std::vector<std::string> argslist;
-        std::string args;
-        bool bSuccess = true;
-        ConsoleFunc func = *(cvar->m_pVarData);
-        std::string sCmd = sCommand;
-
-        //extract arguments string
-        int pos = sCmd.find( " " );
-        if( pos != -1 ) {
-            args = sCmd.substr(pos+1, sCmd.length() - pos);
-        }
-        //parse arguments into a list of strings
-        if( args.length() > 0 ) {
-            while( ( pos = args.find(" ") ) != -1 ) {
-                argslist.push_back(args.substr(0, pos));
-                args = args.substr(pos+1, args.length() - pos);
-            }
-            if( args.length() > 0 ) {
-                argslist.push_back(args);
-            }
-        }
-
-        if( bExecute ) {
-            const bool res = (*func)( &argslist );
-            if( !res ) {
-                bSuccess = false;
-            }
-        }
-
-        return bSuccess;
-    }
-
 
     ////////////////////////////////////////////////////////////////////////////////
     bool IsConsoleFunc( TrieNode *node )
