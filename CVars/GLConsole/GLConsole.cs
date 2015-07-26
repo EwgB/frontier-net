@@ -4,9 +4,6 @@ This Code is covered under the LGPL.  See COPYING file for the license.
 $Id: GLConsole.h 192 2012-03-06 01:12:01Z gsibley $
 */
 
-namespace CVars.GLConsole {
-
-}
 #define CVAR_DEL_KEY 127
 #define GLCONSOLE_KEY 96
 
@@ -16,82 +13,28 @@ namespace CVars.GLConsole {
 #define GLCONSOLE_SCRIPT_FILE "default.script"
 #define GLCONSOLE_INITIAL_SCRIPT_FILE "initial.script"
 
+namespace CVars.GLConsole {
+	internal sealed class GLConsole {
+		private static readonly GLConsole instance = new GLConsole();
+		public static GLConsole Instance { get { return instance; } }
 
+		/// Utility function.
+		private string FindLevel(string s, int minRecurLevel) {
+			int level = 0;
+			int index = s.length();
+			for (int i = 0; i < s.length(); i++) {
+				if (s[i] == '.') {
+					level++;
+				}
+				if (level == minRecurLevel) {
+					index = i + 1;
+				}
+			}
+			return s.substr(0, index);
+		}
 
-////////////////////////////////////////////////////////////////////////////////
-/// This function returns a pointer to the very first GLConsole ever created.
-//  As there should only be one, this is ok.
-//  This is a workaround for header only programming.
-inline GLConsole* GetConsole( GLConsole* pFirstConsole = NULL )
-{
-    static GLConsole* pSavedConsole = NULL;
-    if( pSavedConsole ){
-        return pSavedConsole;
-    }
-    if( pFirstConsole == NULL ){
-        // if pFirstConsole is NULL (e.g. user is asking for this first console), then
-        // pSavedConsole BETTER not also be NULL;
-        fprintf( stderr, "ERROR: GLConsole has not been initialized!\n" );
-    }
-    else{
-        pSavedConsole = pFirstConsole;
-    }
-    return pSavedConsole;
+	}
 }
-
-////////////////////////////////////////////////////////////////////////////////
-/// This function calls "GetConsole" to set the static variable pSavedConsole so
-//  we can get access to the console globally.
-//  This is a workaround for header only programming.
-inline void SetConsole( GLConsole* pFirstConsole )
-{
-    GetConsole( pFirstConsole );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Return whether first element is greater than the second.
-inline bool StringIndexPairGreater( pair<string,int> e1, pair<string,int> e2 )
-{
-    return e1.first < e2.first;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Utility function.
-inline string FindLevel( string sString, int iMinRecurLevel )
-{
-    int level = 0;
-    int index = sString.length();
-    for( unsigned int ii = 0; ii < sString.length(); ii++ ) {
-        if( sString.c_str()[ii]=='.' ) {
-            level ++;
-        }
-        if( level == iMinRecurLevel ) {
-            index = ii+1;
-        }
-    }
-    return sString.substr( 0, index );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// remove all spaces from the front and back...
-inline string& RemoveSpaces( string &str )
-{
-    // remove them off the front
-    int idx = str.find_first_not_of( ' ' );
-    if( idx > 0 && idx != 0 ) {
-        str = str.substr( idx, str.length() );
-    }
-
-    // remove them off the back
-    idx = str.find_last_not_of(' ');
-    if( idx != -1 ) {
-        str = str.substr( 0, idx+1 );
-    }
-
-    return str;
-}
-
-
 
 ////////////////////////////////////////////////////////////////////////////////
 ///  The GLConsole class.
@@ -1457,7 +1400,7 @@ inline int GLConsole::_FindRecursionLevel( string sCommand )
 void GLConsole::PrintAllCVars()
 {
     Trie& trie = TrieInstance();
-    TrieNode* node = trie.FindSubStr(  RemoveSpaces( m_sCurrentCommandBeg ) );
+    TrieNode* node = trie.FindSubStr(   m_sCurrentCommandBeg.Trim() );
     if( !node ) {
         return;
     }
@@ -1498,13 +1441,13 @@ void GLConsole::PrintAllCVars()
 inline void GLConsole::_TabComplete()
 {
     Trie& trie = TrieInstance();
-    TrieNode* node = trie.FindSubStr(  RemoveSpaces( m_sCurrentCommandBeg ) );
+    TrieNode* node = trie.FindSubStr(   m_sCurrentCommandBeg.Trim());
     if( !node ) {
         // Attempt to strip away '=' so that the value can be re-completed
         const size_t nEquals = m_sCurrentCommandBeg.rfind( "=" );
         if(nEquals != m_sCurrentCommandBeg.npos) {
             string sCommandStripEq = m_sCurrentCommandBeg.substr( 0, nEquals );
-            node = trie.FindSubStr( RemoveSpaces( sCommandStripEq ) );
+            node = trie.FindSubStr( sCommandStripEq.Trim());
             if( node != NULL ) { m_sCurrentCommandBeg = sCommandStripEq; }
         }
     }
@@ -1683,10 +1626,10 @@ inline bool GLConsole::_ProcessCurrentCommand( bool bExecute )
         if( ( eq_pos = m_sCurrentCommand.find( "=" ) ) != -1 ) {
             string command, value;
             string tmp = m_sCurrentCommand.substr(0, eq_pos ) ;
-            command = RemoveSpaces( tmp );
+            command = tmp.Trim();
             value = m_sCurrentCommand.substr( eq_pos+1, m_sCurrentCommand.length() );
             if( !value.empty() ) {
-                value = RemoveSpaces( value );
+                value = value.Trim();
                 if( ( node = trie.Find(command) ) ) {
                     if( bExecute ) {
                         SetValueFromString( node->m_pNodeData, value );
