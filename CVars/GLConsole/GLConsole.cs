@@ -15,6 +15,7 @@ $Id: GLConsole.h 192 2012-03-06 01:12:01Z gsibley $
 
 namespace CVars.GLConsole {
 	using OpenTK.Graphics;
+	using OpenTK.Graphics.OpenGL;
 
 	public class GLConsole {
 		private static readonly GLConsole instance = new GLConsole();
@@ -84,9 +85,8 @@ namespace CVars.GLConsole {
 			BlinkTimer.Stamp();
 			GLFont = new GLFont();
 
-			// if the width and height ptrs aren't supplied then just extract the info
-			// from GL
-			glGetIntegerv(GL_VIEWPORT, &m_Viewport.x);
+			// if the width and height ptrs aren't supplied then just extract the info from GL
+			GL.GetInteger(GL_VIEWPORT, m_Viewport.x);
 
 			// add basic functions to the console
 			CreateCVar("console.version", ConsoleVersion, "The current version of GLConsole");
