@@ -7,6 +7,7 @@ $Id: GLFont.h 183 2010-07-18 15:20:20Z effer $
 #define MAX_TEXT_LENGTH 512
 
 namespace CVars.GLConsole {
+	using System.Diagnostics;
 	using OpenTK.Graphics.OpenGL;
 
 	internal class GLFont {
@@ -21,6 +22,8 @@ namespace CVars.GLConsole {
 		// base number for display lists
 		private int DisplayListBase { get; set; }
 		private bool InitDone { get; set; }
+
+		private static int GlobalDisplayListBase = -1;
 
 		public GLFont() {
 			NumLists = 96;
@@ -43,31 +46,31 @@ namespace CVars.GLConsole {
 				return false;
 			}
 
-			static int nDisplayListBase = -1;
-			if (!pFont.m_bInitDone) {
-				assert(pFont != null);
+			if (!pFont.InitDone) {
+				Debug.Assert(pFont != null);
 				// GLUT bitmapped fonts...  
-				pFont.m_nDisplayListBase = glGenLists(pFont.m_nNumLists);
-				if (pFont.m_nDisplayListBase == 0) {
+				pFont.DisplayListBase = GL.GenLists(pFont.NumLists);
+				if (pFont.DisplayListBase == 0) {
 					//    hmm, commented out for now because on my linux box w get here sometimes
 					//    even though glut hasn't been initialized.
-					//            fprintf( stderr, "%i", pFont.m_nNumLists );
-					fprintf(stderr, "GLFontCheckInit() -- out of display lists\n");
+					//            fprintf( stderr, "%i", pFont.NumLists );
+					//Log.Error("GLFontCheckInit() -- out of display lists\n");
 					return false;
 				}
-				for (int nList = pFont.m_nDisplayListBase;
-								nList < pFont.m_nDisplayListBase + pFont.m_nNumLists; nList++) {
-					glNewList(nList, GL_COMPILE);
-					glutBitmapCharacter(GLUT_BITMAP_8_BY_13, nList + 32 - pFont.m_nDisplayListBase);
-					glEndList();
+				for (int nList = pFont.DisplayListBase;
+								nList < pFont.DisplayListBase + pFont.NumLists; nList++) {
+					GL.NewList(nList, ListMode.Compile);
+					OpenTK.
+					glutBitmapCharacter(GLUT_BITMAP_8_BY_13, nList + 32 - pFont.DisplayListBase);
+					GL.EndList();
 				}
 
-				nDisplayListBase = pFont.m_nDisplayListBase;
-				pFont.m_bInitDone = true;
+				GlobalDisplayListBase = pFont.DisplayListBase;
+				pFont.InitDone = true;
 				return false;
 			} else {
-				assert(nDisplayListBase > 0);
-				pFont.m_nDisplayListBase = nDisplayListBase;
+				Debug.Assert(GlobalDisplayListBase > 0);
+				pFont.DisplayListBase = GlobalDisplayListBase;
 			}
 			return true;
 		}
@@ -78,8 +81,8 @@ namespace CVars.GLConsole {
 ////////////////////////////////////////////////////////////////////////////////
 inline GLFont::~GLFont()
 {
-    if( m_bInitDone && GLFontCheckInit(this) ) {
-        glDeleteLists( m_nDisplayListBase, m_nDisplayListBase + m_nNumLists );
+    if( InitDone && GLFontCheckInit(this) ) {
+        glDeleteLists( DisplayListBase, DisplayListBase + NumLists );
     } 
 }
  
@@ -126,7 +129,7 @@ inline void GLFont::glPrintf(int x, int y, const char *fmt, ...)
     //glRasterPos2f(x, y);
 
     glPushAttrib( GL_LIST_BIT );                        // Pushes The Display List Bits
-    glListBase( m_nDisplayListBase - 32 );      // Sets The Base Character to 32
+    glListBase( DisplayListBase - 32 );      // Sets The Base Character to 32
     //glScalef( 0.5, 0.5, 0.5 ); 
     glCallLists( strlen(text), GL_UNSIGNED_BYTE, text );// Draws The Display List Text
     glPopAttrib();                                      // Pops The Display List Bits
@@ -155,7 +158,7 @@ inline void GLFont::glPrintfFast(int x, int y, const char *fmt, ...)
     glDisable( GL_DEPTH_TEST ); // Causes text not to clip with geometry
     glRasterPos2f( x, y );
     //glPushAttrib( GL_LIST_BIT );                        // Pushes The Display List Bits
-    glListBase( m_nDisplayListBase - 32 );        // Sets The Base Character to 32
+    glListBase( DisplayListBase - 32 );        // Sets The Base Character to 32
     glCallLists( strlen(text), GL_UNSIGNED_BYTE, text );  // Draws The Display List Text
     //glPopAttrib();                                      // Pops The Display List Bits
     glEnable( GL_DEPTH_TEST );
