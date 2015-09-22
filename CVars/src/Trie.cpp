@@ -10,6 +10,8 @@
 
 // Trie data structure implementation.
 
+#pragma once
+
 #include "CVars/CVar.h"
 #include "CVars/Trie.h"
 #include "CVars/TrieNode.h"

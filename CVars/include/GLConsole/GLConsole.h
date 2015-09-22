@@ -6,6 +6,8 @@
     $Id: GLConsole.h 192 2012-03-06 01:12:01Z gsibley $
  */
 
+#pragma once
+
 #ifndef __GLCONSOLE_H__
 #define __GLCONSOLE_H__
 

@@ -77,6 +77,8 @@
 ** MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
 */
 
+#pragma once
+
 #ifndef __glxew_h__
 #define __glxew_h__
 #define __GLXEW_H__

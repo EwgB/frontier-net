@@ -8,6 +8,7 @@
 
  */
 
+#pragma once
 
 #ifndef _TRIE_NODE_H__
 #define _TRIE_NODE_H__

@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef _CVARS_CONFIG_H_
 #define _CVARS_CONFIG_H_
 

@@ -25,6 +25,8 @@
 // or to save just the values starting by "cons" with verbose:
 // save cvars.xml cons true
 
+#pragma once
+
 #ifndef CVAR_H__
 #define CVAR_H__
 

@@ -8,6 +8,8 @@
 
  */
 
+#pragma once
+
 #include <CVars/CVar.h>
 
 using namespace CVarUtils;

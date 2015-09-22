@@ -7,6 +7,7 @@
     $Id: TrieNode.cpp 162 2010-02-15 19:11:05Z gsibley $
  */
 
+#pragma once
 
 #include "CVars/TrieNode.h"
 #include "CVars/CVar.h"

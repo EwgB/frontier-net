@@ -6,6 +6,8 @@
     $Id: FLConsole.h 199 2012-04-09 01:00:25Z gsibley $
  */
 
+#pragma once
+
 #ifndef __FLCONSOLE_H__
 #define __FLCONSOLE_H__
 

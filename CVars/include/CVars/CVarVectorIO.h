@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef _CVAR_VECTOR_IO_H_
 #define _CVAR_VECTOR_IO_H_
 

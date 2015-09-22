@@ -5,6 +5,9 @@
 
     $Id: GLFont.h 183 2010-07-18 15:20:20Z effer $
  */
+
+#pragma once
+
 #ifndef __GL_FONT_H__
 #define __GL_FONT_H__
 

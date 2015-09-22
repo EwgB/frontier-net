@@ -9,6 +9,8 @@
  *
  */
 
+#pragma once
+
 #ifndef CVARS_GLPLATFORM_H
 #define CVARS_GLPLATFORM_H
 

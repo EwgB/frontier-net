@@ -8,6 +8,8 @@
 
  */
 
+#pragma once
+
 #include <time.h>
 #include <iostream>
 #include <stdio.h>

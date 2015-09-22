@@ -7,6 +7,8 @@
     $Id: FLConsoleFunction.h 164 2010-03-01 20:19:13Z gsibley $
  */
 
+#pragma once
+
 #ifndef __FLCONSOLE_FUNCTION__
 #define __FLCONSOLE_FUNCTION__
 

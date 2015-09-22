@@ -8,6 +8,7 @@
 
  */
 
+#pragma once
 
 // cross platform timing utility
 #ifndef __TIMESTAMP_H__

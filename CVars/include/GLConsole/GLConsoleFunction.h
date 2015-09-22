@@ -7,6 +7,8 @@
     $Id: GLConsoleFunction.h 162 2010-02-15 19:11:05Z gsibley $
  */
 
+#pragma once
+
 #ifndef __GL_CONSOLE_FUNCTION__
 #define __GL_CONSOLE_FUNCTION__
 
