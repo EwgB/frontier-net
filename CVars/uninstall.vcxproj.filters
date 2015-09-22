@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="D:\Documents\Visual Studio 2015\Projects\frontier-git\CVars\CMakeLists.txt" />
+    <CustomBuild Include="D:\Documents\Visual Studio 2015\Projects\frontier-git\CVars\CMakeFiles\b6e88532de1f75989b9aaa6b2efd6c05\uninstall.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="D:\Documents\Visual Studio 2015\Projects\frontier-git\CVars\CMakeFiles\uninstall" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{39642BD3-599E-4E01-A177-47FDAD8B03CA}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
