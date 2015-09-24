@@ -24,7 +24,7 @@ distribution.
 
 #pragma once
 
-#include <CVars/cvars_tinyxml.h>
+#include "..\CVars\include\CVars\cvars_tinyxml.h"
 
 // The goal of the seperate error file is to make the first
 // step towards localization. tinyxml (currently) only supports

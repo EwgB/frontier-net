@@ -27,7 +27,7 @@ distribution.
 #include <ctype.h>
 #include <stddef.h>
 
-#include <CVars/cvars_tinyxml.h>
+#include "..\CVars\include\CVars\cvars_tinyxml.h"
 
 //#define DEBUG_PARSER
 #if defined( DEBUG_PARSER )

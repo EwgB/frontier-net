@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <CVars/CVar.h>
+#include "..\CVars\include\CVars\CVar.h"
 
 using namespace CVarUtils;
 

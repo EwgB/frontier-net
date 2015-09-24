@@ -39,10 +39,14 @@
 #include <algorithm>
 #include <memory>
 
-#include <CVars/glplatform.h>
-#include <CVars/Trie.h>
-#include <CVars/TrieNode.h>
-#include <CVars/CVarVectorIO.h>
+#if defined(_WIN32)
+#include <windows.h>
+#endif
+
+#include "glplatform.h"
+#include "Trie.h"
+#include "TrieNode.h"
+#include "CVarVectorIO.h"
 
 // Console functions must have the following signature
 typedef bool (*ConsoleFunc)( std::vector<std::string> *args);
