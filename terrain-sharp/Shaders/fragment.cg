@@ -1,0 +1,100 @@
+/*
+float4 green (float4 pos : POSITION, float2 uv : TEXCOORD0,
+            float4 also_pos: TEXCOORD1,
+            float fog: FOG,
+            float3 fogcolor,
+            uniform float4 data,
+            float3 light : COLOR0,
+            uniform sampler2D texture : TEXUNIT0,
+            sampler2D texture2): COLOR
+{
+
+  also_pos = fmod (also_pos * 0.05, 1);
+  also_pos.y *= 0.25;
+  float4  c = tex2D (texture, uv);
+  float   bright = length (light.rgb) / 3;
+  float4  s = step (float4 (bright, bright, bright, bright), float4 (0.3, 0.4, 0.5, 0.6));
+  bright = 1 - (s.x + s.y + s.z + s.w) / 5;
+  float2  uv_shading = float2 (also_pos.x, also_pos.y + bright);
+  float4  shading = tex2D (texture2, uv_shading);
+  c.rgb *= light;
+  c.rgb *= bright;
+//  c.rgb *= shading.rgb;
+//  c.rgb = also_pos.xyz;
+  c.rgb = lerp (c.rgb, fogcolor.rgb, fog);
+
+  //c = tex2D (texture2, uv_shading);
+  //c.a = 1;
+  //c.rgb *= light;
+  return c;
+}
+*/
+
+#define CLOUD_BRIGHTNESS      b
+#define CLOUD_DENSITY         g
+
+float4 mask_transfer (float2 uv : TEXCOORD0,
+            float4 world_pos: TEXCOORD1,
+            float fog : FOG,
+            uniform float3 fogcolor,
+            uniform float4 data,
+            float4 light : COLOR0,
+            uniform sampler2D texture : TEXUNIT0,
+            sampler2D texture2): COLOR
+{
+
+  float4  c = tex2D (texture, uv);
+  c.rgb *= light;
+  return c;
+}
+
+float4 green (float2 uv : TEXCOORD0,
+            float4 world_pos: TEXCOORD1,
+            float fog : FOG,
+            uniform float3 fogcolor,
+            uniform float4 data,
+            float4 light : COLOR0,
+            uniform sampler2D texture : TEXUNIT0,
+            sampler2D texture2): COLOR
+{
+
+  float4  c = tex2D (texture, uv);
+  c.rgb *= light;
+  c.rgb = lerp (c.rgb, fogcolor.rgb, fog);
+  c.a *= light.a;
+  return c;
+}
+
+
+float4 clouds (float2 uv : TEXCOORD0,
+            float4 world_pos: TEXCOORD1,
+            float fog : FOG,
+            uniform float3 fogcolor,
+            uniform float4 data,
+            float4 light : COLOR0,
+            uniform sampler2D texture : TEXUNIT0,
+            sampler2D texture2): COLOR
+{
+
+  float4  c1 = tex2D (texture2, uv);
+  float4  c2 = tex2D (texture2, world_pos.xy);
+  float   cloud, alpha;
+  float4  cf;
+
+  //cf.rgb = max (c1.rgb,c2.rgb);
+  float density = 2 - saturate (data.CLOUD_DENSITY) * 2;
+  cloud = c1.r + c2.r - density;
+  cloud = saturate (cloud / (2 - density));
+  cloud = 1 - cloud;
+  cloud = cloud * cloud;
+  cloud = 1 - cloud;
+  alpha = saturate (cloud * 10);
+  cf.a = alpha * light.a;
+//  cf.rgb = lerp (float3 (0,0,0.5), float3 (0,0, 0.5), cloud);// * float3 (0,0,0.3);
+  cf.rgb = lerp (fogcolor.rgb, float3 (data.CLOUD_BRIGHTNESS,data.CLOUD_BRIGHTNESS,data.CLOUD_BRIGHTNESS), cloud);
+  //cf.rgb = fogcolor.rgb;
+//  cf.a = 0;
+  //cf.rgb = lerp (float3(1,0,0), float3 (0,1,0), color);
+//  cf.rgb = 0;
+  return cf;
+}
