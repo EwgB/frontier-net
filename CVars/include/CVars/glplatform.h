@@ -16,7 +16,7 @@
 // Attempt to portably include Necessary OpenGL headers
 //////////////////////////////////////////////////////////
 
-#include <CVars/config.h>
+#include "config.h"
 
 #ifdef _WIN_
     // Define maths quantities when using <cmath> to match posix systems

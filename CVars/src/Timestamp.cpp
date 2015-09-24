@@ -11,13 +11,13 @@
 #include <time.h>
 #include <iostream>
 #include <stdio.h>
-#include <CVars/config.h>
+#include "..\CVars\include\CVars\config.h"
 
 #ifdef _WIN_
 #    include <windows.h>
 #endif
 
-#include <CVars/Timestamp.h>
+#include "..\CVars\include\CVars\Timestamp.h"
 
 TimeStamp::TimeStamp()
 {
