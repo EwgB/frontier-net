@@ -1,0 +1,50 @@
+Joint Root
+CHANNELS 3
+Joint Pelvis
+CHANNELS 3
+Joint Hip Right
+CHANNELS 3
+Joint Knee Right
+CHANNELS 3
+Joint Ankle Right
+CHANNELS 3
+Joint Toe Right
+CHANNELS 3
+Joint Hip Left
+CHANNELS 3
+Joint Knee Left
+CHANNELS 3
+Joint Ankle Left
+CHANNELS 3
+Joint Toe Left
+CHANNELS 3
+Joint Spine
+CHANNELS 3
+Joint Shoulder Right
+CHANNELS 3
+Joint Arm Right
+CHANNELS 3
+Joint Elbow Right
+CHANNELS 3
+Joint Wrist Right
+CHANNELS 3
+Joint Shoulder Left
+CHANNELS 3
+Joint Arm Left
+CHANNELS 3
+Joint Elbow Left
+CHANNELS 3
+Joint Wrist Left
+CHANNELS 3
+Joint Neck
+CHANNELS 3
+Joint Head
+CHANNELS 3
+Joint Bone Invalid
+CHANNELS 3
+Joint Bone Invalid
+CHANNELS 3
+Motion
+Frames: 1
+Frame Time: 1.0
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 

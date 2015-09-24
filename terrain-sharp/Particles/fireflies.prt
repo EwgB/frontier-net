@@ -1,0 +1,26 @@
+<cvars>
+    <particle.texture>  particle_dot.png    </particle.texture>
+    <particle.acceleration>  [ 0,  0,  0 ]    </particle.acceleration>
+    <particle.blend>  1    </particle.blend>
+    <particle.emitter_lifespan>  0    </particle.emitter_lifespan>
+    <particle.emit_count>  1    </particle.emit_count>
+    <particle.emit_interval>  10000    </particle.emit_interval>
+    <particle.fade_in>  200    </particle.fade_in>
+    <particle.fade_out>  200    </particle.fade_out>
+    <particle.interpolate>  0    </particle.interpolate>
+    <particle.lifespan>  1000    </particle.lifespan>
+    <particle.origin>  [ 0,  0,  0.3 ]    </particle.origin>
+    <particle.panel_type>  1    </particle.panel_type>
+    <particle.rotation>  [ 0,  0,  0 ]    </particle.rotation>
+    <particle.size.min>  [ .03,  .03,  0.03 ]    </particle.size.min>
+    <particle.size.max>  [ .03,  .03,  0.03 ]    </particle.size.max>
+    <particle.speed.min>  [ -1,  -1,  -0.5 ]    </particle.speed.min>
+    <particle.speed.max>  [  1,   1,   0.5 ]    </particle.speed.max>
+    <particle.spin>  [ 0,  0,  45 ]    </particle.spin>
+    <particle.volume.min>  [ -32.0,  -32,  1.0 ]    </particle.volume.min>
+    <particle.volume.max>  [  32.0,   32,  1.5 ]    </particle.volume.max>
+    <particle.wind>  0    </particle.wind>
+    <particle.gravity>  0    </particle.wind>
+    <particle.z_buffer>  0    </particle.z_buffer>
+
+</cvars>

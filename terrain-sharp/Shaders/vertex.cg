@@ -1,0 +1,133 @@
+#define CURVE_DISTANCE    x
+#define CURVE_STRENGTH    y
+#define DIST_MIN          x
+#define DIST_MAX          y
+#define CLOUD_WAVE        z
+
+#define UNIFORM_DATA      uniform float4x4 ModelViewProj, uniform float3 offset, uniform float3 lightpos, uniform float3 eyepos, uniform float3 lightcol,  uniform float3 ambientcol, uniform float2 fogdist, uniform float4 data
+#define PARAMS            IN, ModelViewProj, offset, lightpos, eyepos, lightcol, ambientcol, fogdist, data
+
+struct appdata
+{
+  float4 position : POSITION;
+	float4 color	  : COLOR0;
+  float4 normal		: NORMAL;
+  float4 uv			  : TEXCOORD0;
+};
+
+struct output
+{
+	float4 pos      : POSITION;
+	float4 color    : COLOR0;
+  float  fog      : FOG;
+  float3 world_pos: TEXCOORD1;
+  float4 uv			  : TEXCOORD0;
+};
+
+//Our general-purpose transformations are done here. All other vshaders call this one.
+output TransformAndLight (appdata IN, UNIFORM_DATA)
+{
+
+	output OUT;
+
+  IN.position.xyz += offset.xyz;
+  //IN.normal = mul (IN.normal, ModelViewProj);
+  float2 O = IN.position.xy - eyepos.xy;
+  float  dist = length (O);
+  float  D = dist / data.CURVE_DISTANCE;
+  D *= D;
+  OUT.fog = (length (O) - fogdist.DIST_MIN) / (fogdist.DIST_MAX - fogdist.DIST_MIN);
+  OUT.fog = clamp (OUT.fog, 0, 1);
+  IN.position.z -= D * data.CURVE_STRENGTH;
+
+  float3 P = IN.position.xyz;
+  float3 N = IN.normal;
+
+  float3 L = normalize(lightpos - P);
+  float diffuse = max(dot(N, lightpos), 0);
+  float3 diffusecol = diffuse * lightcol;
+
+  //Specular lighting
+  float3 V = normalize(eyepos - P);
+  float3 H = normalize(lightpos + V);
+  float specular = pow(max(dot(N, H), 0), 10) * lightcol.r;
+  float3 speccol = specular * lightcol;
+  if (diffuse <= 0)
+    specular = 0;
+	// Transform The Vertex Position Into Homogenous Clip-Space (Required)
+	OUT.pos = mul(ModelViewProj, IN.position);
+//	OUT.world_pos.xyz = IN.position.xyz;
+	// Set The Color To The Value Specified In IN.color
+	OUT.color.rgb = (IN.color.xyz * ambientcol) + (IN.color.xyz * diffusecol) + speccol;//(IN.color.xyz * specular);
+  OUT.color.a = 1;
+  OUT.uv = IN.uv;
+	return OUT;
+}
+
+output standard (appdata IN, UNIFORM_DATA)
+{
+	output OUT;
+
+	OUT = TransformAndLight (PARAMS);
+	return OUT;
+
+}
+
+output trees (appdata IN, UNIFORM_DATA)
+{
+
+  if (IN.uv.x >= 0.25 && IN.uv.x <= 0.5) {
+    float move = abs (IN.uv.y - 0.5) + abs (IN.uv.x - 0.375);
+    IN.position.x += sin ((IN.position.y + IN.position.x) / 10.0f + data.z) * move;
+  }
+	return TransformAndLight (PARAMS);
+
+}
+
+output grass (appdata IN, UNIFORM_DATA)
+{
+
+	output OUT;
+
+  float dist = length (float2 (IN.position.xy - eyepos.xy)) / 48;
+  dist = max (dist - 0.75, 0) * 4;
+
+  float move;
+  if (IN.uv.y > 0.5)
+    move = min (IN.uv.y, 0.75);
+  else if (IN.uv.y < 0.5)
+    move = IN.uv.y * 2.0f;
+  move = sin ((IN.position.y + IN.position.x) / 10.0f + data.z) * move * 0.15;
+  IN.position.x += move;
+//  IN.normal.x -= abs (move) * 4;
+//  IN.normal.z += abs (move) * 4;
+//  IN.normal = normalize (IN.normal);
+	OUT = TransformAndLight (PARAMS);
+	OUT.color.a = 1 - dist;
+	return OUT;
+
+}
+
+
+output clouds (appdata IN, UNIFORM_DATA)
+{
+
+	output OUT;
+
+  float2 move;
+  sincos (IN.position.y + IN.position.x + data.CLOUD_WAVE, move.x, move.y);
+	OUT.uv = IN.uv;
+	OUT.uv.xy += move / 10;
+	OUT.world_pos.xy = IN.uv.xy + data.CLOUD_WAVE / 50;
+  //IN.uv.xy += move;
+//	OUT = TransformAndLight (PARAMS);
+	OUT.pos = mul(ModelViewProj, IN.position);
+//	OUT.color.rgb = float3 (.5,.5,.5);
+  OUT.color.rgba = IN.color.rgba;
+	return OUT;
+
+}
+
+
+
+
