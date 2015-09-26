@@ -56,8 +56,18 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Source\GLmesh.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Source\CTree\BranchAnchor.cs" />
+    <Compile Include="Source\CTree\CTree.cs" />
+    <Compile Include="Source\CTree\Leaf.cs" />
+    <Compile Include="Source\StdAfx\Cell.cs" />
+    <Compile Include="Source\StdAfx\Direction.cs" />
+    <Compile Include="Source\StdAfx\LOD.cs" />
+    <Compile Include="Source\StdAfx\StdAfx.cs" />
+    <Compile Include="Source\StdAfx\SurfaceColor.cs" />
+    <Compile Include="Source\StdAfx\SurfaceType.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -215,6 +225,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
