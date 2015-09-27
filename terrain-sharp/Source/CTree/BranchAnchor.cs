@@ -2,9 +2,9 @@
 
 namespace terrain_sharp.Source.CTree {
 	class BranchAnchor {
-		Vector3 root;
-		float radius;
-		float length;
-		float lift;
+		public Vector3 root;
+		public float radius;
+		public float length;
+		public float lift;
 	}
 }

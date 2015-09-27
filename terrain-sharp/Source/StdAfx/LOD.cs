@@ -2,7 +2,6 @@
 	enum LOD {
 		Low,
 		Med,
-		High,
-		Levels
+		High
 	}
 }

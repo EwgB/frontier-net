@@ -10,15 +10,15 @@
 	/// This class is used for storing groups of verts and polygons.
 	class GLmesh {
 		GLbbox _bbox;
-		List<int> _index;
+		public List<int> _index;
 		public List<Vector3> _vertex;
-		List<Vector3> _normal;
-		List<glRgba> _color;
-		List<Vector2> _uv;
+		public List<Vector3> _normal;
+		public List<glRgba> _color;
+		public List<Vector2> _uv;
 
 		int TriangleCount() { return _index.Count / 3; }
 
-		void operator+= (const GLmesh& c);
+		void operator+= (const GLmesh c);
 
 		public void PushTriangle(int i1, int i2, int i3) {
 			_index.Add(i1);
