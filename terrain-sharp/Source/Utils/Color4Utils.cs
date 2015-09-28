@@ -39,7 +39,7 @@
 			0x15D, 0x060, 0x1A1, 0x0C9, 0x043, 0x10E, 0x121, 0x194, 0x1C0, 0x1E4, 0x079, 0x02C, 0x1A9, 0x178, 0x086, 0x1A6,
 		};
 
-		public static Color4 Color4FromHsl(float h, float sl, float l) {
+		public static Color4 FromHsl(float h, float sl, float l) {
 			float r = l;   // default to gray
 			float g = l;
 			float b = l;
@@ -94,6 +94,10 @@
 			return new Color4(r, g, b, 1);
 		}
 
+		public static Color4 FromLuminance(float luminance) {
+			return new Color4(luminance, luminance, luminance, 1);
+		}
+
 		public static Color4 GetUnique(int i) {
 			Color4 c = new Color4();
 			i = color_mix[i % 512];
@@ -122,14 +126,14 @@
 		//		1);
 		//}
 
-		//		GLrgba glRgba(long c) {
-		//			GLrgba result;
-		//			result.red = (float) GetRValue(c) / 255.0f;
-		//			result.green = (float) GetGValue(c) / 255.0f;
-		//			result.blue = (float) GetBValue(c) / 255.0f;
-		//			result.alpha = 1.0f;
-		//			return result;
-		//		}
+		//public static Color4 FromLong(long c) {
+		//	Color4 result = new Color4();
+		//	result.R = (float) GetRValue(c) / 255.0f;
+		//	result.G = (float) GetGValue(c) / 255.0f;
+		//	result.B = (float) GetBValue(c) / 255.0f;
+		//	result.A = 1.0f;
+		//	return result;
+		//}
 
 		//		GLrgba glRgba(float luminance) {
 		//			GLrgba result;

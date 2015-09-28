@@ -1,12 +1,15 @@
 ﻿namespace terrain_sharp.Source.CTree {
-	using OpenTK;
-	using OpenTK.Graphics.OpenGL;
-
-	using StdAfx;
-
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+
+	using OpenTK;
+	using OpenTK.Graphics;
+	using OpenTK.Graphics.OpenGL;
+
+	using Extensions;
+	using StdAfx;
+	using Utils;
 
 	class CTree {
 		const int TREE_ALTS = 3;
@@ -18,33 +21,20 @@
 		static readonly Vector3 UP = new Vector3(0f, 0f, 1f);
 
 		private enum TreeTrunkStyle {
-			TREE_TRUNK_NORMAL,
-			TREE_TRUNK_JAGGED,
-			TREE_TRUNK_BENT,
-			TREE_TRUNK_STYLES
-		};
+			Normal, Jagged, Bent
+		}
 
 		private enum TreeFoliageStyle {
-			TREE_FOLIAGE_UMBRELLA,
-			TREE_FOLIAGE_BOWL,
-			TREE_FOLIAGE_SHIELD,
-			TREE_FOLIAGE_PANEL,
-			TREE_FOLIAGE_SAG,
-			TREE_FOLIAGE_STYLES
-		};
+			Umbrella, Bowl, Shield, Panel, Sag
+		}
 
 		private enum TreeLiftStyle {
-			TREE_LIFT_STRAIGHT,
-			TREE_LIFT_IN,
-			TREE_LIFT_OUT,
-			TREE_LIFT_STYLES
-		};
+			Straight, In, Out
+		}
 
 		private enum TreeLeafStyle {
-			Fan,
-			Scatter,
-			Styles
-		};
+			Fan, Scatter
+		}
 
 		TreeTrunkStyle _trunk_style;
 		TreeFoliageStyle _foliage_style;
@@ -82,14 +72,14 @@
 		float _branch_reach;
 		float _foliage_size;
 		float _leaf_size;
-		glRgba _bark_color1;
-		glRgba _bark_color2;
-		glRgba _leaf_color;
+		Color4 _bark_color1;
+		Color4 _bark_color2;
+		Color4 _leaf_color;
 		List<Leaf> _leaf_list;
 		GLmesh[,] _meshes = new GLmesh[TREE_ALTS, Enum.GetValues(typeof(LOD)).Length];
 
 		private void DrawBark() {
-			GL.Color3(_bark_color1);
+			GL.Color4(_bark_color1);
 			GL.BindTexture(TextureTarget.Texture2D, 0);
 			GL.Begin(PrimitiveType.Quads);
 			GL.TexCoord2(0f, 0f);
@@ -106,10 +96,10 @@
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Nearest);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Nearest);
 			int frames = Math.Max(t.height / t.width, 1);
-			float frame_size = 1.0f / frames;
+			float frame_size = 1f / frames;
 			int frame = WorldNoisei(_seed_current++) % frames;
 			var uvframe = new GLuvbox();
-			uvframe.Set(new Vector2(0.0f, frame * frame_size), new Vector2(1.0f, (frame + 1) * frame_size));
+			uvframe.Set(new Vector2(0, frame * frame_size), new Vector2(1, (frame + 1) * frame_size));
 			GL.BindTexture(TextureTarget.Texture2D, t.id);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 			GL.ColorMask(true, true, true, false);
@@ -133,11 +123,10 @@
 
 		private void DrawLeaves() {
 			if (_leaf_style == TreeLeafStyle.Scatter) {
-				glRgba color = _bark_color1;
-				color *= 0.5f;
+				Color4 color = _bark_color1.Scale(0.5f);
 				GL.BindTexture(TextureTarget.Texture2D, 0);
 				GL.LineWidth(3);
-				GL.Color3(color);
+				GL.Color4(color);
 
 				GL.Begin(PrimitiveType.Lines);
 				foreach (var leaf in _leaf_list) {
@@ -149,7 +138,7 @@
 
 			GLtexture t = TextureFromName("foliage.png");
 			int frames = Math.Max(t.height / t.width, 1);
-			float frame_size = 1.0f / (float) frames;
+			float frame_size = 1 / (float) frames;
 			int frame = WorldNoisei(_seed_current++) % frames;
 			var uvframe = new GLuvbox();
 			uvframe.Set(new Vector2(0f, frame * frame_size), new Vector2(1f, (frame + 1) * frame_size));
@@ -162,12 +151,12 @@
 			for (int i = 0; i < _leaf_list.Count; i++) {
 				Leaf l = _leaf_list[i];
 				GL.PushMatrix();
-				GL.Translate(l.position.x, l.position.y, 0);
-				GL.Rotate(l.angle, 0.0f, 0.0f, 1.0f);
-				GL.Translate(-l.position.x, -l.position.y, 0);
+				GL.Translate(l.position.X, l.position.Y, 0);
+				GL.Rotate(l.angle, 0, 0, 1);
+				GL.Translate(-l.position.X, -l.position.Y, 0);
 
-				//GLrgba color = _leaf_color * l.brightness;
-				GL.Color3(l.color);
+				//Color4 color = _leaf_color * l.brightness;
+				GL.Color4(l.color);
 				GL.Begin(PrimitiveType.Quads);
 				Vector2 uv = uvframe.Corner(0);
 				GL.TexCoord2(uv);
@@ -187,20 +176,20 @@
 		}
 
 		private void DrawVines() {
-			GL.Color3(&_bark_color1.red);
+			GL.Color4(_bark_color1);
 			GL.BindTexture(TextureTarget.Texture2D, 0);
 			GLtexture t = TextureFromName("vines.png");
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Nearest);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Nearest);
 			int frames = Math.Max(t.height / t.width, 1);
-			float frame_size = 1.0f / (float) frames;
+			float frame_size = 1 / (float) frames;
 			int frame = WorldNoisei(_seed_current++) % frames;
 			var uvframe = new GLuvbox();
 			uvframe.Set(new Vector2(0f, frame * frame_size), new Vector2(1f, (frame + 1) * frame_size));
 			GL.BindTexture(TextureTarget.Texture2D, t.id);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-			GLrgba color = _leaf_color * 0.75f;
-			GL.Color3(_leaf_color);
+			Color4 color = _leaf_color.Scale(0.75f);
+			GL.Color4(_leaf_color);
 			GL.Begin(PrimitiveType.Quads);
 			Vector2 uv = uvframe.Corner(3);
 			GL.TexCoord2(uv);
@@ -225,19 +214,19 @@
 
 			//We get the bounding box for the high-res tree, but we cut off the roots.  No reason to 
 			//waste texture pixels on that.
-			_meshes[0][LOD.High].RecalculateBoundingBox();
-			box = _meshes[0][LOD.High]._bbox;
-			box.pmin.z = 0.0f;  //Cuts off roots
+			_meshes[0, (int) LOD.High].RecalculateBoundingBox();
+			box = _meshes[0, (int) LOD.High]._bbox;
+			box.pmin.Z = 0;  //Cuts off roots
 			center = box.Center();
 			size = box.Count;
 
 			//Move our viewpoint to the middle of the texture frame 
-			GL.Translate(TEXTURE_HALF, TEXTURE_HALF, 0.0f);
-			GL.Rotate(-90.0f, 1.0f, 0.0f, 0.0f);
+			GL.Translate(TEXTURE_HALF, TEXTURE_HALF, 0);
+			GL.Rotate(-90, 1, 0, 0);
 
 			//Scale so that the tree will exactly fill the rectangle
-			GL.Scale((1.0f / size.X) * TEXTURE_SIZE, 1.0f, (1.0f / size.Z) * TEXTURE_SIZE);
-			GL.Translate(-center.X, 0.0f, -center.Z);
+			GL.Scale((1 / size.X) * TEXTURE_SIZE, 1, (1 / size.Z) * TEXTURE_SIZE);
+			GL.Translate(-center.X, 0, -center.Z);
 			GL.Color3(1, 1, 1);
 			Render(new Vector3(), 0, LOD.High);
 		}
@@ -249,7 +238,7 @@
 			for (int segment = 0; segment < points.Count; segment++) {
 				float v = segment;
 				m.PushVertex(points[segment], UP, new Vector2(0.75f, v));
-				m.PushVertex(Vector3.Add(points[segment], new Vector3(0.0f, 0.0f, -3.5f)), UP, new Vector2(0.5f, v));
+				m.PushVertex(Vector3.Add(points[segment], new Vector3(0, 0, -3.5f)), UP, new Vector2(0.5f, v));
 			}
 			for (int segment = 0; segment < points.Count - 1; segment++) {
 				m.PushTriangle(
@@ -266,34 +255,34 @@
 		private void DoFoliage(GLmesh m, Vector3 pos, float fsize, float angle) {
 			fsize *= _foliage_size;
 			var uv = new GLuvbox();
-			uv.Set(new Vector2(0.25f, 0.0f), new Vector2(0.5f, 1.0f));
+			uv.Set(new Vector2(0.25f, 0), new Vector2(0.5f, 1));
 			int base_index = m._vertex.Count;
 
 			//don't let the foliage get so big it touches the ground.
 			fsize = Math.Min(pos.Z - 2.0f, fsize);
 			if (fsize < 0.1f)
 				return;
-			if (_foliage_style == TreeFoliageStyle.TREE_FOLIAGE_PANEL) {
-				m.PushVertex(new Vector3(-0.0f, -fsize, -fsize), UP, uv.Corner(0));
-				m.PushVertex(new Vector3(-1.0f, fsize, -fsize), UP, uv.Corner(1));
-				m.PushVertex(new Vector3(-1.0f, fsize, fsize), UP, uv.Corner(2));
-				m.PushVertex(new Vector3(-0.0f, -fsize, fsize), UP, uv.Corner(3));
+			if (_foliage_style == TreeFoliageStyle.Panel) {
+				m.PushVertex(new Vector3(-0, -fsize, -fsize), UP, uv.Corner(0));
+				m.PushVertex(new Vector3(-1, fsize, -fsize), UP, uv.Corner(1));
+				m.PushVertex(new Vector3(-1, fsize, fsize), UP, uv.Corner(2));
+				m.PushVertex(new Vector3(-0, -fsize, fsize), UP, uv.Corner(3));
 
-				m.PushVertex(new Vector3(0.0f, -fsize, -fsize), UP, uv.Corner(1));
-				m.PushVertex(new Vector3(1.0f, fsize, -fsize), UP, uv.Corner(2));
-				m.PushVertex(new Vector3(1.0f, fsize, fsize), UP, uv.Corner(3));
-				m.PushVertex(new Vector3(0.0f, -fsize, fsize), UP, uv.Corner(0));
+				m.PushVertex(new Vector3(0, -fsize, -fsize), UP, uv.Corner(1));
+				m.PushVertex(new Vector3(1, fsize, -fsize), UP, uv.Corner(2));
+				m.PushVertex(new Vector3(1, fsize, fsize), UP, uv.Corner(3));
+				m.PushVertex(new Vector3(0, -fsize, fsize), UP, uv.Corner(0));
 
 				m.PushQuad(base_index + 0, base_index + 1, base_index + 2, base_index + 3);
 				m.PushQuad(base_index + 7, base_index + 6, base_index + 5, base_index + 4);
 
-			} else if (_foliage_style == TreeFoliageStyle.TREE_FOLIAGE_SHIELD) {
-				m.PushVertex(new Vector3(fsize / 2, 0.0f, 0.0f), UP, uv.Center());
-				m.PushVertex(new Vector3(0.0f, -fsize, 0.0f), UP, uv.Corner(0));
-				m.PushVertex(new Vector3(0.0f, 0.0f, fsize), UP, uv.Corner(1));
-				m.PushVertex(new Vector3(0.0f, fsize, 0.0f), UP, uv.Corner(2));
-				m.PushVertex(new Vector3(0.0f, 0.0f, -fsize), UP, uv.Corner(3));
-				m.PushVertex(new Vector3(-fsize / 2, 0.0f, 0.0f), UP, uv.Center());
+			} else if (_foliage_style == TreeFoliageStyle.Shield) {
+				m.PushVertex(new Vector3(fsize / 2, 0, 0), UP, uv.Center());
+				m.PushVertex(new Vector3(0, -fsize, 0), UP, uv.Corner(0));
+				m.PushVertex(new Vector3(0, 0, fsize), UP, uv.Corner(1));
+				m.PushVertex(new Vector3(0, fsize, 0), UP, uv.Corner(2));
+				m.PushVertex(new Vector3(0, 0, -fsize), UP, uv.Corner(3));
+				m.PushVertex(new Vector3(-fsize / 2, 0, 0), UP, uv.Center());
 				//Cap
 				m.PushTriangle(base_index, base_index + 1, base_index + 2);
 				m.PushTriangle(base_index, base_index + 2, base_index + 3);
@@ -303,7 +292,7 @@
 				m.PushTriangle(base_index + 5, base_index + 3, base_index + 2);
 				m.PushTriangle(base_index + 5, base_index + 4, base_index + 3);
 				m.PushTriangle(base_index + 5, base_index + 1, base_index + 4);
-			} else if (_foliage_style == TreeFoliageStyle.TREE_FOLIAGE_SAG) {
+			} else if (_foliage_style == TreeFoliageStyle.Sag) {
 				/*     /\
 							/__\
 						 /|  |\
@@ -314,10 +303,10 @@
 				float level2 = fsize * -1.2f;
 
 				var uv_inner = new GLuvbox();
-				uv_inner.Set(new Vector2(0.25f + 1.25f, 0.125f), new Vector2(0.5f - 0.125f, 1.0f - 0.125f));
+				uv_inner.Set(new Vector2(0.25f + 1.25f, 0.125f), new Vector2(0.5f - 0.125f, 1 - 0.125f));
 
 				//Center
-				m.PushVertex(new Vector3(0.0f, 0.0f, 0.0f), UP, uv.Center());
+				m.PushVertex(new Vector3(), UP, uv.Center());
 
 				//First ring
 				m.PushVertex(new Vector3(-fsize / 2, -fsize / 2, level1), UP, uv.Corner(GLUV_TOP_EDGE));//1
@@ -326,12 +315,12 @@
 				m.PushVertex(new Vector3(-fsize / 2, fsize / 2, level1), UP, uv.Corner(GLUV_LEFT_EDGE));//4
 
 				//Tips
-				m.PushVertex(new Vector3(0.0f, -fsize, level2), UP, uv.Corner(1));//5
-				m.PushVertex(new Vector3(fsize, 0.0f, level2), UP, uv.Corner(2));//6
-				m.PushVertex(new Vector3(0.0f, fsize, level2), UP, uv.Corner(3));//7
-				m.PushVertex(new Vector3(-fsize, 0.0f, level2), UP, uv.Corner(0));//8
+				m.PushVertex(new Vector3(0, -fsize, level2), UP, uv.Corner(1));//5
+				m.PushVertex(new Vector3(fsize, 0, level2), UP, uv.Corner(2));//6
+				m.PushVertex(new Vector3(0, fsize, level2), UP, uv.Corner(3));//7
+				m.PushVertex(new Vector3(-fsize, 0, level2), UP, uv.Corner(0));//8
 																																					//Center, but lower
-				m.PushVertex(new Vector3(0.0f, 0.0f, level1 / 16), UP, uv.Center());
+				m.PushVertex(new Vector3(0, 0, level1 / 16), UP, uv.Center());
 
 				//Cap
 				m.PushTriangle(base_index, base_index + 2, base_index + 1);
@@ -343,18 +332,18 @@
 				m.PushTriangle(base_index + 6, base_index + 2, base_index + 3);
 				m.PushTriangle(base_index + 7, base_index + 3, base_index + 4);
 				m.PushTriangle(base_index + 8, base_index + 4, base_index + 1);
-			} else if (_foliage_style == TreeFoliageStyle.TREE_FOLIAGE_BOWL) {
+			} else if (_foliage_style == TreeFoliageStyle.Bowl) {
 				float tip_height;
 
 				tip_height = fsize / 4.0f;
-				if (_foliage_style == TreeFoliageStyle.TREE_FOLIAGE_BOWL)
-					tip_height *= -1.0f;
-				m.PushVertex(new Vector3(0.0f, 0.0f, tip_height), new Vector3(0.0f, 0.0f, 1.0f), uv.Center());
-				m.PushVertex(new Vector3(-fsize, -fsize, -tip_height), new Vector3(-0.5f, -0.5f, 0.0f), uv.Corner(0));
-				m.PushVertex(new Vector3(fsize, -fsize, -tip_height), new Vector3(0.5f, -0.5f, 0.0f), uv.Corner(1));
-				m.PushVertex(new Vector3(fsize, fsize, -tip_height), new Vector3(0.5f, 0.5f, 0.0f), uv.Corner(2));
-				m.PushVertex(new Vector3(-fsize, fsize, -tip_height), new Vector3(-0.5f, 0.5f, 0.0f), uv.Corner(3));
-				m.PushVertex(new Vector3(0.0f, 0.0f, tip_height / 2), new Vector3(0.0f, 0.0f, 1.0f), uv.Center());
+				if (_foliage_style == TreeFoliageStyle.Bowl)
+					tip_height *= -1;
+				m.PushVertex(new Vector3(0, 0, tip_height), new Vector3(0, 0, 1), uv.Center());
+				m.PushVertex(new Vector3(-fsize, -fsize, -tip_height), new Vector3(-0.5f, -0.5f, 0), uv.Corner(0));
+				m.PushVertex(new Vector3(fsize, -fsize, -tip_height), new Vector3(0.5f, -0.5f, 0), uv.Corner(1));
+				m.PushVertex(new Vector3(fsize, fsize, -tip_height), new Vector3(0.5f, 0.5f, 0), uv.Corner(2));
+				m.PushVertex(new Vector3(-fsize, fsize, -tip_height), new Vector3(-0.5f, 0.5f, 0), uv.Corner(3));
+				m.PushVertex(new Vector3(0, 0, tip_height / 2), new Vector3(0, 0, 1), uv.Center());
 				m.PushTriangle(base_index, base_index + 1, base_index + 2);
 				m.PushTriangle(base_index, base_index + 2, base_index + 3);
 				m.PushTriangle(base_index, base_index + 3, base_index + 4);
@@ -366,16 +355,16 @@
 				m.PushTriangle(base_index + 5, base_index + 1, base_index + 4);
 
 				//m.PushQuad (base_index + 1, base_index + 4, base_index + 3, base_index + 2);
-			} else if (_foliage_style == TreeFoliageStyle.TREE_FOLIAGE_UMBRELLA) {
+			} else if (_foliage_style == TreeFoliageStyle.Umbrella) {
 				float tip_height;
 
 				tip_height = fsize / 4.0f;
-				m.PushVertex(new Vector3(0.0f, 0.0f, tip_height), new Vector3(0.0f, 0.0f, 1.0f), uv.Center());
-				m.PushVertex(new Vector3(-fsize, -fsize, -tip_height), new Vector3(-0.5f, -0.5f, 0.0f), uv.Corner(0));
-				m.PushVertex(new Vector3(fsize, -fsize, -tip_height), new Vector3(0.5f, -0.5f, 0.0f), uv.Corner(1));
-				m.PushVertex(new Vector3(fsize, fsize, -tip_height), new Vector3(0.5f, 0.5f, 0.0f), uv.Corner(2));
-				m.PushVertex(new Vector3(-fsize, fsize, -tip_height), new Vector3(-0.5f, 0.5f, 0.0f), uv.Corner(3));
-				m.PushVertex(new Vector3(0.0f, 0.0f, tip_height / 2), new Vector3(0.0f, 0.0f, 1.0f), uv.Center());
+				m.PushVertex(new Vector3(0, 0, tip_height), new Vector3(0, 0, 1), uv.Center());
+				m.PushVertex(new Vector3(-fsize, -fsize, -tip_height), new Vector3(-0.5f, -0.5f, 0), uv.Corner(0));
+				m.PushVertex(new Vector3(fsize, -fsize, -tip_height), new Vector3(0.5f, -0.5f, 0), uv.Corner(1));
+				m.PushVertex(new Vector3(fsize, fsize, -tip_height), new Vector3(0.5f, 0.5f, 0), uv.Corner(2));
+				m.PushVertex(new Vector3(-fsize, fsize, -tip_height), new Vector3(-0.5f, 0.5f, 0), uv.Corner(3));
+				m.PushVertex(new Vector3(0, 0, tip_height / 2), new Vector3(0, 0, 1), uv.Center());
 				//Top
 				m.PushTriangle(base_index, base_index + 2, base_index + 1);
 				m.PushTriangle(base_index, base_index + 3, base_index + 2);
@@ -383,10 +372,10 @@
 				m.PushTriangle(base_index, base_index + 1, base_index + 4);
 			}
 			GLmatrix mat;
-			//angle = MathAngle (pos.x, pos.y, 0.0f, 0.0f);
+			//angle = MathAngle (pos.X, pos.Y, 0, 0);
 			//angle += 45.0f;
 			mat.Identity();
-			mat.Rotate(angle, 0.0f, 0.0f, 1.0f);
+			mat.Rotate(angle, 0, 0, 1);
 			for (int i = base_index; i < m._vertex.Count; i++) {
 				m._vertex[i] = glMatrixTransformPoint(mat, m._vertex[i]);
 				m._vertex[i] += pos;
@@ -404,49 +393,53 @@
 			int base_index = m._vertex.Count;
 			GLmatrix mat = new GLmatrix();
 			mat.Identity();
-			mat.Rotate(branch_angle, 0.0f, 0.0f, 1.0f);
+			mat.Rotate(branch_angle, 0, 0, 1);
 			int radial_steps;
-			if (lod == LOD.Low) {
-				segment_count = 2;
-				radial_steps = 2;
-			} else if (lod == LOD_MED) {
-				radial_steps = 2;
-				segment_count = 3;
-			} else {
-				segment_count = 5;
-				radial_steps = 6;
+			switch (lod) {
+				case LOD.Low:
+					segment_count = 2;
+					radial_steps = 2;
+					break;
+				case LOD.Med:
+					radial_steps = 2;
+					segment_count = 3;
+					break;
+				default:
+					segment_count = 5;
+					radial_steps = 6;
+					break;
 			}
 			int radial_edge = radial_steps + 1;
 			Vector3 core = anchor.root;
 			float radius = anchor.radius;
 			var underside = new List<Vector3>();
+			var pos = new Vector3();
 			for (int segment = 0; segment <= segment_count; segment++) {
 				float horz_pos = segment / (float) (segment_count + 1);
 				float curve;
-				if (_lift_style == TreeLiftStyle.TREE_LIFT_OUT)
+				if (_lift_style == TreeLiftStyle.Out)
 					curve = horz_pos * horz_pos;
-				else if (_lift_style == TreeLiftStyle.TREE_LIFT_IN) {
-					curve = 1.0f - horz_pos;
+				else if (_lift_style == TreeLiftStyle.In) {
+					curve = 1 - horz_pos;
 					curve *= curve * curve;
-					curve = 1.0f - curve;
+					curve = 1 - curve;
 				} else //Straight
 					curve = horz_pos;
-				radius = Math.Max(MIN_RADIUS, anchor.radius * (1.0f - horz_pos));
+				radius = Math.Max(MIN_RADIUS, anchor.radius * (1 - horz_pos));
 				core.Z = anchor.root.Z + anchor.lift * curve * _branch_lift;
 				//if this is the last segment, don't make a ring of points. Make ONE, in the center.
 				//This is so the branch can end at a point.
-				Vector3 pos = new Vector3();
 				if (segment == segment_count) {
 					pos = new Vector3(0, anchor.length * horz_pos, 0);
 					pos = glMatrixTransformPoint(mat, pos);
-					m.PushVertex(pos + core, new Vector3(pos.X, 0.0f, pos.Z), new Vector2(0.249f, pos.Y * _texture_tile));
+					m.PushVertex(pos + core, new Vector3(pos.X, 0, pos.Z), new Vector2(0.249f, pos.Y * _texture_tile));
 				} else {
 					for (int ring = 0; ring <= radial_steps; ring++) {
 						//Make sure the final edge perfectly matches the starting one. Can't leave
 						//this to floating-point math.
 						float angle;
 						if (ring == radial_steps || ring == 0)
-							angle = 0.0f;
+							angle = 0;
 						else
 							angle = ring * (360f / radial_steps);
 						angle *= DEGREES_TO_RADIANS;
@@ -457,7 +450,7 @@
 						pos = glMatrixTransformPoint(mat, pos);
 						m.PushVertex(
 							pos + core,
-							new Vector3(pos.X, 0.0f, pos.Z),
+							new Vector3(pos.X, 0, pos.Z),
 							new Vector2(((float) ring / radial_steps) * 0.249f, pos.Y * _texture_tile));
 					}
 				}
@@ -480,7 +473,7 @@
 				}
 			}
 			//Grab the last point and use it as the origin for the foliage
-			var pos = m._vertex[m._vertex.Count - 1];
+			pos = m._vertex[m._vertex.Count - 1];
 			DoFoliage(m, pos, anchor.length * 0.56f, branch_angle);
 			//We saved the points on the underside of the branch.
 			//Use these to hang vines on the branch
@@ -506,19 +499,19 @@
 			if (lod == LOD.Low) {
 				//Use the fourth frame of our texture
 				var uv = new GLuvbox();
-				uv.Set(new Vector2(0.75f, 0.0f), new Vector2(1.0f, 1.0f));
+				uv.Set(new Vector2(0.75f, 0), new Vector2(1, 1));
 				float height = _current_height;
 				float width = _current_height / 2.0f;
 
 				//First panel
-				m.PushVertex(new Vector3(-width, -width, 0.0f), new Vector3(-width, -width, 0.0f), uv.Corner(0));
-				m.PushVertex(new Vector3(width, width, 0.0f), new Vector3(width, width, 0.0f), uv.Corner(1));
+				m.PushVertex(new Vector3(-width, -width, 0), new Vector3(-width, -width, 0), uv.Corner(0));
+				m.PushVertex(new Vector3(width, width, 0), new Vector3(width, width, 0), uv.Corner(1));
 				m.PushVertex(new Vector3(width, width, height), new Vector3(width, width, height), uv.Corner(2));
 				m.PushVertex(new Vector3(-width, -width, height), new Vector3(-width, -width, height), uv.Corner(3));
 
 				//Second Panel
-				m.PushVertex(new Vector3(-width, width, 0.0f), new Vector3(-width, width, 0.0f), uv.Corner(0));
-				m.PushVertex(new Vector3(width, -width, 0.0f), new Vector3(width, -width, 0.0f), uv.Corner(1));
+				m.PushVertex(new Vector3(-width, width, 0), new Vector3(-width, width, 0), uv.Corner(0));
+				m.PushVertex(new Vector3(width, -width, 0), new Vector3(width, -width, 0), uv.Corner(1));
 				m.PushVertex(new Vector3(width, -width, height), new Vector3(width, -width, height), uv.Corner(2));
 				m.PushVertex(new Vector3(-width, width, height), new Vector3(-width, width, height), uv.Corner(3));
 
@@ -545,7 +538,7 @@
 			float angle;
 			for (int i = -1; i < branch_list.Count; i++) {
 				if (i < 0) { //-1 is the bottom rung, the root. Put it underground, widen it a bit
-					core = TrunkPosition(0.0f, out radius);
+					core = TrunkPosition(0, out radius);
 					radius *= 1.5f;
 					core.Z -= 2.0f;
 				} else {
@@ -556,14 +549,14 @@
 					//Make sure the final edge perfectly matches the starting one. Can't leave
 					//this to floating-point math.
 					if (ring == radial_steps || ring == 0)
-						angle = 0.0f;
+						angle = 0;
 					else
-						angle = (float) ring * (360.0f / (float) radial_steps);
+						angle = ring * (360f / radial_steps);
 					angle *= DEGREES_TO_RADIANS;
 					float x = (float) Math.Sin(angle);
 					float y = (float) Math.Cos(angle);
-					m.PushVertex(core + new Vector3(x * radius, y * radius, 0.0f),
-						new Vector3(x, y, 0.0f),
+					m.PushVertex(core + new Vector3(x * radius, y * radius, 0),
+						new Vector3(x, y, 0),
 						new Vector2(((float) ring / radial_steps) * 0.249f, core.Z * _texture_tile));
 				}
 				segment_count++;
@@ -571,7 +564,7 @@
 
 			//Push one more point, for the very tip of the tree
 			float dummyRadius;
-			m.PushVertex(TrunkPosition(1.0f, out dummyRadius), new Vector3(0.0f, 0.0f, 1.0f), new Vector2(0.0f, 0.0f));
+			m.PushVertex(TrunkPosition(1, out dummyRadius), new Vector3(0, 0, 1), new Vector2(0, 0));
 			//Make the triangles for the main trunk.
 			for (int segment = 0; segment < segment_count - 1; segment++) {
 				for (int ring = 0; ring < radial_steps; ring++) {
@@ -587,17 +580,17 @@
 				m.PushTriangle((ring + 1) + (segment_count - 1) * radial_edge, m._vertex.Count - 1,
 					(ring + 0) + (segment_count - 1) * radial_edge);
 			}
-			DoFoliage(m, m._vertex[m._vertex.Count - 1] + new Vector3(0.0f, 0.0f, -0.0f), _current_height / 2, 0.0f);
+			DoFoliage(m, m._vertex[m._vertex.Count - 1] + new Vector3(0, 0, -0), _current_height / 2, 0);
 			//if (!_canopy) {
-			//DoFoliage (TrunkPosition (vertical_pos, NULL), vertical_pos * _height, 0.0f);
+			//DoFoliage (TrunkPosition (vertical_pos, NULL), vertical_pos * _height, 0);
 			if (_evergreen) { //just rings of foliage, like an evergreen
-				for (int i = 0; i < (int) branch_list.Count; i++) {
-					angle = (float) i * ((360.0f / (float) branch_list.Count));
+				for (int i = 0; i < branch_list.Count; i++) {
+					angle = i * ((360f / branch_list.Count));
 					DoFoliage(m, branch_list[i].root, branch_list[i].length, angle);
 				}
 			} else { //has branches
-				for (int i = 0; i < (int) branch_list.Count; i++) {
-					angle = _current_angle_offset + i * ((360.0f / branch_list.Count) + 180.0f);
+				for (int i = 0; i < branch_list.Count; i++) {
+					angle = _current_angle_offset + i * ((360f / branch_list.Count) + 180);
 					DoBranch(m, branch_list[i], angle, lod);
 				}
 			}
@@ -608,21 +601,21 @@
 			if (_leaf_style == TreeLeafStyle.Fan) {
 				int total_steps = 5;
 				float current_steps = total_steps;
-				for (current_steps = total_steps; current_steps >= 1.0f; current_steps -= 1.0f) {
-					float size = (TEXTURE_HALF / 2) / (1.0f + ((float) total_steps - current_steps));
+				for (current_steps = total_steps; current_steps >= 1; current_steps -= 1) {
+					float size = (TEXTURE_HALF / 2) / (1 + ((float) total_steps - current_steps));
 					float radius = (TEXTURE_HALF - size * 2.0f);
 					float circ = (float) Math.PI * radius * 2;
-					float step_size = 360.0f / current_steps;
-					for (float x = 0.0f; x < 360.0f; x += step_size) {
+					float step_size = 360f / current_steps;
+					for (float x = 0; x < 360f; x += step_size) {
 						float rad = x * DEGREES_TO_RADIANS;
 						var l = new Leaf();
 						l.size = size;
 						l.position.X = (float) (TEXTURE_HALF + Math.Sin(rad) * l.size);
 						l.position.Y = (float) (TEXTURE_HALF + Math.Cos(rad) * l.size);
 						l.angle = -MathAngle(TEXTURE_HALF, TEXTURE_HALF, l.position.X, l.position.Y);
-						//l.brightness = 1.0f - (current_steps / (float)total_steps) * WorldNoisef (_seed_current++) * 0.5f;
-						//l.brightness = 1.0f - WorldNoisef (_seed_current++) * 0.2f;
-						//l.color = glRgbaInterpolate (_leaf_color, glRgba (0.0f, 0.5f, 0.0f), WorldNoisef (_seed_current++) * 0.25f);
+						//l.brightness = 1 - (current_steps / (float)total_steps) * WorldNoisef (_seed_current++) * 0.5f;
+						//l.brightness = 1 - WorldNoisef (_seed_current++) * 0.2f;
+						//l.color = Color4Utils.Interpolate(_leaf_color, new Color4(0, 0.5f, 0), WorldNoisef(_seed_current++) * 0.25f);
 						_leaf_list.Add(l);
 					}
 				}
@@ -633,7 +626,7 @@
 				l.size = leaf_size;
 				l.position.X = TEXTURE_HALF;
 				l.position.Y = TEXTURE_HALF;
-				l.angle = 0.0f;
+				l.angle = 0;
 				_leaf_list.Add(l);
 				//now scatter other leaves around
 				for (int i = 0; i < 50; i++) {
@@ -644,7 +637,7 @@
 					l.dist = delta.Length;
 					//Leaves get smaller as we move from the center of the texture
 					l.size = (0.25f + ((TEXTURE_HALF - l.dist) / TEXTURE_HALF) * 0.75f) * leaf_size;
-					l.angle = 0.0f;
+					l.angle = 0;
 					//l.brightness = 0.7f + ((float)i / 50) * 0.3f;
 					//l.color = 
 					_leaf_list.Add(l);
@@ -679,7 +672,7 @@
 				}
 			}
 			for (int i = 0; i < _leaf_list.Count; i++)
-				_leaf_list[i].color = glRgbaInterpolate(_leaf_color, glRgba(0.0f, 0.5f, 0.0f), WorldNoisef(_seed_current++) * 0.33f);
+				_leaf_list[i].color = Color4Utils.Interpolate(_leaf_color, new Color4(0, 0.5f, 0, 1), WorldNoisef(_seed_current++) * 0.33f);
 		}
 
 		private void DoTexture() {
@@ -702,7 +695,7 @@
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMFilter.Nearest);
 			Byte[] buffer = new Byte[TEXTURE_SIZE * TEXTURE_SIZE * 4];
 			for (int i = 0; i < 4; i++) {
-				GL.ClearColor(1.0f, 0.0f, 1.0f, 0.0f);
+				GL.ClearColor(1, 0, 1, 0);
 				GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 				if (i == 0)
 					DrawBark();
@@ -726,38 +719,38 @@
 			RenderCanvasEnd();
 		}
 
-		//Given the value of 0.0 (root) to 1.0f (top), return the center of the trunk 
+		//Given the value of 0 (root) to 1 (top), return the center of the trunk 
 		//at that height.
 		private Vector3 TrunkPosition(float delta, out float radius_in) {
 			float delta_curve;
 			if (_funnel_trunk) {
-				delta_curve = 1.0f - delta;
+				delta_curve = 1 - delta;
 				delta_curve *= delta_curve;
-				delta_curve = 1.0f - delta_curve;
+				delta_curve = 1 - delta_curve;
 			} else
 				delta_curve = delta;
 			float radius;
 			if (_canopy) //canopy trees are thick all the way up, do not taper to a point
-				radius = _current_base_radius * (1.0f - delta_curve / 2);
+				radius = _current_base_radius * (1 - delta_curve / 2);
 			else
-				radius = _current_base_radius * (1.0f - delta_curve);
+				radius = _current_base_radius * (1 - delta_curve);
 
 			radius = Math.Max(radius, MIN_RADIUS);
 			float bend = delta * delta;
 			Vector3 trunk = new Vector3();
 			switch (_trunk_style) {
-				case TreeTrunkStyle.TREE_TRUNK_BENT:
+				case TreeTrunkStyle.Bent:
 					trunk.X = bend * _current_height / 3.0f;
-					trunk.Y = 0.0f;
+					trunk.Y = 0;
 					break;
-				case TreeTrunkStyle.TREE_TRUNK_JAGGED:
+				case TreeTrunkStyle.Jagged:
 					trunk.X = bend * _current_height / 2.0f;
 					trunk.Y = (float) (Math.Sin(delta * _current_bend_frequency) * _current_height / 3);
 					break;
-				case TreeTrunkStyle.TREE_TRUNK_NORMAL:
+				case TreeTrunkStyle.Normal:
 				default:
-					trunk.X = 0.0f;
-					trunk.Y = 0.0f;
+					trunk.X = 0;
+					trunk.Y = 0;
 					break;
 			}
 			trunk.Z = delta * _current_height;
@@ -770,7 +763,7 @@
 			//_trunk_bend_frequency = 3.0f + WorldNoisef (_seed_current++) * 4.0f;
 			_seed_current = _seed;
 			for (int alt = 0; alt < TREE_ALTS; alt++) {
-				_current_angle_offset = WorldNoisef(_seed_current++) * 360.0f;
+				_current_angle_offset = WorldNoisef(_seed_current++) * 360f;
 				_current_height = _default_height * (0.5f + WorldNoisef(_seed_current++));
 				_current_base_radius = _default_base_radius * (0.5f + WorldNoisef(_seed_current++));
 				_current_branches = _default_branches + WorldNoisei(_seed_current++) % 3;
@@ -797,7 +790,7 @@
 			_seed_current = _seed;
 			//We want our height to fall on a bell curve
 			_default_height = 8.0f + WorldNoisef(_seed_current++) * 4.0f + WorldNoisef(_seed_current++) * 4.0f;
-			_default_bend_frequency = 1.0f + WorldNoisef(_seed_current++) * 2.0f;
+			_default_bend_frequency = 1 + WorldNoisef(_seed_current++) * 2.0f;
 			_default_base_radius = 0.2f + (_default_height / 20.0f) * WorldNoisef(_seed_current++);
 			_default_branches = 2 + WorldNoisei(_seed_current) % 2;
 			//Keep branches away from the ground, since they don't have collision
@@ -808,37 +801,37 @@
 				_default_base_radius *= 1.2f;
 				_default_height *= 1.5f;
 			}
-			_trunk_style = (TreeTrunkStyle) (WorldNoisei(_seed_current) % TREE_TRUNK_STYLES);
-			_foliage_style = (TreeFoliageStyle) (WorldNoisei(_seed_current++) % TREE_FOLIAGE_STYLES);
-			_lift_style = (TreeLiftStyle) (WorldNoisei(_seed_current++) % TREE_LIFT_STYLES);
-			_leaf_style = (TreeLeafStyle) (WorldNoisei(_seed_current++) % TreeLeafStyle.Styles);
+			_trunk_style = (TreeTrunkStyle) (WorldNoisei(_seed_current) % Enum.GetNames(typeof(TreeTrunkStyle)).Count);
+			_foliage_style = (TreeFoliageStyle) (WorldNoisei(_seed_current++) % Enum.GetNames(typeof(TreeFoliageStyle)).Count);
+			_lift_style = (TreeLiftStyle) (WorldNoisei(_seed_current++) % Enum.GetNames(typeof(TreeLiftStyle)).Count);
+			_leaf_style = (TreeLeafStyle) (WorldNoisei(_seed_current++) % Enum.GetNames(typeof(TreeLeafStyle)).Count);
 			_evergreen = _temperature + (WorldNoisef(_seed_current++) * 0.25f) < 0.5f;
 			_has_vines = _moisture > 0.6f && _temperature > 0.5f;
 			//Narrow trees can gorw on top of hills. (Big ones will stick out over cliffs, so we place them low.)
-			GrowsHigh = (_default_base_radius <= 1.0f);
-			_branch_reach = 1.0f + WorldNoisef(_seed_current++) * 0.5f;
-			_branch_lift = 1.0f + WorldNoisef(_seed_current++);
-			_foliage_size = 1.0f;
+			GrowsHigh = (_default_base_radius <= 1);
+			_branch_reach = 1 + WorldNoisef(_seed_current++) * 0.5f;
+			_branch_lift = 1 + WorldNoisef(_seed_current++);
+			_foliage_size = 1;
 			_leaf_size = 0.125f;
 			_leaf_color = TerraformColorGenerate(SurfaceColor.Grass, moisture, _temperature, _seed_current++);
 			_bark_color2 = TerraformColorGenerate(SurfaceColor.Dirt, moisture, _temperature, _seed_current++);
-			_bark_color1 = _bark_color2 * 0.5f;
+			_bark_color1 = _bark_color2.Scale(0.5f);
 			//1 in 8 non-tropical trees has white bark
 			if (!_has_vines && !(WorldNoisei(_seed_current++) % 8))
-				_bark_color2 = glRgba(1.0f);
+				_bark_color2 = Color4Utils.FromLuminance(1);
 			//These foliage styles don't look right on evergreens.
-			if (_evergreen && _foliage_style == TreeFoliageStyle.TREE_FOLIAGE_BOWL)
-				_foliage_style = TreeFoliageStyle.TREE_FOLIAGE_UMBRELLA;
-			if (_evergreen && _foliage_style == TreeFoliageStyle.TREE_FOLIAGE_SHIELD)
-				_foliage_style = TreeFoliageStyle.TREE_FOLIAGE_UMBRELLA;
-			if (_evergreen && _foliage_style == TreeFoliageStyle.TREE_FOLIAGE_PANEL)
-				_foliage_style = TreeFoliageStyle.TREE_FOLIAGE_SAG;
+			if (_evergreen && _foliage_style == TreeFoliageStyle.Bowl)
+				_foliage_style = TreeFoliageStyle.Umbrella;
+			if (_evergreen && _foliage_style == TreeFoliageStyle.Shield)
+				_foliage_style = TreeFoliageStyle.Umbrella;
+			if (_evergreen && _foliage_style == TreeFoliageStyle.Panel)
+				_foliage_style = TreeFoliageStyle.Sag;
 			if (_canopy) {
-				_foliage_style = TreeFoliageStyle.TREE_FOLIAGE_UMBRELLA;
+				_foliage_style = TreeFoliageStyle.Umbrella;
 				_default_height = Math.Max(_default_height, 16.0f);
 				_default_base_radius = 1.5f;
 				_foliage_size = 2.0f;
-				_trunk_style = TreeTrunkStyle.TREE_TRUNK_NORMAL;
+				_trunk_style = TreeTrunkStyle.Normal;
 			}
 			Build();
 			DoLeaves();

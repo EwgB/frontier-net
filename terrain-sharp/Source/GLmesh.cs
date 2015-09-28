@@ -1,24 +1,21 @@
 ﻿namespace terrain_sharp.Source {
 	using OpenTK;
 	using OpenTK.Graphics;
-	using OpenTK.Graphics.OpenGL;
+  using OpenTK.Graphics.OpenGL;
 
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
 
 	/// This class is used for storing groups of verts and polygons.
 	class GLmesh {
-		GLbbox _bbox;
-		public List<int> _index;
-		public List<Vector3> _vertex;
-		public List<Vector3> _normal;
-		public List<glRgba> _color;
-		public List<Vector2> _uv;
+		public GLbbox _bbox = new GLbbox();
+		public List<int> _index = new List<int>();
+		public List<Vector3> _vertex = new List<Vector3>();
+		public List<Vector3> _normal = new List<Vector3>();
+		public List<Color4> _color = new List<Color4>();
+		public List<Vector2> _uv = new List<Vector2>();
 
-		int TriangleCount() { return _index.Count / 3; }
-
-		void operator+= (const GLmesh c);
+		public int TriangleCount() { return _index.Count / 3; }
 
 		public void PushTriangle(int i1, int i2, int i3) {
 			_index.Add(i1);
@@ -38,7 +35,7 @@
 			_uv.Add(uv);
 		}
 
-		public void PushVertex(Vector3 vert, Vector3 normal, glRgba color, Vector2 uv) {
+		public void PushVertex(Vector3 vert, Vector3 normal, Color4 color, Vector2 uv) {
 			_bbox.ContainPoint(vert);
 			_vertex.Add(vert);
 			_normal.Add(normal);

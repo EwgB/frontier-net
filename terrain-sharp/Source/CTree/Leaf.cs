@@ -5,7 +5,7 @@ namespace terrain_sharp.Source.CTree {
 	class Leaf {
 		public Vector2 position;
 		public int neighbor;
-		public glRgba color;
+		public Color4 color;
 		public float size;
 		public float angle;
 		public float dist;
