@@ -76,7 +76,7 @@
 		Color4 _bark_color2;
 		Color4 _leaf_color;
 		List<Leaf> _leaf_list;
-		GLmesh[,] _meshes = new GLmesh[TREE_ALTS, Enum.GetValues(typeof(LOD)).Length];
+		GLMesh[,] _meshes = new GLMesh[TREE_ALTS, Enum.GetValues(typeof(LOD)).Length];
 
 		private void DrawBark() {
 			GL.Color4(_bark_color1);
@@ -98,23 +98,23 @@
 			int frames = Math.Max(t.height / t.width, 1);
 			float frame_size = 1f / frames;
 			int frame = WorldNoisei(_seed_current++) % frames;
-			var uvframe = new GLuvbox();
+			var uvframe = new GLUvBox();
 			uvframe.Set(new Vector2(0, frame * frame_size), new Vector2(1, (frame + 1) * frame_size));
 			GL.BindTexture(TextureTarget.Texture2D, t.id);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 			GL.ColorMask(true, true, true, false);
 			GL.Color4(_bark_color2);
 			GL.Begin(PrimitiveType.Quads);
-			Vector2 uv = uvframe.Corner(0);
+			Vector2 uv = uvframe.Corner(UvBoxPosition.TopLeft);
 			GL.TexCoord2(uv);
 			GL.Vertex2(0, 0);
-			uv = uvframe.Corner(1);
+			uv = uvframe.Corner(UvBoxPosition.TopRight);
 			GL.TexCoord2(uv);
 			GL.Vertex2(TEXTURE_SIZE, 0);
-			uv = uvframe.Corner(2);
+			uv = uvframe.Corner(UvBoxPosition.BottomRight);
 			GL.TexCoord2(uv);
 			GL.Vertex2(TEXTURE_SIZE, TEXTURE_SIZE);
-			uv = uvframe.Corner(3);
+			uv = uvframe.Corner(UvBoxPosition.BottomLeft);
 			GL.TexCoord2(uv);
 			GL.Vertex2(0, TEXTURE_SIZE);
 			GL.End();
@@ -140,7 +140,7 @@
 			int frames = Math.Max(t.height / t.width, 1);
 			float frame_size = 1 / (float) frames;
 			int frame = WorldNoisei(_seed_current++) % frames;
-			var uvframe = new GLuvbox();
+			var uvframe = new GLUvBox();
 			uvframe.Set(new Vector2(0f, frame * frame_size), new Vector2(1f, (frame + 1) * frame_size));
 			GL.BindTexture(TextureTarget.Texture2D, t.id);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
@@ -158,16 +158,16 @@
 				//Color4 color = _leaf_color * l.brightness;
 				GL.Color4(l.color);
 				GL.Begin(PrimitiveType.Quads);
-				Vector2 uv = uvframe.Corner(0);
+				Vector2 uv = uvframe.Corner(UvBoxPosition.TopLeft);
 				GL.TexCoord2(uv);
 				GL.Vertex2(l.position.X - l.size, l.position.Y - l.size);
-				uv = uvframe.Corner(1);
+				uv = uvframe.Corner(UvBoxPosition.TopRight);
 				GL.TexCoord2(uv);
 				GL.Vertex2(l.position.X + l.size, l.position.Y - l.size);
-				uv = uvframe.Corner(2);
+				uv = uvframe.Corner(UvBoxPosition.BottomRight);
 				GL.TexCoord2(uv);
 				GL.Vertex2(l.position.X + l.size, l.position.Y + l.size);
-				uv = uvframe.Corner(3);
+				uv = uvframe.Corner(UvBoxPosition.BottomLeft);
 				GL.TexCoord2(uv);
 				GL.Vertex2(l.position.X - l.size, l.position.Y + l.size);
 				GL.End();
@@ -184,23 +184,23 @@
 			int frames = Math.Max(t.height / t.width, 1);
 			float frame_size = 1 / (float) frames;
 			int frame = WorldNoisei(_seed_current++) % frames;
-			var uvframe = new GLuvbox();
+			var uvframe = new GLUvBox();
 			uvframe.Set(new Vector2(0f, frame * frame_size), new Vector2(1f, (frame + 1) * frame_size));
 			GL.BindTexture(TextureTarget.Texture2D, t.id);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 			Color4 color = _leaf_color.Scale(0.75f);
 			GL.Color4(_leaf_color);
 			GL.Begin(PrimitiveType.Quads);
-			Vector2 uv = uvframe.Corner(3);
+			Vector2 uv = uvframe.Corner(UvBoxPosition.BottomLeft);
 			GL.TexCoord2(uv);
 			GL.Vertex2(0, 0);
-			uv = uvframe.Corner(0);
+			uv = uvframe.Corner(UvBoxPosition.TopLeft);
 			GL.TexCoord2(uv);
 			GL.Vertex2(TEXTURE_SIZE, 0);
-			uv = uvframe.Corner(1);
+			uv = uvframe.Corner(UvBoxPosition.TopRight);
 			GL.TexCoord2(uv);
 			GL.Vertex2(TEXTURE_SIZE, TEXTURE_SIZE);
-			uv = uvframe.Corner(2);
+			uv = uvframe.Corner(UvBoxPosition.BottomRight);
 			GL.TexCoord2(uv);
 			GL.Vertex2(0, TEXTURE_SIZE);
 			GL.End();
@@ -231,7 +231,7 @@
 			Render(new Vector3(), 0, LOD.High);
 		}
 
-		private void DoVines(GLmesh m, List<Vector3> points) {
+		private void DoVines(GLMesh m, List<Vector3> points) {
 			if (!_has_vines)
 				return;
 			int base_index = m._vertex.Count;
@@ -252,9 +252,9 @@
 			}
 		}
 
-		private void DoFoliage(GLmesh m, Vector3 pos, float fsize, float angle) {
+		private void DoFoliage(GLMesh m, Vector3 pos, float fsize, float angle) {
 			fsize *= _foliage_size;
-			var uv = new GLuvbox();
+			var uv = new GLUvBox();
 			uv.Set(new Vector2(0.25f, 0), new Vector2(0.5f, 1));
 			int base_index = m._vertex.Count;
 
@@ -263,26 +263,26 @@
 			if (fsize < 0.1f)
 				return;
 			if (_foliage_style == TreeFoliageStyle.Panel) {
-				m.PushVertex(new Vector3(-0, -fsize, -fsize), UP, uv.Corner(0));
-				m.PushVertex(new Vector3(-1, fsize, -fsize), UP, uv.Corner(1));
-				m.PushVertex(new Vector3(-1, fsize, fsize), UP, uv.Corner(2));
-				m.PushVertex(new Vector3(-0, -fsize, fsize), UP, uv.Corner(3));
+				m.PushVertex(new Vector3(-0, -fsize, -fsize), UP, uv.Corner(UvBoxPosition.TopLeft));
+				m.PushVertex(new Vector3(-1, fsize, -fsize), UP, uv.Corner(UvBoxPosition.TopRight));
+				m.PushVertex(new Vector3(-1, fsize, fsize), UP, uv.Corner(UvBoxPosition.BottomRight));
+				m.PushVertex(new Vector3(-0, -fsize, fsize), UP, uv.Corner(UvBoxPosition.BottomLeft));
 
-				m.PushVertex(new Vector3(0, -fsize, -fsize), UP, uv.Corner(1));
-				m.PushVertex(new Vector3(1, fsize, -fsize), UP, uv.Corner(2));
-				m.PushVertex(new Vector3(1, fsize, fsize), UP, uv.Corner(3));
-				m.PushVertex(new Vector3(0, -fsize, fsize), UP, uv.Corner(0));
+				m.PushVertex(new Vector3(0, -fsize, -fsize), UP, uv.Corner(UvBoxPosition.TopRight));
+				m.PushVertex(new Vector3(1, fsize, -fsize), UP, uv.Corner(UvBoxPosition.BottomRight));
+				m.PushVertex(new Vector3(1, fsize, fsize), UP, uv.Corner(UvBoxPosition.BottomLeft));
+				m.PushVertex(new Vector3(0, -fsize, fsize), UP, uv.Corner(UvBoxPosition.TopLeft));
 
 				m.PushQuad(base_index + 0, base_index + 1, base_index + 2, base_index + 3);
 				m.PushQuad(base_index + 7, base_index + 6, base_index + 5, base_index + 4);
 
 			} else if (_foliage_style == TreeFoliageStyle.Shield) {
-				m.PushVertex(new Vector3(fsize / 2, 0, 0), UP, uv.Center());
-				m.PushVertex(new Vector3(0, -fsize, 0), UP, uv.Corner(0));
-				m.PushVertex(new Vector3(0, 0, fsize), UP, uv.Corner(1));
-				m.PushVertex(new Vector3(0, fsize, 0), UP, uv.Corner(2));
-				m.PushVertex(new Vector3(0, 0, -fsize), UP, uv.Corner(3));
-				m.PushVertex(new Vector3(-fsize / 2, 0, 0), UP, uv.Center());
+				m.PushVertex(new Vector3(fsize / 2, 0, 0), UP, uv.Center);
+				m.PushVertex(new Vector3(0, -fsize, 0), UP, uv.Corner(UvBoxPosition.TopLeft));
+				m.PushVertex(new Vector3(0, 0, fsize), UP, uv.Corner(UvBoxPosition.TopRight));
+				m.PushVertex(new Vector3(0, fsize, 0), UP, uv.Corner(UvBoxPosition.BottomRight));
+				m.PushVertex(new Vector3(0, 0, -fsize), UP, uv.Corner(UvBoxPosition.BottomLeft));
+				m.PushVertex(new Vector3(-fsize / 2, 0, 0), UP, uv.Center);
 				//Cap
 				m.PushTriangle(base_index, base_index + 1, base_index + 2);
 				m.PushTriangle(base_index, base_index + 2, base_index + 3);
@@ -302,25 +302,25 @@
 				float level1 = fsize * -0.4f;
 				float level2 = fsize * -1.2f;
 
-				var uv_inner = new GLuvbox();
+				var uv_inner = new GLUvBox();
 				uv_inner.Set(new Vector2(0.25f + 1.25f, 0.125f), new Vector2(0.5f - 0.125f, 1 - 0.125f));
 
 				//Center
-				m.PushVertex(new Vector3(), UP, uv.Center());
+				m.PushVertex(new Vector3(), UP, uv.Center);
 
 				//First ring
-				m.PushVertex(new Vector3(-fsize / 2, -fsize / 2, level1), UP, uv.Corner(GLUV_TOP_EDGE));//1
-				m.PushVertex(new Vector3(fsize / 2, -fsize / 2, level1), UP, uv.Corner(GLUV_RIGHT_EDGE));//2
-				m.PushVertex(new Vector3(fsize / 2, fsize / 2, level1), UP, uv.Corner(GLUV_BOTTOM_EDGE));//3
-				m.PushVertex(new Vector3(-fsize / 2, fsize / 2, level1), UP, uv.Corner(GLUV_LEFT_EDGE));//4
+				m.PushVertex(new Vector3(-fsize / 2, -fsize / 2, level1), UP, uv.Corner(UvBoxPosition.TopEdge));//1
+				m.PushVertex(new Vector3(fsize / 2, -fsize / 2, level1), UP, uv.Corner(UvBoxPosition.RightEdge));//2
+				m.PushVertex(new Vector3(fsize / 2, fsize / 2, level1), UP, uv.Corner(UvBoxPosition.BottomEdge));//3
+				m.PushVertex(new Vector3(-fsize / 2, fsize / 2, level1), UP, uv.Corner(UvBoxPosition.LeftEdge));//4
 
 				//Tips
-				m.PushVertex(new Vector3(0, -fsize, level2), UP, uv.Corner(1));//5
-				m.PushVertex(new Vector3(fsize, 0, level2), UP, uv.Corner(2));//6
-				m.PushVertex(new Vector3(0, fsize, level2), UP, uv.Corner(3));//7
-				m.PushVertex(new Vector3(-fsize, 0, level2), UP, uv.Corner(0));//8
+				m.PushVertex(new Vector3(0, -fsize, level2), UP, uv.Corner(UvBoxPosition.TopRight));//5
+				m.PushVertex(new Vector3(fsize, 0, level2), UP, uv.Corner(UvBoxPosition.BottomRight));//6
+				m.PushVertex(new Vector3(0, fsize, level2), UP, uv.Corner(UvBoxPosition.BottomLeft));//7
+				m.PushVertex(new Vector3(-fsize, 0, level2), UP, uv.Corner(UvBoxPosition.TopLeft));//8
 																																					//Center, but lower
-				m.PushVertex(new Vector3(0, 0, level1 / 16), UP, uv.Center());
+				m.PushVertex(new Vector3(0, 0, level1 / 16), UP, uv.Center);
 
 				//Cap
 				m.PushTriangle(base_index, base_index + 2, base_index + 1);
@@ -338,12 +338,12 @@
 				tip_height = fsize / 4.0f;
 				if (_foliage_style == TreeFoliageStyle.Bowl)
 					tip_height *= -1;
-				m.PushVertex(new Vector3(0, 0, tip_height), new Vector3(0, 0, 1), uv.Center());
-				m.PushVertex(new Vector3(-fsize, -fsize, -tip_height), new Vector3(-0.5f, -0.5f, 0), uv.Corner(0));
-				m.PushVertex(new Vector3(fsize, -fsize, -tip_height), new Vector3(0.5f, -0.5f, 0), uv.Corner(1));
-				m.PushVertex(new Vector3(fsize, fsize, -tip_height), new Vector3(0.5f, 0.5f, 0), uv.Corner(2));
-				m.PushVertex(new Vector3(-fsize, fsize, -tip_height), new Vector3(-0.5f, 0.5f, 0), uv.Corner(3));
-				m.PushVertex(new Vector3(0, 0, tip_height / 2), new Vector3(0, 0, 1), uv.Center());
+				m.PushVertex(new Vector3(0, 0, tip_height), new Vector3(0, 0, 1), uv.Center);
+				m.PushVertex(new Vector3(-fsize, -fsize, -tip_height), new Vector3(-0.5f, -0.5f, 0), uv.Corner(UvBoxPosition.TopLeft));
+				m.PushVertex(new Vector3(fsize, -fsize, -tip_height), new Vector3(0.5f, -0.5f, 0), uv.Corner(UvBoxPosition.TopRight));
+				m.PushVertex(new Vector3(fsize, fsize, -tip_height), new Vector3(0.5f, 0.5f, 0), uv.Corner(UvBoxPosition.BottomRight));
+				m.PushVertex(new Vector3(-fsize, fsize, -tip_height), new Vector3(-0.5f, 0.5f, 0), uv.Corner(UvBoxPosition.BottomLeft));
+				m.PushVertex(new Vector3(0, 0, tip_height / 2), new Vector3(0, 0, 1), uv.Center);
 				m.PushTriangle(base_index, base_index + 1, base_index + 2);
 				m.PushTriangle(base_index, base_index + 2, base_index + 3);
 				m.PushTriangle(base_index, base_index + 3, base_index + 4);
@@ -359,12 +359,12 @@
 				float tip_height;
 
 				tip_height = fsize / 4.0f;
-				m.PushVertex(new Vector3(0, 0, tip_height), new Vector3(0, 0, 1), uv.Center());
-				m.PushVertex(new Vector3(-fsize, -fsize, -tip_height), new Vector3(-0.5f, -0.5f, 0), uv.Corner(0));
-				m.PushVertex(new Vector3(fsize, -fsize, -tip_height), new Vector3(0.5f, -0.5f, 0), uv.Corner(1));
-				m.PushVertex(new Vector3(fsize, fsize, -tip_height), new Vector3(0.5f, 0.5f, 0), uv.Corner(2));
-				m.PushVertex(new Vector3(-fsize, fsize, -tip_height), new Vector3(-0.5f, 0.5f, 0), uv.Corner(3));
-				m.PushVertex(new Vector3(0, 0, tip_height / 2), new Vector3(0, 0, 1), uv.Center());
+				m.PushVertex(new Vector3(0, 0, tip_height), new Vector3(0, 0, 1), uv.Center);
+				m.PushVertex(new Vector3(-fsize, -fsize, -tip_height), new Vector3(-0.5f, -0.5f, 0), uv.Corner(UvBoxPosition.TopLeft));
+				m.PushVertex(new Vector3(fsize, -fsize, -tip_height), new Vector3(0.5f, -0.5f, 0), uv.Corner(UvBoxPosition.TopRight));
+				m.PushVertex(new Vector3(fsize, fsize, -tip_height), new Vector3(0.5f, 0.5f, 0), uv.Corner(UvBoxPosition.BottomRight));
+				m.PushVertex(new Vector3(-fsize, fsize, -tip_height), new Vector3(-0.5f, 0.5f, 0), uv.Corner(UvBoxPosition.BottomLeft));
+				m.PushVertex(new Vector3(0, 0, tip_height / 2), new Vector3(0, 0, 1), uv.Center);
 				//Top
 				m.PushTriangle(base_index, base_index + 2, base_index + 1);
 				m.PushTriangle(base_index, base_index + 3, base_index + 2);
@@ -382,7 +382,7 @@
 			}
 		}
 
-		private void DoBranch(GLmesh m, BranchAnchor anchor, float branch_angle, LOD lod) {
+		private void DoBranch(GLMesh m, BranchAnchor anchor, float branch_angle, LOD lod) {
 			if (anchor.length < 2.0f)
 				return;
 			if (anchor.radius < MIN_RADIUS)
@@ -480,7 +480,7 @@
 				DoVines(m, underside);
 		}
 
-		private void DoTrunk(GLmesh m, LOD lod) {
+		private void DoTrunk(GLMesh m, LOD lod) {
 			//Determine the branch locations
 			float branch_spacing = (0.95f - _current_lowest_branch) / _current_branches;
 			var branch_list = new List<BranchAnchor>();
@@ -497,22 +497,22 @@
 			//Just make a 2-panel facer
 			if (lod == LOD.Low) {
 				//Use the fourth frame of our texture
-				var uv = new GLuvbox();
+				var uv = new GLUvBox();
 				uv.Set(new Vector2(0.75f, 0), new Vector2(1, 1));
 				float height = _current_height;
 				float width = _current_height / 2.0f;
 
 				//First panel
-				m.PushVertex(new Vector3(-width, -width, 0), new Vector3(-width, -width, 0), uv.Corner(0));
-				m.PushVertex(new Vector3(width, width, 0), new Vector3(width, width, 0), uv.Corner(1));
-				m.PushVertex(new Vector3(width, width, height), new Vector3(width, width, height), uv.Corner(2));
-				m.PushVertex(new Vector3(-width, -width, height), new Vector3(-width, -width, height), uv.Corner(3));
+				m.PushVertex(new Vector3(-width, -width, 0), new Vector3(-width, -width, 0), uv.Corner(UvBoxPosition.TopLeft));
+				m.PushVertex(new Vector3(width, width, 0), new Vector3(width, width, 0), uv.Corner(UvBoxPosition.TopRight));
+				m.PushVertex(new Vector3(width, width, height), new Vector3(width, width, height), uv.Corner(UvBoxPosition.BottomRight));
+				m.PushVertex(new Vector3(-width, -width, height), new Vector3(-width, -width, height), uv.Corner(UvBoxPosition.BottomLeft));
 
 				//Second Panel
-				m.PushVertex(new Vector3(-width, width, 0), new Vector3(-width, width, 0), uv.Corner(0));
-				m.PushVertex(new Vector3(width, -width, 0), new Vector3(width, -width, 0), uv.Corner(1));
-				m.PushVertex(new Vector3(width, -width, height), new Vector3(width, -width, height), uv.Corner(2));
-				m.PushVertex(new Vector3(-width, width, height), new Vector3(-width, width, height), uv.Corner(3));
+				m.PushVertex(new Vector3(-width, width, 0), new Vector3(-width, width, 0), uv.Corner(UvBoxPosition.TopLeft));
+				m.PushVertex(new Vector3(width, -width, 0), new Vector3(width, -width, 0), uv.Corner(UvBoxPosition.TopRight));
+				m.PushVertex(new Vector3(width, -width, height), new Vector3(width, -width, height), uv.Corner(UvBoxPosition.BottomRight));
+				m.PushVertex(new Vector3(-width, width, height), new Vector3(-width, width, height), uv.Corner(UvBoxPosition.BottomLeft));
 
 				for (int i = 0; i < (int) m._normal.Count; i++)
 					m._normal[i].Normalize();
@@ -853,7 +853,7 @@
 				DoTexture();
 		}
 
-		public GLmesh Mesh(int alt, LOD lod) {
+		public GLMesh Mesh(int alt, LOD lod) {
 			return _meshes[alt % TREE_ALTS, (int) lod];
 		}
 

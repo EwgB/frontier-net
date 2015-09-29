@@ -7,7 +7,7 @@
 	using System.Collections.Generic;
 
 	/// This class is used for storing groups of verts and polygons.
-	class GLmesh {
+	class GLMesh {
 		public GLbbox _bbox = new GLbbox();
 		public List<int> _index = new List<int>();
 		public List<Vector3> _vertex = new List<Vector3>();
