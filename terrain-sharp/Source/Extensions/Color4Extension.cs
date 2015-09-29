@@ -1,6 +1,9 @@
 ﻿namespace terrain_sharp.Source.Extensions {
 	using System;
+
 	using OpenTK.Graphics;
+
+	using Utils;
 
 	public static class Color4Extension {
 		public static Color4 Add(this Color4 c1, Color4 c2) {

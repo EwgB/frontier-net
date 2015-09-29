@@ -97,10 +97,10 @@
 				float dot = Vector3.Dot(edge[2], edge[0]);
 				var angle = new float[3];
 				angle[0] = (float) Math.Acos(-dot);
-				if (_isnan(angle[0]))
+				if (float.IsNaN(angle[0]))
 					continue;
 				angle[1] = (float) Math.Acos(-Vector3.Dot(edge[0], edge[1]));
-				if (_isnan(angle[1]))
+				if (float.IsNaN(angle[1]))
 					continue;
 				angle[2] = (float) (Math.PI - (angle[0] + angle[1]));
 				//Now weight each normal by the size of the angle so that the triangle 
@@ -164,10 +164,10 @@
 				float dot = Vector3.Dot(edge[2], edge[0]);
 				var angle = new float[3];
 				angle[0] = (float) Math.Acos(-dot);
-				if (_isnan(angle[0]))
+				if (float.IsNaN(angle[0]))
 					continue;
 				angle[1] = (float) Math.Acos(-Vector3.Dot(edge[0], edge[1]));
-				if (_isnan(angle[1]))
+				if (float.IsNaN(angle[1]))
 					continue;
 				angle[2] = (float) (Math.PI - (angle[0] + angle[1]));
 				//Now weight each normal by the size of the angle so that the triangle 

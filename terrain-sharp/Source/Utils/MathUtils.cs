@@ -1,53 +1,48 @@
-﻿using System;
+﻿namespace terrain_sharp.Source.Utils {
+	using System;
 
-namespace terrain_sharp.Source.Utils {
-	static class MathUtils {
-		/*-----------------------------------------------------------------------------
-		Keep an angle between 0 and 360
-		-----------------------------------------------------------------------------*/
+	public static class MathUtils {
+		public static double DegreeToRadian(double angle) {
+			return Math.PI * angle / 180;
+		}
 
-		//float MathAngle(float angle) {
+		public static double RadianToDegree(double angle) {
+			return angle * (180 / Math.PI);
+		}
+		
+		///<summary>Keep an angle between 0 and 360</summary>
+		public static float MathAngle(float angle) {
+			if (angle < 0)
+				angle = 360 - Math.Abs(angle) % 360;
+			else
+				angle %= 360;
+			return angle;
+		}
 
-		//	if (angle < 0.0f)
-		//		angle = 360.0f - (float) fmod(fabs(angle), 360.0f);
-		//	else
-		//		angle = (float) fmod(angle, 360.0f);
-		//	return angle;
-
-		//}
-
-		///*-----------------------------------------------------------------------------
-		//Get an angle between two given points on a grid
-		//-----------------------------------------------------------------------------*/
-
-		//float MathAngle(float x1, float y1, float x2, float y2) {
-
-		//	float x_delta;
-		//	float z_delta;
-		//	float angle;
-
-		//	z_delta = (y1 - y2);
-		//	x_delta = (x1 - x2);
-		//	if (x_delta == 0) {
-		//		if (z_delta > 0)
-		//			return 0.0f;
-		//		else
-		//			return 180.0f;
-		//	}
-		//	if (fabs(x_delta) < fabs(z_delta)) {
-		//		angle = 90 - (float) atan(z_delta / x_delta) * RADIANS_TO_DEGREES;
-		//		if (x_delta < 0)
-		//			angle -= 180.0f;
-		//	} else {
-		//		angle = (float) atan(x_delta / z_delta) * RADIANS_TO_DEGREES;
-		//		if (z_delta < 0.0f)
-		//			angle += 180.0f;
-		//	}
-		//	if (angle < 0.0f)
-		//		angle += 360.0f;
-		//	return angle;
-
-		//}
+		///<summary>Get an angle between two given points on a grid</summary>
+		public static float MathAngle(float x1, float y1, float x2, float y2) {
+			float z_delta = (y1 - y2);
+			float x_delta = (x1 - x2);
+			if (x_delta == 0) {
+				if (z_delta > 0)
+					return 0;
+				else
+					return 180;
+			}
+			float angle;
+			if (Math.Abs(x_delta) < Math.Abs(z_delta)) {
+				angle = 90 - (float) RadianToDegree(Math.Atan(z_delta / x_delta));
+				if (x_delta < 0)
+					angle -= 180;
+			} else {
+				angle = (float) RadianToDegree(Math.Atan(x_delta / z_delta));
+				if (z_delta < 0)
+					angle += 180;
+			}
+			if (angle < 0)
+				angle += 360;
+			return angle;
+		}
 
 		///*-----------------------------------------------------------------------------
 		//Get distance (squared) between 2 points on a plane

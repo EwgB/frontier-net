@@ -372,7 +372,7 @@
 				m.PushTriangle(base_index, base_index + 1, base_index + 4);
 			}
 			GLmatrix mat;
-			//angle = MathAngle (pos.X, pos.Y, 0, 0);
+			//angle = MathUtils.MathAngle(pos.X, pos.Y, 0, 0);
 			//angle += 45.0f;
 			mat.Identity();
 			mat.Rotate(angle, 0, 0, 1);
@@ -441,8 +441,7 @@
 						if (ring == radial_steps || ring == 0)
 							angle = 0;
 						else
-							angle = ring * (360f / radial_steps);
-						angle *= DEGREES_TO_RADIANS;
+							angle = (float) MathUtils.DegreeToRadian(ring * (360f / radial_steps));
 						pos = new Vector3(
 							(float) (-Math.Sin(angle) * radius),
 							anchor.length * horz_pos,
@@ -551,8 +550,7 @@
 					if (ring == radial_steps || ring == 0)
 						angle = 0;
 					else
-						angle = ring * (360f / radial_steps);
-					angle *= DEGREES_TO_RADIANS;
+						angle = (float) MathUtils.DegreeToRadian(ring * (360f / radial_steps));
 					float x = (float) Math.Sin(angle);
 					float y = (float) Math.Cos(angle);
 					m.PushVertex(core + new Vector3(x * radius, y * radius, 0),
@@ -607,12 +605,12 @@
 					float circ = (float) Math.PI * radius * 2;
 					float step_size = 360f / current_steps;
 					for (float x = 0; x < 360f; x += step_size) {
-						float rad = x * DEGREES_TO_RADIANS;
+						float rad = (float) MathUtils.DegreeToRadian(x);
 						var l = new Leaf();
 						l.size = size;
 						l.position.X = (float) (TEXTURE_HALF + Math.Sin(rad) * l.size);
 						l.position.Y = (float) (TEXTURE_HALF + Math.Cos(rad) * l.size);
-						l.angle = -MathAngle(TEXTURE_HALF, TEXTURE_HALF, l.position.X, l.position.Y);
+						l.angle = -MathUtils.MathAngle(TEXTURE_HALF, TEXTURE_HALF, l.position.X, l.position.Y);
 						//l.brightness = 1 - (current_steps / (float)total_steps) * WorldNoisef (_seed_current++) * 0.5f;
 						//l.brightness = 1 - WorldNoisef (_seed_current++) * 0.2f;
 						//l.color = Color4Utils.Interpolate(_leaf_color, new Color4(0, 0.5f, 0), WorldNoisef(_seed_current++) * 0.25f);
@@ -668,7 +666,7 @@
 				//Get the angles between them
 				for (int i = 1; i < _leaf_list.Count; i++) {
 					int j = _leaf_list[i].neighbor;
-					_leaf_list[i].angle = -MathAngle(_leaf_list[j].position.X, _leaf_list[j].position.Y, _leaf_list[i].position.X, _leaf_list[i].position.Y);
+					_leaf_list[i].angle = -MathUtils.MathAngle(_leaf_list[j].position.X, _leaf_list[j].position.Y, _leaf_list[i].position.X, _leaf_list[i].position.Y);
 				}
 			}
 			for (int i = 0; i < _leaf_list.Count; i++)
