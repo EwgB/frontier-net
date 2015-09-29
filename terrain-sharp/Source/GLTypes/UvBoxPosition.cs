@@ -1,4 +1,4 @@
-﻿namespace terrain_sharp.Source {
+﻿namespace terrain_sharp.Source.GLTypes {
 	enum UvBoxPosition {
 		TopLeft,
 		TopRight,

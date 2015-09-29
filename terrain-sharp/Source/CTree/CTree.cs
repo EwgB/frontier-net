@@ -10,6 +10,7 @@
 	using Extensions;
 	using StdAfx;
 	using Utils;
+	using GLTypes;
 
 	class CTree {
 		const int TREE_ALTS = 3;
@@ -76,7 +77,7 @@
 		Color4 _bark_color2;
 		Color4 _leaf_color;
 		List<Leaf> _leaf_list;
-		GLMesh[,] _meshes = new GLMesh[TREE_ALTS, Enum.GetValues(typeof(LOD)).Length];
+		Mesh[,] _meshes = new Mesh[TREE_ALTS, Enum.GetValues(typeof(LOD)).Length];
 
 		private void DrawBark() {
 			GL.Color4(_bark_color1);
@@ -98,7 +99,7 @@
 			int frames = Math.Max(t.height / t.width, 1);
 			float frame_size = 1f / frames;
 			int frame = WorldNoisei(_seed_current++) % frames;
-			var uvframe = new GLUvBox();
+			var uvframe = new UvBox();
 			uvframe.Set(new Vector2(0, frame * frame_size), new Vector2(1, (frame + 1) * frame_size));
 			GL.BindTexture(TextureTarget.Texture2D, t.id);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
@@ -140,7 +141,7 @@
 			int frames = Math.Max(t.height / t.width, 1);
 			float frame_size = 1 / (float) frames;
 			int frame = WorldNoisei(_seed_current++) % frames;
-			var uvframe = new GLUvBox();
+			var uvframe = new UvBox();
 			uvframe.Set(new Vector2(0f, frame * frame_size), new Vector2(1f, (frame + 1) * frame_size));
 			GL.BindTexture(TextureTarget.Texture2D, t.id);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
@@ -184,7 +185,7 @@
 			int frames = Math.Max(t.height / t.width, 1);
 			float frame_size = 1 / (float) frames;
 			int frame = WorldNoisei(_seed_current++) % frames;
-			var uvframe = new GLUvBox();
+			var uvframe = new UvBox();
 			uvframe.Set(new Vector2(0f, frame * frame_size), new Vector2(1f, (frame + 1) * frame_size));
 			GL.BindTexture(TextureTarget.Texture2D, t.id);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
@@ -231,7 +232,7 @@
 			Render(new Vector3(), 0, LOD.High);
 		}
 
-		private void DoVines(GLMesh m, List<Vector3> points) {
+		private void DoVines(Mesh m, List<Vector3> points) {
 			if (!_has_vines)
 				return;
 			int base_index = m._vertex.Count;
@@ -252,9 +253,9 @@
 			}
 		}
 
-		private void DoFoliage(GLMesh m, Vector3 pos, float fsize, float angle) {
+		private void DoFoliage(Mesh m, Vector3 pos, float fsize, float angle) {
 			fsize *= _foliage_size;
-			var uv = new GLUvBox();
+			var uv = new UvBox();
 			uv.Set(new Vector2(0.25f, 0), new Vector2(0.5f, 1));
 			int base_index = m._vertex.Count;
 
@@ -302,7 +303,7 @@
 				float level1 = fsize * -0.4f;
 				float level2 = fsize * -1.2f;
 
-				var uv_inner = new GLUvBox();
+				var uv_inner = new UvBox();
 				uv_inner.Set(new Vector2(0.25f + 1.25f, 0.125f), new Vector2(0.5f - 0.125f, 1 - 0.125f));
 
 				//Center
@@ -382,7 +383,7 @@
 			}
 		}
 
-		private void DoBranch(GLMesh m, BranchAnchor anchor, float branch_angle, LOD lod) {
+		private void DoBranch(Mesh m, BranchAnchor anchor, float branch_angle, LOD lod) {
 			if (anchor.length < 2.0f)
 				return;
 			if (anchor.radius < MIN_RADIUS)
@@ -480,7 +481,7 @@
 				DoVines(m, underside);
 		}
 
-		private void DoTrunk(GLMesh m, LOD lod) {
+		private void DoTrunk(Mesh m, LOD lod) {
 			//Determine the branch locations
 			float branch_spacing = (0.95f - _current_lowest_branch) / _current_branches;
 			var branch_list = new List<BranchAnchor>();
@@ -497,7 +498,7 @@
 			//Just make a 2-panel facer
 			if (lod == LOD.Low) {
 				//Use the fourth frame of our texture
-				var uv = new GLUvBox();
+				var uv = new UvBox();
 				uv.Set(new Vector2(0.75f, 0), new Vector2(1, 1));
 				float height = _current_height;
 				float width = _current_height / 2.0f;
@@ -853,7 +854,7 @@
 				DoTexture();
 		}
 
-		public GLMesh Mesh(int alt, LOD lod) {
+		public Mesh Mesh(int alt, LOD lod) {
 			return _meshes[alt % TREE_ALTS, (int) lod];
 		}
 

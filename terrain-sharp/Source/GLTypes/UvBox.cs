@@ -1,8 +1,8 @@
-﻿namespace terrain_sharp.Source {
+﻿namespace terrain_sharp.Source.GLTypes {
 	using OpenTK;
 
 	///<summary>This class is used for storing and and manipULating UV texture coords.</summary>
-	class GLUvBox {
+	class UvBox {
 		public Vector2 UL { get; set; }
 		public Vector2 LR { get; set; }
 		public Vector2 Center { get { return (UL + LR) / 2; } }

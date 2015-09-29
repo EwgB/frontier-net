@@ -1,4 +1,4 @@
-﻿namespace terrain_sharp.Source {
+﻿namespace terrain_sharp.Source.GLTypes {
 	using OpenTK;
 	using OpenTK.Graphics;
   using OpenTK.Graphics.OpenGL;
@@ -7,7 +7,7 @@
 	using System.Collections.Generic;
 
 	/// This class is used for storing groups of verts and polygons.
-	class GLMesh {
+	class Mesh {
 		public GLbbox _bbox = new GLbbox();
 		public List<int> _index = new List<int>();
 		public List<Vector3> _vertex = new List<Vector3>();
