@@ -1,6 +1,5 @@
 ﻿namespace terrain_sharp.Source.Extensions {
 	using System;
-
 	using OpenTK.Graphics;
 
 	using Utils;

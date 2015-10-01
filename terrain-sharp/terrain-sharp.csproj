@@ -56,13 +56,16 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Source\GLTypes\Coord.cs" />
+    <Compile Include="Source\GLTypes\UvBoxPosition.cs" />
     <Compile Include="Source\Extensions\Color4Extension.cs" />
-    <Compile Include="Source\GLmesh.cs" />
+    <Compile Include="Source\GLTypes\Mesh.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Source\CTree\BranchAnchor.cs" />
     <Compile Include="Source\CTree\CTree.cs" />
     <Compile Include="Source\CTree\Leaf.cs" />
+    <Compile Include="Source\GLTypes\UvBox.cs" />
     <Compile Include="Source\StdAfx\Cell.cs" />
     <Compile Include="Source\StdAfx\Direction.cs" />
     <Compile Include="Source\StdAfx\LOD.cs" />
@@ -71,6 +74,10 @@
     <Compile Include="Source\StdAfx\SurfaceType.cs" />
     <Compile Include="Source\Utils\Color4Utils.cs" />
     <Compile Include="Source\Utils\MathUtils.cs" />
+    <Compile Include="Source\World\Climate.cs" />
+    <Compile Include="Source\World\Region.cs" />
+    <Compile Include="Source\World\RegionFlag.cs" />
+    <Compile Include="Source\World\World.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
