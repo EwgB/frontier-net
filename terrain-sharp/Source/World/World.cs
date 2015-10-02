@@ -1,6 +1,8 @@
 ﻿namespace terrain_sharp.Source.World {
 	using System;
 
+	using MathNet.Numerics.Random;
+
 	using OpenTK;
 	using OpenTK.Graphics;
 	using OpenTK.Graphics.OpenGL;
@@ -402,12 +404,14 @@
 			return lat + ", " + lng;
 		}
 
-		private void Init() {
+		public void Init() {
 			//Fill in the dither table - a table of random offsets
+			seed = RandomSeed.Time();
+			var random = new MersenneTwister(seed);
 			for (int y = 0; y < DITHER_SIZE; y++) {
 				for (int x = 0; x < DITHER_SIZE; x++) {
-					dithermap[x, y].X = RandomVal() % DITHER_SIZE + RandomVal() % DITHER_SIZE;
-					dithermap[x, y].Y = RandomVal() % DITHER_SIZE + RandomVal() % DITHER_SIZE;
+					dithermap[x, y].X = random.Next(DITHER_SIZE) + random.Next(DITHER_SIZE);
+					dithermap[x, y].Y = random.Next(DITHER_SIZE) + random.Next(DITHER_SIZE);
 				}
 			}
 		}
@@ -453,7 +457,7 @@
 			//sprintf(filename, "%sworld.sav", GameDirectory());
 			//if (!(f = fopen(filename, "rb"))) {
 			//	ConsoleLog("WorldLoad: Could not open file %s", filename);
-			//	WorldGenerate(seed_in);
+			//	Generate(seed_in);
 			//	return;
 			//}
 			//fread(&header, sizeof(header), 1, f);
@@ -465,18 +469,18 @@
 		}
 
 		private void Generate(int seed_in) {
-			RandomInit(seed_in);
+			var random = new MersenneTwister(seed_in);
 			seed = seed_in;
 
 			for (int x = 0; x < NOISE_BUFFER; x++) {
-				noiseInt[x] = RandomVal();
-				noiseFloat[x] = RandomFloat();
+				noiseInt[x] = random.Next();
+				noiseFloat[x] = (float) random.NextDouble();
 			}
 			BuildTrees();
-			windFromWest = (RandomVal() % 2) ? true : false;
-			northernHemisphere = (RandomVal() % 2) ? true : false;
-			riverCount = 4 + RandomVal() % 4;
-			lakeCount = 1 + RandomVal() % 4;
+			windFromWest = random.NextBoolean();
+			northernHemisphere = random.NextBoolean();
+			riverCount = random.Next(4, 7);
+			lakeCount = random.Next(1, 4);
 			TerraformPrepare();
 			TerraformOceans();
 			TerraformCoast();
