@@ -99,7 +99,7 @@
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Nearest);
 			int frames = Math.Max(t.height / t.width, 1);
 			float frame_size = 1f / frames;
-			int frame = World.WorldNoisei(_seed_current++) % frames;
+			int frame = World.Instance.NoiseInt(_seed_current++) % frames;
 			var uvframe = new UvBox();
 			uvframe.Set(new Vector2(0, frame * frame_size), new Vector2(1, (frame + 1) * frame_size));
 			GL.BindTexture(TextureTarget.Texture2D, t.id);
@@ -141,7 +141,7 @@
 			GLtexture t = TextureFromName("foliage.png");
 			int frames = Math.Max(t.height / t.width, 1);
 			float frame_size = 1 / (float) frames;
-			int frame = World.WorldNoisei(_seed_current++) % frames;
+			int frame = World.Instance.NoiseInt(_seed_current++) % frames;
 			var uvframe = new UvBox();
 			uvframe.Set(new Vector2(0f, frame * frame_size), new Vector2(1f, (frame + 1) * frame_size));
 			GL.BindTexture(TextureTarget.Texture2D, t.id);
@@ -185,7 +185,7 @@
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Nearest);
 			int frames = Math.Max(t.height / t.width, 1);
 			float frame_size = 1 / (float) frames;
-			int frame = World.WorldNoisei(_seed_current++) % frames;
+			int frame = World.Instance.NoiseInt(_seed_current++) % frames;
 			var uvframe = new UvBox();
 			uvframe.Set(new Vector2(0f, frame * frame_size), new Vector2(1f, (frame + 1) * frame_size));
 			GL.BindTexture(TextureTarget.Texture2D, t.id);
@@ -613,9 +613,9 @@
 						l.position.X = (float) (TEXTURE_HALF + Math.Sin(rad) * l.size);
 						l.position.Y = (float) (TEXTURE_HALF + Math.Cos(rad) * l.size);
 						l.angle = -MathUtils.Angle(TEXTURE_HALF, TEXTURE_HALF, l.position.X, l.position.Y);
-						//l.brightness = 1 - (current_steps / (float)total_steps) * World.WorldNoisef (_seed_current++) * 0.5f;
-						//l.brightness = 1 - World.WorldNoisef (_seed_current++) * 0.2f;
-						//l.color = Color4Utils.Interpolate(_leaf_color, new Color4(0, 0.5f, 0), World.WorldNoisef(_seed_current++) * 0.25f);
+						//l.brightness = 1 - (current_steps / (float)total_steps) * World.Instance.WorldNoisef (_seed_current++) * 0.5f;
+						//l.brightness = 1 - World.Instance.WorldNoisef (_seed_current++) * 0.2f;
+						//l.color = Color4Utils.Interpolate(_leaf_color, new Color4(0, 0.5f, 0), World.Instance.WorldNoisef(_seed_current++) * 0.25f);
 						_leaf_list.Add(l);
 					}
 				}
@@ -630,9 +630,9 @@
 				_leaf_list.Add(l);
 				//now scatter other leaves around
 				for (int i = 0; i < 50; i++) {
-					l.size = leaf_size * 0.5f;//  * (0.5f + World.WorldNoisef (_seed_current++);
-					l.position.X = TEXTURE_HALF + (World.WorldNoisef(_seed_current++) - 0.5f) * (TEXTURE_HALF - l.size) * 2.0f;
-					l.position.Y = TEXTURE_HALF + (World.WorldNoisef(_seed_current++) - 0.5f) * (TEXTURE_HALF - l.size) * 2.0f;
+					l.size = leaf_size * 0.5f;//  * (0.5f + World.Instance.WorldNoisef (_seed_current++);
+					l.position.X = TEXTURE_HALF + (World.Instance.NoiseFloat(_seed_current++) - 0.5f) * (TEXTURE_HALF - l.size) * 2.0f;
+					l.position.Y = TEXTURE_HALF + (World.Instance.NoiseFloat(_seed_current++) - 0.5f) * (TEXTURE_HALF - l.size) * 2.0f;
 					Vector2 delta = _leaf_list[i].position - new Vector2(TEXTURE_HALF, TEXTURE_HALF);
 					l.dist = delta.Length;
 					//Leaves get smaller as we move from the center of the texture
@@ -672,7 +672,7 @@
 				}
 			}
 			for (int i = 0; i < _leaf_list.Count; i++)
-				_leaf_list[i].color = Color4Utils.Interpolate(_leaf_color, new Color4(0, 0.5f, 0, 1), World.WorldNoisef(_seed_current++) * 0.33f);
+				_leaf_list[i].color = Color4Utils.Interpolate(_leaf_color, new Color4(0, 0.5f, 0, 1), World.Instance.NoiseFloat(_seed_current++) * 0.33f);
 		}
 
 		private void DoTexture() {
@@ -759,16 +759,16 @@
 		}
 
 		private void Build() {
-			//_branches = 3 + World.WorldNoisei (_seed_current++) % 3;
-			//_trunk_bend_frequency = 3.0f + World.WorldNoisef (_seed_current++) * 4.0f;
+			//_branches = 3 + World.Instance.WorldNoisei (_seed_current++) % 3;
+			//_trunk_bend_frequency = 3.0f + World.Instance.WorldNoisef (_seed_current++) * 4.0f;
 			_seed_current = _seed;
 			for (int alt = 0; alt < TREE_ALTS; alt++) {
-				_current_angle_offset = World.WorldNoisef(_seed_current++) * 360f;
-				_current_height = _default_height * (0.5f + World.WorldNoisef(_seed_current++));
-				_current_base_radius = _default_base_radius * (0.5f + World.WorldNoisef(_seed_current++));
-				_current_branches = _default_branches + World.WorldNoisei(_seed_current++) % 3;
-				_current_bend_frequency = _default_bend_frequency + World.WorldNoisef(_seed_current++);
-				_current_lowest_branch = _default_lowest_branch + World.WorldNoisef(_seed_current++) * 0.2f;
+				_current_angle_offset = World.Instance.NoiseFloat(_seed_current++) * 360f;
+				_current_height = _default_height * (0.5f + World.Instance.NoiseFloat(_seed_current++));
+				_current_base_radius = _default_base_radius * (0.5f + World.Instance.NoiseFloat(_seed_current++));
+				_current_branches = _default_branches + World.Instance.NoiseInt(_seed_current++) % 3;
+				_current_bend_frequency = _default_bend_frequency + World.Instance.NoiseFloat(_seed_current++);
+				_current_lowest_branch = _default_lowest_branch + World.Instance.NoiseFloat(_seed_current++) * 0.2f;
 				foreach (LOD lod in Enum.GetValues(typeof(LOD))) {
 					_meshes[alt, (int) lod].Clear();
 					DoTrunk(_meshes[alt, (int) lod], lod);
@@ -789,35 +789,35 @@
 			_temperature = temp_in;
 			_seed_current = _seed;
 			//We want our height to fall on a bell curve
-			_default_height = 8.0f + World.WorldNoisef(_seed_current++) * 4.0f + World.WorldNoisef(_seed_current++) * 4.0f;
-			_default_bend_frequency = 1 + World.WorldNoisef(_seed_current++) * 2.0f;
-			_default_base_radius = 0.2f + (_default_height / 20.0f) * World.WorldNoisef(_seed_current++);
-			_default_branches = 2 + World.WorldNoisei(_seed_current) % 2;
+			_default_height = 8.0f + World.Instance.NoiseFloat(_seed_current++) * 4.0f + World.Instance.NoiseFloat(_seed_current++) * 4.0f;
+			_default_bend_frequency = 1 + World.Instance.NoiseFloat(_seed_current++) * 2.0f;
+			_default_base_radius = 0.2f + (_default_height / 20.0f) * World.Instance.NoiseFloat(_seed_current++);
+			_default_branches = 2 + World.Instance.NoiseInt(_seed_current) % 2;
 			//Keep branches away from the ground, since they don't have collision
 			_default_lowest_branch = (3.0f / _default_height);
 			//Funnel trunk trees taper off quickly at the base.
-			_funnel_trunk = (World.WorldNoisei(_seed_current++) % 6) == 0;
+			_funnel_trunk = (World.Instance.NoiseInt(_seed_current++) % 6) == 0;
 			if (_funnel_trunk) {//Funnel trees need to be bigger and taller to look right
 				_default_base_radius *= 1.2f;
 				_default_height *= 1.5f;
 			}
-			_trunk_style = (TreeTrunkStyle) (World.WorldNoisei(_seed_current) % Enum.GetNames(typeof(TreeTrunkStyle)).Count());
-			_foliage_style = (TreeFoliageStyle) (World.WorldNoisei(_seed_current++) % Enum.GetNames(typeof(TreeFoliageStyle)).Count());
-			_lift_style = (TreeLiftStyle) (World.WorldNoisei(_seed_current++) % Enum.GetNames(typeof(TreeLiftStyle)).Count());
-			_leaf_style = (TreeLeafStyle) (World.WorldNoisei(_seed_current++) % Enum.GetNames(typeof(TreeLeafStyle)).Count());
-			_evergreen = _temperature + (World.WorldNoisef(_seed_current++) * 0.25f) < 0.5f;
+			_trunk_style = (TreeTrunkStyle) (World.Instance.NoiseInt(_seed_current) % Enum.GetNames(typeof(TreeTrunkStyle)).Count());
+			_foliage_style = (TreeFoliageStyle) (World.Instance.NoiseInt(_seed_current++) % Enum.GetNames(typeof(TreeFoliageStyle)).Count());
+			_lift_style = (TreeLiftStyle) (World.Instance.NoiseInt(_seed_current++) % Enum.GetNames(typeof(TreeLiftStyle)).Count());
+			_leaf_style = (TreeLeafStyle) (World.Instance.NoiseInt(_seed_current++) % Enum.GetNames(typeof(TreeLeafStyle)).Count());
+			_evergreen = _temperature + (World.Instance.NoiseFloat(_seed_current++) * 0.25f) < 0.5f;
 			_has_vines = _moisture > 0.6f && _temperature > 0.5f;
 			//Narrow trees can gorw on top of hills. (Big ones will stick out over cliffs, so we place them low.)
 			GrowsHigh = (_default_base_radius <= 1);
-			_branch_reach = 1 + World.WorldNoisef(_seed_current++) * 0.5f;
-			_branch_lift = 1 + World.WorldNoisef(_seed_current++);
+			_branch_reach = 1 + World.Instance.NoiseFloat(_seed_current++) * 0.5f;
+			_branch_lift = 1 + World.Instance.NoiseFloat(_seed_current++);
 			_foliage_size = 1;
 			_leaf_size = 0.125f;
 			_leaf_color = TerraformColorGenerate(SurfaceColor.Grass, moisture, _temperature, _seed_current++);
 			_bark_color2 = TerraformColorGenerate(SurfaceColor.Dirt, moisture, _temperature, _seed_current++);
 			_bark_color1 = _bark_color2.Scale(0.5f);
 			//1 in 8 non-tropical trees has white bark
-			if (!_has_vines && ((World.WorldNoisei(_seed_current++) % 8) == 0))
+			if (!_has_vines && ((World.Instance.NoiseInt(_seed_current++) % 8) == 0))
 				_bark_color2 = Color4Utils.FromLuminance(1);
 			//These foliage styles don't look right on evergreens.
 			if (_evergreen && _foliage_style == TreeFoliageStyle.Bowl)

@@ -51,28 +51,33 @@
 		private const int FILE_VERSION = 1;
 		#endregion
 
+		private static readonly World instance = new World();
+		public static World Instance { get { return instance; } }
+
 		public int CanopyTree { get; private set; }
 		public int Map { get; private set; }
-		public World Planet { get; private set; } //THE WHOLE THING!
 
-		CTree[,] tree = new CTree[TREE_TYPES, TREE_TYPES];
-		Coord[,] dithermap = new Coord[DITHER_SIZE, DITHER_SIZE];
+		private CTree[,] tree = new CTree[TREE_TYPES, TREE_TYPES];
+		private Coord[,] dithermap = new Coord[DITHER_SIZE, DITHER_SIZE];
 
-		int seed;
-		bool wind_from_west;
-		bool northern_hemisphere;
-		int river_count;
-		int lake_count;
-		float[] noisef = new float[NOISE_BUFFER];
-		int[] noisei = new int[NOISE_BUFFER];
-		Region[,] map = new Region[WORLD_GRID, WORLD_GRID];
+		private int seed;
+		private bool windFromWest;
+		private bool northernHemisphere;
+		private int riverCount;
+		private int lakeCount;
+		private float[] noiseFloat = new float[NOISE_BUFFER];
+		private int[] noiseInt = new int[NOISE_BUFFER];
+
+		private Region[,] map = new Region[WORLD_GRID, WORLD_GRID];
+		private Region GetRegion(int index_x, int index_y) { return map[index_x, index_y]; }
+		private void SetRegion(int index_x, int index_y, Region val) { map[index_x, index_y] = val; }
 
 		#region The following functions are used when generating elevation data
 		///<summary>
 		///	This modifies the passed elevation value AFTER region cross-fading is complete,
 		///	For things that should not be mimicked by neighbors. (Like rivers.)
 		///</summary>
-		float do_height_noblend(float val, Region r, Vector2 offset, float water) {
+		private float DoHeightNoBlend(float val, Region r, Vector2 offset, float water) {
 			//return val;
 			if (r.FlagsShape.HasFlag(RegionFlag.RiverAny)) {
 				//if this river is strictly north / south
@@ -166,7 +171,7 @@
 		///	Water is the water level.  Detail is the height of the rolling hills. Bias
 		///	is a direct height added on to these.
 		///</summary>
-		float do_height(Region r, Vector2 offset, float water, float detail, float bias) {
+		private float DoHeight(Region r, Vector2 offset, float water, float detail, float bias) {
 			//Modify the detail values before they are applied
 			if (r.FlagsShape.HasFlag(RegionFlag.Crater)) {
 				if (detail > 0.5f)
@@ -234,7 +239,7 @@
 			return val;
 		}
 
-		void build_trees() {
+		private void BuildTrees() {
 			int rotator = 0;
 			for (int m = 0; m < TREE_TYPES; m++) {
 				for (int t = 0; t < TREE_TYPES; t++) {
@@ -249,7 +254,7 @@
 			}
 		}
 
-		void build_map_texture() {
+		private void BuildMapTexture() {
 			if (Map == 0)
 				Map = GL.GenTexture();
 			GL.BindTexture(TextureTarget.Texture2D, Map);
@@ -261,7 +266,7 @@
 				for (int y = 0; y < WORLD_GRID; y++) {
 					//Flip it vertically, because the OpenGL texture coord system is retarded.
 					int yy = (WORLD_GRID - 1) - y;
-					Region r = Planet.map[x, yy];
+					Region r = map[x, yy];
 					int pos = (x + y * WORLD_GRID) * 3;
 					buffer[pos] = (byte) (r.color_map.R * 255.0f);
 					buffer[pos + 1] = (byte) (r.color_map.G * 255.0f);
@@ -273,7 +278,7 @@
 		}
 		#endregion
 
-		float WorldWaterLevel(int world_x, int world_y) {
+		private float WaterLevel(int world_x, int world_y) {
 			world_x += REGION_HALF;
 			world_y += REGION_HALF;
 			var origin = new Coord(
@@ -283,14 +288,14 @@
 				(float) (world_x % REGION_SIZE) / REGION_SIZE,
 				(float) (world_y % REGION_SIZE) / REGION_SIZE);
 			//Four corners: upper left, upper right, etc.
-			Region rul = WorldRegionGet(origin.X, origin.Y);
-			Region rur = WorldRegionGet(origin.X + 1, origin.Y);
-			Region rbl = WorldRegionGet(origin.X, origin.Y + 1);
-			Region rbr = WorldRegionGet(origin.X + 1, origin.Y + 1);
+			Region rul = GetRegion(origin.X, origin.Y);
+			Region rur = GetRegion(origin.X + 1, origin.Y);
+			Region rbl = GetRegion(origin.X, origin.Y + 1);
+			Region rbr = GetRegion(origin.X + 1, origin.Y + 1);
 			return MathUtils.InterpolateQuad(rul.geo_water, rur.geo_water, rbl.geo_water, rbr.geo_water, offset, ((origin.X + origin.Y) % 2) == 0);
 		}
 
-		float WorldBiasLevel(int world_x, int world_y) {
+		private float BiasLevel(int world_x, int world_y) {
 			world_x += REGION_HALF;
 			world_y += REGION_HALF;
 			var origin = new Coord(
@@ -300,17 +305,17 @@
 				(float) (world_x % REGION_SIZE) / REGION_SIZE,
 				(float) (world_y % REGION_SIZE) / REGION_SIZE);
 			//Four corners: upper left, upper right, etc.
-			Region rul = WorldRegionGet(origin.X, origin.Y);
-			Region rur = WorldRegionGet(origin.X + 1, origin.Y);
-			Region rbl = WorldRegionGet(origin.X, origin.Y + 1);
-			Region rbr = WorldRegionGet(origin.X + 1, origin.Y + 1);
+			Region rul = GetRegion(origin.X, origin.Y);
+			Region rur = GetRegion(origin.X + 1, origin.Y);
+			Region rbl = GetRegion(origin.X, origin.Y + 1);
+			Region rbr = GetRegion(origin.X + 1, origin.Y + 1);
 			return MathUtils.InterpolateQuad(rul.geo_bias, rur.geo_bias, rbl.geo_bias, rbr.geo_bias, offset, ((origin.X + origin.Y) % 2) == 0);
 		}
 
-		Cell WorldCell(int world_x, int world_y) {
+		private Cell GetCell(int world_x, int world_y) {
 			float detail = Entropy(world_x, world_y);
-			float bias = WorldBiasLevel(world_x, world_y);
-			float water = WorldWaterLevel(world_x, world_y);
+			float bias = BiasLevel(world_x, world_y);
+			float water = WaterLevel(world_x, world_y);
 			var origin = new Coord(
 				MathHelper.Clamp(world_x / REGION_SIZE, 0, WORLD_GRID - 1),
 				MathHelper.Clamp(world_y / REGION_SIZE, 0, WORLD_GRID - 1));
@@ -323,8 +328,8 @@
 				(float) ((world_x) % REGION_SIZE) / REGION_SIZE,
 				(float) ((world_y) % REGION_SIZE) / REGION_SIZE);
 			var result = new Cell();
-			result.detail = detail;
-			result.water_level = water;
+			result.Detail = detail;
+			result.WaterLevel = water;
 
 			Region rul, rur, rbl, rbr;//Four corners: upper left, upper right, etc.
 			float eul, eur, ebl, ebr;
@@ -336,26 +341,26 @@
 				(world_y + BLEND_DISTANCE) / REGION_SIZE);
 
 			if (ul == br) {
-				rul = WorldRegionGet(ul.X, ul.Y);
-				result.elevation = do_height(rul, offset, water, detail, bias);
-				result.elevation = do_height_noblend(result.elevation, rul, offset, water);
+				rul = GetRegion(ul.X, ul.Y);
+				result.Elevation = DoHeight(rul, offset, water, detail, bias);
+				result.Elevation = DoHeightNoBlend(result.Elevation, rul, offset, water);
 				return result;
 			}
-			rul = WorldRegionGet(ul.X, ul.Y);
-			rur = WorldRegionGet(br.X, ul.Y);
-			rbl = WorldRegionGet(ul.X, br.Y);
-			rbr = WorldRegionGet(br.X, br.Y);
+			rul = GetRegion(ul.X, ul.Y);
+			rur = GetRegion(br.X, ul.Y);
+			rbl = GetRegion(ul.X, br.Y);
+			rbr = GetRegion(br.X, br.Y);
 
-			eul = do_height(rul, offset, water, detail, bias);
-			eur = do_height(rur, offset, water, detail, bias);
-			ebl = do_height(rbl, offset, water, detail, bias);
-			ebr = do_height(rbr, offset, water, detail, bias);
-			result.elevation = MathUtils.InterpolateQuad(eul, eur, ebl, ebr, blend, left);
-			result.elevation = do_height_noblend(result.elevation, rul, offset, water);
+			eul = DoHeight(rul, offset, water, detail, bias);
+			eur = DoHeight(rur, offset, water, detail, bias);
+			ebl = DoHeight(rbl, offset, water, detail, bias);
+			ebr = DoHeight(rbr, offset, water, detail, bias);
+			result.Elevation = MathUtils.InterpolateQuad(eul, eur, ebl, ebr, blend, left);
+			result.Elevation = DoHeightNoBlend(result.Elevation, rul, offset, water);
 			return result;
 		}
 
-		int WorldTreeType(float moisture, float temperature) {
+		private int TreeType(float moisture, float temperature) {
 			int m = (int) (moisture * TREE_TYPES);
 			int t = (int) (temperature * TREE_TYPES);
 			m = MathHelper.Clamp(m, 0, TREE_TYPES - 1);
@@ -363,13 +368,13 @@
 			return m + t * TREE_TYPES;
 		}
 
-		CTree WorldTree(int id) {
+		private CTree WorldTree(int id) {
 			int m = id % TREE_TYPES;
 			int t = (id - m) / TREE_TYPES;
 			return tree[m, t];
 		}
 
-		string WorldLocationName(int world_x, int world_y) {
+		private string LocationName(int world_x, int world_y) {
 			world_x /= REGION_SIZE;
 			world_y /= REGION_SIZE;
 			world_x -= WORLD_GRID_CENTER;
@@ -397,7 +402,7 @@
 			return lat + ", " + lng;
 		}
 
-		void WorldInit() {
+		private void Init() {
 			//Fill in the dither table - a table of random offsets
 			for (int y = 0; y < DITHER_SIZE; y++) {
 				for (int x = 0; x < DITHER_SIZE; x++) {
@@ -407,17 +412,17 @@
 			}
 		}
 
-		public float WorldNoisef(int index) {
+		public float NoiseFloat(int index) {
 			index = Math.Abs(index % NOISE_BUFFER);
-			return Planet.noisef[index];
+			return noiseFloat[index];
 		}
 
-		public int WorldNoisei(int index) {
+		public int NoiseInt(int index) {
 			index = Math.Abs(index % NOISE_BUFFER);
-			return Planet.noisei[index];
+			return noiseInt[index];
 		}
 
-		void WorldSave() {
+		private void Save() {
 			//FILE* f;
 			//WHeader header;
 
@@ -440,7 +445,7 @@
 			//ConsoleLog("WorldSave: '%s' saved.", filename);
 		}
 
-		void WorldLoad(int seed_in) {
+		private void Load(int seed_in) {
 			//FILE* f;
 			//char filename[256];
 			//WHeader header;
@@ -459,25 +464,25 @@
 			//build_map_texture();
 		}
 
-		void WorldGenerate(int seed_in) {
+		private void Generate(int seed_in) {
 			RandomInit(seed_in);
-			Planet.seed = seed_in;
+			seed = seed_in;
 
 			for (int x = 0; x < NOISE_BUFFER; x++) {
-				Planet.noisei[x] = RandomVal();
-				Planet.noisef[x] = RandomFloat();
+				noiseInt[x] = RandomVal();
+				noiseFloat[x] = RandomFloat();
 			}
-			build_trees();
-			Planet.wind_from_west = (RandomVal() % 2) ? true : false;
-			Planet.northern_hemisphere = (RandomVal() % 2) ? true : false;
-			Planet.river_count = 4 + RandomVal() % 4;
-			Planet.lake_count = 1 + RandomVal() % 4;
+			BuildTrees();
+			windFromWest = (RandomVal() % 2) ? true : false;
+			northernHemisphere = (RandomVal() % 2) ? true : false;
+			riverCount = 4 + RandomVal() % 4;
+			lakeCount = 1 + RandomVal() % 4;
 			TerraformPrepare();
 			TerraformOceans();
 			TerraformCoast();
 			TerraformClimate();
-			TerraformRivers(Planet.river_count);
-			TerraformLakes(Planet.lake_count);
+			TerraformRivers(riverCount);
+			TerraformLakes(lakeCount);
 			TerraformClimate();//Do climate a second time now that rivers are in
 			TerraformZones();
 			TerraformClimate();//Now again, Math.Since we have added climate-modifying features (Mountains, etc.)
@@ -485,18 +490,10 @@
 			TerraformAverage();
 			TerraformFlora();
 			TerraformColors();
-			build_map_texture();
+			BuildMapTexture();
 		}
 
-		Region WorldRegionGet(int index_x, int index_y) {
-			return Planet.map[index_x, index_y];
-		}
-
-		void WorldRegionSet(int index_x, int index_y, Region val) {
-			Planet.map[index_x, index_y] = val;
-		}
-
-		Region WorldRegionFromPosition(int world_x, int world_y) {
+		private Region GetRegionFromPosition(int world_x, int world_y) {
 			world_x = Math.Max(world_x, 0);
 			world_y = Math.Max(world_y, 0);
 			world_x += dithermap[world_x % DITHER_SIZE, world_y % DITHER_SIZE].X;
@@ -504,15 +501,15 @@
 			world_x /= REGION_SIZE;
 			world_y /= REGION_SIZE;
 			if (world_x >= WORLD_GRID || world_y >= WORLD_GRID)
-				return Planet.map[0, 0];
-			return Planet.map[world_x, world_y];
+				return map[0, 0];
+			return map[world_x, world_y];
 		}
 
-		Region WorldRegionFromPosition(float world_x, float world_y) {
-			return WorldRegionFromPosition((int) world_x, (int) world_y);
+		private Region WorldRegionFromPosition(float world_x, float world_y) {
+			return GetRegionFromPosition((int) world_x, (int) world_y);
 		}
 
-		Color4 WorldColorGet(int world_x, int world_y, SurfaceColor c) {
+		private Color4 WorldColorGet(int world_x, int world_y, SurfaceColor c) {
 			int x = Math.Max(world_x % DITHER_SIZE, 0);
 			int y = Math.Max(world_y % DITHER_SIZE, 0);
 			world_x += dithermap[x, y].X;
@@ -523,10 +520,10 @@
 			var origin = new Coord(
 				world_x / REGION_SIZE,
 				world_y / REGION_SIZE);
-			Region r0 = WorldRegionGet(origin.X, origin.Y);
-			Region r1 = WorldRegionGet(origin.X + 1, origin.Y);
-			Region r2 = WorldRegionGet(origin.X, origin.Y + 1);
-			Region r3 = WorldRegionGet(origin.X + 1, origin.Y + 1);
+			Region r0 = GetRegion(origin.X, origin.Y);
+			Region r1 = GetRegion(origin.X + 1, origin.Y);
+			Region r2 = GetRegion(origin.X, origin.Y + 1);
+			Region r3 = GetRegion(origin.X + 1, origin.Y + 1);
 			Color4 c0, c1, c2, c3;
 			switch (c) {
 				case SurfaceColor.Dirt:
@@ -559,16 +556,16 @@
 			return result;
 		}
 
-		void WorldTexturePurge() {
+		private void WorldTexturePurge() {
 			for (int m = 0; m < TREE_TYPES; m++) {
 				for (int t = 0; t < TREE_TYPES; t++) {
 					tree[m, t].TexturePurge();
 				}
 			}
-			build_map_texture();
+			BuildMapTexture();
 		}
 
-		string WorldDirectionFromAngle(float angle) {
+		private string WorldDirectionFromAngle(float angle) {
 			string direction = "North";
 			if (angle < 22.5f)
 				direction = "North";

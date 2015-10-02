@@ -1,7 +1,7 @@
 ﻿namespace terrain_sharp.Source.StdAfx {
 	class Cell {
-		float Elevation { get; set; }
-		float WaterLevel { get; set; }
-		float Detail { get; set; }
+		public float Elevation { get; set; }
+		public float WaterLevel { get; set; }
+		public float Detail { get; set; }
 	}
 }
