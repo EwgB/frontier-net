@@ -6,9 +6,9 @@
 	class Region {
 		private const int FLOWERS = 3;
 
-		public char[] title = new char[50];
+		public string title;
 		public int tree_type;
-		public RegionFlag FlagsShape { get; private set; }
+		public RegionFlag FlagsShape { get; set; }
 		public Climate climate;
 		public Coord grid_pos;
 		public int mountain_height;

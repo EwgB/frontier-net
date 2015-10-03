@@ -1,18 +1,18 @@
 ﻿namespace terrain_sharp.Source.World {
 	enum Climate {
-		CLIMATE_INVALID,
-		CLIMATE_OCEAN,
-		CLIMATE_COAST,
-		CLIMATE_MOUNTAIN,
-		CLIMATE_RIVER,
-		CLIMATE_RIVER_BANK,
-		CLIMATE_SWAMP,
-		CLIMATE_ROCKY,
-		CLIMATE_LAKE,
-		CLIMATE_DESERT,
-		CLIMATE_FIELD,
-		CLIMATE_PLAINS,
-		CLIMATE_CANYON,
-		CLIMATE_FOREST
+		Invalid,
+		Ocean,
+		Coast,
+		Mountain,
+		River,
+		RiverBank,
+		Swamp,
+		Rocky,
+		Lake,
+		Desert,
+		Field,
+		Plains,
+		Canyon,
+		Forest
 	}
 }

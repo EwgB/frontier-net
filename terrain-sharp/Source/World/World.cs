@@ -27,8 +27,9 @@
 	///	Only one of these is ever instanced.  This is everything that goes into a "save file".
 	///	UMath.Sing only this, the entire world can be re-created.
 	///</remarks>
-	class World {
+	partial class World {
 		#region Constants
+		private const int FLOWERS = 3;
 		///<summary>
 		///	We keep a list of random numbers so we can have deterministic "randomness". 
 		///	This is the size of that list.
@@ -71,8 +72,8 @@
 		private int[] noiseInt = new int[NOISE_BUFFER];
 
 		private Region[,] map = new Region[WORLD_GRID, WORLD_GRID];
-		private Region GetRegion(int index_x, int index_y) { return map[index_x, index_y]; }
-		private void SetRegion(int index_x, int index_y, Region val) { map[index_x, index_y] = val; }
+		public Region GetRegion(int index_x, int index_y) { return map[index_x, index_y]; }
+		public void SetRegion(int index_x, int index_y, Region val) { map[index_x, index_y] = val; }
 
 		#region The following functions are used when generating elevation data
 		///<summary>
@@ -149,7 +150,7 @@
 				var cen = new Vector2(
 					Math.Abs((offset.X - 0.5f) * 2.0f),
 					Math.Abs((offset.Y - 0.5f) * 2.0f));
-				float strength = glVectorLength(cen);
+				float strength = cen.Length;
 				if (r.FlagsShape.HasFlag(RegionFlag.RiverN) && offset.Y < 0.5f)
 					strength = Math.Min(strength, cen.X);
 				if (r.FlagsShape.HasFlag(RegionFlag.RiverS) && offset.Y >= 0.5f)
@@ -208,7 +209,7 @@
 
 			//Apply the values!
 			float val = water + detail * r.geo_detail + bias;
-			if (r.climate == Climate.CLIMATE_SWAMP) {
+			if (r.climate == Climate.Swamp) {
 				val -= r.geo_detail / 2.0f;
 				val = Math.Max(val, r.geo_water - 0.5f);
 			}

@@ -4,6 +4,11 @@ namespace terrain_sharp.Source.GLTypes {
 		public int X { get; set; }
 		public int Y { get; set; }
 
+		public Coord() {
+			X = 0;
+			Y = 0;
+		}
+
 		public Coord(int x, int y) {
 			X = x;
 			Y = y;

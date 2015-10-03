@@ -6,6 +6,8 @@
 	using System;
 	using System.Collections.Generic;
 
+	using StdAfx;
+
 	/// This class is used for storing groups of verts and polygons.
 	class Mesh {
 		public GLbbox _bbox = new GLbbox();
@@ -180,7 +182,7 @@
 			//Re-normalize. Done.
 			for (int i = 0; i < _normal.Count; i++) {
 				var normal = normals_merged[merge_index[i]];
-				normal.Z *= NORMAL_SCALING;
+				normal.Z *= StdAfx.NORMAL_SCALING;
 				normal.Normalize();
 				_normal[i] = normal;
 			}

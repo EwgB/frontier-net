@@ -82,6 +82,7 @@
     <Compile Include="Source\World\Climate.cs" />
     <Compile Include="Source\World\Region.cs" />
     <Compile Include="Source\World\RegionFlag.cs" />
+    <Compile Include="Source\World\World.Terraform.cs" />
     <Compile Include="Source\World\World.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
