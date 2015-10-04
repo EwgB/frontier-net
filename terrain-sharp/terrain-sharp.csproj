@@ -61,6 +61,9 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Source\Avatar\AnimType.cs" />
+    <Compile Include="Source\Avatar\Avatar.cs" />
+    <Compile Include="Source\GLTypes\BBox.cs" />
     <Compile Include="Source\GLTypes\Coord.cs" />
     <Compile Include="Source\GLTypes\UvBoxPosition.cs" />
     <Compile Include="Source\Extensions\Color4Extension.cs" />
@@ -241,7 +244,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\CVarsWrapper\CVarsWrapper.vcxproj">
+      <Project>{7c9c34e2-78d3-409d-9a01-032d63c1b14a}</Project>
+      <Name>CVarsWrapper</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

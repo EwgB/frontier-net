@@ -29,29 +29,29 @@
 	///</remarks>
 	partial class World {
 		#region Constants
-		private const int FLOWERS = 3;
+		public const int FLOWERS = 3;
 		///<summary>
 		///	We keep a list of random numbers so we can have deterministic "randomness". 
 		///	This is the size of that list.
 		///</summary>
-		private const int NOISE_BUFFER = 1024;
+		public const int NOISE_BUFFER = 1024;
 		///<summary>
 		///	This is the size of the grid of trees. The total number of tree species 
 		///	in the world is the square of this value, minus one. ("tree zero" is actually
 		///	"no trees at all".)
 		///</summary>
-		private const int TREE_TYPES = 6;
-		private const int REGION_SIZE = 128;
-		private const int REGION_HALF = (REGION_SIZE / 2);
-		private const int WORLD_GRID = 256;
-		private const int WORLD_GRID_EDGE = (WORLD_GRID + 1);
-		private const int WORLD_GRID_CENTER = (WORLD_GRID / 2);
-		private const int WORLD_SIZE_METERS = (REGION_SIZE * WORLD_GRID);
+		public const int TREE_TYPES = 6;
+		public const int REGION_SIZE = 128;
+		public const int REGION_HALF = (REGION_SIZE / 2);
+		public const int WORLD_GRID = 256;
+		public const int WORLD_GRID_EDGE = (WORLD_GRID + 1);
+		public const int WORLD_GRID_CENTER = (WORLD_GRID / 2);
+		public const int WORLD_SIZE_METERS = (REGION_SIZE * WORLD_GRID);
 		///<summary>The dither map scatters surface data so that grass colorings end up in adjacent regions.</summary>
-		private const int DITHER_SIZE = (REGION_SIZE / 2);
+		public const int DITHER_SIZE = (REGION_SIZE / 2);
 		///<summary>How much space in a region is spent interpolating between itself and its neighbors.</summary>
-		private const int BLEND_DISTANCE = (REGION_SIZE / 4);
-		private const int FILE_VERSION = 1;
+		public const int BLEND_DISTANCE = (REGION_SIZE / 4);
+		public const int FILE_VERSION = 1;
 		#endregion
 
 		private static readonly World instance = new World();
@@ -281,7 +281,7 @@
 		}
 		#endregion
 
-		private float WaterLevel(int world_x, int world_y) {
+		public float WaterLevel(int world_x, int world_y) {
 			world_x += REGION_HALF;
 			world_y += REGION_HALF;
 			var origin = new Coord(
@@ -298,7 +298,7 @@
 			return MathUtils.InterpolateQuad(rul.geo_water, rur.geo_water, rbl.geo_water, rbr.geo_water, offset, ((origin.X + origin.Y) % 2) == 0);
 		}
 
-		private float BiasLevel(int world_x, int world_y) {
+		public float BiasLevel(int world_x, int world_y) {
 			world_x += REGION_HALF;
 			world_y += REGION_HALF;
 			var origin = new Coord(
@@ -315,7 +315,7 @@
 			return MathUtils.InterpolateQuad(rul.geo_bias, rur.geo_bias, rbl.geo_bias, rbr.geo_bias, offset, ((origin.X + origin.Y) % 2) == 0);
 		}
 
-		private Cell GetCell(int world_x, int world_y) {
+		public Cell GetCell(int world_x, int world_y) {
 			float detail = Entropy(world_x, world_y);
 			float bias = BiasLevel(world_x, world_y);
 			float water = WaterLevel(world_x, world_y);
@@ -363,7 +363,7 @@
 			return result;
 		}
 
-		private int TreeType(float moisture, float temperature) {
+		public int TreeType(float moisture, float temperature) {
 			int m = (int) (moisture * TREE_TYPES);
 			int t = (int) (temperature * TREE_TYPES);
 			m = MathHelper.Clamp(m, 0, TREE_TYPES - 1);
@@ -371,13 +371,13 @@
 			return m + t * TREE_TYPES;
 		}
 
-		private CTree WorldTree(int id) {
+		public CTree WorldTree(int id) {
 			int m = id % TREE_TYPES;
 			int t = (id - m) / TREE_TYPES;
 			return tree[m, t];
 		}
 
-		private string LocationName(int world_x, int world_y) {
+		public string LocationName(int world_x, int world_y) {
 			world_x /= REGION_SIZE;
 			world_y /= REGION_SIZE;
 			world_x -= WORLD_GRID_CENTER;
@@ -427,7 +427,7 @@
 			return noiseInt[index];
 		}
 
-		private void Save() {
+		public void Save() {
 			//FILE* f;
 			//WHeader header;
 
@@ -450,7 +450,7 @@
 			//ConsoleLog("WorldSave: '%s' saved.", filename);
 		}
 
-		private void Load(int seed_in) {
+		public void Load(int seed_in) {
 			//FILE* f;
 			//char filename[256];
 			//WHeader header;
@@ -469,7 +469,7 @@
 			//build_map_texture();
 		}
 
-		private void Generate(int seed_in) {
+		public void Generate(int seed_in) {
 			var random = new MersenneTwister(seed_in);
 			seed = seed_in;
 
@@ -498,7 +498,7 @@
 			BuildMapTexture();
 		}
 
-		private Region GetRegionFromPosition(int world_x, int world_y) {
+		public Region GetRegionFromPosition(int world_x, int world_y) {
 			world_x = Math.Max(world_x, 0);
 			world_y = Math.Max(world_y, 0);
 			world_x += dithermap[world_x % DITHER_SIZE, world_y % DITHER_SIZE].X;
@@ -510,11 +510,11 @@
 			return map[world_x, world_y];
 		}
 
-		private Region WorldRegionFromPosition(float world_x, float world_y) {
+		public Region WorldRegionFromPosition(float world_x, float world_y) {
 			return GetRegionFromPosition((int) world_x, (int) world_y);
 		}
 
-		private Color4 WorldColorGet(int world_x, int world_y, SurfaceColor c) {
+		public Color4 WorldColorGet(int world_x, int world_y, SurfaceColor c) {
 			int x = Math.Max(world_x % DITHER_SIZE, 0);
 			int y = Math.Max(world_y % DITHER_SIZE, 0);
 			world_x += dithermap[x, y].X;
@@ -561,7 +561,7 @@
 			return result;
 		}
 
-		private void WorldTexturePurge() {
+		public void WorldTexturePurge() {
 			for (int m = 0; m < TREE_TYPES; m++) {
 				for (int t = 0; t < TREE_TYPES; t++) {
 					tree[m, t].TexturePurge();
@@ -570,7 +570,7 @@
 			BuildMapTexture();
 		}
 
-		private string WorldDirectionFromAngle(float angle) {
+		public string DirectionFromAngle(float angle) {
 			string direction = "North";
 			if (angle < 22.5f)
 				direction = "North";
