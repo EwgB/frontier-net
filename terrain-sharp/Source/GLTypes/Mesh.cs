@@ -10,7 +10,7 @@
 
 	/// This class is used for storing groups of verts and polygons.
 	class Mesh {
-		public GLbbox _bbox = new GLbbox();
+		public BBox _bbox = new BBox();
 		public List<int> _index = new List<int>();
 		public List<Vector3> _vertex = new List<Vector3>();
 		public List<Vector3> _normal = new List<Vector3>();

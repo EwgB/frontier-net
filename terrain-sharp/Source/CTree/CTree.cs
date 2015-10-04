@@ -209,7 +209,7 @@
 		}
 
 		private void DrawFacer() {
-			GLbbox box;
+			BBox box;
 			Vector3 size, center;
 
 			GL.Disable(EnableCap.Blend);
@@ -219,8 +219,8 @@
 			_meshes[0, (int) LOD.High].RecalculateBoundingBox();
 			box = _meshes[0, (int) LOD.High]._bbox;
 			box.pmin.Z = 0;  //Cuts off roots
-			center = box.Center();
-			size = box.Count;
+			center = box.Center;
+			size = box.Size;
 
 			//Move our viewpoint to the middle of the texture frame 
 			GL.Translate(TEXTURE_HALF, TEXTURE_HALF, 0);
@@ -691,8 +691,8 @@
 			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, TEXTURE_SIZE * 4, TEXTURE_SIZE,
 				0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
 			RenderCanvasBegin(0, TEXTURE_SIZE, 0, TEXTURE_SIZE, TEXTURE_SIZE);
-			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMFilter.Nearest);
-			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMFilter.Nearest);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Nearest);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Nearest);
 			Byte[] buffer = new Byte[TEXTURE_SIZE * TEXTURE_SIZE * 4];
 			for (int i = 0; i < 4; i++) {
 				GL.ClearColor(1, 0, 1, 0);
