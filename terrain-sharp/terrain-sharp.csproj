@@ -61,8 +61,13 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Source\CAnim\BoneId.cs" />
     <Compile Include="Source\Avatar\AnimType.cs" />
     <Compile Include="Source\Avatar\Avatar.cs" />
+    <Compile Include="Source\CFigure\Bone.cs" />
+    <Compile Include="Source\CFigure\CFigure.cs" />
+    <Compile Include="Source\Figure\Bone.cs" />
+    <Compile Include="Source\Figure\Figure.cs" />
     <Compile Include="Source\GLTypes\BBox.cs" />
     <Compile Include="Source\GLTypes\Coord.cs" />
     <Compile Include="Source\GLTypes\UvBoxPosition.cs" />

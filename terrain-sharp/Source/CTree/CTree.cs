@@ -236,7 +236,7 @@
 		private void DoVines(Mesh m, List<Vector3> points) {
 			if (!_has_vines)
 				return;
-			int base_index = m._vertex.Count;
+			int base_index = m.Vertices.Count;
 			for (int segment = 0; segment < points.Count; segment++) {
 				float v = segment;
 				m.PushVertex(points[segment], UP, new Vector2(0.75f, v));
@@ -258,7 +258,7 @@
 			fsize *= _foliage_size;
 			var uv = new UvBox();
 			uv.Set(new Vector2(0.25f, 0), new Vector2(0.5f, 1));
-			int base_index = m._vertex.Count;
+			int base_index = m.Vertices.Count;
 
 			//don't let the foliage get so big it touches the ground.
 			fsize = Math.Min(pos.Z - 2.0f, fsize);
@@ -378,9 +378,9 @@
 			//angle += 45.0f;
 			mat.Identity();
 			mat.Rotate(angle, 0, 0, 1);
-			for (int i = base_index; i < m._vertex.Count; i++) {
-				m._vertex[i] = glMatrixTransformPoint(mat, m._vertex[i]);
-				m._vertex[i] += pos;
+			for (int i = base_index; i < m.Vertices.Count; i++) {
+				m.Vertices[i] = glMatrixTransformPoint(mat, m.Vertices[i]);
+				m.Vertices[i] += pos;
 			}
 		}
 
@@ -392,7 +392,7 @@
 			int segment_count = (int) (anchor.length * SEGMENTS_PER_METER);
 			segment_count = Math.Max(segment_count, MIN_SEGMENTS);
 			segment_count += 3;
-			int base_index = m._vertex.Count;
+			int base_index = m.Vertices.Count;
 			GLmatrix mat = new GLmatrix();
 			mat.Identity();
 			mat.Rotate(branch_angle, 0, 0, 1);
@@ -469,12 +469,12 @@
 						m.PushTriangle(
 							base_index + (ring + 1) + segment * (radial_edge),
 							base_index + (ring + 0) + segment * (radial_edge),
-							m._vertex.Count - 1);
+							m.Vertices.Count - 1);
 					}
 				}
 			}
 			//Grab the last point and use it as the origin for the foliage
-			pos = m._vertex[m._vertex.Count - 1];
+			pos = m.Vertices[m.Vertices.Count - 1];
 			DoFoliage(m, pos, anchor.length * 0.56f, branch_angle);
 			//We saved the points on the underside of the branch.
 			//Use these to hang vines on the branch
@@ -516,8 +516,8 @@
 				m.PushVertex(new Vector3(width, -width, height), new Vector3(width, -width, height), uv.Corner(UvBoxPosition.BottomRight));
 				m.PushVertex(new Vector3(-width, width, height), new Vector3(-width, width, height), uv.Corner(UvBoxPosition.BottomLeft));
 
-				for (int i = 0; i < (int) m._normal.Count; i++)
-					m._normal[i].Normalize();
+				for (int i = 0; i < (int) m.Normals.Count; i++)
+					m.Normals[i].Normalize();
 				m.PushQuad(0, 1, 2, 3);
 				m.PushQuad(4, 5, 6, 7);
 				return;
@@ -577,10 +577,10 @@
 
 			//Make the triangles for the tip
 			for (int ring = 0; ring < radial_steps; ring++) {
-				m.PushTriangle((ring + 1) + (segment_count - 1) * radial_edge, m._vertex.Count - 1,
+				m.PushTriangle((ring + 1) + (segment_count - 1) * radial_edge, m.Vertices.Count - 1,
 					(ring + 0) + (segment_count - 1) * radial_edge);
 			}
-			DoFoliage(m, m._vertex[m._vertex.Count - 1] + new Vector3(0, 0, -0), _current_height / 2, 0);
+			DoFoliage(m, m.Vertices[m.Vertices.Count - 1] + new Vector3(0, 0, -0), _current_height / 2, 0);
 			//if (!_canopy) {
 			//DoFoliage (TrunkPosition (vertical_pos, NULL), vertical_pos * _height, 0);
 			if (_evergreen) { //just rings of foliage, like an evergreen

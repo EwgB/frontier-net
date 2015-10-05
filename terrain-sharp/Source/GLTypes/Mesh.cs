@@ -11,18 +11,18 @@
 	/// This class is used for storing groups of verts and polygons.
 	class Mesh {
 		public BBox _bbox = new BBox();
-		public List<int> _index = new List<int>();
-		public List<Vector3> _vertex = new List<Vector3>();
-		public List<Vector3> _normal = new List<Vector3>();
-		public List<Color4> _color = new List<Color4>();
-		public List<Vector2> _uv = new List<Vector2>();
+		public List<int> Indices = new List<int>();
+		public List<Vector3> Vertices = new List<Vector3>();
+		public List<Vector3> Normals = new List<Vector3>();
+		public List<Color4> Colors = new List<Color4>();
+		public List<Vector2> UVs = new List<Vector2>();
 
-		public int TriangleCount() { return _index.Count / 3; }
+		public int TriangleCount { get { return Indices.Count / 3; } }
 
 		public void PushTriangle(int i1, int i2, int i3) {
-			_index.Add(i1);
-			_index.Add(i2);
-			_index.Add(i3);
+			Indices.Add(i1);
+			Indices.Add(i2);
+			Indices.Add(i3);
 		}
 
 		public void PushQuad(int i1, int i2, int i3, int i4) {
@@ -32,59 +32,59 @@
 
 		public void PushVertex(Vector3 vert, Vector3 normal, Vector2 uv) {
 			_bbox.ContainPoint(vert);
-			_vertex.Add(vert);
-			_normal.Add(normal);
-			_uv.Add(uv);
+			Vertices.Add(vert);
+			Normals.Add(normal);
+			UVs.Add(uv);
 		}
 
 		public void PushVertex(Vector3 vert, Vector3 normal, Color4 color, Vector2 uv) {
 			_bbox.ContainPoint(vert);
-			_vertex.Add(vert);
-			_normal.Add(normal);
-			_color.Add(color);
-			_uv.Add(uv);
+			Vertices.Add(vert);
+			Normals.Add(normal);
+			Colors.Add(color);
+			UVs.Add(uv);
 		}
 
 		public void Clear() {
 			_bbox.Clear();
-			_vertex.Clear();
-			_normal.Clear();
-			_uv.Clear();
-			_index.Clear();
+			Vertices.Clear();
+			Normals.Clear();
+			UVs.Clear();
+			Indices.Clear();
 		}
 
 		public void Render() {
 			GL.Begin(PrimitiveType.Triangles);
-			foreach (int item in _index) {
-				GL.Normal3(_normal[item]);
-				GL.TexCoord2(_uv[item]);
-				GL.Vertex3(_vertex[item]);
+			foreach (int item in Indices) {
+				GL.Normal3(Normals[item]);
+				GL.TexCoord2(UVs[item]);
+				GL.Vertex3(Vertices[item]);
 			}
 			GL.End();
 		}
 
 		public void RecalculateBoundingBox() {
 			_bbox.Clear();
-			_vertex.ForEach(vertex => _bbox.ContainPoint(vertex));
+			Vertices.ForEach(vertex => _bbox.ContainPoint(vertex));
 		}
 
 		public void CalculateNormals() {
 			//Clear any existing normals
-			for (int i = 0; i < _normal.Count; i++)
-				_normal[i] = new Vector3();
+			for (int i = 0; i < Normals.Count; i++)
+				Normals[i] = new Vector3();
 
 			//For each triangle... 
-			for (int i = 0; i < TriangleCount(); i++) {
+			for (int i = 0; i < TriangleCount; i++) {
 				int index = i * 3;
-				int i0 = _index[index];
-				int i1 = _index[index + 1];
-				int i2 = _index[index + 2];
+				int i0 = Indices[index];
+				int i1 = Indices[index + 1];
+				int i2 = Indices[index + 2];
 
 				// Convert the 3 edges of the polygon into vectors 
 				var edge = new Vector3[3];
-				edge[0] = _vertex[i0] - _vertex[i1];
-				edge[1] = _vertex[i1] - _vertex[i2];
-				edge[2] = _vertex[i2] - _vertex[i0];
+				edge[0] = Vertices[i0] - Vertices[i1];
+				edge[1] = Vertices[i1] - Vertices[i2];
+				edge[2] = Vertices[i2] - Vertices[i0];
 
 				// Normalize the vectors 
 				edge[0].Normalize();
@@ -108,29 +108,29 @@
 				//Now weight each normal by the size of the angle so that the triangle 
 				//with the largest angle at that vertex has the most influence over the 
 				//direction of the normal.
-				_normal[i0] = Vector3.Add(_normal[i0], Vector3.Multiply(normal, angle[0]));
-				_normal[i1] = Vector3.Add(_normal[i1], Vector3.Multiply(normal, angle[1]));
-				_normal[i2] = Vector3.Add(_normal[i2], Vector3.Multiply(normal, angle[2]));
+				Normals[i0] = Vector3.Add(Normals[i0], Vector3.Multiply(normal, angle[0]));
+				Normals[i1] = Vector3.Add(Normals[i1], Vector3.Multiply(normal, angle[1]));
+				Normals[i2] = Vector3.Add(Normals[i2], Vector3.Multiply(normal, angle[2]));
 			}
 
 			//Re-normalize. Done.
-			_normal.ForEach((v) => v.Normalize());
+			Normals.ForEach((v) => v.Normalize());
 		}
 
 		public void CalculateNormalsSeamless() {
 			//Clear any existing normals
 			var normals_merged = new List<Vector3>();
-			_normal.ForEach(normal => normals_merged.Add(new Vector3()));
+			Normals.ForEach(normal => normals_merged.Add(new Vector3()));
 
 			// scan through the vert list, and make an alternate list where
 			// verticies that share the same location are merged
 			var merge_index = new List<int>();
 			var verts_merged = new List<Vector3>();
-			foreach (var vertex in _vertex) {
+			foreach (var vertex in Vertices) {
 				int found = -1;
 				//see if there is another vertex in the same position in the merged list
 				for (int i = 0; i < merge_index.Count; i++) {
-					if (vertex == _vertex[merge_index[i]]) {
+					if (vertex == Vertices[merge_index[i]]) {
 						merge_index.Add(i);
 						verts_merged.Add(vertex);
 						found = i;
@@ -145,11 +145,11 @@
 			}
 
 			//For each triangle... 
-			for (int i = 0; i < TriangleCount(); i++) {
+			for (int i = 0; i < TriangleCount; i++) {
 				int index = i * 3;
-				int i0 = merge_index[_index[index]];
-				int i1 = merge_index[_index[index + 1]];
-				int i2 = merge_index[_index[index + 2]];
+				int i0 = merge_index[Indices[index]];
+				int i1 = merge_index[Indices[index + 1]];
+				int i2 = merge_index[Indices[index + 2]];
 				// Convert the 3 edges of the polygon into vectors 
 				var edge = new Vector3[3];
 				edge[0] = verts_merged[i0] - verts_merged[i1];
@@ -180,11 +180,11 @@
 				normals_merged[i2] += normal * angle[2];
 			}
 			//Re-normalize. Done.
-			for (int i = 0; i < _normal.Count; i++) {
+			for (int i = 0; i < Normals.Count; i++) {
 				var normal = normals_merged[merge_index[i]];
 				normal.Z *= StdAfx.NORMAL_SCALING;
 				normal.Normalize();
-				_normal[i] = normal;
+				Normals[i] = normal;
 			}
 		}
 	}

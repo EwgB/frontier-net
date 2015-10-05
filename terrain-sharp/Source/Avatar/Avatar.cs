@@ -5,6 +5,9 @@
 	using OpenTK;
 	using OpenTK.Graphics;
 	using OpenTK.Graphics.OpenGL;
+
+	using CAnim;
+	using CFigure;
 	using Utils;
 	using World;
 
@@ -54,7 +57,7 @@
 		private bool sprinting;
 		private int last_update;
 		private CFigure avatar;
-		private IDictionary<AnimType, CAnim> anim = new Dictionary<AnimType, CAnim>(Enum.GetValues(typeof(AnimType)).Length);
+		private Dictionary<AnimType, CAnim> anim = new Dictionary<AnimType, CAnim>(Enum.GetValues(typeof(AnimType)).Length);
 		private float distance_walked;
 		private float last_time;
 		private float current_speed;
@@ -66,12 +69,12 @@
 		private void do_model() {
 			avatar.LoadX("models//male.X");
 			if (CVarUtils.GetCVar<bool>("avatar.expand")) {
-				avatar.BoneInflate(BONE_PELVIS, 0.02f, true);
-				avatar.BoneInflate(BONE_HEAD, 0.025f, true);
-				avatar.BoneInflate(BONE_LWRIST, 0.03f, true);
-				avatar.BoneInflate(BONE_RWRIST, 0.03f, true);
-				avatar.BoneInflate(BONE_RANKLE, 0.05f, true);
-				avatar.BoneInflate(BONE_LANKLE, 0.05f, true);
+				avatar.BoneInflate(BoneId.BONE_PELVIS, 0.02f, true);
+				avatar.BoneInflate(BoneId.BONE_HEAD, 0.025f, true);
+				avatar.BoneInflate(BoneId.BONE_LWRIST, 0.03f, true);
+				avatar.BoneInflate(BoneId.BONE_RWRIST, 0.03f, true);
+				avatar.BoneInflate(BoneId.BONE_RANKLE, 0.05f, true);
+				avatar.BoneInflate(BoneId.BONE_LANKLE, 0.05f, true);
 			}
 		}
 
@@ -108,15 +111,13 @@
 		}
 
 		private void do_location() {
+			//ostringstream oss(ostringstream.in);
 
-			ostringstream oss(ostringstream.in);
-
-			oss << APP << " ";
-			//oss << WorldLocationName (region.grid_pos.X, region.grid_pos.Y) << " (" << region.title << ") ";
-			oss << WorldLocationName((int) Position.X, (int) Position.Y) << " (" << Region.title << ") ";
-			oss << "Looking " << WorldDirectionFromAngle(angle.Z);
-			SdlSetCaption(oss.str().c_str());
-
+			//oss << APP << " ";
+			////oss << WorldLocationName (region.grid_pos.X, region.grid_pos.Y) << " (" << region.title << ") ";
+			//oss << WorldLocationName((int) Position.X, (int) Position.Y) << " (" << Region.title << ") ";
+			//oss << "Looking " << WorldDirectionFromAngle(angle.Z);
+			//SdlSetCaption(oss.str().c_str());
 		}
 
 		public void AvatarUpdate() {
@@ -235,8 +236,8 @@
 			else
 				AnimId = AnimType.ANIM_RUN;
 			avatar.Animate(anim[AnimId], movement_animation);
-			avatar.PositionSet(Position);
-			avatar.RotationSet(avatar_facing);
+			avatar.Position = Position;
+			avatar.SetRotation(avatar_facing);
 			avatar.Update();
 			float step_tracking = movement_animation % 1;
 			if (AnimId == AnimType.ANIM_RUN || AnimId == AnimType.ANIM_SPRINT) {
@@ -246,7 +247,7 @@
 						dust_particle.colors.Add(new Color4(0.4f, 0.7f, 1, 1));
 					else
 						dust_particle.colors.Add(CacheSurfaceColor((int) Position.X, (int) Position.Y));
-					ParticleAdd(&dust_particle, Position);
+					ParticleAdd(dust_particle, Position);
 				}
 			}
 			last_step_tracking = step_tracking;
