@@ -71,7 +71,7 @@
 		public void CalculateNormals() {
 			//Clear any existing normals
 			for (int i = 0; i < Normals.Count; i++)
-				Normals[i] = new Vector3();
+				Normals[i] = Vector3.Zero;
 
 			//For each triangle... 
 			for (int i = 0; i < TriangleCount; i++) {
@@ -120,7 +120,7 @@
 		public void CalculateNormalsSeamless() {
 			//Clear any existing normals
 			var normals_merged = new List<Vector3>();
-			Normals.ForEach(normal => normals_merged.Add(new Vector3()));
+			Normals.ForEach(normal => normals_merged.Add(Vector3.Zero));
 
 			// scan through the vert list, and make an alternate list where
 			// verticies that share the same location are merged

@@ -230,7 +230,7 @@
 			GL.Scale((1 / size.X) * TEXTURE_SIZE, 1, (1 / size.Z) * TEXTURE_SIZE);
 			GL.Translate(-center.X, 0, -center.Z);
 			GL.Color3(1, 1, 1);
-			Render(new Vector3(), 0, LOD.High);
+			Render(Vector3.Zero, 0, LOD.High);
 		}
 
 		private void DoVines(Mesh m, List<Vector3> points) {
@@ -308,7 +308,7 @@
 				uv_inner.Set(new Vector2(0.25f + 1.25f, 0.125f), new Vector2(0.5f - 0.125f, 1 - 0.125f));
 
 				//Center
-				m.PushVertex(new Vector3(), UP, uv.Center);
+				m.PushVertex(Vector3.Zero, UP, uv.Center);
 
 				//First ring
 				m.PushVertex(new Vector3(-fsize / 2, -fsize / 2, level1), UP, uv.Corner(UvBoxPosition.TopEdge));//1
@@ -415,7 +415,7 @@
 			Vector3 core = anchor.root;
 			float radius = anchor.radius;
 			var underside = new List<Vector3>();
-			var pos = new Vector3();
+			var pos = Vector3.Zero;
 			for (int segment = 0; segment <= segment_count; segment++) {
 				float horz_pos = segment / (float) (segment_count + 1);
 				float curve;
@@ -737,7 +737,7 @@
 
 			radius = Math.Max(radius, MIN_RADIUS);
 			float bend = delta * delta;
-			Vector3 trunk = new Vector3();
+			Vector3 trunk = Vector3.Zero;
 			switch (_trunk_style) {
 				case TreeTrunkStyle.Bent:
 					trunk.X = bend * _current_height / 3.0f;

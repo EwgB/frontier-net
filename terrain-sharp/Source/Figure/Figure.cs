@@ -5,39 +5,41 @@
 	using OpenTK;
 	using OpenTK.Graphics.OpenGL;
 
-	using Anim;
+	using Avatar;
+	using CAnim;
+	using CFigure;
 	using GLTypes;
 
 	class Figure {
 		private static readonly List<Bone> boneList = new List<Bone>() {
-			new Bone() { pos = new Vector3(0, 0, 0), id = BoneId.BONE_ROOT, id_parent = BoneId.BONE_ROOT },
-      new Bone() { pos = new Vector3(0, 0, 1.1f), id = BoneId.BONE_PELVIS, id_parent = BoneId.BONE_ROOT },
-			new Bone() { pos = new Vector3(0.1f, 0, 1), id = BoneId.BONE_RHIP, id_parent = BoneId.BONE_PELVIS },
-			new Bone() { pos = new Vector3(0.1f, 0, 0.5f), id = BoneId.BONE_RKNEE, id_parent = BoneId.BONE_RHIP },
-			new Bone() { pos = new Vector3(0.1f, 0, 0), id = BoneId.BONE_RANKLE, id_parent = BoneId.BONE_RKNEE },
-			new Bone() { pos = new Vector3(0.1f,-0.1f, 0), id = BoneId.BONE_RTOE, id_parent = BoneId.BONE_RANKLE },
+			new Bone() { pos = new Vector3(0, 0, 0), id = BoneId.Root, id_parent = BoneId.Root },
+      new Bone() { pos = new Vector3(0, 0, 1.1f), id = BoneId.Pelvis, id_parent = BoneId.Root },
+			new Bone() { pos = new Vector3(0.1f, 0, 1), id = BoneId.RightHip, id_parent = BoneId.Pelvis },
+			new Bone() { pos = new Vector3(0.1f, 0, 0.5f), id = BoneId.RightKnee, id_parent = BoneId.RightHip },
+			new Bone() { pos = new Vector3(0.1f, 0, 0), id = BoneId.RightAnkle, id_parent = BoneId.RightKnee },
+			new Bone() { pos = new Vector3(0.1f,-0.1f, 0), id = BoneId.RightToe, id_parent = BoneId.RightAnkle },
 
-			new Bone() { pos = new Vector3(-0.1f, 0, 1), id = BoneId.BONE_LHIP, id_parent = BoneId.BONE_PELVIS },
-			new Bone() { pos = new Vector3(-0.1f, 0, 0.5f), id = BoneId.BONE_LKNEE, id_parent = BoneId.BONE_LHIP },
-			new Bone() { pos = new Vector3(-0.1f, 0, 0), id = BoneId.BONE_LANKLE, id_parent = BoneId.BONE_LKNEE },
-			new Bone() { pos = new Vector3(-0.1f,-0.1f, 0), id = BoneId.BONE_LTOE, id_parent = BoneId.BONE_LANKLE },
+			new Bone() { pos = new Vector3(-0.1f, 0, 1), id = BoneId.LeftHip, id_parent = BoneId.Pelvis },
+			new Bone() { pos = new Vector3(-0.1f, 0, 0.5f), id = BoneId.LeftKnee, id_parent = BoneId.LeftHip },
+			new Bone() { pos = new Vector3(-0.1f, 0, 0), id = BoneId.LeftAnkle, id_parent = BoneId.LeftKnee },
+			new Bone() { pos = new Vector3(-0.1f,-0.1f, 0), id = BoneId.LeftToe, id_parent = BoneId.LeftAnkle },
 
-			new Bone() { pos = new Vector3(0, 0, 1.55f), id = BoneId.BONE_SPINE1, id_parent = BoneId.BONE_PELVIS },
+			new Bone() { pos = new Vector3(0, 0, 1.55f), id = BoneId.Spine1, id_parent = BoneId.Pelvis },
 
-			new Bone() { pos = new Vector3(0.1f, 0, 1.5f), id = BoneId.BONE_RSHOULDER, id_parent = BoneId.BONE_SPINE1 },
-			new Bone() { pos = new Vector3(0.2f, 0, 1.5f), id = BoneId.BONE_RARM, id_parent = BoneId.BONE_RSHOULDER },
-			new Bone() { pos = new Vector3(0.4f, 0, 1.5f), id = BoneId.BONE_RELBOW, id_parent = BoneId.BONE_RARM },
-			new Bone() { pos = new Vector3(0.8f, 0, 1.5f), id = BoneId.BONE_RWRIST, id_parent = BoneId.BONE_RELBOW },
+			new Bone() { pos = new Vector3(0.1f, 0, 1.5f), id = BoneId.RightShoulder, id_parent = BoneId.Spine1 },
+			new Bone() { pos = new Vector3(0.2f, 0, 1.5f), id = BoneId.RightArm, id_parent = BoneId.RightShoulder },
+			new Bone() { pos = new Vector3(0.4f, 0, 1.5f), id = BoneId.RightElbow, id_parent = BoneId.RightArm },
+			new Bone() { pos = new Vector3(0.8f, 0, 1.5f), id = BoneId.RightWrist, id_parent = BoneId.RightElbow },
 
-			new Bone() { pos = new Vector3(-0.1f, 0, 1.5f), id = BoneId.BONE_LSHOULDER, id_parent = BoneId.BONE_SPINE1 },
-			new Bone() { pos = new Vector3(-0.2f, 0, 1.5f), id = BoneId.BONE_LARM, id_parent = BoneId.BONE_LSHOULDER },
-			new Bone() { pos = new Vector3(-0.4f, 0, 1.5f), id = BoneId.BONE_LELBOW, id_parent = BoneId.BONE_LARM },
-			new Bone() { pos = new Vector3(-0.8f, 0, 1.5f), id = BoneId.BONE_LWRIST, id_parent = BoneId.BONE_LELBOW },
+			new Bone() { pos = new Vector3(-0.1f, 0, 1.5f), id = BoneId.LeftShoulder, id_parent = BoneId.Spine1 },
+			new Bone() { pos = new Vector3(-0.2f, 0, 1.5f), id = BoneId.LeftArm, id_parent = BoneId.LeftShoulder },
+			new Bone() { pos = new Vector3(-0.4f, 0, 1.5f), id = BoneId.LeftElbow, id_parent = BoneId.LeftArm },
+			new Bone() { pos = new Vector3(-0.8f, 0, 1.5f), id = BoneId.LeftWrist, id_parent = BoneId.LeftElbow },
 
-			new Bone() { pos = new Vector3(0, 0, 1.6f), id = BoneId.BONE_NECK, id_parent = BoneId.BONE_SPINE1 },
-			new Bone() { pos = new Vector3(0, 0, 1.65f), id = BoneId.BONE_HEAD, id_parent = BoneId.BONE_NECK },
-			new Bone() { pos = new Vector3(0,-0.2f, 1.65f), id = BoneId.BONE_FACE, id_parent = BoneId.BONE_HEAD },
-			new Bone() { pos = new Vector3(0, 0, 1.8f), id = BoneId.BONE_CROWN, id_parent = BoneId.BONE_FACE }
+			new Bone() { pos = new Vector3(0, 0, 1.6f), id = BoneId.Neck, id_parent = BoneId.Spine1 },
+			new Bone() { pos = new Vector3(0, 0, 1.65f), id = BoneId.Head, id_parent = BoneId.Neck },
+			new Bone() { pos = new Vector3(0,-0.2f, 1.65f), id = BoneId.Face, id_parent = BoneId.Head },
+			new Bone() { pos = new Vector3(0, 0, 1.8f), id = BoneId.Crown, id_parent = BoneId.Face }
 		};
 
 		private static readonly Vector3 UP = new Vector3(0, 0, 1);
@@ -54,7 +56,7 @@
 		private float figureRender_nn;
 
 		private void add_hull(CFigure f, Vector3 p, float d, float h, BoneId id) {
-			Mesh m = f.Skin();
+			Mesh m = f.Skin;
 			int offset = m.Vertices.Count;
 			m.PushVertex(new Vector3(p.X, p.Y, p.Z), UP, new Vector2());
 			m.PushVertex(new Vector3(p.X, p.Y + d, p.Z), UP, new Vector2());
@@ -70,19 +72,19 @@
 
 		public void FigureInit() {
 			boneList.ForEach(bone => fig.PushBone(bone));
-			Mesh skin = fig.Skin();
+			Mesh skin = fig.Skin;
 
-			add_hull(fig, new Vector3(0.1f, 0.05f, 0.5f), -0.1f, -0.4f, BoneId.BONE_RKNEE);
-			add_hull(fig, new Vector3(-0.1f, 0.05f, 0.5f), -0.1f, -0.4f, BoneId.BONE_LKNEE);
+			add_hull(fig, new Vector3(0.1f, 0.05f, 0.5f), -0.1f, -0.4f, BoneId.RightKnee);
+			add_hull(fig, new Vector3(-0.1f, 0.05f, 0.5f), -0.1f, -0.4f, BoneId.LeftKnee);
 
-			add_hull(fig, new Vector3(0.1f, 0.05f, 1.0f), -0.1f, -0.5f, BoneId.BONE_RHIP);
-			add_hull(fig, new Vector3(-0.1f, 0.05f, 1.0f), -0.1f, -0.5f, BoneId.BONE_LHIP);
+			add_hull(fig, new Vector3(0.1f, 0.05f, 1.0f), -0.1f, -0.5f, BoneId.RightHip);
+			add_hull(fig, new Vector3(-0.1f, 0.05f, 1.0f), -0.1f, -0.5f, BoneId.LeftHip);
 
-			add_hull(fig, new Vector3(0.2f, 0.05f, 1.5f), -0.1f, -0.1f, BoneId.BONE_RSHOULDER);
-			add_hull(fig, new Vector3(0.5f, 0.05f, 1.5f), -0.1f, -0.1f, BoneId.BONE_RELBOW);
+			add_hull(fig, new Vector3(0.2f, 0.05f, 1.5f), -0.1f, -0.1f, BoneId.RightShoulder);
+			add_hull(fig, new Vector3(0.5f, 0.05f, 1.5f), -0.1f, -0.1f, BoneId.RightElbow);
 
-			add_hull(fig, new Vector3(-0.2f, 0.05f, 1.5f), -0.1f, -0.1f, BoneId.BONE_LSHOULDER);
-			add_hull(fig, new Vector3(-0.5f, 0.05f, 1.5f), -0.1f, -0.1f, BoneId.BONE_LELBOW);
+			add_hull(fig, new Vector3(-0.2f, 0.05f, 1.5f), -0.1f, -0.1f, BoneId.LeftShoulder);
+			add_hull(fig, new Vector3(-0.5f, 0.05f, 1.5f), -0.1f, -0.1f, BoneId.LeftElbow);
 
 			fig.Prepare();
 			anim.LoadBvh("Anims//run.bvh");
@@ -115,13 +117,13 @@
 			if (moveit)
 				figureRender_nn += 0.03f;
 
-			fig2.RotateBone(BoneId.BONE_SPINE1, new Vector3(0, 0, (float) Math.Sin(figureRender_nn * 3) * 25.0f));
-			fig2.RotateBone(BoneId.BONE_RFINGERS1, new Vector3(0, (float) -Math.Abs(Math.Sin(figureRender_nn * 1)) * -80, 0));
+			fig2.RotateBone(BoneId.Spine1, new Vector3(0, 0, (float) Math.Sin(figureRender_nn * 3) * 25.0f));
+			fig2.RotateBone(BoneId.RightFingers1, new Vector3(0, (float) -Math.Abs(Math.Sin(figureRender_nn * 1)) * -80, 0));
 			//fig2.RotateBone (BoneId.BONE_RELBOW, new Vector3 ((float) Math.Abs (Math.Cos (figureRender_nn * 1)) * 45.0f, 0, 0));
 			//fig2.RotateBone (BoneId.BONE_LSHOULDER, new Vector3 (0, (float) Math.Abs (Math.Sin (figureRender_nn * 3)) * 80, 0));
 
 			//fig2.RotateBone (BoneId.BONE_LELBOW, new Vector3 (0, 0, (float) Math.Abs (Math.Cos (figureRender_nn * 2)) * 90));
-			fig2.RotateBone(BoneId.BONE_LWRIST, new Vector3(0, (float) Math.Abs(Math.Cos(figureRender_nn * 2)) * 90, 0));
+			fig2.RotateBone(BoneId.LeftWrist, new Vector3(0, (float) Math.Abs(Math.Cos(figureRender_nn * 2)) * 90, 0));
 			//fig2.RotateBone (BoneId.BONE_RHIP, new Vector3 ((float) Math.Sin (figureRender_nn) * 25.0f, 0,  0));
 			//fig2.RotateBone (BoneId.BONE_RKNEE, new Vector3 ((float) -Math.Abs (Math.Cos (figureRender_nn * 2) * 45.0f), 0,  0));
 
@@ -143,8 +145,8 @@
 			//fig.Update ();
 			//fig2.Update ();
 			if (InputKeyPressed(SDLK_f)) {
-				fig.PositionSet(AvatarPosition() + new Vector3(0, -2.0f, 0));
-				fig2.PositionSet(AvatarPosition() + new Vector3(0, 2.0f, 0));
+				fig.Position = Avatar.Instance.Position + new Vector3(0, -2.0f, 0);
+				fig2.Position = Avatar.Instance.Position + new Vector3(0, 2.0f, 0);
 			}
 			if (InputKeyPressed(SDLK_g))
 				moveit = !moveit;

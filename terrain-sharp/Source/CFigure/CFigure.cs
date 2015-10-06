@@ -13,7 +13,7 @@
 		public List<Bone> _bone;
 		public Vector3 Position { get; set; }
 		public Vector3 _rotation;
-		public int[] _bone_index = new int[(int) BoneId.BONE_COUNT];
+		public int[] _bone_index = new int[(int) BoneId.Count];
 		public int _unknown_count;
 		public GLmesh Skin { get; private set; }//The original, read only
 		public GLmesh _skin_deform;//Altered
@@ -55,8 +55,8 @@
 		}
 
 		public void Clear() {
-			for (int i = 0; i < (int) BoneId.BONE_COUNT; i++)
-				_bone_index[i] = (int) BoneId.BONE_INVALID;
+			for (int i = 0; i < (int) BoneId.Count; i++)
+				_bone_index[i] = (int) BoneId.Invalid;
 			_unknown_count = 0;
 			Skin.Clear();
 			_skin_deform.Clear();
@@ -74,42 +74,46 @@
 		public BoneId IdentifyBone(string name) {
 			BoneId bid = CAnim.BoneFromString(name);
 			//If CAnim couldn't make sense of the name, or if that id is already in use...
-			if (bid == BoneId.BONE_INVALID || _bone_index[(int) bid] != (int) BoneId.BONE_INVALID) {
+			if (bid == BoneId.Invalid || _bone_index[(int) bid] != (int) BoneId.Invalid) {
 				Console.WriteLine("Couldn't id Bone '%s'.", name);
-				bid = BoneId.BONE_UNKNOWN0 + _unknown_count;
+				bid = BoneId.Unknown0 + _unknown_count;
 				_unknown_count++;
 			}
 			return bid;
 		}
 
 		public void SetRotation(Vector3 rot) {
-			_bone[_bone_index[(int) BoneId.BONE_ROOT]].Rotation = rot;
+			_bone[_bone_index[(int) BoneId.Root]].Rotation = rot;
 		}
 
 		public void RotateBone(BoneId id, Vector3 angle) {
-			if (_bone_index[(int) id] != (int) BoneId.BONE_INVALID)
+			if (_bone_index[(int) id] != (int) BoneId.Invalid)
 				_bone[_bone_index[(int) id]].Rotation = angle;
 		}
 
-		public void PushBone(BoneId id, int parent, Vector3 pos) {
+		public void PushBone(BoneId id, BoneId parent, Vector3 pos) {
 			_bone_index[(int) id] = _bone.Count;
 			Bone b = new Bone();
 			b.Id = id;
-			b.IdParent = (BoneId) parent;
+			b.IdParent = parent;
 			b.Position = pos;
 			b.Origin = pos;
-			b.Rotation = new Vector3();
+			b.Rotation = Vector3.Zero;
 			b.Children.Clear();
 			b.Color = glRgbaUnique(id + 1);
 			_bone.Add(b);
-			_bone[_bone_index[parent]].Children.Add((int) id);
+			_bone[_bone_index[(int) parent]].Children.Add((int) id);
 		}
 
-		public void PushWeight(int id, int index, float weight) {
+		public void PushBone(Figure.Bone bone) {
+			PushBone(bone.id, bone.id_parent, bone.pos);
+		}
+
+		public void PushWeight(BoneId id, int index, float weight) {
 			Bone.BWeight bw;
 			bw._index = index;
 			bw._weight = weight;
-			_bone[_bone_index[id]].VertexWeights.Add(bw);
+			_bone[_bone_index[(int) id]].VertexWeights.Add(bw);
 		}
 
 		public void Prepare() {
@@ -132,7 +136,7 @@
 			GL.Translate(Position.X, Position.Y, Position.Z);
 			CgUpdateMatrix();
 			_skin_render.Render();
-			CgSetOffset(new Vector3());
+			CgSetOffset(Vector3.Zero);
 			GL.PopMatrix();
 			CgUpdateMatrix();
 		}

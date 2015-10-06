@@ -17,8 +17,8 @@
 		public const float TEMP_HOT = 0.9f;
     public const float MIN_TEMP = 0;
 		public const float MAX_TEMP = 1;
-		//#define NEGLIGIBLE                0.000000000001f
-		//#define GRAVITY                   9.5f
+		public const float NEGLIGIBLE = 0.000000000001f;
+		public const float GRAVITY = 9.5f;
 
 		//This is used to scale the z value of normals
 		//Nower numbers make the normals more extreme, exaggerate the lighting

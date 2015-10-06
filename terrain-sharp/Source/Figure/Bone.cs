@@ -1,7 +1,7 @@
 ﻿namespace terrain_sharp.Source.Figure {
 	using OpenTK;
 
-	using Anim;
+	using CAnim;
 
 	class Bone {
 		public Vector3 pos;

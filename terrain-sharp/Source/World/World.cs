@@ -25,7 +25,7 @@
 	///</summary>
 	///<remarks>
 	///	Only one of these is ever instanced.  This is everything that goes into a "save file".
-	///	UMath.Sing only this, the entire world can be re-created.
+	///	Using only this, the entire world can be re-created.
 	///</remarks>
 	partial class World {
 		#region Constants
@@ -55,6 +55,7 @@
 		#endregion
 
 		private static readonly World instance = new World();
+		private World() { }
 		public static World Instance { get { return instance; } }
 
 		public int CanopyTree { get; private set; }
@@ -371,7 +372,7 @@
 			return m + t * TREE_TYPES;
 		}
 
-		public CTree WorldTree(int id) {
+		public CTree Tree(int id) {
 			int m = id % TREE_TYPES;
 			int t = (id - m) / TREE_TYPES;
 			return tree[m, t];
@@ -510,11 +511,11 @@
 			return map[world_x, world_y];
 		}
 
-		public Region WorldRegionFromPosition(float world_x, float world_y) {
+		public Region RegionFromPosition(float world_x, float world_y) {
 			return GetRegionFromPosition((int) world_x, (int) world_y);
 		}
 
-		public Color4 WorldColorGet(int world_x, int world_y, SurfaceColor c) {
+		public Color4 GetColor(int world_x, int world_y, SurfaceColor c) {
 			int x = Math.Max(world_x % DITHER_SIZE, 0);
 			int y = Math.Max(world_y % DITHER_SIZE, 0);
 			world_x += dithermap[x, y].X;
@@ -561,7 +562,7 @@
 			return result;
 		}
 
-		public void WorldTexturePurge() {
+		public void PurgeTexture() {
 			for (int m = 0; m < TREE_TYPES; m++) {
 				for (int t = 0; t < TREE_TYPES; t++) {
 					tree[m, t].TexturePurge();

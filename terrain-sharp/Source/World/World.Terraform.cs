@@ -595,11 +595,11 @@ namespace terrain_sharp.Source.World {
 					var cold_dirt = Color4Utils.Interpolate(wet_dirt, Color4Utils.FromLuminance(0.7f), 0.5f);
 					//warm dirt us a fade from wet to dry
 					var warm_dirt = Color4Utils.Interpolate(dry_dirt, wet_dirt, moisture);
-					fade = MathScalar(temperature, StdAfx.FREEZING, 1);
+					fade = MathUtils.Scalar(temperature, StdAfx.FREEZING, 1);
 					return Color4Utils.Interpolate(cold_dirt, warm_dirt, fade);
 				case SurfaceColor.Rock:
 					//Devise a rock color
-					fade = MathScalar(temperature, StdAfx.FREEZING, 1);
+					fade = MathUtils.Scalar(temperature, StdAfx.FREEZING, 1);
 					//Warm rock is red
 					var random = MersenneTwister.Default;
           var warm_rock = new Color4(

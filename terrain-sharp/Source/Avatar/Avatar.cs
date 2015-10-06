@@ -8,6 +8,7 @@
 
 	using CAnim;
 	using CFigure;
+	using StdAfx;
 	using Utils;
 	using World;
 
@@ -37,6 +38,7 @@
 		};
 
 		private static readonly Avatar instance = new Avatar();
+		private Avatar() { }
 		public static Avatar Instance { get { return instance; } }
 
 		public Vector3 CameraAngle { get; private set; }
@@ -69,12 +71,12 @@
 		private void do_model() {
 			avatar.LoadX("models//male.X");
 			if (CVarUtils.GetCVar<bool>("avatar.expand")) {
-				avatar.BoneInflate(BoneId.BONE_PELVIS, 0.02f, true);
-				avatar.BoneInflate(BoneId.BONE_HEAD, 0.025f, true);
-				avatar.BoneInflate(BoneId.BONE_LWRIST, 0.03f, true);
-				avatar.BoneInflate(BoneId.BONE_RWRIST, 0.03f, true);
-				avatar.BoneInflate(BoneId.BONE_RANKLE, 0.05f, true);
-				avatar.BoneInflate(BoneId.BONE_LANKLE, 0.05f, true);
+				avatar.BoneInflate(BoneId.Pelvis, 0.02f, true);
+				avatar.BoneInflate(BoneId.Head, 0.025f, true);
+				avatar.BoneInflate(BoneId.LeftWrist, 0.03f, true);
+				avatar.BoneInflate(BoneId.RightWrist, 0.03f, true);
+				avatar.BoneInflate(BoneId.RightAnkle, 0.05f, true);
+				avatar.BoneInflate(BoneId.LeftAnkle, 0.05f, true);
 			}
 		}
 
@@ -120,11 +122,11 @@
 			//SdlSetCaption(oss.str().c_str());
 		}
 
-		public void AvatarUpdate() {
+		public void Update() {
 			if (!GameRunning())
 				return;
 			if (InputKeyState(SDLK_LCTRL))
-				AvatarLook(0, 1);
+				Look(0, 1);
 			bool flying = CVarUtils.GetCVar<bool>("flying");
 			float elapsed = Math.Min(SdlElapsedSeconds(), 0.25f);
 			Vector3 old = Position;
@@ -136,7 +138,7 @@
 			if (InputKeyPressed(SDLK_F2))
 				CVarUtils.SetCVar("flying", !CVarUtils.GetCVar<bool>("flying"));
 			//Joystick movement
-			AvatarLook((int) (InputJoystickGet(3) * 5), (int) (InputJoystickGet(4) * -5));
+			Look((int) (InputJoystickGet(3) * 5), (int) (InputJoystickGet(4) * -5));
 			do_move(new Vector3(InputJoystickGet(0), InputJoystickGet(1), 0));
 			if (InputMouselook()) {
 				if (InputKeyPressed(INPUT_MWHEEL_UP))
@@ -172,7 +174,7 @@
 				current_speed -= elapsed * MOVE_SPEED * DECEL;
 			current_speed = MathHelper.Clamp(current_speed, min_speed, max_speed);
 			//Now figure out the angle of movement
-			float angle_adjust = MathAngleDifference(current_angle, desired_angle);
+			float angle_adjust = MathUtils.AngleDifference(current_angle, desired_angle);
 			//if we're trying to reverse direction, don't do a huge, arcing turn.  Just slow and double back
 			float lean_angle = 0;
 			if (Math.Abs(angle_adjust) > 135)
@@ -198,14 +200,14 @@
 			float water = World.Instance.WaterLevel((int) Position.X, (int) Position.Y);
 			avatar_facing.Y = MathUtils.Interpolate(avatar_facing.Y, lean_angle, elapsed);
 			if (!flying) {
-				velocity -= GRAVITY * elapsed;
+				velocity -= StdAfx.GRAVITY * elapsed;
 				position.Z += velocity * elapsed;
 				if (Position.Z <= ground) {
 					on_ground = true;
 					swimming = false;
 					position.Z = ground;
 					velocity = 0;
-				} else if (Position.Z > ground + GRAVITY * 0.1f)
+				} else if (Position.Z > ground + StdAfx.GRAVITY * 0.1f)
 					on_ground = false;
 				if (Position.Z + SWIM_DEPTH < water) {
 					swimming = true;
@@ -261,7 +263,7 @@
 			do_location();
 		}
 
-		public void AvatarInit() {
+		public void Init() {
 			desired_cam_distance = IniFloat("Avatar", "CameraDistance");
 			do_model();
 			foreach (AnimType animType in Enum.GetValues(typeof(AnimType))) {
@@ -271,7 +273,7 @@
 			ParticleLoad("step", &dust_particle);
 		}
 
-		public void AvatarLook(int x, int y) {
+		public void Look(int x, int y) {
 			if (CVarUtils.GetCVar<bool>("mouse.invert"))
 				x = -x;
 			float mouse_sense = CVarUtils.GetCVar<float>("mouse.sensitivity");
