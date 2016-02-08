@@ -319,7 +319,7 @@ namespace terrain_sharp.Source.World {
 						continue;
 					depth = size - depth;
 					var r = GetRegion(xx + try_x, yy + try_y);
-					r.title = "Lake" + id.ToString();
+					r.title = "Lake" + id.Tostring();
 					r.geo_water = water_level;
 					r.geo_detail = 2;
 					r.geo_bias = -4 * depth;

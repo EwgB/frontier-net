@@ -8,7 +8,8 @@
 
 	using CAnim;
 	using CFigure;
-	using StdAfx;
+	using CVarsWrapper;
+  using StdAfx;
 	using Utils;
 	using World;
 
@@ -70,7 +71,7 @@
 
 		private void do_model() {
 			avatar.LoadX("models//male.X");
-			if (CVarUtils.GetCVar<bool>("avatar.expand")) {
+			if (CVarsWrapper.Instance.GetCVar<bool>("avatar.expand")) {
 				avatar.BoneInflate(BoneId.Pelvis, 0.02f, true);
 				avatar.BoneInflate(BoneId.Head, 0.025f, true);
 				avatar.BoneInflate(BoneId.LeftWrist, 0.03f, true);
@@ -81,7 +82,7 @@
 		}
 
 		private void do_move(Vector3 delta) {
-			if (CVarUtils.GetCVar<bool>("flying")) {
+			if (CVarsWrapper.Instance.GetCVar<bool>("flying")) {
 				float forward = (float) Math.Sin(MathHelper.DegreesToRadians(angle.X));
 				var movement = new Vector3(
 					(float) (Math.Cos(MathHelper.DegreesToRadians(angle.Z)) * delta.X + Math.Sin(MathHelper.DegreesToRadians(angle.Z)) * delta.Y * forward),
@@ -127,7 +128,7 @@
 				return;
 			if (InputKeyState(SDLK_LCTRL))
 				Look(0, 1);
-			bool flying = CVarUtils.GetCVar<bool>("flying");
+			bool flying = CVarsWrapper.Instance.GetCVar<bool>("flying");
 			float elapsed = Math.Min(SdlElapsedSeconds(), 0.25f);
 			Vector3 old = Position;
 			desired_movement = new Vector2();
@@ -136,7 +137,7 @@
 				on_ground = false;
 			}
 			if (InputKeyPressed(SDLK_F2))
-				CVarUtils.SetCVar("flying", !CVarUtils.GetCVar<bool>("flying"));
+				CVarsWrapper.Instance.SetCVar("flying", !CVarsWrapper.Instance.GetCVar<bool>("flying"));
 			//Joystick movement
 			Look((int) (InputJoystickGet(3) * 5), (int) (InputJoystickGet(4) * -5));
 			do_move(new Vector3(InputJoystickGet(0), InputJoystickGet(1), 0));
@@ -267,16 +268,16 @@
 			desired_cam_distance = IniFloat("Avatar", "CameraDistance");
 			do_model();
 			foreach (AnimType animType in Enum.GetValues(typeof(AnimType))) {
-				anim[animType].LoadBvh(IniString("Animations", anim_names[animType]));
-				IniStringSet("Animations", anim_names[animType], IniString("Animations", anim_names[animType]));
+				anim[animType].LoadBvh(Inistring("Animations", anim_names[animType]));
+				InistringSet("Animations", anim_names[animType], Inistring("Animations", anim_names[animType]));
 			}
 			ParticleLoad("step", &dust_particle);
 		}
 
 		public void Look(int x, int y) {
-			if (CVarUtils.GetCVar<bool>("mouse.invert"))
+			if (CVarsWrapper.Instance.GetCVar<bool>("mouse.invert"))
 				x = -x;
-			float mouse_sense = CVarUtils.GetCVar<float>("mouse.sensitivity");
+			float mouse_sense = CVarsWrapper.Instance.GetCVar<float>("mouse.sensitivity");
 			angle.X -= x * mouse_sense;
 			angle.Z += y * mouse_sense;
 			angle.X = MathHelper.Clamp(angle.X, 0, 180);
@@ -300,7 +301,7 @@
 			GL.BindTexture(TextureTarget.Texture2D, TextureIdFromName("avatar.png"));
 			//GL.BindTexture (TextureTarget.Texture2D, 0);
 			avatar.Render();
-			if (CVarUtils.GetCVar<bool>("show.skeleton"))
+			if (CVarsWrapper.Instance.GetCVar<bool>("show.skeleton"))
 				avatar.RenderSkeleton();
 		}
 	}

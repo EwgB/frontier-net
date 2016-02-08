@@ -18,8 +18,8 @@
 		public Vector3 Position { get; set; }
 		public Vector3 Rotation { get; set; }
 		public Color4 Color { get; set; }
-		public List<int> Children { get; set; }
+		public List<BoneId> Children { get; set; }
 		public List<BWeight> VertexWeights { get; set; }
-		public GLmatrix Matrix { get; set; }
+		public Matrix4 Matrix { get; set; }
 	}
 }

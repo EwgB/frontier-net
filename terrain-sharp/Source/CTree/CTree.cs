@@ -373,14 +373,11 @@
 				m.PushTriangle(base_index, base_index + 4, base_index + 3);
 				m.PushTriangle(base_index, base_index + 1, base_index + 4);
 			}
-			GLmatrix mat;
 			//angle = MathUtils.MathAngle(pos.X, pos.Y, 0, 0);
 			//angle += 45.0f;
-			mat.Identity();
-			mat.Rotate(angle, 0, 0, 1);
+			var mat = Matrix4.CreateRotationZ(angle);
 			for (int i = base_index; i < m.Vertices.Count; i++) {
-				m.Vertices[i] = glMatrixTransformPoint(mat, m.Vertices[i]);
-				m.Vertices[i] += pos;
+				m.Vertices[i] = Vector3.TransformPosition(m.Vertices[i], mat) + pos;
 			}
 		}
 
@@ -433,7 +430,7 @@
 				//This is so the branch can end at a point.
 				if (segment == segment_count) {
 					pos = new Vector3(0, anchor.length * horz_pos, 0);
-					pos = glMatrixTransformPoint(mat, pos);
+					pos = Vector3.TransformPosition(pos, mat);
 					m.PushVertex(pos + core, new Vector3(pos.X, 0, pos.Z), new Vector2(0.249f, pos.Y * _texture_tile));
 				} else {
 					for (int ring = 0; ring <= radial_steps; ring++) {
@@ -448,7 +445,7 @@
 							(float) (-Math.Sin(angle) * radius),
 							anchor.length * horz_pos,
 							(float) (-Math.Cos(angle) * radius));
-						pos = glMatrixTransformPoint(mat, pos);
+						pos = Vector3.TransformPosition(pos, mat);
 						m.PushVertex(
 							pos + core,
 							new Vector3(pos.X, 0, pos.Z),

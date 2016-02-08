@@ -391,17 +391,17 @@
 			if (world_x == 0)
 				lng = "meridian";
 			else if (world_x < 0)
-				lng = Math.Abs(world_x).ToString() + " west";
+				lng = Math.Abs(world_x).Tostring() + " west";
 			else
-				lng = world_x.ToString() + " east";
+				lng = world_x.Tostring() + " east";
 
 			string lat;
 			if (world_y == 0)
 				lat = "Equator";
 			else if (world_y < 0)
-				lat = Math.Abs(world_y).ToString() + " north";
+				lat = Math.Abs(world_y).Tostring() + " north";
 			else
-				lat = world_y.ToString() + " south";
+				lat = world_y.Tostring() + " south";
 
 			return lat + ", " + lng;
 		}

@@ -108,7 +108,7 @@
 			return c;
 		}
 
-		//static Color4 Color4FromString(string s) {
+		//static Color4 Color4Fromstring(string s) {
 		//	long color;
 		//	char buffer[10];
 		//	char* pound;

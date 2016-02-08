@@ -64,6 +64,7 @@
     <Compile Include="Source\CAnim\BoneId.cs" />
     <Compile Include="Source\Avatar\AnimType.cs" />
     <Compile Include="Source\Avatar\Avatar.cs" />
+    <Compile Include="Source\CAnim\CAnim.cs" />
     <Compile Include="Source\CFigure\Bone.cs" />
     <Compile Include="Source\CFigure\CFigure.cs" />
     <Compile Include="Source\Figure\Bone.cs" />
