@@ -1,0 +1,11 @@
+prefix=C:/Program Files (x86)/CVars
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: CVars
+Description: Library for runtime variable editing for fast prototyping.
+Version: 2.5.0
+Cflags:   /DWIN32 /D_WINDOWS /W3
+Libs: -L${libdir}  -lcvars
+
