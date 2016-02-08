@@ -25,8 +25,21 @@ using namespace System;
 
 namespace CVarsWrapper {
 
-	public ref class Class1
-	{
-		// TODO: Add your methods for this class here.
-	};
-}
+	public ref class CVarsWrapper {
+    private:
+        CVarsWrapper() {}
+        CVarsWrapper(const CVarsWrapper%) { throw gcnew System::InvalidOperationException("CVarsWrapper cannot be copy-constructed"); }
+        static CVarsWrapper m_instance;
+    public:
+        static property CVarsWrapper^ Instance { CVarsWrapper^ get() { return %m_instance; } }
+
+        /** These function can be called to obtain the value of a previously
+        *  created CVar.
+        *
+        *  The exception "CVarUtils::CVarNonExistant" will be thrown if the value
+        *  does not exist.
+        *  eg. int nGUIWidth = CVarUtils::GetCVar<int>( "gui.Width" );
+        */
+        template <class T> T GetCVar(std::string s);
+    };
+};
