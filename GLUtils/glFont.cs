@@ -1,23 +1,43 @@
 /*-----------------------------------------------------------------------------
-
   glFont.cpp
-
   2009 Shamus Young
-
 -------------------------------------------------------------------------------
-  
   A system for loading bitmap fonts.
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
+
+struct GLglyph
+{
+  char        chr;
+  GLcoord     size;
+  GLvector2   uv1;
+  GLvector2   uv2;
+  int         advance;
+  char*       buffer;
+};
+
+struct GLfont
+{
+private:
+  GLglyph         _glyph[GL_MAX_GLYPHS];
+  int             _id;
+  int             _line_height;
+public:
+  void            FaceSet (unsigned id);
+  void            Select ();
+  GLglyph         Glyph (int ascii) const { return _glyph[ascii]; };
+  int             GlyphDraw (int ascii, GLcoord origin) const;
+  int             GlyphWidth (int ascii);
+  int             LineHeight () const { return _line_height;}
+};
 
 #define GLYPH_GRID  16
 #define GLYPH_UNIT  (1.0f / GLYPH_GRID)
 
 void GLfont::Select ()
 {
-
   glBindTexture (GL_TEXTURE_2D, _id);
   glEnable (GL_TEXTURE_2D);
   glEnable (GL_BLEND);
@@ -30,12 +50,10 @@ void GLfont::Select ()
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_LIGHTING);
   //glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 }
 
 void GLfont::FaceSet (unsigned id)
 {
-
   GLcoord         size;
   GLcoord         origin;
   unsigned char*  buffer;
@@ -102,22 +120,18 @@ void GLfont::FaceSet (unsigned id)
   delete buffer;
   _line_height = box_size;
   //_glyph[32].
-
 }
 
 int GLfont::GlyphWidth (int ascii)
 {
-
   ascii %= GL_MAX_GLYPHS;
   if (ascii < 0)
     ascii = GL_MAX_GLYPHS + ascii;
   return _glyph[ascii].size.x;
-    
 }
 
 int GLfont::GlyphDraw (int ascii, GLcoord origin) const
 {
-
   ascii %= GL_MAX_GLYPHS;
   if (ascii < 0)
     ascii = GL_MAX_GLYPHS + ascii;
@@ -133,31 +147,23 @@ int GLfont::GlyphDraw (int ascii, GLcoord origin) const
   glTexCoord2f (_glyph[ascii].uv1.x, _glyph[ascii].uv2.y);
   glVertex2i (origin.x, origin.y);
   return _glyph[ascii].size.x;
-
 }
 
 #include "texture.h"
 
 static GLfont      f;
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
 void glFontInit ()
 {
-
   GLtexture*  t;
 
   return;
   t = TextureFromName ("font.png");
   f.FaceSet (t->id);
-
 }
 
 void glFontDraw ()
 {
-
   return;
   f.Select ();
 
@@ -188,15 +194,10 @@ void glFontDraw ()
   }
   glEnd (); 
 
-
-
-
   glPopMatrix ();
   glMatrixMode (GL_PROJECTION);
   glPopMatrix ();
   glMatrixMode (GL_MODELVIEW);
   buffer[0] = 0;
-
-
 }
-
+*/

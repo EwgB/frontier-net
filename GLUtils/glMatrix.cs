@@ -1,19 +1,34 @@
 /*-----------------------------------------------------------------------------
-
   glMatrix.cpp
-
   2006 Shamus Young
-
 -------------------------------------------------------------------------------
-  
   Functions useful for manipulating the Matrix struct
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
+
+struct GLmatrix
+{
+  float       elements[4][4];
+  void        Identity ();
+  void        Rotate (float theta, float x, float y, float z);
+  void        Multiply (GLmatrix m);
+  GLvector    TransformPoint (GLvector pt);
+};
+
+GLmatrix  glMatrixIdentity (void);
+void      glMatrixElementsSet (GLmatrix* m, float* in);
+GLmatrix  glMatrixMultiply (GLmatrix a, GLmatrix b);
+GLmatrix  glMatrixScale (GLmatrix m, GLvector in);
+GLvector  glMatrixTransformPoint (GLmatrix m, GLvector in);
+GLmatrix  glMatrixTranslate (GLmatrix m, GLvector in);
+GLmatrix  glMatrixRotate (GLmatrix m, float theta, float x, float y, float z);
+GLvector  glMatrixToEuler (GLmatrix mat, int order);
 
 #define M(e,x,y)                (e.elements[x][y])
 #define E(x,y)                  (elements[x][y])
+*/
 
 /*** Order type constants, constructors, extractors ***/
 
@@ -29,6 +44,7 @@
     /* {a,b,c,ord} means Rz(c)Ry(b)Rx(a), where Rz(c)v	    */
     /* rotates v around Z by c radians.			    */
 
+/*
 #define EulFrmS	     0
 #define EulFrmR	     1
 #define EulFrm(ord)  ((unsigned)(ord)&1)
@@ -44,12 +60,18 @@
 #define EulAxJ(ord)  ((int)(EulNext[EulAxI(ord)+(EulPar(ord)==EulParOdd)]))
 #define EulAxK(ord)  ((int)(EulNext[EulAxI(ord)+(EulPar(ord)!=EulParOdd)]))
 #define EulAxH(ord)  ((EulRep(ord)==EulRepNo)?EulAxK(ord):EulAxI(ord))
+*/
     /* EulGetOrd unpacks all useful information about order simultaneously. */
+/*
 #define EulGetOrd(ord,i,j,k,h,n,s,f) {unsigned o=ord;f=o&1;o>>=1;s=o&1;o>>=1;\
     n=o&1;o>>=1;i=EulSafe[o&3];j=EulNext[i+n];k=EulNext[i+1-n];h=s?k:i;}
+*/
     /* EulOrd creates an order value between 0 and 23 from 4-tuple choices. */
+/*
 #define EulOrd(i,p,r,f)	   (((((((i)<<1)+(p))<<1)+(r))<<1)+(f))
+*/
     /* Static axes */
+/*
 #define EulOrdXYZs    EulOrd(X,EulParEven,EulRepNo,EulFrmS)
 #define EulOrdXYXs    EulOrd(X,EulParEven,EulRepYes,EulFrmS)
 #define EulOrdXZYs    EulOrd(X,EulParOdd,EulRepNo,EulFrmS)
@@ -62,7 +84,9 @@
 #define EulOrdZXZs    EulOrd(Z,EulParEven,EulRepYes,EulFrmS)
 #define EulOrdZYXs    EulOrd(Z,EulParOdd,EulRepNo,EulFrmS)
 #define EulOrdZYZs    EulOrd(Z,EulParOdd,EulRepYes,EulFrmS)
+*/
     /* Rotating axes */
+/*
 #define EulOrdZYXr    EulOrd(X,EulParEven,EulRepNo,EulFrmR)
 #define EulOrdXYXr    EulOrd(X,EulParEven,EulRepYes,EulFrmR)
 #define EulOrdYZXr    EulOrd(X,EulParOdd,EulRepNo,EulFrmR)
@@ -75,7 +99,6 @@
 #define EulOrdZXZr    EulOrd(Z,EulParEven,EulRepYes,EulFrmR)
 #define EulOrdXYZr    EulOrd(Z,EulParOdd,EulRepNo,EulFrmR)
 #define EulOrdZYZr    EulOrd(Z,EulParOdd,EulRepYes,EulFrmR)
-
 
 #include <math.h>
 #include <float.h>
@@ -90,14 +113,8 @@ static float      identity_matrix[4][4] =
   {0.0f, 0.0f, 0.0f, 1.0f},
 };
 
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
 void* glMatrixCreate (void)
 {
-
   GLmatrix*       m;
   int             x;
   int             y;
@@ -109,16 +126,10 @@ void* glMatrixCreate (void)
     }
   }
   return (void*)m;
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 GLmatrix glMatrixIdentity (void)
 {
-
   GLmatrix        m;
   int             x;
   int             y;
@@ -129,16 +140,10 @@ GLmatrix glMatrixIdentity (void)
     }
   }
   return m;
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 void glMatrixElementsSet (GLmatrix* m, float* in)
 {
-
   m -> elements[0][0] = in[0];
   m -> elements[0][1] = in[1];
   m -> elements[0][2] = in[2];
@@ -158,16 +163,16 @@ void glMatrixElementsSet (GLmatrix* m, float* in)
   m -> elements[3][1] = in[13];
   m -> elements[3][2] = in[14];
   m -> elements[3][3] = in[15];
-
 }
+*/
 
 /*---------------------------------------------------------------------------
 A matrix multiplication (dot product) of two 4x4 matrices.
 ---------------------------------------------------------------------------*/
 
+/*
 GLmatrix glMatrixMultiply (GLmatrix a, GLmatrix b)
 {
-
   GLmatrix        result;
   
   M(result, 0,0) = M(a, 0,0) * M(b, 0, 0) + M(a, 1,0) * M(b, 0, 1) + M(a, 2,0) * M(b, 0, 2);
@@ -185,16 +190,10 @@ GLmatrix glMatrixMultiply (GLmatrix a, GLmatrix b)
   M(result, 2,2) = M(a, 0,2) * M(b, 2, 0) + M(a, 1,2) * M(b, 2, 1) + M(a, 2,2) * M(b, 2, 2);
   M(result, 3,2) = M(a, 0,2) * M(b, 3, 0) + M(a, 1,2) * M(b, 3, 1) + M(a, 2,2) * M(b, 3, 2) + M(a, 3,2);
   return result;
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 GLvector glMatrixTransformPoint (GLmatrix m, GLvector in)
 {
-
   GLvector              out;
 
   out.x = (M(m,0,0) * in.x + M(m,1,0) * in.y + M(m,2,0) * in.z + M(m,3,0));
@@ -204,30 +203,18 @@ GLvector glMatrixTransformPoint (GLmatrix m, GLvector in)
   //out.y = (M(m,0,1) * in.x + M(m,1,1) * in.y + M(m,2,1) * in.z + M(m,1,3));
   //out.z = (M(m,0,2) * in.x + M(m,1,2) * in.y + M(m,2,2) * in.z + M(m,2,3));
   return out;
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 GLmatrix glMatrixScale (GLmatrix m, GLvector in)
 {
-
   M(m,0,3) *= in.x;
   M(m,1,3) *= in.y;
   M(m,2,3) *= in.z;
   return m;  
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 GLmatrix glMatrixTranslate (GLmatrix m, GLvector in)
 {
-
   GLvector  old;
 
   old.x = M(m,3,0);
@@ -244,16 +231,10 @@ GLmatrix glMatrixTranslate (GLmatrix m, GLvector in)
   M(m,3,1) += in.y;
   M(m,3,2) += in.z;
   return m;
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 GLmatrix glMatrixRotate (GLmatrix m, float theta, float x, float y, float z)
 {
-
   GLmatrix              r;
   float                 length;
   float                 s, c, t;
@@ -289,10 +270,11 @@ GLmatrix glMatrixRotate (GLmatrix m, float theta, float x, float y, float z)
 
   m = glMatrixMultiply (m, r);
   return m;
-
 }
+*/
 
 /* Convert matrix to Euler angles (in radians). */
+/*
 GLvector glMatrixToEuler (GLmatrix mat, int order)
 {
   GLvector    ea;
@@ -338,7 +320,6 @@ GLvector glMatrixToEuler (GLmatrix mat, int order)
 
 void GLmatrix::Identity ()
 {
-
   int             x;
   int             y;
 
@@ -347,12 +328,10 @@ void GLmatrix::Identity ()
       E(x,y) = identity_matrix[x][y];
     }
   }
-
 }
 
 void GLmatrix::Rotate (float theta, float x, float y, float z)
 {
-
   GLmatrix              r;
   float                 length;
   float                 s, c, t;
@@ -388,17 +367,15 @@ void GLmatrix::Rotate (float theta, float x, float y, float z)
   E(3,2) = 0;
 
   Multiply (r);
-
 }
-
+*/
 
 /*---------------------------------------------------------------------------
 A matrix multiplication (dot product) of two 4x4 matrices.
 ---------------------------------------------------------------------------*/
-
+/*
 void GLmatrix::Multiply (GLmatrix a)
 {
-
   GLmatrix        b;
   
   b = *this;
@@ -416,19 +393,15 @@ void GLmatrix::Multiply (GLmatrix a)
   E(1,2) = M(a, 0,2) * M(b, 1, 0) + M(a, 1,2) * M(b, 1, 1) + M(a, 2,2) * M(b, 1, 2);
   E(2,2) = M(a, 0,2) * M(b, 2, 0) + M(a, 1,2) * M(b, 2, 1) + M(a, 2,2) * M(b, 2, 2);
   E(3,2) = M(a, 0,2) * M(b, 3, 0) + M(a, 1,2) * M(b, 3, 1) + M(a, 2,2) * M(b, 3, 2) + M(a, 3,2);
-  
-
 }
-
 
 GLvector GLmatrix::TransformPoint (GLvector in)
 {
-
   GLvector              out;
 
   out.x = (E(0,0) * in.x + E(1,0) * in.y + E(2,0) * in.z + E(3,0));
   out.y = (E(0,1) * in.x + E(1,1) * in.y + E(2,1) * in.z + E(3,1));
   out.z = (E(0,2) * in.x + E(1,2) * in.y + E(2,2) * in.z + E(3,2));
   return out;
-
 }
+*/

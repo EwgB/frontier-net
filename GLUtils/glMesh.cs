@@ -1,69 +1,78 @@
 /*-----------------------------------------------------------------------------
-
   glUvbox.cpp
-
   2011 Shamus Young
-
 -------------------------------------------------------------------------------
-  
   This class is used for storing groups of verts and polygons.
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
+
+struct GLmesh
+{
+  GLbbox            _bbox;
+  vector<UINT>      _index;
+  vector<GLvector>  _vertex;
+  vector<GLvector>  _normal;
+  vector<GLrgba>    _color;
+  vector<GLvector2> _uv;
+
+  void              CalculateNormals ();
+  void              CalculateNormalsSeamless ();
+  void              Clear ();
+  void              PushTriangle (UINT i1, UINT i2, UINT i3);
+  void              PushQuad (UINT i1, UINT i2, UINT i3, UINT i4);
+  void              PushVertex (GLvector vert, GLvector normal, GLvector2 uv);
+  void              PushVertex (GLvector vert, GLvector normal, GLrgba color, GLvector2 uv);
+  void              RecalculateBoundingBox  ();
+  void              Render ();
+  unsigned          Triangles () { return _index.size () / 3; };
+  unsigned          Vertices () { return _vertex.size (); };
+
+  void    operator+= (const GLmesh& c);
+};
 
 void GLmesh::PushTriangle (UINT i1, UINT i2, UINT i3)
 {
-
   _index.push_back (i1);
   _index.push_back (i2);
   _index.push_back (i3);
-
 }
 
 void GLmesh::PushQuad (UINT i1, UINT i2, UINT i3, UINT i4)
 {
-
   PushTriangle (i1, i2, i3);
   PushTriangle (i1, i3, i4);
-
 }
 
 void GLmesh::PushVertex (GLvector vert, GLvector normal, GLvector2 uv)
 {
-
   _bbox.ContainPoint (vert);
   _vertex.push_back (vert);
   _normal.push_back (normal);
   _uv.push_back (uv);
-
 }
 
 void GLmesh::PushVertex (GLvector vert, GLvector normal, GLrgba color, GLvector2 uv)
 {
-
   _bbox.ContainPoint (vert);
   _vertex.push_back (vert);
   _normal.push_back (normal);
   _color.push_back (color);
   _uv.push_back (uv);
-
 }
 
 void GLmesh::Clear () 
 {
-
   _bbox.Clear ();
   _vertex.clear ();
   _normal.clear ();
   _uv.clear ();
   _index.clear ();
-
 }
 
 void GLmesh::Render ()
 {
-
   unsigned      i;
 
   glBegin (GL_TRIANGLES);
@@ -73,17 +82,13 @@ void GLmesh::Render ()
     glVertex3fv (&_vertex[_index[i]].x);
   }
   glEnd ();
-
 }
 
 void GLmesh::RecalculateBoundingBox ()
 {
-
   _bbox.Clear ();
   for (unsigned i = 0; i < Vertices (); i++)
     _bbox.ContainPoint (_vertex[i]);
-
-
 }
 
 void GLmesh::CalculateNormals ()
@@ -135,9 +140,7 @@ void GLmesh::CalculateNormals ()
   //Re-normalize. Done.
   for (i = 0; i < _normal.size (); i++) 
     _normal[i].Normalize ();
-
 }
-
 
 void GLmesh::CalculateNormalsSeamless ()
 {
@@ -215,5 +218,5 @@ void GLmesh::CalculateNormalsSeamless ()
     _normal[i].z *= NORMAL_SCALING;
     _normal[i].Normalize ();
   }
-
 }
+*/
