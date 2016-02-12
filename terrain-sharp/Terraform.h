@@ -1,0 +1,12 @@
+void    TerraformAverage ();
+void    TerraformCoast ();
+void    TerraformColors ();
+GLrgba  TerraformColorGenerate (SurfaceColor c, float moisture, float temperature, int seed);
+void    TerraformClimate ();
+void    TerraformFill ();
+void    TerraformFlora ();
+void    TerraformLakes (int count);
+void    TerraformOceans ();
+void    TerraformPrepare ();
+void    TerraformRivers (int count);
+void    TerraformZones ();
