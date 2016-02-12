@@ -158,7 +158,6 @@
     <Compile Include="Game.cs" />
     <Compile Include="Ini.cs" />
     <Compile Include="Input.cs" />
-    <Compile Include="Main.cs" />
     <Compile Include="Math.cs" />
     <Compile Include="Particle.cs" />
     <Compile Include="Player.cs" />
