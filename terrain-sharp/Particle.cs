@@ -4,6 +4,39 @@
   This manages the list of active particle emitters.
 -----------------------------------------------------------------------------*/
 
+namespace terrain_sharp {
+	static internal class Particle {
+		static internal void Init() {
+			// TODO: Init Particle CVars
+			//CVarUtils::CreateCVar<string>("particle.texture", "");
+			//CVarUtils::CreateCVar("particle.acceleration", glVector(0.0f, 0.0f, 0.0f));
+			//CVarUtils::CreateCVar("particle.blend", 0);
+			//CVarUtils::CreateCVar("particle.emitter_lifespan", 0);
+			//CVarUtils::CreateCVar("particle.emit_count", 0);
+			//CVarUtils::CreateCVar("particle.emit_interval", 0);
+			//CVarUtils::CreateCVar("particle.fade_in", 0);
+			//CVarUtils::CreateCVar("particle.fade_out", 0);
+			//CVarUtils::CreateCVar("particle.interpolate", 0);
+			//CVarUtils::CreateCVar("particle.lifespan", 0);
+			//CVarUtils::CreateCVar("particle.origin", glVector(0.0f, 0.0f, 0.0f));
+			//CVarUtils::CreateCVar("particle.panel_type", 0);
+			//CVarUtils::CreateCVar("particle.rotation", glVector(0.0f, 0.0f, 0.0f));
+			//CVarUtils::CreateCVar("particle.size.min", glVector(0.0f, 0.0f, 0.0f));
+			//CVarUtils::CreateCVar("particle.size.max", glVector(0.0f, 0.0f, 0.0f));
+			//CVarUtils::CreateCVar("particle.speed.min", glVector(0.0f, 0.0f, 0.0f));
+			//CVarUtils::CreateCVar("particle.speed.max", glVector(0.0f, 0.0f, 0.0f));
+			//CVarUtils::CreateCVar("particle.spin", glVector(0.0f, 0.0f, 0.0f));
+			//CVarUtils::CreateCVar("particle.volume.min", glVector(0.0f, 0.0f, 0.0f));
+			//CVarUtils::CreateCVar("particle.volume.max", glVector(0.0f, 0.0f, 0.0f));
+			//CVarUtils::CreateCVar<bool>("particle.wind", false);
+			//CVarUtils::CreateCVar<bool>("particle.gravity", false);
+			//CVarUtils::CreateCVar<bool>("particle.z_buffer", false);
+
+			//CVarUtils::CreateCVar<string>("current_particle", "");
+		}
+	}
+}
+
 /*
 #include "stdafx.h"
 
@@ -19,7 +52,6 @@
 UINT ParticleAdd (ParticleSet* p_in, GLvector position);
 bool ParticleCmd (vector<string> *args);
 void ParticleDestroy (UINT id);
-void ParticleInit ();
 void ParticleLoad (const char* filename_in, struct ParticleSet* p);
 void ParticleRender ();
 void ParticleRetire (UINT id);
@@ -83,35 +115,6 @@ void ParticleRetire (UINT id)
     }
   }
   ConsoleLog ("ParticleRetire: Effect #%d not found.", id);
-}
-
-void ParticleInit ()
-{
-  CVarUtils::CreateCVar<string> ("particle.texture", "");
-  CVarUtils::CreateCVar ("particle.acceleration", glVector (0.0f, 0.0f, 0.0f));
-  CVarUtils::CreateCVar ("particle.blend", 0);
-  CVarUtils::CreateCVar ("particle.emitter_lifespan", 0);
-  CVarUtils::CreateCVar ("particle.emit_count", 0);
-  CVarUtils::CreateCVar ("particle.emit_interval", 0);
-  CVarUtils::CreateCVar ("particle.fade_in", 0);
-  CVarUtils::CreateCVar ("particle.fade_out", 0);
-  CVarUtils::CreateCVar ("particle.interpolate", 0);
-  CVarUtils::CreateCVar ("particle.lifespan", 0);
-  CVarUtils::CreateCVar ("particle.origin", glVector (0.0f, 0.0f, 0.0f));
-  CVarUtils::CreateCVar ("particle.panel_type", 0);
-  CVarUtils::CreateCVar ("particle.rotation", glVector (0.0f, 0.0f, 0.0f));
-  CVarUtils::CreateCVar ("particle.size.min", glVector (0.0f, 0.0f, 0.0f));
-  CVarUtils::CreateCVar ("particle.size.max", glVector (0.0f, 0.0f, 0.0f));
-  CVarUtils::CreateCVar ("particle.speed.min", glVector (0.0f, 0.0f, 0.0f));
-  CVarUtils::CreateCVar ("particle.speed.max", glVector (0.0f, 0.0f, 0.0f));
-  CVarUtils::CreateCVar ("particle.spin", glVector (0.0f, 0.0f, 0.0f));
-  CVarUtils::CreateCVar ("particle.volume.min", glVector (0.0f, 0.0f, 0.0f));
-  CVarUtils::CreateCVar ("particle.volume.max", glVector (0.0f, 0.0f, 0.0f));
-  CVarUtils::CreateCVar<bool> ("particle.wind", false);
-  CVarUtils::CreateCVar<bool> ("particle.gravity", false);
-  CVarUtils::CreateCVar<bool> ("particle.z_buffer", false);
-
-  CVarUtils::CreateCVar<string> ("current_particle", "");
 }
 
 void ParticleUpdate ()
