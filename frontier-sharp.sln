@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CVarsWrapper", "CVarsWrapper\CVarsWrapper.vcxproj", "{7C9C34E2-78D3-409D-9A01-032D63C1B14A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "terrain-sharp", "terrain-sharp\terrain-sharp.csproj", "{C68F547E-17AF-4771-92DF-FBFA05D1C964}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Frontier", "Terrain\Terrain.vcxproj", "{A1163D2D-59A7-4B3E-9DBE-5DFE09E0A7F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GLUtils", "GLUtils\GLUtils.csproj", "{F3A78ADA-8135-4618-8DFB-EC24DF98DF3F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +51,18 @@ Global
 		{A1163D2D-59A7-4B3E-9DBE-5DFE09E0A7F2}.Release|x64.ActiveCfg = Release|Win32
 		{A1163D2D-59A7-4B3E-9DBE-5DFE09E0A7F2}.Release|x86.ActiveCfg = Release|Win32
 		{A1163D2D-59A7-4B3E-9DBE-5DFE09E0A7F2}.Release|x86.Build.0 = Release|Win32
+		{F3A78ADA-8135-4618-8DFB-EC24DF98DF3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3A78ADA-8135-4618-8DFB-EC24DF98DF3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3A78ADA-8135-4618-8DFB-EC24DF98DF3F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F3A78ADA-8135-4618-8DFB-EC24DF98DF3F}.Debug|x64.Build.0 = Debug|Any CPU
+		{F3A78ADA-8135-4618-8DFB-EC24DF98DF3F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F3A78ADA-8135-4618-8DFB-EC24DF98DF3F}.Debug|x86.Build.0 = Debug|Any CPU
+		{F3A78ADA-8135-4618-8DFB-EC24DF98DF3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3A78ADA-8135-4618-8DFB-EC24DF98DF3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3A78ADA-8135-4618-8DFB-EC24DF98DF3F}.Release|x64.ActiveCfg = Release|Any CPU
+		{F3A78ADA-8135-4618-8DFB-EC24DF98DF3F}.Release|x64.Build.0 = Release|Any CPU
+		{F3A78ADA-8135-4618-8DFB-EC24DF98DF3F}.Release|x86.ActiveCfg = Release|Any CPU
+		{F3A78ADA-8135-4618-8DFB-EC24DF98DF3F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
