@@ -42,6 +42,18 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="glBbox.cs" />
+    <Compile Include="glCoord.cs" />
+    <Compile Include="glFont.cs" />
+    <Compile Include="glMatrix.cs" />
+    <Compile Include="glMesh.cs" />
+    <Compile Include="glRgba.cs" />
+    <Compile Include="glTypes.cs" />
+    <Compile Include="glUvbox.cs" />
+    <Compile Include="glVector2.cs" />
+    <Compile Include="glVector3.cs" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
