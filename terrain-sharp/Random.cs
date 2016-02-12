@@ -10,10 +10,17 @@
   properties in dimensions up to 623; and it's fast, very fast. 
 -----------------------------------------------------------------------------*/
 
+/*
 #include "StdAfx.h"
 #include <memory.h>
 #include "random.h"
 
+#define COIN_FLIP     (RandomVal (2) == 0)
+
+unsigned long RandomVal (int range);
+unsigned long RandomVal (void);
+void          RandomInit (unsigned long seed);
+float         RandomFloat ();
 
 #define LOWER_MASK            0x7fffffff 
 #define M                     397
@@ -31,13 +38,8 @@ static int              k = 1;
 static unsigned long    mag01[2] = {0x0, MATRIX_A};
 static unsigned long    ptgfsr[N];
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
 unsigned long RandomVal (void)
 {
-
   int		            kk;
   unsigned long	    y; 
   
@@ -59,47 +61,28 @@ unsigned long RandomVal (void)
   y ^= TEMPERING_SHIFT_S (y) & TEMPERING_MASK_B;
   y ^= TEMPERING_SHIFT_T (y) & TEMPERING_MASK_C;
   return y ^= TEMPERING_SHIFT_L (y);
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 unsigned long RandomVal (int range)
 {
-
   return range ? (RandomVal () % range) : 0;
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 float RandomFloat ()
 {
-
   unsigned    n;
 
   n = RandomVal (10000);
   return (float)n / 10000;
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 void RandomInit (unsigned long seed)
 {
-
   mag01[0] = 0;
   mag01[1] = MATRIX_A;
   ptgfsr[0] = seed;
   for (k = 1; k < N; k++)
     ptgfsr[k] = 69069 * ptgfsr[k - 1];
   k = 1;
-
 }
-
+*/

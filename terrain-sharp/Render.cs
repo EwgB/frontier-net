@@ -1,13 +1,10 @@
 /*-----------------------------------------------------------------------------
-
   render.cpp
-
 -------------------------------------------------------------------------------
-
   This module kicks off most of the rendering jobs and handles the GL setup.
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 
 #include <math.h> 
@@ -23,6 +20,17 @@
 #include "texture.h"
 #include "text.h"
 #include "world.h"
+
+void Render (void);
+void RenderCreate (int width, int height, int bits, bool fullscreen);
+void RenderCanvasBegin (int left, int right, int bottom, int top, int size);
+void RenderCanvasEnd ();
+void RenderClick (int x, int y);
+void RenderInit  (void);
+void RenderLoadingScreen (float progress);
+int  RenderMaxDimension ();
+void RenderTexture (unsigned id);
+void RenderUpdate (void);
 
 #define RENDER_DISTANCE     1536
 #define NEAR_CLIP           0.2f
@@ -41,11 +49,10 @@ static GLrgba         current_fog;
 static float          fog_min;
 static float          fog_max;
 	
-/*** static Functions *******************************************************/
+// static Functions
 
 static void draw_water (float tile)
 {
-
   int     edge;
 
   edge = REGION_SIZE * WORLD_GRID;
@@ -64,11 +71,10 @@ static void draw_water (float tile)
   glTexCoord2f (tile, 0);
   glVertex3i (0, edge, 0);
   glEnd ();
-
-
 }
+*/
 
-/*
+/* Commented out in original
 void  water_map (bool underwater)
 {
 
@@ -103,7 +109,7 @@ void  water_map (bool underwater)
 
 /*** Module Functions *******************************************************/
 
-
+/*
 void RenderClick (int x, int y)
 {
 
@@ -120,12 +126,10 @@ void RenderClick (int x, int y)
   p.y *= WORLD_GRID * REGION_SIZE;
   p.z = REGION_SIZE;
   AvatarPositionSet (p);
-
 }
 
 void RenderCanvasBegin (int left, int right, int bottom, int top, int size)
 {
-
   glDisable (GL_CULL_FACE);
   glDisable (GL_FOG);
   glDisable(GL_DEPTH_TEST);
@@ -146,36 +150,30 @@ void RenderCanvasBegin (int left, int right, int bottom, int top, int size)
   glPushMatrix ();
   glLoadIdentity();
   glTranslatef(0, 0, -10.0f);
-
 }
 
 void RenderCanvasEnd ()
 {
-
   glMatrixMode (GL_PROJECTION);
   glPopMatrix ();  
 	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
   glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
   glMatrixMode (GL_MODELVIEW);
   glPopMatrix ();  
-
 }
 
 void RenderInit  (void)		
 {
-
   current_ambient = glRgba (0.0f);
   current_diffuse = glRgba (1.0f);
   current_fog = glRgba (1.0f);
   fog_max = 1000;
   fog_min = 1;
   CgInit ();
-
 }
 
 void RenderCreate (int width, int height, int bits, bool fullscreen)
 {
-
   int         flags;
   float       fovy;
   int         d;
@@ -214,23 +212,18 @@ void RenderCreate (int width, int height, int bits, bool fullscreen)
   WorldTexturePurge ();
   CgCompile ();
   TextCreate (width, height);  
-
 }
 
 //Return the power of 2 closest to the smallest dimension of the canvas
 //(This tells you how much room you have for drawing on textures.)
 int RenderMaxDimension ()
 {
-
   //return 64;///////////////////////////////////////////
   return max_dimension;
-
 }
 
 void RenderTexture (unsigned id)
 {
-
-
   glMatrixMode (GL_PROJECTION);
   glPushMatrix ();
   glLoadIdentity ();
@@ -248,7 +241,6 @@ void RenderTexture (unsigned id)
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable (GL_TEXTURE_2D);
-
 
   glColor3f (1, 1, 1);
 
@@ -293,26 +285,17 @@ void RenderTexture (unsigned id)
     glVertex3f (pos.x, pos.y + 10, 0);
     glEnd ();
   }
-  
 
   glPopMatrix ();
   glMatrixMode (GL_PROJECTION);
   glPopMatrix ();
   glMatrixMode (GL_MODELVIEW);
-
 }
-
 
 static float    spin;
 
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
 void RenderUpdate (void)		
 {
-  
   Env*        e;
 
   e = EnvGet ();
@@ -323,17 +306,10 @@ void RenderUpdate (void)
   fog_max = e->fog.rmax;
   if (InputKeyPressed (SDLK_TAB)) 
     show_map = !show_map;
-
 }
-
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 void RenderLoadingScreen (float progress)
 {
-
   glClearColor (0.0f, 0.0f, 0.0f, 1.0f);
   glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glColor3f (1.0f - progress, progress, 0.0f);
@@ -351,17 +327,10 @@ void RenderLoadingScreen (float progress)
   TextRender ();
   ConsoleRender ();
   SDL_GL_SwapBuffers ();
-
 }
-
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 void Render (void)		
 {
-
   GLvector        pos;
   GLvector        angle;
   Env*            e;
@@ -452,11 +421,10 @@ void Render (void)
     RenderTexture (WorldMap ());
   ConsoleRender ();
   SDL_GL_SwapBuffers ();
-
 }
+*/
 
-
-/*
+/* Commented out in original
   if (0) { //water reflection effect.  Needs stencil buffer to work right
     glDisable (GL_FOG);
     glPushMatrix ();
@@ -496,6 +464,5 @@ void Render (void)
     glEnable (GL_LIGHTING);
     glPolygonMode(GL_FRONT, GL_FILL);
     glPolygonMode(GL_BACK, GL_LINE);
-
   }
   */

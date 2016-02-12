@@ -1,3 +1,4 @@
+/*
 #define WRAP(x,y)                 ((unsigned)x % y)
 #define SIGN(x)                   (((x) > 0) ? 1 : ((x) < 0) ? -1 : 0)
 #define SIGNF(x)                  (((x) > NEGLIGIBLE) ? 1 : ((x) < -NEGLIGIBLE) ? -1 : 0)
@@ -90,3 +91,4 @@ struct Cell
   float water_level;
   float detail;
 };
+*/

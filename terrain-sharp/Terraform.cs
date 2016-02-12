@@ -1,24 +1,33 @@
 /*-----------------------------------------------------------------------------
-
   Terraform.cpp
-
-
 -------------------------------------------------------------------------------
-
   This module is a set of worker functions for World.cpp.  Really, everything
   here could go in World.cpp, except that region.cpp would be just too 
   damn big and unmanageable. 
 
   Still, this system isn't connected to anything else and it's only used
   when World.cpp is generating region data.
- 
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 #include "entropy.h"
 #include "math.h"
 #include "random.h"
 #include "world.h"
+
+void    TerraformAverage ();
+void    TerraformCoast ();
+void    TerraformColors ();
+GLrgba  TerraformColorGenerate (SurfaceColor c, float moisture, float temperature, int seed);
+void    TerraformClimate ();
+void    TerraformFill ();
+void    TerraformFlora ();
+void    TerraformLakes (int count);
+void    TerraformOceans ();
+void    TerraformPrepare ();
+void    TerraformRivers (int count);
+void    TerraformZones ();
 
 //The number of regions around the edge which should be ocean.
 #define OCEAN_BUFFER      (WORLD_GRID / 10) 
@@ -52,14 +61,11 @@ static GLrgba       flower_palette[] = {
   {1.0f, 0.0f, 0.5f, 1.0f}, //Maroon
 };
 
-/*-----------------------------------------------------------------------------
-Helper functions
------------------------------------------------------------------------------*/
+// Helper functions
 
 //In general, what part of the map is this coordinate in?
 static char* get_direction_name (int x, int y)
 {
-
   GLcoord   from_center;
 
   from_center.x = abs (x - WORLD_GRID_CENTER);
@@ -73,13 +79,11 @@ static char* get_direction_name (int x, int y)
   if (x < WORLD_GRID_CENTER)
     return direction_name[WEST];
   return direction_name[EAST];
-
 }
 
 //In general, what part of the map is this coordinate in?
 GLcoord get_map_side (int x, int y)
 {
-
   GLcoord   from_center;
 
   from_center.x = abs (x - WORLD_GRID_CENTER);
@@ -93,13 +97,11 @@ GLcoord get_map_side (int x, int y)
   if (x < WORLD_GRID_CENTER)
     return direction[WEST];
   return direction[EAST];
-
 }
 
 //Test the given area and see if it contains the given climate.
 static bool is_climate_present (int x, int y, int radius, Climate c) 
 {
-
   GLcoord   start, end;
   int       xx, yy;
   Region    r;
@@ -116,13 +118,11 @@ static bool is_climate_present (int x, int y, int radius, Climate c)
     }
   }
   return false;
-
 }
 
 //check the regions around the given one, see if they are unused
 static bool is_free (int x, int y, int radius)
 {
-
   int       xx, yy;
   Region    r;
 
@@ -138,14 +138,11 @@ static bool is_free (int x, int y, int radius)
     }
   }
   return true;
-
 }
-
 
 //look around the map and find an unused area of the desired size
 static bool find_plot (int radius, GLcoord* result)
 {
-
   int       cycles;
   GLcoord   test;
   
@@ -161,13 +158,11 @@ static bool find_plot (int radius, GLcoord* result)
   }
   //couldn't find a spot. Map is full, or just bad dice rolls. 
   return false; 
-
 }
 
 //Gives a 1 in 'odds' chance of adding flowers to the given region
 void add_flowers (Region* r, unsigned odds)
 {
-
   GLrgba    c;
   int       shape;
 
@@ -182,18 +177,13 @@ void add_flowers (Region* r, unsigned odds)
       c = flower_palette[RandomVal () % FLOWER_PALETTE];
     }
   }
-
-
 }
 
-/*-----------------------------------------------------------------------------
-Functions to place individual climates
------------------------------------------------------------------------------*/
+// Functions to place individual climates
 
 //Place one mountain
 static void do_mountain (int x, int y, int mtn_size)
 {
-
   int     step;
   Region  r;
   int     xx, yy;
@@ -217,13 +207,11 @@ static void do_mountain (int x, int y, int mtn_size)
       WorldRegionSet (xx + x, yy + y, r);
     }
   }
-
 }
 
 //Place a rocky wasteland
 static void do_rocky (int x, int y, int size)
 {
-
   Region  r;
   int     xx, yy;
 
@@ -237,14 +225,11 @@ static void do_rocky (int x, int y, int size)
       WorldRegionSet (x + xx, y + yy, r);
     }
   }
-
 }
-
 
 //Place some plains
 static void do_plains (int x, int y, int size)
 {
-
   Region  r;
   int     xx, yy;
   float   water;
@@ -267,14 +252,11 @@ static void do_plains (int x, int y, int size)
       WorldRegionSet (x + xx, y + yy, r);
     }
   }
-
 }
-
 
 //Place a swamp
 static void do_swamp (int x, int y, int size)
 {
-
   Region  r;
   int     xx, yy;
   float   water;
@@ -295,13 +277,11 @@ static void do_swamp (int x, int y, int size)
       WorldRegionSet (x + xx, y + yy, r);
     }
   }
-
 }
 
 //Place a field of flowers
 static void do_field (int x, int y, int size)
 {
-
   Region    r;
   int       xx, yy;
 
@@ -317,14 +297,12 @@ static void do_field (int x, int y, int size)
       WorldRegionSet (x + xx, y + yy, r);
     }
   }
-
 }
 
 
 //Place a forest
 static void do_forest (int x, int y, int size)
 {
-
   Region    r;
   int       xx, yy;
 
@@ -340,14 +318,12 @@ static void do_forest (int x, int y, int size)
       WorldRegionSet (x + xx, y + yy, r);
     }
   }
-
 }
 
 
 //Place a desert
 static void do_desert (int x, int y, int size)
 {
-
   Region    r;
   int       xx, yy;
 
@@ -363,14 +339,10 @@ static void do_desert (int x, int y, int size)
       WorldRegionSet (x + xx, y + yy, r);
     }
   }
-
 }
-
-
 
 static void do_canyon (int x, int y, int radius)
 {
-
   Region    r;
   int       yy;
   float     step;
@@ -386,12 +358,10 @@ static void do_canyon (int x, int y, int radius)
     r.flags_shape |= REGION_FLAG_CANYON_NS | REGION_FLAG_NOBLEND;
     WorldRegionSet (x, y + yy, r);
   }
-
 }
 
 static bool try_lake (int try_x, int try_y, int id)
 {
-
   Region    r;
   int       xx, yy;
   int       size;
@@ -432,12 +402,10 @@ static bool try_lake (int try_x, int try_y, int id)
     }
   }
   return true;
-
 }
 
 static bool try_river (int start_x, int start_y, int id)
 {
-
   Region            r;
   Region            neighbor;
   vector<GLcoord>   path;
@@ -570,18 +538,13 @@ static bool try_river (int start_x, int start_y, int id)
     y += selected.y;
   }
   return true;
-
 }
 
-
-/*-----------------------------------------------------------------------------
-The following functions are used when building a new world.
------------------------------------------------------------------------------*/
+// The following functions are used when building a new world.
 
 //pass over the map, calculate the temp & moisture
 void TerraformClimate () 
 {
-
   int       x, y;  
   float     rainfall, rain_loss, temp;
   Region    r;
@@ -601,7 +564,7 @@ void TerraformClimate ()
       x = (WORLD_GRID - 1) - walk.x;
     y = walk.y;
     r = WorldRegionGet (x, y);
-    //************   TEMPERATURE *******************//
+    //------------   TEMPERATURE -------------------//
     //The north 25% is max cold.  The south 25% is all tropical
     //On a southern hemisphere map, this is reversed.
     if (w->northern_hemisphere)
@@ -617,7 +580,7 @@ void TerraformClimate ()
     distance = from_center.Length () / WORLD_GRID_CENTER;
     temp += distance * 0.2f;
     temp = clamp (temp, MIN_TEMP, MAX_TEMP);
-    //************  RAINFALL *******************//
+    //------------  RAINFALL -------------------//
     //Oceans are ALWAYS WET.
     if (r.climate == CLIMATE_OCEAN) 
       rainfall = 1.0f;
@@ -647,14 +610,11 @@ void TerraformClimate ()
     //r.temperature = min (1, r.temperature + WorldNoisef (walk.x + walk.y * WORLD_GRID) * 0.1f);
     WorldRegionSet (x, y, r);
   } while (!walk.Walk (WORLD_GRID));
-
 }
-
 
 //Figure out what plant life should grow here.
 void TerraformFlora () 
 {
-
   Region    r;
   GLcoord   walk;
 
@@ -666,12 +626,10 @@ void TerraformFlora ()
       r.tree_type = WorldCanopyTree ();
     WorldRegionSet (walk.x, walk.y, r);
   } while (!walk.Walk (WORLD_GRID));
-
 }
 
 GLrgba TerraformColorGenerate (SurfaceColor c, float moisture, float temperature, int seed)
 {
-
   float     fade;
 
   switch (c) {
@@ -742,13 +700,11 @@ GLrgba TerraformColorGenerate (SurfaceColor c, float moisture, float temperature
   }
   //Shouldn't happen. Returns pink to flag the problem.
   return glRgba (1.0f, 0.0f, 1.0f);
-
 }
 
 //Determine the grass, dirt, rock, and other colors used by this region.
 void TerraformColors ()
 {
-
   int       x, y;
   Region    r;
   GLrgba    humid_air, dry_air, cold_air, warm_air;
@@ -827,14 +783,12 @@ void TerraformColors ()
       WorldRegionSet (x, y, r);
     }
   }
-  
 }
 
 //Blur the region attributes by averaging each region with its
 //neighbors.  This prevents overly harsh transitions.
 void TerraformAverage ()
 {
-
   int       x, y, xx, yy, count;
   int       radius;
   Region    r;
@@ -902,13 +856,11 @@ void TerraformAverage ()
   delete []elev;
   delete []sm;
   delete []bias;
-  
 }
 
 //Indentify regions where geo_scale is negative.  These will be ocean.
 void TerraformOceans ()
 {
-
   int     x, y;
   Region  r;
   bool    is_ocean;
@@ -935,13 +887,11 @@ void TerraformOceans ()
       }        
     }
   }
-
 }
 
 //Find existing ocean regions and place costal regions beside them.
 void TerraformCoast ()
 {
-
   int             x, y;
   Region          r;
   int             pass;
@@ -1003,15 +953,12 @@ void TerraformCoast ()
       WorldRegionSet (current.x, current.y, r);
     }
   }
-
-
 }
 
 //Drop a point in the middle of the terrain and attempt to
 //place a river. 
 void TerraformRivers (int count)
 {
-
   int         rivers;
   int         cycles;
   int         x, y;
@@ -1027,13 +974,11 @@ void TerraformRivers (int count)
       rivers++;
     cycles++;
   }
-
 }
 
 //Search around for places to put lakes
 void TerraformLakes (int count)
 {
-
   int         lakes;
   int         cycles;
   int         x, y;
@@ -1054,13 +999,11 @@ void TerraformLakes (int count)
       lakes++;
     cycles++;
   }
-
 }
 
 //Create zones of different climates.
 void TerraformZones ()
 {
-
   int             x, y;
   vector<Climate> climates;
   Region          r;
@@ -1132,14 +1075,12 @@ void TerraformZones ()
       }
     }
   } while (!walk.Walk (WORLD_GRID));
-
 }
 
 
 //This will fill in all previously un-assigned regions.
 void TerraformFill ()
 {
-
   int       x, y;
   Region    r;
   unsigned  rand;
@@ -1199,13 +1140,10 @@ void TerraformFill ()
       WorldRegionSet (x, y, r);
     }
   }
-
 }
 
 void TerraformPrepare () 
 {
-
-
   int         x, y;
   Region      r;
   GLcoord     from_center;
@@ -1246,5 +1184,5 @@ void TerraformPrepare ()
       WorldRegionSet (x, y, r);
     }
   }
-
 }
+*/

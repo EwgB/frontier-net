@@ -1,14 +1,10 @@
 /*-----------------------------------------------------------------------------
-
   CBrush.cpp
-
 -------------------------------------------------------------------------------
-
   This holds the brush object class.  Bushes and the like. 
-
 -----------------------------------------------------------------------------*/
 
-
+/*
 #include "stdafx.h"
 #include "cache.h"
 #include "cbrush.h"
@@ -17,6 +13,53 @@
 #include "Render.h"
 #include "texture.h"
 #include "world.h"
+
+#define BRUSH_SIZE        32
+
+enum
+{
+  BRUSH_STAGE_BEGIN,
+  BRUSH_STAGE_BUILD,
+  BRUSH_STAGE_COMPILE,
+  BRUSH_STAGE_DONE,
+};
+
+
+#ifndef GRID
+#include "cgrid.h"
+#endif
+
+class CBrush : public GridData
+{
+  GLcoord           _grid_position;
+  GLcoord           _origin;
+  GLcoord           _walk;
+  unsigned          _current_distance;
+  //vector<GLrgba>    _color;
+  //vector<GLvector>  _vertex;
+  //vector<GLvector>  _normal;
+  //vector<GLvector2> _uv;
+  //vector<UINT>      _index;
+  GLmesh            _mesh;
+  class VBO         _vbo;
+  int               _stage;
+  GLbbox            _bbox;
+  bool              _valid;
+
+  void              Build (long stop);
+  void              VertexPush (GLvector vert, GLvector normal, GLrgba color, GLvector2 uv);
+  void              QuadPush (int n1, int n2, int n3, int n4);
+  bool              ZoneCheck ();
+
+public:
+  CBrush ();
+  unsigned          Sizeof () { return sizeof (CBrush); }; 
+  void              Set (int origin_x, int origin_y, int distance);
+  void              Render ();
+  void              Update (long stop);
+  bool              Ready ()  { return _stage == BRUSH_STAGE_DONE; };
+  void              Invalidate () { _valid = false; };
+};
 
 #define BRUSH_TYPES   4
 #define MAX_TUFTS     9
@@ -31,13 +74,8 @@ static GLuvbox        box_flower[BRUSH_TYPES];
 static bool           prep_done;
 static tuft           tuft_list[MAX_TUFTS];
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
 static void do_prep ()
 {
-
   int           i, j;
   GLmatrix      m;
   float         angle_step;
@@ -58,17 +96,10 @@ static void do_prep ()
       tuft_list[i].v[j] = m.TransformPoint (tuft_list[i].v[j]);
   }
   prep_done = true;
-
 }
-
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 CBrush::CBrush () 
 {
-
   GridData ();
   _origin.x = 0;
   _origin.y = 0;
@@ -81,13 +112,10 @@ CBrush::CBrush ()
   _stage = BRUSH_STAGE_BEGIN;
   if (!prep_done) 
     do_prep ();
-
 }
-
 
 void CBrush::Set (int x, int y, int density)
 {
-
   if (_origin.x == x * BRUSH_SIZE && _origin.y == y * BRUSH_SIZE)
     return;
   _grid_position.x = x;
@@ -98,13 +126,10 @@ void CBrush::Set (int x, int y, int density)
   _stage = BRUSH_STAGE_BEGIN;
   _mesh.Clear ();
   _bbox.Clear ();
-
 }
-
 
 bool CBrush::ZoneCheck ()
 {
-
   if (!CachePointAvailable (_origin.x, _origin.y))
     return false;
   if (!CachePointAvailable (_origin.x + BRUSH_SIZE, _origin.y))
@@ -114,13 +139,10 @@ bool CBrush::ZoneCheck ()
   if (!CachePointAvailable (_origin.x, _origin.y + BRUSH_SIZE))
     return false;
   return true;
-
 }
-
 
 void CBrush::Build (long stop)
 {
-
   int       world_x, world_y;
   bool      do_tuft;
 
@@ -180,12 +202,10 @@ void CBrush::Build (long stop)
   }
   if (_walk.Walk (BRUSH_SIZE)) 
     _stage++;
-
 }
 
 void CBrush::Update (long stop)
 {
-
   while (SdlTick () < stop && !Ready ()) {
     switch (_stage) {
     case BRUSH_STAGE_BEGIN:
@@ -205,13 +225,10 @@ void CBrush::Update (long stop)
       break;
     }
   }
-
 }
-
 
 void CBrush::Render ()
 {
-
   //We need at least one successful build before we can draw.
   if (!_valid)
     return;
@@ -220,5 +237,5 @@ void CBrush::Render ()
   glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
   glDisable (GL_CULL_FACE);
   _vbo.Render ();
-
 }
+*/

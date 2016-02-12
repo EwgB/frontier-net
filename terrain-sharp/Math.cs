@@ -1,42 +1,42 @@
 /*-----------------------------------------------------------------------------
-
   Math.cpp
-
   2009 Shamus Young
-
 -------------------------------------------------------------------------------
-  
   Various useful math functions.
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 #include <math.h>
 
 #include "math.h"
 
-/*-----------------------------------------------------------------------------
-Keep an angle between 0 and 360
------------------------------------------------------------------------------*/
+float MathAngle (float angle);
+float MathAngle (float x1, float y1, float x2, float y2);
+float MathAngleDifference (float a1, float a2);
+float MathAverage (float n1, float n2);
+float MathInterpolate (float n1, float n2, float delta);
+float MathLine_distance (float x1, float y1, float x2, float y2, float px, float py);
+float MathDistance (float x1, float y1, float x2, float y2);
+float MathDistance2 (float x1, float y1, float x2, float y2);
+float MathSmoothStep (float val, float a, float b);
+float MathScalar (float val, float low, float high);
+float MathScalarCurve (float val);
+float MathInterpolateQuad (float y0, float y1, float y2, float y3, GLvector2 offset, bool left = false);
 
+// Keep an angle between 0 and 360
 float MathAngle (float angle)
 {
-
   if (angle < 0.0f) 
     angle = 360.0f - (float)fmod (fabs (angle), 360.0f);
   else
     angle = (float)fmod (angle, 360.0f);
   return angle;
-
 }
 
-/*-----------------------------------------------------------------------------
-Get an angle between two given points on a grid
------------------------------------------------------------------------------*/
-
+// Get an angle between two given points on a grid
 float MathAngle (float x1, float y1, float x2, float y2)
 {
-
   float   x_delta;
   float   z_delta;
   float   angle;
@@ -61,50 +61,34 @@ float MathAngle (float x1, float y1, float x2, float y2)
   if (angle< 0.0f)
     angle += 360.0f;
   return angle;
-
 }
 
-/*-----------------------------------------------------------------------------
-Get distance (squared) between 2 points on a plane
------------------------------------------------------------------------------*/
-
+// Get distance (squared) between 2 points on a plane
 float MathDistance2 (float x1, float y1, float x2, float y2)
 {
-
   float     dx;
   float     dy;
 
   dx = x1 - x2;
   dy = y1 - y2;
   return dx * dx + dy * dy;
-
 }
 
-/*-----------------------------------------------------------------------------
-Get distance between 2 points on a plane. This is slightly slower than 
-MathDistance2 ()
------------------------------------------------------------------------------*/
-
+// Get distance between 2 points on a plane. This is slightly slower than 
+// MathDistance2 ()
 float MathDistance (float x1, float y1, float x2, float y2)
 {
-
   float     dx;
   float     dy;
 
   dx = x1 - x2;
   dy = y1 - y2;
   return (float)sqrt (dx * dx + dy * dy);
-
 }
 
-/*-----------------------------------------------------------------------------
-difference between two angles
------------------------------------------------------------------------------*/
-
+// difference between two angles
 float MathAngleDifference (float a1, float a2)
-
 {
-
   float         result;
 
   result = (float)fmod (a1 - a2, 360.0f);
@@ -113,55 +97,35 @@ float MathAngleDifference (float a1, float a2)
   if (result < -180.0)
     return result + 360.0F;
   return result;
-
 }
 
-/*-----------------------------------------------------------------------------
-interpolate between two values
------------------------------------------------------------------------------*/
-
+// interpolate between two values
 float MathInterpolate (float n1, float n2, float delta)
 {
-
   return n1 * (1.0f - delta) + n2 * delta;
-
 }
 
-/*-----------------------------------------------------------------------------
-return a scalar of 0.0 to 1.0, based an the given values position within a range
------------------------------------------------------------------------------*/
-
+// return a scalar of 0.0 to 1.0, based an the given values position within a range
 float MathSmoothStep (float val, float a, float b)
 {
-
   if (b == a)
     return 0.0f;
   val -= a;
   val /= (b - a);
   return clamp (val, 0.0f, 1.0f);
-
 }
 
-/*-----------------------------------------------------------------------------
-Average two values
------------------------------------------------------------------------------*/
-
+// Average two values
 float MathAverage (float n1, float n2)
 {
-
   return (n1 + n2) / 2.0f;
-
 }
 
-/*-----------------------------------------------------------------------------
-  This will take linear input values from 0.0 to 1.0 and convert them to 
-  values along a curve.  This could also be acomplished with sin (), but this 
-  way avoids converting to radians and back.
------------------------------------------------------------------------------*/
-
+//This will take linear input values from 0.0 to 1.0 and convert them to 
+//values along a curve.  This could also be acomplished with sin (), but this 
+//way avoids converting to radians and back.
 float MathScalarCurve (float val)
 {
- 
   float   sign;
 
   val = (val - 0.5f) * 2.0f;
@@ -177,22 +141,16 @@ float MathScalarCurve (float val)
   val *= sign;
   val = (val + 1.0f) / 2.0f;
   return val;
-
 }
 
-/*-----------------------------------------------------------------------------
-  This will take values between low and high and return a value from 0 to 1.
------------------------------------------------------------------------------*/
-
+//  This will take values between low and high and return a value from 0 to 1.
 float MathScalar (float val, float low, float high)
 {
- 
   val = max (val, low);
   val = min (val, high);
   return (val - low) / (high - low);
-
 }
-
+*/
 
 /*-----------------------------------------------------------------------------
 
@@ -207,10 +165,9 @@ float MathScalar (float val, float low, float high)
   y2-----y3
 
 -----------------------------------------------------------------------------*/
-
+/*
 float MathInterpolateQuad (float y0, float y1, float y2, float y3, GLvector2 offset, bool left)
 {
- 
   float   a;
   float   b;
   float   c;
@@ -237,9 +194,9 @@ float MathInterpolateQuad (float y0, float y1, float y2, float y3, GLvector2 off
     }
   }
   return (a + b * offset.x + c * offset.y);
+*/
 
-}
-/*
+/* Commented out in original
 float MathInterpolateQuad (float y0, float y1, float y2, float y3, GLvector2 offset)
 {
 

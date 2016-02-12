@@ -1,13 +1,10 @@
 /*-----------------------------------------------------------------------------
-
   CTerrain.cpp
-
 -------------------------------------------------------------------------------
-
   This holds the terrain object class.
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 #include "cache.h"
 #include "console.h"
@@ -17,6 +14,102 @@
 #include "sdl.h"
 #include "texture.h"
 
+#define TERRAIN_SIZE      128
+#define TERRAIN_HALF      (TERRAIN_SIZE / 2)
+#define TERRAIN_EDGE      (TERRAIN_SIZE + 1)
+#define TERRAIN_PATCH     (TERRAIN_SIZE / _patch_steps)
+
+enum
+{
+  NEIGHBOR_NORTH,
+  NEIGHBOR_EAST,
+  NEIGHBOR_SOUTH,
+  NEIGHBOR_WEST,
+  NEIGHBOR_COUNT
+};
+
+enum 
+{
+  STAGE_BEGIN,
+  STAGE_CLEAR,
+  STAGE_DO_COMPILE_GRID,
+  STAGE_HEIGHTMAP,
+  STAGE_QUADTREE,
+  STAGE_STITCH,
+  STAGE_BUFFER_LOAD,
+  STAGE_COMPILE,
+  STAGE_VBO,
+  STAGE_TEXTURE,
+  STAGE_TEXTURE_FINAL,
+  STAGE_DONE
+};
+
+#ifndef GRID
+#include "cgrid.h"
+#endif
+
+class CTerrain : public GridData
+{
+private:
+  GLcoord           _origin;
+  GLvector          _pos[TERRAIN_EDGE][TERRAIN_EDGE];
+  int               _index_map[TERRAIN_EDGE][TERRAIN_EDGE];
+  bool              _point[TERRAIN_EDGE][TERRAIN_EDGE];
+  GLcoord           _walk;
+  unsigned          _front_texture;
+  unsigned          _back_texture;
+  int               _texture_desired_size;
+  int               _texture_current_size;
+  LOD               _lod;
+  int               _patch_size;
+  int               _patch_steps;
+  int               _index_buffer_size;
+  GLrgba            _color;
+  class VBO         _vbo;
+  int               _stage;
+  bool              _surface_used[SURFACE_TYPES];
+  vector<UINT>      _index_buffer;
+  vector<GLvector>  _vertex_list;
+  vector<GLvector>  _normal_list;
+  vector<GLvector2> _uv_list;
+  long              _rebuild;
+  int               _neighbors[NEIGHBOR_COUNT];
+  vector<GLvector>  _vert;
+  unsigned          _current_distance;
+  bool              _valid;
+
+
+  void              DoStitch ();
+  void              DoPatch (int x, int y);
+  void              DoTexture ();
+  void              DoHeightmap ();
+  void              DoNormals ();
+  void              DoQuad (int x1, int y1, int size);
+  bool              DoCheckNeighbors ();
+  bool              ZoneCheck (long stop);
+  void              CompileBlock  (int x, int y, int size);
+  void              TrianglePush (int i1, int i2, int i3);
+  void              PointActivate (int x, int y);
+  void              Invalidate () { _valid = false; }
+
+public:
+  CTerrain ();
+
+  unsigned          Sizeof () { return sizeof (CTerrain); }; 
+  void              Set (int grid_x, int grid_y, int distance);
+  void              Clear ();
+  void              Render ();
+  void              Update (long stop);
+  void              TexturePurge ();
+  void              TextureSize (int size);
+  int               TextureSizeGet () { return _texture_current_size;};
+  int               Polygons () { return _index_buffer.size () / 3; }
+  GLcoord           Origin ();
+  bool              Point (int x, int y) {return _point[x][y]; }
+  int               Points () { return _index_buffer.size (); }
+  bool              Ready () { return _stage == STAGE_DONE; };
+
+};
 
 //Lower values make the terrain more precise at the expense of more polygons
 #define TOLERANCE         0.08f
@@ -62,14 +155,10 @@ static struct LayerAttributes
 static bool   bound_ready;
 static int    boundary[TERRAIN_SIZE];
 
-/*-----------------------------------------------------------------------------
-  //This finds the largest power-of-two denominator for the given number.  This 
-  //is used to determine what level of the quadtree a grid position occupies.  
------------------------------------------------------------------------------*/
-
+//This finds the largest power-of-two denominator for the given number.  This 
+//is used to determine what level of the quadtree a grid position occupies.  
 static int Boundary (int val)
 {
-
   if (!bound_ready) {
     for (int n = 0; n < TERRAIN_SIZE; n++) {
       boundary[n] = -1;
@@ -89,25 +178,16 @@ static int Boundary (int val)
     bound_ready = true;
   }
   return boundary[val];
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 CTerrain::CTerrain ()
 {
-
   //Call parent constructor
   GridData ();
-
 }
-
 
 void CTerrain::DoPatch (int patch_z, int patch_y)
 {
-
   float       tile;
   int         x, y;
   int         world_x, world_y;
@@ -215,17 +295,10 @@ void CTerrain::DoPatch (int patch_z, int patch_y)
       }
     }
   }
-
-
-
-
 }
 
 void CTerrain::DoTexture ()
 {
-
-
-
   if (!_back_texture) {
     glGenTextures (1, &_back_texture); 
     glBindTexture(GL_TEXTURE_2D, _back_texture);
@@ -250,12 +323,10 @@ void CTerrain::DoTexture ()
   RenderCanvasEnd ();
   if (_walk.Walk (_patch_steps))
     _stage++;
-    
 }
 
 void CTerrain::DoHeightmap ()
 {
-
   GLcoord         world;
   GLvector        pos;
 
@@ -268,17 +339,17 @@ void CTerrain::DoHeightmap ()
   _pos[_walk.x][_walk.y] = pos;
   if (_walk.Walk (TERRAIN_EDGE))
     _stage++;
-
 }
+*/
 
 /*-----------------------------------------------------------------------------
 
   In order to avoid having gaps between adjacent terrains, we have to "stitch"
-  them togather.  We analyze the points used along the shared edge, and
+  them together.  We analyze the points used along the shared edge, and
   activate any points used by our neighbor.  
 
 -----------------------------------------------------------------------------*/
-
+/*
 void CTerrain::DoStitch ()
 {
 
@@ -324,20 +395,11 @@ void CTerrain::DoStitch ()
     _neighbors[NEIGHBOR_NORTH] = n->Points ();
   if (s)
     _neighbors[NEIGHBOR_SOUTH] = s->Points ();
-
 }
 
-
-/*-----------------------------------------------------------------------------
-
-  Look at our neighbors and see if they have added detail since our last 
-  rebuild.
-
------------------------------------------------------------------------------*/
-
+//  Look at our neighbors and see if they have added detail since our last rebuild.
 bool CTerrain::DoCheckNeighbors ()
 {
-
   CTerrain*    e;
   CTerrain*    s;
   CTerrain*    w;
@@ -356,8 +418,8 @@ bool CTerrain::DoCheckNeighbors ()
   if (n && n->Points () != _neighbors[NEIGHBOR_NORTH])
     return true;
   return false;
-
 }
+*/
 
 /*-----------------------------------------------------------------------------
 This is tricky stuff.  When this is called, it means the given point is needed
@@ -367,10 +429,9 @@ causes the "shattering" effect that breaks the terrain into triangles.
 If you want to know more, Google for Peter Lindstrom, the inventor of this 
 very clever system.  
 -----------------------------------------------------------------------------*/
-
+/*
 void CTerrain::PointActivate (int x, int y)
 {
-
   int           xl;
   int           yl;
   int           level;
@@ -403,8 +464,8 @@ void CTerrain::PointActivate (int x, int y)
       PointActivate (x - level, y - level);
     }
   }
-
 }
+*/
 
 /*-----------------------------------------------------------------------------
 
@@ -425,10 +486,9 @@ coplanar the quad is.  The elevation of the corners are averaged, and compared
 to the elevation of the center.  The geater the difference between these two 
 values, the more non-coplanar this quad is.
 -----------------------------------------------------------------------------*/
-
+/*
 void CTerrain::DoQuad (int x1, int y1, int size)
 {
-
   int       xc, yc, x2, y2;
   int       half;
   float     ul, ur, ll, lr, center;
@@ -452,17 +512,15 @@ void CTerrain::DoQuad (int x1, int y1, int size)
   //delta /= (float)size;
   if (delta > TOLERANCE)
     PointActivate (xc, yc);
-
 }
 
 void CTerrain::TrianglePush (int i1, int i2, int i3)
 {
-
   _index_buffer.push_back (i1);
   _index_buffer.push_back (i2);
   _index_buffer.push_back (i3);
-
 }
+*/
 
 /*-----------------------------------------------------------------------------
                           North                 N    
@@ -489,7 +547,7 @@ four triangles.  (Fig. b)  If the edges are active, then the block is cut
 into a combination of smaller triangles (Fig. c) and sub-blocks (Fig. d).   
 
 -----------------------------------------------------------------------------*/
-
+/*
 void CTerrain::CompileBlock (int x, int y, int size)
 {
 
@@ -508,11 +566,13 @@ void CTerrain::CompileBlock (int x, int y, int size)
   y2 = y + size;
   xc = x + next_size;
   yc = y + next_size;
+*/
   /*    n0--n1--n2
         |        |
         n3  n4  n5
         |        |
         n6--n7--n8    */
+/*
   n0 = _index_map[x][y];
   n1 = _index_map[xc][y];
   n2 = _index_map[x2][y];
@@ -618,18 +678,17 @@ void CTerrain::CompileBlock (int x, int y, int size)
     CompileBlock (x, y + next_size, next_size); //Sub-block C
   if (Point (x2, yc) && Point (xc, y2)) 
     CompileBlock (x + next_size, y + next_size, next_size); //Sub-block D
-
 }
+*/
 
 /*-----------------------------------------------------------------------------
   This checks the four corners of zone data that will be used by this terrain.
   Returns true if the data is ready and terrain building can proceed. This
   will also "touch" the zone, letting the zone know it's still in use.
 -----------------------------------------------------------------------------*/
-
+/*
 bool CTerrain::ZoneCheck (long stop)
 {
-
   //If we're waiting on a zone, give it our update allotment
   if (!CachePointAvailable (_origin.x, _origin.y)) {
     CacheUpdatePage (_origin.x, _origin.y, stop);
@@ -648,13 +707,10 @@ bool CTerrain::ZoneCheck (long stop)
     return false;
   }
   return true;
-
 }
-
 
 void CTerrain::Update (long stop)
 {
-
   while (SdlTick () < stop) {
     switch (_stage) {
     case STAGE_BEGIN: 
@@ -755,21 +811,14 @@ void CTerrain::Update (long stop)
     default: //any stages not used end up here, skip it
       _stage++;
       break;
-
     }
   }
-
 }
 
-
-/*-----------------------------------------------------------------------------
-  De-allocate and cleanup 
------------------------------------------------------------------------------*/
-
+//  De-allocate and cleanup 
 
 void CTerrain::Clear ()
 {
-
   if (_front_texture) 
     glDeleteTextures (1, &_front_texture); 
   if (_back_texture) 
@@ -783,12 +832,10 @@ void CTerrain::Clear ()
   _uv_list.clear ();
   _index_buffer.clear ();
   _walk.Clear ();
-
 }
 
 void CTerrain::TextureSize (int size)
 {
-
   //We can't resize in the middle of rendering the texture
   if (_stage == STAGE_TEXTURE || _stage == STAGE_TEXTURE_FINAL)
     return;
@@ -797,20 +844,15 @@ void CTerrain::TextureSize (int size)
     if (_stage == STAGE_DONE)
       _stage = STAGE_TEXTURE;
   }
-
 }
 
 GLcoord CTerrain::Origin ()
 {
-
   return _origin;
-
 }
-
 
 void CTerrain::TexturePurge ()
 {
-
   if (_front_texture) 
     glDeleteTextures (1, &_front_texture); 
   if (_back_texture) 
@@ -823,12 +865,10 @@ void CTerrain::TexturePurge ()
     _stage = STAGE_TEXTURE;
     _walk.Clear ();
   }
-
 }
 
 void CTerrain::Set (int grid_x, int grid_y, int distance)
 {
-
   LOD       new_lod;
 
   if (_stage == STAGE_TEXTURE)
@@ -860,16 +900,14 @@ void CTerrain::Set (int grid_x, int grid_y, int distance)
   }
   //ConsoleLog ("Texture: %d, %d = %d", grid_x, grid_y, _texture_desired_size);
   _walk.Clear ();
-
 }
 
 void CTerrain::Render ()
 {
-
   if (_front_texture && _valid) {
     //glColor3fv (&_color.red);
     glBindTexture (GL_TEXTURE_2D, _front_texture);
     _vbo.Render ();
   }
-
 }
+*/

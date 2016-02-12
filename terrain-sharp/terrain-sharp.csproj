@@ -132,78 +132,43 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Avatar.cs" />
-    <Content Include="Avatar.h" />
     <Compile Include="Cache.cs" />
-    <Content Include="Cache.h" />
     <Compile Include="CAnim.cs" />
-    <Content Include="Canim.h" />
     <Compile Include="CBrush.cs" />
-    <Content Include="CBrush.h" />
     <Compile Include="CEmitter.cs" />
-    <Content Include="CEmitter.h" />
     <Compile Include="CFigure.cs" />
-    <Content Include="CFigure.h" />
     <Compile Include="CForest.cs" />
-    <Content Include="CForest.h" />
     <Compile Include="Cg.cs" />
-    <Content Include="Cg.h" />
     <Compile Include="CGrass.cs" />
-    <Content Include="CGrass.h" />
     <Compile Include="CGrid.cs" />
-    <Content Include="CGrid.h" />
     <Compile Include="Console.cs" />
-    <Content Include="Console.h" />
     <Compile Include="CPage.cs" />
-    <Content Include="Cpage.h" />
     <Compile Include="CParticleArea.cs" />
-    <Content Include="CParticleArea.h" />
     <Compile Include="CTerrain.cs" />
-    <Content Include="CTerrain.h" />
     <Compile Include="CTree.cs" />
-    <Content Include="CTree.h" />
     <Compile Include="Entropy.cs" />
-    <Content Include="Entropy.h" />
     <Compile Include="Env.cs" />
-    <Content Include="Env.h" />
     <Compile Include="Figure.cs" />
-    <Content Include="Figure.h" />
     <Compile Include="File.cs" />
-    <Content Include="File.h" />
     <Compile Include="FileImage.cs" />
     <Compile Include="FileX.cs" />
     <Compile Include="Game.cs" />
-    <Content Include="Game.h" />
     <Compile Include="Ini.cs" />
-    <Content Include="Ini.h" />
     <Compile Include="Input.cs" />
-    <Content Include="Input.h" />
     <Compile Include="Main.cs" />
-    <Content Include="Main.h" />
     <Compile Include="Math.cs" />
-    <Content Include="Math.h" />
     <Compile Include="Particle.cs" />
-    <Content Include="Particle.h" />
     <Compile Include="Player.cs" />
-    <Content Include="Player.h" />
     <Compile Include="Random.cs" />
-    <Content Include="Random.h" />
     <Compile Include="Region.cs" />
-    <Content Include="Region.h" />
     <Compile Include="Render.cs" />
-    <Content Include="Render.h" />
     <Compile Include="Scene.cs" />
-    <Content Include="Scene.h" />
     <Compile Include="Sdl.cs" />
-    <Content Include="Sdl.h" />
     <Compile Include="Sky.cs" />
-    <Content Include="Sky.h" />
-    <Content Include="StdAfx.h" />
+    <Compile Include="StdAfx.cs" />
     <Compile Include="Terraform.cs" />
-    <Content Include="Terraform.h" />
     <Compile Include="Text.cs" />
-    <Content Include="Text.h" />
     <Compile Include="Texture.cs" />
-    <Content Include="Texture.h" />
     <Content Include="Textures\avatar.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -286,11 +251,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Compile Include="VBO.cs" />
-    <Content Include="VBO.h" />
     <Compile Include="Water.cs" />
-    <Content Include="Water.h" />
     <Compile Include="World.cs" />
-    <Content Include="World.h" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

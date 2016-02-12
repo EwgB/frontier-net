@@ -1,19 +1,24 @@
 /*-----------------------------------------------------------------------------
-
   Player.cpp
-
 -------------------------------------------------------------------------------
-
   This handles the character stats. Hitpoints, energy, etc.
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 #include "avatar.h"
 #include "game.h"
 #include "input.h"
 #include "text.h"
 #include "world.h"
+
+void      PlayerInit ();
+void      PlayerLoad ();
+void      PlayerSave ();
+void      PlayerUpdate ();
+GLvector  PlayerPositionGet ();
+void      PlayerPositionSet (GLvector new_pos);
+void      PlayerReset ();
 
 #define MAX_STOMACH         4000
 #define MAX_POOL            3000
@@ -41,7 +46,6 @@ static char*  hunger_states [] =
   "Weak",
   "Starving"
 };
-
 
 static float    burn_rate[] = 
 {
@@ -71,13 +75,8 @@ struct Player
 static Player     my;
 static Region     region;
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
 void PlayerInit ()
 {
-
   my.gender = CVarUtils::CreateCVar ("player.gender", 0, "");
   //CVarUtils::CreateCVar ("player.last_time", 0, "");
   CVarUtils::AttachCVar ("player.last_time", &my.last_time, "");
@@ -92,13 +91,10 @@ void PlayerInit ()
   CVarUtils::AttachCVar ("player.position_y", &my.position.y, "");
   CVarUtils::AttachCVar ("player.position_z", &my.position.z, "");
   //CVarUtils::CreateCVar ("player.position", &my.calorie_pool, "");
-
 }
-
 
 void PlayerReset ()
 {
-
   my.distance_traveled = 0.0f;
   my.calories_burned = 0.0f;
   my.calorie_stomach = MAX_STOMACH / 2;
@@ -107,12 +103,10 @@ void PlayerReset ()
   my.gender = 0;
   my.last_time = GameTime ();
   my.position = glVector (0.0f, 0.0f, 0.0f);
-
 }
 
 void PlayerLoad ()
 {
-
   string            filename;
   vector<string>    sub_group;
 
@@ -121,13 +115,13 @@ void PlayerLoad ()
   sub_group.push_back ("player");
   CVarUtils::Load (filename, sub_group);
   AvatarPositionSet (my.position);
-
-
 }
 
 void PlayerSave ()
 {
-  /*
+*/
+
+  /* Commented out in original
   string            filename;
   vector<string>    sub_group;
 
@@ -141,11 +135,12 @@ void PlayerSave ()
   sub_group.push_back ("player");
   CVarUtils::Save (filename, sub_group);
   */
+
+/*
 }
 
 void PlayerUpdate ()
 {
-
   AnimType      anim;
   float         time_passed;
   GLvector      av_pos;
@@ -222,22 +217,17 @@ void PlayerUpdate ()
   region = WorldRegionGet ((int)(my.position.x + REGION_HALF) / REGION_SIZE, (int)(my.position.y + REGION_HALF) / REGION_SIZE);
   if (CVarUtils::GetCVar<bool> ("show.region")) 
     TextPrint ("Temp:%1.1f%c Moisture:%1.0f%%\nGeo Scale: %1.2f Water Level: %1.2f Topography Detail:%1.2f Topography Bias:%1.2f", region.temperature * 100.0f, 186, region.moisture * 100.0f, region.geo_scale, region.geo_water, region.geo_detail, region.geo_bias);
-
-
 }
 
 void PlayerPositionSet (GLvector new_pos)
 {
-
   my.position = new_pos;
   my.last_time = GameTime ();
   AvatarPositionSet (new_pos);
-
 }
 
 GLvector PlayerPositionGet ()
 {
-
   return my.position;
-
 }
+*/

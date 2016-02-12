@@ -1,21 +1,70 @@
 /*-----------------------------------------------------------------------------
-
   CGrid.cpp
-
-
 -------------------------------------------------------------------------------
-
   The grid manager handles various types of objects that make up the world. 
   Terrain, blocks of trees, grass, etc.  It takes tables of GridData objects
   and shuffles them around, rendering them and prioritizing their updates
   to favor things closest to the player.
- 
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 #include "avatar.h"
 #include "cgrid.h"
 #include "input.h"
+
+#ifndef GRID
+#define GRID
+
+
+//A virtual class.  Anything to be managed should be a subclass of this
+
+class GridData
+{
+protected:
+  GLcoord           _grid_position;
+  GLbbox            _bbox;
+public:
+  GLcoord           GridPosition () const { return _grid_position; };
+  virtual bool      Ready () { return true; };
+  virtual void      Render () {};
+  virtual void      Set (int grid_x, int grid_y, int grid_distance) {};
+  virtual void      Update (long stop) {};
+  virtual void      Invalidate () {}; 
+  virtual unsigned  Sizeof () { return sizeof (this); }; 
+};
+
+//The grid manager. You need one of these for each type of object you plan to manage.
+
+class GridManager
+{
+protected:
+  GridData*             _item;       //Our list of items
+  unsigned              _grid_size;  //The size of the grid of items to manage. Should be odd. Bigger = see farther.
+  unsigned              _grid_half;  //The mid-point of the grid
+  unsigned              _item_size;  //Size of an item in world units.
+  unsigned              _item_count; //How many total items in the table?
+  unsigned              _item_bytes; //size of items, in bytes
+  unsigned              _view_items; //How many items in the table are withing the viewable circle?
+  GLcoord               _last_viewer;
+  unsigned              _list_pos;
+
+  GLcoord               ViewPosition (GLvector eye);
+  GridData*             Item (GLcoord c);
+  GridData*             Item (unsigned index);
+public:
+  GridManager ();
+  void                  Clear ();
+  void                  Init (GridData* items, unsigned grid_size, unsigned item_size);
+  unsigned              ItemsReady () { return _list_pos; }
+  unsigned              ItemsViewable () { return _view_items; }
+  void                  Update (long stop);
+  void                  Render ();
+  void                  RestartProgress () { _list_pos = 0; };
+
+};
+
+#endif
 
 struct Dist
 {
@@ -30,13 +79,14 @@ struct Dist
 static vector<Dist> distance_list;
 //static vector<Dist> foo2;
 static bool         list_ready;
+*/
 
 /*-----------------------------------------------------------------------------
 Here we build a list of offsets.  These are used to walk a grid outward in
 concentric circles.  This is used to make sure we update the items closest to 
 the player first.
 -----------------------------------------------------------------------------*/
-
+/*
 int dist_sort (const void* elem1, const void* elem2)
 {
 
@@ -48,12 +98,10 @@ int dist_sort (const void* elem1, const void* elem2)
   else if (d1->distancef > d2->distancef)
     return 1;
   return 0;
-
 }
 
 static void do_list ()
 {
-  
   int       x, y;
   int       i;
   Dist*     d;
@@ -76,23 +124,15 @@ static void do_list ()
     }
   }
   qsort (&distance_list[0], distance_list.size (), sizeof (Dist), dist_sort);
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 GridManager::GridManager ()
 {
-
   Clear ();
-
 }
 
 GridData* GridManager::Item (GLcoord c)
 {
-
   int       index;
   char*     ptr;
 
@@ -100,23 +140,18 @@ GridData* GridManager::Item (GLcoord c)
   index = (c.x % _grid_size) + (c.y  % _grid_size) * _grid_size;
   ptr = (char*)&_item[0] + (index * _item_bytes);
   return (GridData*)ptr;
-
 }
 
 GridData* GridManager::Item (unsigned index)
 {
-
   char*     ptr;
 
   ptr = (char*)&_item[0] + (index * _item_bytes);
   return (GridData*)ptr;
-
 }
-
 
 void GridManager::Clear ()
 {
-  
   _item = NULL;
   _grid_size = 0;
   _grid_half = 0;
@@ -125,12 +160,10 @@ void GridManager::Clear ()
   _item_count = 0;
   _last_viewer.Clear ();
   _list_pos = 0;
-
 }
 
 void GridManager::Init (GridData* itemptr, unsigned grid_size, unsigned item_size)
 {
-
   GridData*   gd;
   GLcoord     walk;
   unsigned    i;
@@ -160,23 +193,19 @@ void GridManager::Init (GridData* itemptr, unsigned grid_size, unsigned item_siz
     //gd->Set ( _last_viewer.x + walk.x - _grid_half,  _last_viewer.y + walk.y - _grid_half, 0);
     //gd->Set (viewer.x + walk.x - _grid_half, viewer.y + walk.y - _grid_half, 0);
   } while (!walk.Walk (_grid_size));
-
 }
 
 GLcoord GridManager::ViewPosition (GLvector eye)
 {
-
   GLcoord   result;
 
   result.x = (int)(eye.x) / _item_size;
   result.y = (int)(eye.y) / _item_size;
   return result;
-
 }
 
 void GridManager::Update (long stop)
 {
-
   GLcoord     viewer;
   GLcoord     pos;
   GLcoord     grid_pos;
@@ -222,17 +251,13 @@ void GridManager::Update (long stop)
     if (distance_list[_list_pos].distancei > _grid_half)
       _list_pos = 0;
   } 
-
-
 }
 
 void GridManager::Render ()
 {
-
   unsigned      i;
 
   for (i = 0; i < _item_count; i++) 
     Item(i)->Render ();
-
-
 }
+*/

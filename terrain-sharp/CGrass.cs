@@ -1,13 +1,10 @@
 /*-----------------------------------------------------------------------------
-
   CGrass.cpp
-
 -------------------------------------------------------------------------------
-
   This holds the grass object class.  Little bits of grass all over!
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 #include "cache.h"
 #include "cgrass.h"
@@ -16,6 +13,52 @@
 #include "render.h"
 #include "texture.h"
 #include "world.h"
+
+#define GRASS_SIZE        32
+
+enum
+{
+  GRASS_STAGE_BEGIN,
+  GRASS_STAGE_BUILD,
+  GRASS_STAGE_COMPILE,
+  GRASS_STAGE_DONE,
+};
+
+
+#ifndef GRID
+#include "cgrid.h"
+#endif
+
+class CGrass : public GridData
+{
+  GLcoord           _grid_position;
+  GLcoord           _origin;
+  GLcoord           _walk;
+  unsigned          _current_distance;
+  vector<GLrgba>    _color;
+  vector<GLvector>  _vertex;
+  vector<GLvector>  _normal;
+  vector<GLvector2> _uv;
+  vector<UINT>      _index;
+  class VBO         _vbo;
+  int               _stage;
+  GLbbox            _bbox;
+  bool              _valid;
+
+  void              Build (long stop);
+  void              VertexPush (GLvector vert, GLvector normal, GLrgba color, GLvector2 uv);
+  void              QuadPush (int n1, int n2, int n3, int n4);
+  bool              ZoneCheck ();
+
+public:
+  CGrass ();
+  unsigned          Sizeof () { return sizeof (CGrass); }; 
+  void              Set (int origin_x, int origin_y, int distance);
+  void              Render ();
+  void              Update (long stop);
+  bool              Ready ()  { return _stage == GRASS_STAGE_DONE; };
+  void              Invalidate () { _valid = false; };
+};
 
 #define GRASS_TYPES   8
 #define MAX_TUFTS     9
@@ -30,13 +73,8 @@ static GLuvbox        box_flower[GRASS_TYPES];
 static bool           prep_done;
 static tuft           tuft_list[MAX_TUFTS];
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
 static void do_prep ()
 {
-
   int           i, j;
   GLmatrix      m;
   float         angle_step;
@@ -57,17 +95,10 @@ static void do_prep ()
       tuft_list[i].v[j] = m.TransformPoint (tuft_list[i].v[j]);
   }
   prep_done = true;
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 CGrass::CGrass () 
 {
-
-
   GridData ();
   _origin.x = 0;
   _origin.y = 0;
@@ -79,12 +110,10 @@ CGrass::CGrass ()
   _stage = GRASS_STAGE_BEGIN;
   if (!prep_done) 
     do_prep ();
-
 }
 
 void CGrass::Set (int x, int y, int density)
 {
-
   //density = max (density, 1); //detail 0 and 1 are the same level. (Maximum density.)
   density = 1;
   if (_origin.x == x * GRASS_SIZE && _origin.y == y * GRASS_SIZE && density == _current_distance)
@@ -101,33 +130,27 @@ void CGrass::Set (int x, int y, int density)
   _uv.clear ();
   _index.clear ();
   _bbox.Clear ();
-
 }
 
 void CGrass::VertexPush (GLvector vert, GLvector normal, GLrgba color, GLvector2 uv)
 {
-
   _vertex.push_back (vert);
   _normal.push_back (normal);
   _color.push_back (color);
   _uv.push_back (uv);
   _bbox.ContainPoint (vert);
-
 }
 
 void CGrass::QuadPush (int n1, int n2, int n3, int n4)
 {
-
   _index.push_back (n1);
   _index.push_back (n2);
   _index.push_back (n3);
   _index.push_back (n4);
-
 }
 
 bool CGrass::ZoneCheck ()
 {
-
   if (!CachePointAvailable (_origin.x, _origin.y))
     return false;
   if (!CachePointAvailable (_origin.x + GRASS_SIZE, _origin.y))
@@ -137,12 +160,10 @@ bool CGrass::ZoneCheck ()
   if (!CachePointAvailable (_origin.x, _origin.y + GRASS_SIZE))
     return false;
   return true;
-
 }
 
 void CGrass::Build (long stop)
 {
-
   int       world_x, world_y;
   bool      do_grass;
 
@@ -218,12 +239,10 @@ void CGrass::Build (long stop)
   }
   if (_walk.Walk (GRASS_SIZE)) 
     _stage++;
-
 }
 
 void CGrass::Update (long stop)
 {
-
   while (SdlTick () < stop && !Ready ()) {
     switch (_stage) {
     case GRASS_STAGE_BEGIN:
@@ -243,13 +262,10 @@ void CGrass::Update (long stop)
       break;
     }
   }
-
-
 }
 
 void CGrass::Render ()
 {
-
   //We need at least one successful build before we can draw.
   if (!_valid)
     return;
@@ -281,5 +297,5 @@ void CGrass::Render ()
   }
   glEnable (GL_TEXTURE_2D);
   glEnable (GL_LIGHTING);
-
 }
+*/

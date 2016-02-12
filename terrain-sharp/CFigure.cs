@@ -1,13 +1,10 @@
 /*-----------------------------------------------------------------------------
-
   Figure.cpp
-
 -------------------------------------------------------------------------------
-
   Animated models.
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 
 #include "console.h"
@@ -15,11 +12,74 @@
 #include "cg.h"
 #include "file.h"
 
+#ifndef CANIM_H
+#include "canim.h"
+#endif
+
+struct BWeight
+{
+  unsigned          _index;
+  float             _weight;
+};
+
+
+struct PWeight
+{
+  BoneId            _bone;
+  float             _weight;
+};
+
+struct Bone
+{
+  BoneId            _id;
+  BoneId            _id_parent;
+  GLvector          _origin;
+  GLvector          _position;
+  GLvector          _rotation;
+  GLrgba            _color;
+  vector<unsigned>  _children;
+  vector<BWeight>   _vertex_weights;
+  GLmatrix          _matrix;
+};
+
+class CFigure
+{
+  void              RotateHierarchy (unsigned id, GLvector offset, GLmatrix m);
+  void              RotatePoints (unsigned id, GLvector offset, GLmatrix m);
+public:
+  vector<Bone>      _bone;
+  GLvector          _position;
+  GLvector          _rotation;
+  unsigned          _bone_index[BONE_COUNT];
+  unsigned          _unknown_count;
+  GLmesh            _skin_static;//The original, "read only"
+  GLmesh            _skin_deform;//Altered
+  GLmesh            _skin_render;//Updated every frame
+  
+
+  CFigure ();
+  void              Animate (CAnim* anim, float delta);
+  void              Clear ();
+  bool              LoadX (char* filename);
+  BoneId            IdentifyBone (char* name);
+  void              PositionSet (GLvector pos) { _position = pos; };
+  void              RotationSet (GLvector rot);
+  void              RotateBone (BoneId id, GLvector angle);
+  void              PushBone (BoneId id, unsigned parent, GLvector pos);
+  void              PushWeight (unsigned id, unsigned index, float weight);
+  void              Prepare ();
+  void              BoneInflate (BoneId id, float distance, bool do_children);
+
+  void              Render ();
+  void              RenderSkeleton ();
+  GLmesh*           Skin () { return &_skin_static; };
+  void              Update ();
+};
+
 #define NEWLINE   "\n"
 
 static void clean_chars (char* target, char* chars)
 {
-
   unsigned    i;
   char*       c;
 
@@ -27,19 +87,15 @@ static void clean_chars (char* target, char* chars)
     while (c = strchr (target, chars[i]))
       *c = ' ';
   }
-
 }
 
 CFigure::CFigure ()
 {
-
   Clear ();
-
 }
 
 void CFigure::Clear ()
 {
-
   unsigned    i;
 
   for (i = 0; i < BONE_COUNT; i++) 
@@ -49,13 +105,10 @@ void CFigure::Clear ()
   _skin_deform.Clear ();
   _skin_render.Clear ();
   _bone.clear ();
-
-
 }
 
 void CFigure::Animate (CAnim* anim, float delta)
 {
-
   AnimJoint*    aj;
   
   if (delta > 1.0f)
@@ -63,15 +116,11 @@ void CFigure::Animate (CAnim* anim, float delta)
   aj = anim->GetFrame (delta);
   for (unsigned i = 0; i < anim->Joints (); i++) 
      RotateBone (aj[i].id, aj[i].rotation);
-
-
-
 }
 
 //We take a string and turn it into a BoneId, using unknowns as needed
 BoneId CFigure::IdentifyBone (char* name)
 {
-  
   BoneId    bid;
 
   bid = CAnim::BoneFromString (name);
@@ -82,20 +131,16 @@ BoneId CFigure::IdentifyBone (char* name)
     _unknown_count++;
   }
   return bid;
-
 }
 
 void CFigure::RotateBone (BoneId id, GLvector angle)
 {
-
   if (_bone_index[id] != BONE_INVALID)
     _bone[_bone_index[id]]._rotation = angle;
-
 }
 
 void CFigure::RotatePoints (unsigned id, GLvector offset, GLmatrix m)
 {
-
   Bone*       b;
   unsigned    i;
   unsigned    index;
@@ -105,19 +150,19 @@ void CFigure::RotatePoints (unsigned id, GLvector offset, GLmatrix m)
   for (i = 0; i < b->_vertex_weights.size (); i++) {
     index = b->_vertex_weights[i]._index;
     _skin_render._vertex[index] = glMatrixTransformPoint (m, _skin_render._vertex[index] - offset) + offset;
-    /*
+*/
+    /* Commented out in original
     from = _skin_render._vertex[index] - offset;
     to = glMatrixTransformPoint (m, from);
     //movement = movement - _skin_static._vertex[index]; 
     _skin_render._vertex[index] = glVectorInterpolate (from, to, b->_vertex_weights[i]._weight) + offset;
     */
+/*
   }
-
 }
 
 void CFigure::RotateHierarchy (unsigned id, GLvector offset, GLmatrix m)
 {
-
   Bone*       b;
   unsigned    i;
 
@@ -128,12 +173,10 @@ void CFigure::RotateHierarchy (unsigned id, GLvector offset, GLmatrix m)
     if (b->_children[i])
       RotateHierarchy (b->_children[i], offset, m);
   }
-
 }
 
 void CFigure::Update ()
 {
-
   unsigned    i;
   unsigned    c;
   GLmatrix    m;
@@ -158,23 +201,19 @@ void CFigure::Update ()
         RotateHierarchy (b->_children[c], b->_position, m);
     }
   }
-  
 }
 
 void CFigure::PushWeight (unsigned id, unsigned index, float weight)
 {
-
   BWeight   bw;
 
   bw._index = index;
   bw._weight = weight;  
   _bone[_bone_index[id]]._vertex_weights.push_back (bw);
-
 }
 
 void CFigure::PushBone (BoneId id, unsigned parent, GLvector pos)
 {
-
   Bone    b;
 
   _bone_index[id] = _bone.size ();
@@ -187,12 +226,10 @@ void CFigure::PushBone (BoneId id, unsigned parent, GLvector pos)
   b._color = glRgbaUnique (id + 1);
   _bone.push_back (b);
   _bone[_bone_index[parent]]._children.push_back (id);
-
 }
 
 void CFigure::BoneInflate (BoneId id, float distance, bool do_children)
 {
-
   Bone*       b;
   unsigned    i;
   unsigned    c;
@@ -207,20 +244,15 @@ void CFigure::BoneInflate (BoneId id, float distance, bool do_children)
     return;
   for (c = 0; c < b->_children.size (); c++) 
     BoneInflate ((BoneId)b->_children[c], distance, do_children);
-
-
 }
 
 void CFigure::RotationSet (GLvector rot)
 {
-
   _bone[_bone_index[BONE_ROOT]]._rotation = rot;
-
 }
 
 void CFigure::Render ()
 {
-  
   glColor3f (1,1,1);
   glPushMatrix ();
   CgSetOffset (_position);
@@ -230,12 +262,10 @@ void CFigure::Render ()
   CgSetOffset (glVector (0,0,0));
   glPopMatrix ();
   CgUpdateMatrix ();
-  
 }
 
 void CFigure::RenderSkeleton ()
 {
-
   unsigned    i;
   unsigned    parent;
 
@@ -263,21 +293,17 @@ void CFigure::RenderSkeleton ()
   glEnable (GL_DEPTH_TEST);
   glPopMatrix ();
   CgUpdateMatrix ();
-
 }
 
 void CFigure::Prepare ()
 {
-
   _skin_deform = _skin_static;
-
 }
 
 bool CFigure::LoadX (char* filename)
 {
-
   FileXLoad (filename, this);
   Prepare ();
   return true;
-
 }
+*/

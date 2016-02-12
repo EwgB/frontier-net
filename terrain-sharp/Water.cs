@@ -1,13 +1,4 @@
-/*-----------------------------------------------------------------------------
-
-  Water.cpp
-
-
--------------------------------------------------------------------------------
-
- 
------------------------------------------------------------------------------*/
-
+/*
 #include "stdafx.h"
 #include "random.h"
 #include "texture.h"
@@ -19,13 +10,8 @@
 static VBO        water;
 static VBO        wmap;
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
 void WaterBuild ()
 {
-
   vector<GLvector>  vert;
   vector<GLvector>  normal;
   vector<GLvector2> uv;
@@ -55,13 +41,10 @@ void WaterBuild ()
 
   water.Create (GL_QUADS, index.size (), vert.size (), &index[0], &vert[0], &normal[0], NULL, &uv[0]);
   wmap.Create (GL_QUADS, index.size (), vert.size (), &index[0], &vert[0], &normal[0], NULL, &uv_map[0]);
-  
 }
-
 
 void WaterRender ()
 {
-
   glDisable (GL_BLEND);
   glColor3f (1,1,1);
   //glDepthMask (false);
@@ -82,5 +65,5 @@ void WaterRender ()
     glBlendFunc (GL_SRC_COLOR, GL_DST_COLOR);
   }
   wmap.Render ();
-
 }
+*/

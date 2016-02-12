@@ -1,13 +1,10 @@
 /*-----------------------------------------------------------------------------
-
   CForest.cpp
-
 -------------------------------------------------------------------------------
-
   This class will generate a group of trees for the given area.
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 #include "cache.h"
 #include "cforest.h"
@@ -15,13 +12,63 @@
 #include "sdl.h"
 #include "world.h"
 
-/*-----------------------------------------------------------------------------
+#define FOREST_SIZE        128
 
------------------------------------------------------------------------------*/
+enum
+{
+  FOREST_STAGE_BEGIN,
+  FOREST_STAGE_BUILD,
+  FOREST_STAGE_COMPILE,
+  FOREST_STAGE_DONE
+};
+
+struct TreeMesh
+{
+  unsigned          _texture_id;
+  GLmesh            _mesh;
+};
+
+struct TreeVBO
+{
+  unsigned          _texture_id;
+  class VBO         _vbo;
+  GLbbox            _bbox;
+};
+
+#ifndef GRID
+#include "cgrid.h"
+#endif
+
+class CForest : public GridData
+{
+  LOD               _lod;
+  unsigned          _current_distance;
+  bool              _swap;
+  GLcoord           _origin;
+  int               _stage;
+  bool              _valid;
+  GLcoord           _walk;
+  vector<TreeMesh>  _mesh_list;
+  vector<TreeVBO>   _vbo_list;
+
+  void              Build (long stop);
+  void              Compile ();
+  bool              ZoneCheck ();
+  unsigned          MeshFromTexture (unsigned texture_id);
+
+public:
+  CForest ();
+  unsigned          Sizeof () { return sizeof (CForest); }; 
+  //GLcoord           GridPosition () const { return _grid_position; };
+  void              Set (int x, int y, int distance);
+  void              Render ();
+  void              Update (long stop);
+  bool              Ready () { return _stage == FOREST_STAGE_DONE; };
+  void              Invalidate () { _valid = false; };
+};
 
 CForest::CForest ()
 {
-
   GridData ();
   _stage = FOREST_STAGE_BEGIN;
   _current_distance = 0;
@@ -29,12 +76,10 @@ CForest::CForest ()
   _walk.Clear ();
   _mesh_list.clear ();
   _vbo_list.clear ();
-
 }
 
 unsigned CForest::MeshFromTexture (unsigned texture_id)
 {
-
   unsigned      i;
   TreeMesh      tm;
 
@@ -47,12 +92,10 @@ unsigned CForest::MeshFromTexture (unsigned texture_id)
   tm._mesh.Clear ();
   _mesh_list.push_back (tm);
   return _mesh_list.size () - 1;
-
 }
 
 bool CForest::ZoneCheck ()
 {
-
   if (!CachePointAvailable (_origin.x, _origin.y))
     return false;
   if (!CachePointAvailable (_origin.x + FOREST_SIZE, _origin.y))
@@ -62,12 +105,10 @@ bool CForest::ZoneCheck ()
   if (!CachePointAvailable (_origin.x, _origin.y + FOREST_SIZE))
     return false;
   return true;
-
 }
 
 void CForest::Set (int x, int y, int distance)
 {
-
   if (_grid_position.x == x && _grid_position.y == y && _current_distance == distance)
     return;
   if (_stage == FOREST_STAGE_BUILD)
@@ -86,12 +127,10 @@ void CForest::Set (int x, int y, int distance)
   for (unsigned i = 0; i < _mesh_list.size (); i++) 
     _mesh_list[i]._mesh.Clear ();
   _mesh_list.clear ();
-
 }
 
 void CForest::Build (long stop)
 {
-
   unsigned      i;
   GLvector      origin;
   GLvector      newpos;
@@ -136,12 +175,10 @@ void CForest::Build (long stop)
   }
   if (_walk.Walk (FOREST_SIZE))
     _stage++;
-
 }
 
 void CForest::Compile ()
 {
-
   unsigned    i;
 
   //First, purge the existing VBO
@@ -170,13 +207,10 @@ void CForest::Compile ()
   _mesh_list.clear ();
   _valid = true;
   _stage++;
-  
-
 }
 
 void CForest::Update (long stop)
 {
-
   while (SdlTick () < stop && !Ready ()) {
     switch (_stage) {
     case FOREST_STAGE_BEGIN:
@@ -192,14 +226,10 @@ void CForest::Update (long stop)
       break;
     }
   }
-
-
 }
-
 
 void CForest::Render ()
 {
-
   unsigned    i;
   //We need at least one successful build before we can draw.
   if (!_valid)
@@ -212,5 +242,5 @@ void CForest::Render ()
     //glBindTexture (GL_TEXTURE_2D, 0);
     //_vbo_list[i]._bbox.Render ();
   }
-
 }
+*/

@@ -1,33 +1,41 @@
 /*-----------------------------------------------------------------------------
-
   Texture.cpp
-
   2006 Shamus Young
-
 -------------------------------------------------------------------------------
-  
   This loads in textures.  Nothin' fancy.
-  
 -----------------------------------------------------------------------------*/
 
-
+/*
 #include "stdafx.h"
 #include <stdio.h>
 #include "file.h"
 #include "texture.h"
 
-#define max_STRING          128
+class GLtexture
+{
+public:
+  GLtexture*        next;
+  GLuint            id;
+  char              name[32];
+  char*             image_name;
+  int               width;
+  int               height;
+  short             bpp;//bytes per pixel
+};
 
+unsigned    TextureIdFromName (const char* name);
+GLtexture*  TextureFromName (const char* name);
+byte*       TextureRaw (char* name, int* width, int* height);
+void        TextureInit (void);
+void        TextureTerm (void);
+void        TexturePurge ();
+
+#define max_STRING          128
 
 static GLtexture*   head_texture;
 
-/*-----------------------------------------------------------------------------
-                           t e x t u r e   i d
------------------------------------------------------------------------------*/
-
 static GLtexture* LoadTexture (const char* name)
 {
-
   GLtexture*        t;
   char              filename[max_STRING];
   GLcoord           size;
@@ -49,14 +57,10 @@ static GLtexture* LoadTexture (const char* name)
   t->next = head_texture;
   head_texture = t;
   return t;
-
 }
-
-/* Module Functions **********************************************************/
 
 void TexturePurge ()
 {
-
   GLtexture*       t;
 
   while (head_texture) {
@@ -65,12 +69,10 @@ void TexturePurge ()
     head_texture = t->next;
     delete t;
   }
-
 }
 
 GLtexture* TextureFromName (const char* name)
 {
-
   GLtexture*       t;
 
   for (t = head_texture; t; t = t -> next) {
@@ -79,37 +81,24 @@ GLtexture* TextureFromName (const char* name)
   }
   t = LoadTexture (name);
   return t;
-
 }
 
 unsigned TextureIdFromName (const char* name)
 {
-
   GLtexture*       t;
 
   t = TextureFromName (name);
   if (t)
     return t->id;
   return 0;
-
 }
 
 void TextureInit (void)
 {
-
-
 }
-
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 void TextureTerm (void)
 {
-
-
   TexturePurge ();
-
-
 }
+*/

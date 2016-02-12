@@ -1,14 +1,10 @@
 /*-----------------------------------------------------------------------------
-
   Cache.cpp
-
 -------------------------------------------------------------------------------
-
   This generates, stores, and fetches the pages of terrain data.
-
 -----------------------------------------------------------------------------*/
 
-
+/*
 #include "stdafx.h"
 #include <io.h>
 #include "console.h"
@@ -19,25 +15,42 @@
 #include "text.h"
 #include "world.h"
 
-#define PAGE_GRID   (WORLD_SIZE_METERS / PAGE_SIZE)
+//Module functions
+void CachePurge ();
+void CacheRenderDebug ();
+void CacheUpdate (long stop);
+void CacheUpdatePage (int world_x, int world_y, long stop);
 
+//Look up individual cell data
+
+
+float       CacheDetail (int world_x, int world_y);
+bool        CacheDump (vector<string> *args);
+float       CacheElevation (int world_x, int world_y);
+float       CacheElevation (float x, float y);
+GLvector    CacheNormal (int world_x, int world_y);
+bool        CachePointAvailable (int world_x, int world_y);
+GLvector    CachePosition (int world_x, int world_y);
+bool        CacheSize (vector<string> *args);
+SurfaceType CacheSurface (int world_x, int world_y);
+GLrgba      CacheSurfaceColor (int world_x, int world_y);
+unsigned    CacheTree (int world_x, int world_y);
+
+#define PAGE_GRID   (WORLD_SIZE_METERS / PAGE_SIZE)
 
 static CPage*       page[PAGE_GRID][PAGE_GRID];
 static int          page_count;
 static GLcoord      walk;
 
-/* Static Functions *************************************************************/
+// Static Functions
 
 inline int CPageFromPos (int cell)
 {
-
   return cell / PAGE_SIZE;
-
 }
 
 static CPage* page_lookup (int world_x, int world_y) 
 {
-
   int     page_x, page_y;
   
   if (world_x < 0 || world_y < 0)
@@ -47,40 +60,32 @@ static CPage* page_lookup (int world_x, int world_y)
   if (page_x < 0 || page_x >= PAGE_GRID || page_y < 0 || page_y >= PAGE_GRID)
     return NULL;
   return page[page_x][page_y];
-
-
 }
 
-/* Various lookup functions **************************************************/
-
+// Various lookup functions
 
 float CacheDetail (int world_x, int world_y)
 {
-
   CPage*   p;
   
   p = page_lookup (world_x, world_y);
   if (!p) 
     return 0;
   return p->Detail (world_x % PAGE_SIZE, world_y % PAGE_SIZE);
-
 }
 
 float CacheElevation (int world_x, int world_y)
 {
-  
   CPage*   p;
   
   p = page_lookup (world_x, world_y);
   if (!p) 
     return -99;
   return p->Elevation (world_x % PAGE_SIZE, world_y % PAGE_SIZE);
-
 }
 
 float CacheElevation (float x, float y)
 {
-
   int     cell_x;
   int     cell_y;
   float   a;
@@ -108,25 +113,20 @@ float CacheElevation (float x, float y)
     a = y0;
   }
   return (a + b * dx + c * dy);
-
 }
 
 GLvector CacheNormal (int world_x, int world_y)
 {
-  
   CPage*   p;
   
   p = page_lookup (world_x, world_y);
   if (!p) 
     return glVector (0.0f, 0.0f, 1.0f);
   return p->Normal (world_x % PAGE_SIZE, world_y % PAGE_SIZE);
-
 }
-
 
 bool CachePointAvailable (int world_x, int world_y)
 {
-
   int     page_x, page_y;
   CPage*  p;
 
@@ -144,64 +144,52 @@ bool CachePointAvailable (int world_x, int world_y)
     page_count++;
   }
   return p->Ready ();
-
 }
 
 GLvector CachePosition (int world_x, int world_y)
 {
-  
   CPage*   p;
   
   p = page_lookup (world_x, world_y);
   if (!p) 
     return glVector ((float)world_x, (float)world_y, 0.0f);
   return p->Position (world_x % PAGE_SIZE, world_y % PAGE_SIZE);
-
 }
 
 SurfaceType CacheSurface (int world_x, int world_y)
 {
-
   CPage*   p;
 
   p = page_lookup (world_x, world_y);
   if (!p) 
     return SURFACE_NULL;
   return p->Surface(world_x % PAGE_SIZE, world_y % PAGE_SIZE);
-
 }
-
-
 
 unsigned CacheTree (int world_x, int world_y)
 {
-
   CPage*   p;
 
   p = page_lookup (world_x, world_y);
   if (!p) 
     return 0;
   return p->Tree (world_x % PAGE_SIZE, world_y % PAGE_SIZE);
-
 }
 
 GLrgba CacheSurfaceColor (int world_x, int world_y)
 {
-
   CPage*   p;
 
   p = page_lookup (world_x, world_y);
   if (!p) 
     return glRgba (1.0f, 0.0f, 1.0f); //Pink, so we notice
   return p->Color (world_x % PAGE_SIZE, world_y % PAGE_SIZE);
-
 }
 
-/* Module functions ******************************************************/
+// Module functions
 
 void CachePurge ()
 {
-
   int     x, y;
 
   for (y = 0; y < PAGE_GRID; y++) {
@@ -214,12 +202,10 @@ void CachePurge ()
       page[x][y] = NULL;
     }
   }
-
 }
 
 bool CacheSize (vector<string> *args)
 {
-
   char          filespec[256];
   _finddata32_t fd;
   long          handle;
@@ -241,12 +227,10 @@ bool CacheSize (vector<string> *args)
   _findclose(handle);
   ConsoleLog ("Cache contains %d files, %d bytes used.", files, bytes);
   return true;
-
 }
 
 bool CacheDump (vector<string> *args)
 {
-
   char          filespec[256];
   char          file[256];
   _finddata32_t fd;
@@ -266,13 +250,10 @@ bool CacheDump (vector<string> *args)
   }
   _findclose(handle);
   return true;
-
 }
-
 
 void CacheRenderDebug ()
 {
-
   int     x, y;
 
   for (y = 0; y < PAGE_GRID; y++) {
@@ -281,12 +262,10 @@ void CacheRenderDebug ()
         page[x][y]->Render ();
     }
   }
-
 }
 
 void CacheUpdate (long stop)
 {
-
   int   count;
 
   //TextPrint ("%d pages. (%s)", page_count, TextBytes (sizeof (CPage) * page_count));
@@ -302,24 +281,18 @@ void CacheUpdate (long stop)
     count++;
     walk.Walk (PAGE_GRID);
   }  
-
 }
 
 
-/*-----------------------------------------------------------------------------
-  Request an update to a specific zone.  This can be called by Terrains, 
-  which are waiting for the zone.
------------------------------------------------------------------------------*/
-
+//Request an update to a specific zone.  This can be called by Terrains, 
+//which are waiting for the zone.
 void CacheUpdatePage (int world_x, int world_y, long stop)
 {
-
   CPage*   p;
   
   p = page_lookup (world_x, world_y);
   if (!p) 
     return;
   p->Build (stop);
-
 }
-
+*/

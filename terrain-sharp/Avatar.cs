@@ -1,14 +1,10 @@
 /*-----------------------------------------------------------------------------
-
   Avatar.cpp
-
-
 -------------------------------------------------------------------------------
-
   Handles movement and player input.
- 
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 #include <sstream>
 #include "avatar.h"
@@ -26,6 +22,30 @@
 #include "Text.h"
 #include "Texture.h"
 #include "world.h"
+
+enum AnimType
+{
+  ANIM_IDLE,
+  ANIM_RUN,
+  ANIM_SPRINT,
+  ANIM_FLYING,
+  ANIM_FALL,
+  ANIM_JUMP,
+  ANIM_SWIM,
+  ANIM_FLOAT,
+  ANIM_COUNT
+};
+
+AnimType  AvatarAnim ();
+GLvector  AvatarCameraAngle ();
+GLvector  AvatarCameraPosition ();
+void      AvatarInit (void);
+void      AvatarLook (int x, int y);
+GLvector  AvatarPosition ();
+void      AvatarPositionSet (GLvector new_pos);
+void*     AvatarRegion ();
+void      AvatarRender ();
+void      AvatarUpdate ();
 
 #define JUMP_SPEED      4.0f
 #define MOVE_SPEED      5.5f
@@ -76,13 +96,8 @@ static float            velocity;
 static ParticleSet      dust_particle;
 static float            last_step_tracking;
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
 static void do_model ()
 {
-
   avatar.LoadX ("models//male.x");
   if (CVarUtils::GetCVar<bool> ("avatar.expand")) {
     avatar.BoneInflate (BONE_PELVIS, 0.02f, true);
@@ -92,13 +107,10 @@ static void do_model ()
     avatar.BoneInflate (BONE_RANKLE, 0.05f, true);
     avatar.BoneInflate (BONE_LANKLE, 0.05f, true);
   }
-
-
 }
 
 static void do_move (GLvector delta)		
 {
-
   GLvector    movement;
   float       forward;
   
@@ -112,23 +124,19 @@ static void do_move (GLvector delta)
     desired_movement.x += cos (angle.z * DEGREES_TO_RADIANS) * delta.x +  sin (angle.z * DEGREES_TO_RADIANS) * delta.y;
     desired_movement.y += -sin (angle.z * DEGREES_TO_RADIANS) * delta.x +  cos (angle.z * DEGREES_TO_RADIANS) * delta.y;
   }
-
 }
 
 void do_camera ()
 {
-
   GLvector  cam;
   float     vert_delta;
   float     horz_delta;
   float     ground;
   GLvector2 rads;
 
-  
   rads.x = angle.x * DEGREES_TO_RADIANS;
   vert_delta = cos (rads.x) * cam_distance;
   horz_delta = sin (rads.x);
-
 
   cam = position;
   cam.z += EYE_HEIGHT;
@@ -141,14 +149,10 @@ void do_camera ()
   cam.z = max (cam.z, ground);
   camera_angle = angle;
   camera_position = cam;
-
 }
-
-
 
 void do_location ()
 {
-
   ostringstream   oss(ostringstream::in);
 
   oss << APP << " ";
@@ -156,16 +160,10 @@ void do_location ()
   oss << WorldLocationName ((int)position.x, (int)position.y) << " (" << region.title << ") ";
   oss << "Looking " << WorldDirectionFromAngle (angle.z);
   SdlSetCaption (oss.str ().c_str ());
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 void AvatarUpdate (void)
 {
-
   float     ground;
   float     water;
   float     elapsed;
@@ -318,7 +316,6 @@ void AvatarUpdate (void)
   region = WorldRegionGet ((int)(position.x + REGION_HALF) / REGION_SIZE, (int)(position.y + REGION_HALF) / REGION_SIZE);
   do_camera ();
   do_location ();
-
 }
 
 AnimType AvatarAnim ()
@@ -328,7 +325,6 @@ AnimType AvatarAnim ()
 
 void AvatarInit (void)		
 {
-
   desired_cam_distance = IniFloat ("Avatar", "CameraDistance");
   do_model ();
   for (int i = 0; i < ANIM_COUNT; i++) {
@@ -336,12 +332,10 @@ void AvatarInit (void)
     IniStringSet ("Animations", anim_names[i], IniString ("Animations", anim_names[i]));
   }
   ParticleLoad ("step", &dust_particle);
-
 }
 
 void AvatarLook (int x, int y)
 {
-
   float   mouse_sense;
 
   if (CVarUtils::GetCVar<bool> ("mouse.invert"))
@@ -353,20 +347,15 @@ void AvatarLook (int x, int y)
   angle.z = fmod (angle.z, 360.0f);
   if (angle.z < 0.0f)
     angle.z += 360.0f;
-
-
 }
 
 GLvector AvatarPosition ()
 {
-
   return position;
-
 }
 
 void AvatarPositionSet (GLvector new_pos)		
 {
-
   new_pos.z = clamp (new_pos.z, -25, 2048);
   new_pos.x = clamp (new_pos.x, 0, (REGION_SIZE * WORLD_GRID));
   new_pos.y = clamp (new_pos.y, 0, (REGION_SIZE * WORLD_GRID));
@@ -375,21 +364,16 @@ void AvatarPositionSet (GLvector new_pos)
   angle = camera_angle = glVector (90.0f, 0.0f, 0.0f);
   last_time = GameTime ();
   do_model ();
-
 }
 
 GLvector AvatarCameraPosition ()
 {
-
   return camera_position;
-
 }
 
 GLvector AvatarCameraAngle ()
 {
-
   return camera_angle;
-
 }
 
 void* AvatarRegion ()
@@ -399,11 +383,10 @@ void* AvatarRegion ()
 
 void AvatarRender ()
 {
-
   glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("avatar.png"));
   //glBindTexture (GL_TEXTURE_2D, 0);
   avatar.Render ();
   if (CVarUtils::GetCVar<bool> ("show.skeleton"))
     avatar.RenderSkeleton ();
-
 }
+*/

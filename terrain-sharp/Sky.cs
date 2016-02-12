@@ -1,13 +1,9 @@
 /*-----------------------------------------------------------------------------
-
   Sky.cpp
-
 -------------------------------------------------------------------------------
-
   Handles the rendering of the sky.  Gradient horizon, sun, moon, stars, etc.
-
 -----------------------------------------------------------------------------*/
-
+/*
 #include "stdafx.h"
 
 #include "avatar.h"
@@ -18,6 +14,10 @@
 #include "sdl.h"
 #include "texture.h"
 #include "vbo.h"
+
+void SkyInit ();
+void SkyRender ();
+void SkyUpdate ();
 
 #define UP          glVector (0,0,1)
 #define STAR_TILE   3
@@ -40,16 +40,10 @@ static unsigned   texture_stars;
 static GLvector   tip;
 static float      star_fade;
 
-/*-----------------------------------------------------------------------------
-
-
------------------------------------------------------------------------------*/
-
 //The sun angle begins at zero on the eastern horizon. 90 degrees is high noon.
 //180 is west.
 static void draw_sun (float sun_angle, float size)
 {
-
   float     x, z;
   float     s, c;
 
@@ -71,12 +65,10 @@ static void draw_sun (float sun_angle, float size)
   glTexCoord2f (0.0f, 1.0f);
   glVertex3f (x - c, size, z + s);
   glEnd ();
-
 }
 
 static void build_sky ()
 {
-
   vector<GLvector>    vert;
   vector<GLvector>    normal;
   vector<GLvector2>   uv;
@@ -91,7 +83,6 @@ static void build_sky ()
   GLmesh              star;
   GLvector            v;
   int                 x1, x2, y1, y2;
-
 
   uv_map = glVector (0.0f, 0.0f);
   texture_stars = TextureIdFromName ("stars2.bmp");
@@ -151,17 +142,10 @@ static void build_sky ()
   skydome.Create (GL_TRIANGLES, index.size (), vert.size (), &index[0], &vert[0], &normal[0], &color[0], &uv[0]);
   stardome.Create (&star);
   //skydome.Create (GL_TRIANGLES, index.size (), vert.size (), &index[0], &vert[0], &normal[0], NULL, &uv[0]);
-
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 void SkyInit ()
 {
-
   float   angle;
 
   build_sky ();
@@ -173,24 +157,18 @@ void SkyInit ()
     sky[i].y = -cos (angle) * 6.0f;
     sky[i].z = -0.5f;
   }
-
-  
 }
 
 void SkyUpdate ()
 {
-
   Env*    e;
 
   e = EnvGet ();
   star_fade = e->star_fade;
-
 }
-
 
 void SkyRender ()
 {
-
   GLvector  angle;
   Env*      e;
   GLrgba    color;
@@ -278,6 +256,5 @@ void SkyRender ()
 
   glDepthMask (true);
   glPopMatrix ();
-  
-
 }
+*/

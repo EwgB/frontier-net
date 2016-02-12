@@ -1,13 +1,10 @@
 /*-----------------------------------------------------------------------------
-
   Figure.cpp
-
 -------------------------------------------------------------------------------
-
   Animated models.
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 #include "canim.h"
 #include "cfigure.h"
@@ -18,6 +15,8 @@
 #include "input.h"
 /////////////////////////
 
+void FigureInit ();
+void FigureRender ();
 
 struct BoneList
 {
@@ -25,8 +24,6 @@ struct BoneList
   BoneId      id;
   BoneId      id_parent;
 };
-
-
 
 static BoneList  bl[] =
 {
@@ -63,9 +60,6 @@ static BoneList  bl[] =
 
 #define UP  glVector (0.0f, 0.0f, 1.0f)
 
-
-
-
 static CFigure      fig;
 static CFigure      fig2;
 static CAnim        anim;
@@ -73,7 +67,6 @@ static CAnim        anim_stand;
 
 void add_hull (CFigure* f, GLvector p, float d, float h, BoneId id)
 {
-
   unsigned    base;
   GLmesh*     m;
 
@@ -89,12 +82,10 @@ void add_hull (CFigure* f, GLvector p, float d, float h, BoneId id)
   f->PushWeight (id, base + 1, 1.0f);
   f->PushWeight (id, base + 2, 1.0f);
   f->PushWeight (id, base + 3, 1.0f);
-
 }
 
 void FigureInit ()
 {
-
   unsigned    i;
   GLmesh*     skin;
 
@@ -120,7 +111,8 @@ void FigureInit ()
 
   fig2.LoadX ("models//male.x");
 //  fig2.BoneInflate (BONE_HEAD, 0.01f);
-  /*
+*/
+  /* Commented out in original
   {
 
     FILE*             file;
@@ -140,9 +132,7 @@ void FigureInit ()
     fclose (file);
   }
   */
-
-
-
+/*
 }
 
 static unsigned   frame;
@@ -151,7 +141,6 @@ static bool       stand;
 
 void FigureRender ()
 {
-
   static float nn;
 
   if (moveit)
@@ -166,14 +155,16 @@ void FigureRender ()
   fig2.RotateBone (BONE_LWRIST, glVector (0.0f, abs (cos (nn * 2)) * 90.0f, 0.0f));
   //fig2.RotateBone (BONE_RHIP, glVector (sin (nn) * 25.0f, 0.0f,  0.0f));
   //fig2.RotateBone (BONE_RKNEE, glVector (-abs (cos (nn * 2) * 45.0f), 0.0f,  0.0f));
-  
-  
-  /*
+*/
+
+  /* Commented out in original
   for (unsigned i = 0; i < anim._frame[frame].joint.size (); i++) {
     //if (anim._frame[frame].joint[i].id > BONE_PELVIS)
       fig.RotateBone (anim._frame[frame].joint[i].id, anim._frame[frame].joint[i].rotation);
   }
   */
+
+/*
   if (stand) {
     //fig.Animate (&anim_stand, nn);
     //fig2.Animate (&anim_stand, nn);
@@ -199,6 +190,5 @@ void FigureRender ()
   //fig.Render ();
   //fig2.Render ();
   //glEnable (GL_LIGHTING);
-  
-
 }
+*/

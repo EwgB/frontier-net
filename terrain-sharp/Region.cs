@@ -1,20 +1,15 @@
 /*-----------------------------------------------------------------------------
-
   Region.cpp
-
-
 -------------------------------------------------------------------------------
-
   This holds the region grid, which is the main table of information from 
   which ALL OTHER GEOGRAPHICAL DATA is generated or derived.  Note that
   the resulting data is not STORED here. Regions are sets of rules and 
   properties. You crank numbers through them, and it creates the world. 
 
   This output data is stored and managed elsewhere. (See CPage.cpp)
- 
 -----------------------------------------------------------------------------*/
 
-
+/*
 #include "stdafx.h"
 #if 0
 #include "entropy.h"
@@ -22,6 +17,94 @@
 #include "region.h"
 #include "random.h"
 #include "terraform.h"
+
+#if 0 
+#define REGION_SIZE       64
+#define REGION_HALF       (REGION_SIZE / 2)
+#define WORLD_GRID       128
+#define WORLD_GRID_EDGE  (WORLD_GRID + 1)
+#define WORLD_GRID_CENTER     (WORLD_GRID / 2)
+
+#define REGION_FLAG_TEST        0x0001
+#define REGION_FLAG_MESAS       0x0002
+#define REGION_FLAG_CRATER      0x0004
+#define REGION_FLAG_BEACH       0x0008
+#define REGION_FLAG_BEACH_CLIFF 0x0010
+#define REGION_FLAG_SINKHOLE    0x0020
+#define REGION_FLAG_CRACK       0x0040
+#define REGION_FLAG_TIERED      0x0080
+#define REGION_FLAG_CANYON_NS   0x0100
+#define REGION_FLAG_NOBLEND     0x0200
+#define REGION_FLAG_RIVERN      0x1000
+#define REGION_FLAG_RIVERE      0x2000
+#define REGION_FLAG_RIVERS      0x4000
+#define REGION_FLAG_RIVERW      0x8000
+
+#define REGION_FLAG_RIVERNS     (REGION_FLAG_RIVERN | REGION_FLAG_RIVERS)
+#define REGION_FLAG_RIVEREW     (REGION_FLAG_RIVERE | REGION_FLAG_RIVERW)
+
+#define REGION_FLAG_RIVER_ANY   0xf000
+
+#define FLOWERS                 3
+
+enum Climate
+{
+  CLIMATE_INVALID,
+  CLIMATE_OCEAN,
+  CLIMATE_COAST,
+  CLIMATE_MOUNTAIN,
+  CLIMATE_RIVER,
+  CLIMATE_RIVER_BANK,
+  CLIMATE_SWAMP,
+  CLIMATE_ROCKY,
+  CLIMATE_FIELD,
+  CLIMATE_CANYON,
+  CLIMATE_TYPES,
+};
+//#define REGION_FLAG_DESERT      0x4000
+
+struct Region
+{
+  char      title[50];
+  GLcoord   grid_pos;
+  int       mountain_height;
+  int       river_id;
+  int       river_segment;
+  float     river_width;
+  //float     elevation;
+  float     geo_scale; //Number from -1 to 1, lowest to highest elevation
+  float     geo_water;
+  float     geo_detail;
+  float     geo_large;
+  unsigned  flags_shape;
+  Climate   climate;
+  float     temperature;
+  float     moisture;
+  float     threshold;
+  float     beach_threshold;
+  GLrgba    color_map;
+  GLrgba    color_rock;
+  GLrgba    color_dirt;
+  GLrgba    color_grass;
+  GLrgba    color_atmosphere;
+  GLrgba    color_flowers[FLOWERS];
+  unsigned  flower_shape[FLOWERS];
+  bool      has_flowers;
+};
+
+Region    WorldRegionGet (int x, int y);
+void      WorldRegionSet (int x, int y, Region val);
+Region    RegionGet (int x, int y);
+Region    RegionGet (float x, float y);
+GLrgba    WorldColorGet (int world_x, int world_y, SurfaceColor c);
+GLrgba    RegionAtmosphere (int world_x, int world_y);
+float     RegionElevation (int world_x, int world_y);
+Cell      WorldCell (int world_x, int world_y);
+void      RegionInit ();
+unsigned  RegionMap ();
+float     RegionWaterLevel (int world_x, int world_y);
+void      RegionGenerate ();
+#endif
 
 #define LARGE_SCALE       9
 #define SMALL_STRENGTH    1
@@ -58,15 +141,12 @@ static Region       continent[WORLD_GRID][WORLD_GRID];
 static GLcoord      dithermap[DITHER_SIZE][DITHER_SIZE];
 static unsigned     map_id;
 
-/*-----------------------------------------------------------------------------
-The following functions are used when generating elevation data
------------------------------------------------------------------------------*/
+// The following functions are used when generating elevation data
 
 //This modifies the passed elevation value AFTER region cross-fading is complete,
 //For things that should not be mimicked by neighbors. (Like rivers.)
 static float do_height_noblend (float val, Region r, GLvector2 offset, float bias)
 {
-
   //return val;
   if (r.flags_shape & REGION_FLAG_RIVER_ANY) {
     GLvector2   cen;
@@ -120,14 +200,12 @@ static float do_height_noblend (float val, Region r, GLvector2 offset, float bia
     }
   }
   return val;
-
 }
 
 //This takes the given properties and generates a single unit of elevation data,
 //according to the local region rules.
 static float do_height (Region r, GLvector2 offset, float bias, float esmall, float elarge)
 {
-
   float     val;
 
   //Modify the detail values before they are applied
@@ -200,7 +278,6 @@ static float do_height (Region r, GLvector2 offset, float bias, float esmall, fl
     val -= r.beach_threshold;
   }
   return val;
-
 }
 
 static Region region (int x, int y)
@@ -208,16 +285,12 @@ static Region region (int x, int y)
   if (x < 0 || y < 0 || x >= WORLD_GRID || y >= WORLD_GRID)
     return continent[0][0];
   return continent[x][y];
-
 }
 
-/*-----------------------------------------------------------------------------
-The following functions are used when building a new world.
------------------------------------------------------------------------------*/
+// The following functions are used when building a new world.
 
 static void do_map ()
 {
-
   int       x, y, yy;
   Region    r;
 
@@ -244,35 +317,26 @@ static void do_map ()
   }
   glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, WORLD_GRID, WORLD_GRID, 0, GL_RGB, GL_UNSIGNED_BYTE, &buffer[0]);
   delete buffer;
-
 }
 
-
-/*-----------------------------------------------------------------------------
-Module functions
------------------------------------------------------------------------------*/
+// Module functions
 
 unsigned RegionMap ()
 {
-
   return map_id;
-
 }
 
 Region RegionGet (float x, float y)
 {
-  
   x /= REGION_SIZE;
   y /= REGION_SIZE;
   if (x < 0 || y < 0 || x >= WORLD_GRID || y >= WORLD_GRID)
     return continent[0][0];
   return continent[(int)x][(int)y];
-
 }
 
 Region RegionGet (int x, int y)
 {
-  
   x = max (x, 0);
   y = max (y, 0);
   x += dithermap[x % DITHER_SIZE][y% DITHER_SIZE].x;
@@ -282,27 +346,20 @@ Region RegionGet (int x, int y)
   if (x < 0 || y < 0 || x >= WORLD_GRID || y >= WORLD_GRID)
     return continent[0][0];
   return continent[x][y];
-
 }
 
 Region WorldRegionGet (int x, int y)
 {
-
   return continent[x][y];
-
 }
 
 void WorldRegionSet (int x, int y, Region val)
 {
-
   continent[x][y] = val;
-
 }
-
 
 void    RegionInit ()
 {
-
   int         x, y;
   Region      r;
 
@@ -320,12 +377,10 @@ void    RegionInit ()
       continent[x][y] = r;
     }
   }
-
 }
   
 void    RegionGenerate ()
 {
-
   int         x, y;
   Region      r;
   GLcoord     from_center;
@@ -375,12 +430,10 @@ void    RegionGenerate ()
   TerraformAverage ();
   TerraformColors ();
   do_map ();
-  
 }
 
 GLrgba WorldColorGet (int world_x, int world_y, SurfaceColor c)
 {
-
   GLcoord   origin;
   int       x, y;
   GLvector2 offset;
@@ -424,13 +477,10 @@ GLrgba WorldColorGet (int world_x, int world_y, SurfaceColor c)
   result.green = MathInterpolateQuad (c0.green, c1.green, c2.green, c3.green, offset);
   result.blue  = MathInterpolateQuad (c0.blue, c1.blue, c2.blue, c3.blue, offset);
   return result;
-  
 }
-
 
 GLrgba RegionAtmosphere (int world_x, int world_y)
 {
-
   GLcoord   origin;
   GLvector2 offset;
 
@@ -439,12 +489,10 @@ GLrgba RegionAtmosphere (int world_x, int world_y)
   origin.x = world_x / REGION_SIZE;
   origin.y = world_y / REGION_SIZE;
   return region (origin.x, origin.y).color_atmosphere;
-
 }
 
 float RegionWaterLevel (int world_x, int world_y)
 {
-
   GLcoord   origin;
   GLvector2 offset;
   Region    rul, rur, rbl, rbr;//Four corners: upper left, upper right, etc.
@@ -462,12 +510,10 @@ float RegionWaterLevel (int world_x, int world_y)
   rbl = region (origin.x, origin.y + 1);
   rbr = region (origin.x + 1, origin.y + 1);
   return MathInterpolateQuad (rul.geo_water, rur.geo_water, rbl.geo_water, rbr.geo_water, offset, ((origin.x + origin.y) %2) == 0);
-
 }
 
 Cell WorldCell (int world_x, int world_y)
 {
-
   float     esmall, elarge;
   Region    rul, rur, rbl, rbr;//Four corners: upper left, upper right, etc.
   float     eul, eur, ebl, ebr;
@@ -518,7 +564,6 @@ Cell WorldCell (int world_x, int world_y)
   result.elevation = MathInterpolateQuad (eul, eur, ebl,ebr, blend, left);
   result.elevation = do_height_noblend (result.elevation, rul, offset, bias);
   return result;
-
 }
-
 #endif
+*/

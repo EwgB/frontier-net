@@ -1,14 +1,10 @@
 /*-----------------------------------------------------------------------------
-
   Particle.cpp
-
-
 -------------------------------------------------------------------------------
-
   This manages the list of active particle emitters.
- 
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 
 #include "avatar.h"
@@ -18,16 +14,23 @@
 #include "sdl.h"
 #include "world.h"
 
-static vector<CEmitter>   elist;
+#include "cemitter.h"
 
-/*-----------------------------------------------------------------------------
-                              
------------------------------------------------------------------------------*/
+UINT ParticleAdd (ParticleSet* p_in, GLvector position);
+bool ParticleCmd (vector<string> *args);
+void ParticleDestroy (UINT id);
+void ParticleInit ();
+void ParticleLoad (const char* filename_in, struct ParticleSet* p);
+void ParticleRender ();
+void ParticleRetire (UINT id);
+void ParticleSave (char* filename_in, struct ParticleSet* p);
+void ParticleUpdate ();
+
+static vector<CEmitter>   elist;
 
 //For debugging.  Place an emitter at our feet
 void place_emitter ()
 {
-
   ParticleSet   p;
   GLvector      v;
   string        name;
@@ -37,16 +40,10 @@ void place_emitter ()
   ParticleLoad (name.c_str (), &p);
   ParticleSave ("test", &p);
   ParticleAdd (&p, v);
-
 }
-
-/*-----------------------------------------------------------------------------
-                              
------------------------------------------------------------------------------*/
 
 UINT ParticleAdd (ParticleSet* p_in, GLvector position)
 {
-  
   CEmitter*   e;
   CEmitter    new_emitter;
   ParticleSet p;
@@ -58,12 +55,10 @@ UINT ParticleAdd (ParticleSet* p_in, GLvector position)
   e = &elist[elist.size () - 1];
   e->Set (&p);
   return e->Id ();
-
 }
 
 void ParticleDestroy (UINT id)
 {
-
   unsigned    i;
 
   for (i = 0; i < elist.size (); i++) {
@@ -74,13 +69,10 @@ void ParticleDestroy (UINT id)
     }
   }
   ConsoleLog ("ParticleDestroy: Effect #%d not found.", id);
-
 }
-
 
 void ParticleRetire (UINT id)
 {
-
   unsigned    i;
 
   for (i = 0; i < elist.size (); i++) {
@@ -91,13 +83,10 @@ void ParticleRetire (UINT id)
     }
   }
   ConsoleLog ("ParticleRetire: Effect #%d not found.", id);
-
 }
-
 
 void ParticleInit ()
 {
-
   CVarUtils::CreateCVar<string> ("particle.texture", "");
   CVarUtils::CreateCVar ("particle.acceleration", glVector (0.0f, 0.0f, 0.0f));
   CVarUtils::CreateCVar ("particle.blend", 0);
@@ -123,13 +112,10 @@ void ParticleInit ()
   CVarUtils::CreateCVar<bool> ("particle.z_buffer", false);
 
   CVarUtils::CreateCVar<string> ("current_particle", "");
-
-
 }
 
 void ParticleUpdate ()
 {
-
   unsigned    i;
 
   for (i = 0; i < elist.size (); i++) 
@@ -142,12 +128,10 @@ void ParticleUpdate ()
   }
   if (InputKeyPressed (SDLK_f)) 
     place_emitter ();
-
 }
 
 void ParticleRender ()
 {
-
   unsigned    i;
 
   glEnable (GL_BLEND);
@@ -156,12 +140,10 @@ void ParticleRender ()
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   for (i = 0; i < elist.size (); i++) 
     elist[i].Render ();
-
 }
 
 void ParticleSave (char* filename_in, ParticleSet* p)
 {
-
   string            filename;
   vector<string>    sub_group;
 
@@ -193,12 +175,10 @@ void ParticleSave (char* filename_in, ParticleSet* p)
   filename += ".prt";
   sub_group.push_back ("particle");
   CVarUtils::Save (filename, sub_group);
-
 }
 
 void ParticleLoad (const char* filename_in, ParticleSet* p)
 {
-
   string            filename;
   vector<string>    sub_group;
 
@@ -231,13 +211,10 @@ void ParticleLoad (const char* filename_in, ParticleSet* p)
   p->wind = CVarUtils::GetCVar<bool> ("particle.wind");
   p->gravity = CVarUtils::GetCVar<bool> ("particle.gravity");
   p->z_buffer = CVarUtils::GetCVar<bool> ("particle.z_buffer");
-
 }
-
 
 bool ParticleCmd (vector<string> *args)
 {
-
   if (args->empty ()) {
     ConsoleLog (CVarUtils::GetHelp ("game").data ());
     return true;
@@ -245,5 +222,5 @@ bool ParticleCmd (vector<string> *args)
   CVarUtils::SetCVar<string> ("current_particle", args->data ()[0].c_str ());
   place_emitter ();
   return true;
-
 }
+*/

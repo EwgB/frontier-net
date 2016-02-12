@@ -1,16 +1,12 @@
 /*-----------------------------------------------------------------------------
-
   Scene.cpp
-
-
 -------------------------------------------------------------------------------
-
   This manages all the various objects that need to be created, rendered,
   and deleted at various times. If it gets drawn, and if there's more than 
   one of it, then it should go here.
- 
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 #include "avatar.h"
 #include "cache.h"
@@ -34,6 +30,27 @@
 #include "water.h"
 #include "world.h"
 
+enum 
+{
+  DEBUG_RENDER_NONE,
+  DEBUG_RENDER_MOIST,
+  DEBUG_RENDER_TEMP,
+  DEBUG_RENDER_UNIQUE,
+  DEBUG_RENDER_TYPES
+};
+
+void            SceneClear ();
+void            SceneInit ();
+void            SceneGenerate ();
+void            SceneUpdate (long stop);
+void            SceneProgress (unsigned* ready, unsigned* total);
+void            SceneRender ();
+void            SceneRenderDebug ();
+void            SceneRestartProgress ();
+class CTerrain* SceneTerrainGet (int x, int y);
+void            SceneTexturePurge ();
+float           SceneVisibleRange ();
+
 #define BRUSH_GRID      7
 
 #define FOREST_GRID     7
@@ -50,8 +67,6 @@ static int              texture_bytes_counter;
 static int              polygons;
 static int              polygons_counter;
 
-/*                  *************************************************************/
-
 static GridManager            gm_terrain;
 static vector<CTerrain>       il_terrain;
 static GridManager            gm_forest;
@@ -63,11 +78,10 @@ static vector<CBrush>         il_brush;
 static GridManager            gm_particle;
 static vector<CParticleArea>  il_particle;
 
-/* Module Functions *************************************************************/
+// Module Functions
 
 void SceneClear ()
 {
-
   il_grass.clear ();
   il_brush.clear ();
   il_forest.clear ();
@@ -76,12 +90,10 @@ void SceneClear ()
   gm_brush.Clear ();
   gm_forest.Clear ();
   gm_terrain.Clear ();
-
 }
 
 void SceneGenerate ()
 {
-
   GLvector    camera;
   GLcoord     current;
 
@@ -105,13 +117,10 @@ void SceneGenerate ()
   il_brush.clear ();
   il_brush.resize (BRUSH_GRID * BRUSH_GRID);
   gm_brush.Init (&il_brush[0], BRUSH_GRID, BRUSH_SIZE);
-
 }
-
 
 void SceneTexturePurge ()
 {
-
   SceneClear ();
   il_grass.clear ();
   il_grass.resize (GRASS_GRID * GRASS_GRID);
@@ -132,12 +141,10 @@ void SceneTexturePurge ()
   il_particle.clear ();
   il_particle.resize (PARTICLE_GRID * PARTICLE_GRID);
   gm_particle.Init (&il_particle[0], PARTICLE_GRID, PARTICLE_AREA_SIZE);
-
 }
 
 CTerrain* SceneTerrainGet (int x, int y)
 {
-
   unsigned  i;
   GLcoord   gp;
 
@@ -147,44 +154,33 @@ CTerrain* SceneTerrainGet (int x, int y)
       return &il_terrain[i];
   }
   return NULL;
-
 }
 
 //How far is it from the center of the terrain grid to the outer edge?
 float SceneVisibleRange ()
 {
-
   return (float)(TERRAIN_GRID / 2) * TERRAIN_SIZE;
-
 }
 
 //This is called to restart the terrain grid manager. After the terrains are built,
 //we need to pass over them again so they can do their stitching.
 void SceneRestartProgress ()
 {
-
   gm_terrain.RestartProgress ();
-
 }
-
 
 void SceneInit ()
 {
-
-
 }
 
 void SceneProgress (unsigned* ready, unsigned* total)
 {
-
   *ready = gm_terrain.ItemsReady ();
   *total = min (gm_terrain.ItemsViewable (), 3);
-
 }
 
 void SceneUpdate (long stop)
 {
-
   static unsigned update_type;
 
   if (!GameRunning ())
@@ -204,12 +200,10 @@ void SceneUpdate (long stop)
   gm_forest.Update (stop);
   gm_brush.Update (stop);
   TextPrint ("Scene: %d of %d terrains ready", gm_terrain.ItemsReady (), gm_terrain.ItemsViewable ());
-
 }
 
 void SceneRender ()
 {
-
   if (!GameRunning ())
     return;
   if (!CVarUtils::GetCVar<bool> ("render.textured"))
@@ -244,12 +238,10 @@ void SceneRender ()
   CgShaderSelect (VSHADER_NONE);
   ParticleRender ();
   gm_particle.Render ();
-
 }
 
 void SceneRenderDebug ()
 {
-
   glEnable (GL_BLEND);
   glDisable(GL_TEXTURE_2D);
   glDisable (GL_LIGHTING);
@@ -263,5 +255,5 @@ void SceneRenderDebug ()
   glColor3f (1,1,1);
   AvatarRender ();
   WaterRender ();
-
 }
+*/

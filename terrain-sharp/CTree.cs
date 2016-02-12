@@ -1,13 +1,4 @@
-/*-----------------------------------------------------------------------------
-
-  CTree.cpp
-
--------------------------------------------------------------------------------
-
-  
-
------------------------------------------------------------------------------*/
-
+/*
 #include "stdafx.h"
 #include "cg.h"
 #include "ctree.h"
@@ -19,16 +10,133 @@
 #include "vbo.h"
 #include "world.h"
 
+#define TREE_ALTS   3
+
+enum TreeTrunkStyle
+{
+  TREE_TRUNK_NORMAL,
+  TREE_TRUNK_JAGGED,
+  TREE_TRUNK_BENT,
+  TREE_TRUNK_STYLES
+};
+
+enum TreeFoliageStyle
+{
+  TREE_FOLIAGE_UMBRELLA,
+  TREE_FOLIAGE_BOWL,
+  TREE_FOLIAGE_SHIELD,
+  TREE_FOLIAGE_PANEL,
+  TREE_FOLIAGE_SAG,
+  TREE_FOLIAGE_STYLES
+};
+
+enum TreeLiftStyle
+{
+  TREE_LIFT_STRAIGHT,
+  TREE_LIFT_IN,
+  TREE_LIFT_OUT,
+  TREE_LIFT_STYLES
+};
+
+enum TreeLeafStyle
+{
+  TREE_LEAF_FAN,
+  TREE_LEAF_SCATTER,
+  TREE_LEAF_STYLES
+};
+
+struct BranchAnchor
+{
+  GLvector      root;
+  float         radius;
+  float         length;
+  float         lift;
+};
+
+struct Leaf
+{
+
+  GLvector2     position;
+  float         angle;
+  float         size;
+  //float         brightness;
+  GLrgba        color;
+  float         dist;
+  unsigned      neighbor;
+};
+
+class CTree
+{
+  TreeTrunkStyle    _trunk_style;
+  TreeFoliageStyle  _foliage_style;
+  TreeLiftStyle     _lift_style;
+  TreeLeafStyle     _leaf_style;
+  
+  int               _seed;
+  int               _seed_current;
+  bool              _funnel_trunk;
+  bool              _evergreen;
+  bool              _canopy;
+  bool              _grows_high;
+  bool              _has_vines;
+  
+  int               _default_branches;
+  float             _default_height;
+  float             _default_bend_frequency;
+  float             _default_base_radius;
+  float             _default_lowest_branch;
+
+  int               _current_branches;
+  float             _current_height;
+  float             _current_bend_frequency;
+  float             _current_angle_offset;
+  float             _current_base_radius;
+  float             _current_lowest_branch;
+
+  float             _moisture;
+  float             _temperature;
+
+  float             _texture_tile;
+  
+  float             _branch_lift;
+  float             _branch_reach;
+  float             _foliage_size;
+  float             _leaf_size;
+  GLrgba            _bark_color1;
+  GLrgba            _bark_color2;
+  GLrgba            _leaf_color;
+  vector<Leaf>      _leaf_list;
+  GLmesh            _meshes[TREE_ALTS][LOD_LEVELS];
+
+  void              DrawBark ();
+  void              DrawLeaves ();
+  void              DrawVines ();
+  void              DrawFacer ();
+  void              DoVines (GLmesh* m, GLvector* points, unsigned segments);
+  void              DoFoliage (GLmesh* m, GLvector pos, float size, float angle);
+  void              DoBranch (GLmesh* m, BranchAnchor anchor, float angle, LOD lod);
+  void              DoTrunk (GLmesh* m, unsigned local_seed, LOD lod);
+  void              DoLeaves ();
+  void              DoTexture ();
+  GLvector          TrunkPosition (float delta, float* radius);
+  void              Build ();
+public:
+  unsigned          _texture;
+  void              Create (bool canopy, float moisture, float temperature, int seed);
+  void              Render (GLvector pos, unsigned alt, LOD lod);
+  unsigned          Texture () { return _texture; };
+  void              TexturePurge ();
+  GLmesh*           Mesh (unsigned alt, LOD lod);
+  void              Info ();
+  bool              GrowsHigh () { return _grows_high; };
+};
+
 #define SEGMENTS_PER_METER    0.25f
 #define MIN_SEGMENTS          3
 #define TEXTURE_SIZE          256
 #define TEXTURE_HALF          (TEXTURE_SIZE / 2)
 #define MIN_RADIUS            0.3f
 #define UP                    glVector (0.0f, 0.0f, 1.0f)
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 int sort_leaves (const void* elem1, const void* elem2)
 {
@@ -40,25 +148,17 @@ int sort_leaves (const void* elem1, const void* elem2)
   else if (e1->dist > e2->dist)
     return 1;
   return 0;
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 GLmesh* CTree::Mesh (unsigned alt, LOD lod)
 {
-
   return &_meshes[alt % TREE_ALTS][lod];
-
 }
 
 //Given the value of 0.0 (root) to 1.0f (top), return the center of the trunk 
 //at that height.
 GLvector CTree::TrunkPosition (float delta, float* radius_in)
 {
-
   GLvector    trunk;
   float       bend;
   float       delta_curve;
@@ -96,12 +196,10 @@ GLvector CTree::TrunkPosition (float delta, float* radius_in)
   if (radius_in)
     *radius_in = radius;
   return trunk;
-  
 }
 
 void CTree::DoFoliage (GLmesh* m, GLvector pos, float fsize, float angle)
 {
-
   GLuvbox   uv;
   int       base_index;
 
@@ -144,12 +242,14 @@ void CTree::DoFoliage (GLmesh* m, GLvector pos, float fsize, float angle)
     m->PushTriangle (base_index + 5, base_index + 4, base_index + 3);
     m->PushTriangle (base_index + 5, base_index + 1, base_index + 4);
   } else if (_foliage_style == TREE_FOLIAGE_SAG) {
+*/
     /*     /\
           /__\
          /|  |\
          \|__|/
           \  /
            \/   */
+/*
     float level1   = fsize * -0.4f;
     float level2   = fsize * -1.2f;
     GLuvbox   uv_inner;
@@ -229,12 +329,10 @@ void CTree::DoFoliage (GLmesh* m, GLvector pos, float fsize, float angle)
     m->_vertex[i] = glMatrixTransformPoint (mat, m->_vertex[i]);
     m->_vertex[i] += pos;
   }
-
 }
 
 void CTree::DoVines (GLmesh* m, GLvector* points, unsigned segments)
 {
-
   unsigned          base_index;
   unsigned          segment;
 
@@ -256,12 +354,10 @@ void CTree::DoVines (GLmesh* m, GLvector* points, unsigned segments)
           base_index + (segment + 1) * 2 + 1,
           base_index + (segment + 1) * 2);
   }
-
 }
 
 void CTree::DoBranch (GLmesh* m, BranchAnchor anchor, float branch_angle, LOD lod)
 {
-  
   unsigned          ring, segment, segment_count;
   unsigned          radial_steps, radial_edge;
   float             radius;
@@ -358,12 +454,10 @@ void CTree::DoBranch (GLmesh* m, BranchAnchor anchor, float branch_angle, LOD lo
   //Use these to hang vines on the branch
   if (lod == LOD_HIGH)
     DoVines (m, &underside[0], underside.size ());
-
 }
 
 void CTree::DoTrunk (GLmesh* m, unsigned local_seed, LOD lod)
 {
-
   int                   ring, segment, segment_count;
   int                   radial_steps, radial_edge;
   float                 branch_spacing;
@@ -508,12 +602,10 @@ void CTree::Build ()
         _meshes[alt][lod].CalculateNormalsSeamless ();
     }
   }
-
 }
 
 void CTree::Create (bool is_canopy, float moisture, float temp_in, int seed_in)
 {
-  
   //Prepare, clear the tables, etc.
   _leaf_list.clear ();
   _seed = seed_in;
@@ -573,13 +665,11 @@ void CTree::Create (bool is_canopy, float moisture, float temp_in, int seed_in)
   Build ();
   DoLeaves ();
   DoTexture ();
-
 }
 
 //Render a single tree. Very slow. Used for debugging. 
 void CTree::Render (GLvector pos, unsigned alt, LOD lod)
 {
-
   glEnable (GL_BLEND);
   glEnable (GL_TEXTURE_2D);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -588,13 +678,10 @@ void CTree::Render (GLvector pos, unsigned alt, LOD lod)
   glTranslatef (pos.x, pos.y, pos.z);
   _meshes[alt][lod].Render ();
   glPopMatrix ();
-
 }
 
 void CTree::DoLeaves ()
 {
-
-
   unsigned          i;
   Leaf              l;
 
@@ -682,12 +769,10 @@ void CTree::DoLeaves ()
   }
   for (i = 0; i < _leaf_list.size (); i++) 
     _leaf_list[i].color = glRgbaInterpolate (_leaf_color, glRgba (0.0f, 0.5f, 0.0f), WorldNoisef (_seed_current++) * 0.33f);
-
 }
 
 void CTree::DrawFacer ()
 {
-
   GLbbox    box;
   GLvector  size, center;
 
@@ -707,12 +792,10 @@ void CTree::DrawFacer ()
   glTranslatef (-center.x, 0.0f, -center.z);
   glColor3f (1,1,1);
   Render (glVector (0.0f, 0.0f, 0.0f), 0, LOD_HIGH);
-
 }
 
 void CTree::DrawVines ()
 {
-
   GLtexture*  t;
   GLuvbox     uvframe;
   int         frames;
@@ -740,13 +823,10 @@ void CTree::DrawVines ()
   uv = uvframe.Corner (1); glTexCoord2fv (&uv.x); glVertex2i (TEXTURE_SIZE, TEXTURE_SIZE);
   uv = uvframe.Corner (2); glTexCoord2fv (&uv.x); glVertex2i (0, TEXTURE_SIZE);
   glEnd ();
-
-
 }
 
 void CTree::DrawLeaves ()
 {
-
   GLtexture*  t;
   GLuvbox     uvframe;
   int         frames;
@@ -770,7 +850,6 @@ void CTree::DrawLeaves ()
       glVertex2fv (&_leaf_list[i].position.x);
     }
     glEnd ();
-
   }
   
   Leaf              l;
@@ -804,14 +883,10 @@ void CTree::DrawLeaves ()
     glEnd ();
     glPopMatrix ();
   }
-
-
-
 }
 
 void CTree::DrawBark ()
 {
-
   GLtexture*  t;
   GLuvbox     uvframe;
   int         frames;
@@ -846,13 +921,10 @@ void CTree::DrawBark ()
   uv = uvframe.Corner (3); glTexCoord2fv (&uv.x); glVertex2i (0, TEXTURE_SIZE);
   glEnd ();
   glColorMask (true, true, true, true);
-
-
 }
 
 void CTree::DoTexture ()
 {
-
   unsigned  i;
 
   glDisable (GL_CULL_FACE);
@@ -895,20 +967,16 @@ void CTree::DoTexture ()
   }
   delete buffer;
   RenderCanvasEnd ();
-  
 }
 
 void CTree::Info ()
 {
-
   TextPrint ("TREE:\nSeed:%d Moisture: %f Temp: %f", _seed, _moisture, _temperature);
-
 }
 
 void CTree::TexturePurge ()
 {
-
   if (_texture)
     DoTexture ();
-
 }
+*/

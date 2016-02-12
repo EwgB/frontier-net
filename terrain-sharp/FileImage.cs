@@ -1,15 +1,11 @@
 /*-----------------------------------------------------------------------------
-
   FileImage.cpp
-
-
 -------------------------------------------------------------------------------
-
   This module uses devIL (http://openil.sourceforge.net) to open various
   image files.
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 #include "il\il.h"
 
@@ -17,13 +13,8 @@
 
 static unsigned     default_counter;
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
 static char* do_default_image (GLcoord* size_in)
 {
-
   GLrgba          color;
   unsigned char   bcolor[4];
   unsigned char   white[4];
@@ -52,12 +43,10 @@ static char* do_default_image (GLcoord* size_in)
     }
   }
   return (char*)buffer;
-
 }
 
 char* FileImageLoad (char* filename, GLcoord* size_in)
 {
-
   GLcoord size;
   int     ok;
   char*   buffer;
@@ -77,6 +66,5 @@ char* FileImageLoad (char* filename, GLcoord* size_in)
   buffer = new char[size.x * size.y * 4];
   ilCopyPixels (0, 0, 0, size.x, size.y, 1, IL_RGBA, IL_UNSIGNED_BYTE, buffer);
   return buffer;
-
 }
-
+*/

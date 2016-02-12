@@ -1,8 +1,5 @@
 /*-----------------------------------------------------------------------------
-
   Main.cpp
-
-
 -------------------------------------------------------------------------------
 
 TODO:
@@ -21,10 +18,9 @@ http://awesomium.com/
 http://www.bramstein.com/projects/gui/
 
 //glActiveTexture(GL_TEXTURE0);glBindTexture(GL_TEXTURE_2D, decal)
-
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 
 #include "avatar.h"
@@ -46,6 +42,11 @@ http://www.bramstein.com/projects/gui/
 #include "texture.h"
 #include "world.h"
 
+#define APP       "Frontier"
+
+void MainQuit ();
+bool MainIsQuit ();
+
 #pragma comment (lib, "opengl32.lib") //OpenGL
 #pragma comment (lib, "glu32.lib")    //OpenGL
 #pragma comment (lib, "sdl.lib")      //Good 'ol SDL.
@@ -62,13 +63,8 @@ http://www.bramstein.com/projects/gui/
 
 static bool           quit;
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
 static void init ()
 {
-
   ConsoleLog ("%s: Begin startup.", APP);
   ConsoleInit ();
   ParticleInit ();
@@ -86,29 +82,17 @@ static void init ()
   SkyInit ();
   TextInit ();
   ConsoleLog ("init: Done.");
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 static void term ()
 {
-
   GameTerm ();
   TextureTerm ();
   SdlTerm ();
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 static void run ()
 {
-
   long    stop;
   long    remaining;
 
@@ -130,43 +114,26 @@ static void run ()
     if (remaining > 0) 
       Sleep (remaining);
   }
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 void MainQuit ()
 { 
-
   quit = true;
-
 }
-
 
 bool MainIsQuit ()
 { 
-
   return quit;
-
 }
 
 bool ConsoleCgCompile (vector<string> *args) 
 {
-
   CgCompile ();
   return true;
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 int PASCAL WinMain (HINSTANCE instance_in, HINSTANCE previous_instance, LPSTR command_line, int show_style)
 {
-
   //Variables
   CVarUtils::CreateCVar ("avatar.expand", false, "Resize avatar proportions to be more cartoon-y.");
   CVarUtils::CreateCVar ("render.shaders", true, "Enable vertex, fragment shaders.");
@@ -195,5 +162,5 @@ int PASCAL WinMain (HINSTANCE instance_in, HINSTANCE previous_instance, LPSTR co
   term ();
   CVarUtils::Save (SETTINGS_FILE);
   return 0;
-
 }
+*/

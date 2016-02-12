@@ -1,13 +1,10 @@
 /*-----------------------------------------------------------------------------
-
   CTerrain.cpp
-
 -------------------------------------------------------------------------------
-
   This holds the terrain object class.
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 #include "avatar.h"
 #include "console.h"
@@ -19,6 +16,31 @@
 #include "texture.h"
 #include <cg\cg.h>									
 #include <cg\cggl.h>
+
+enum
+{
+  VSHADER_NONE = -1,
+  VSHADER_NORMAL,
+  VSHADER_TREES,
+  VSHADER_GRASS,
+  VSHADER_CLOUDS,
+  VSHADER_COUNT,
+  FSHADER_NONE,
+  FSHADER_GREEN,
+  FSHADER_CLOUDS,
+  FSHADER_MASK_TRANSFER,
+  FSHADER_END,
+};
+
+#define FSHADER_BASE  (FSHADER_NONE + 1)
+#define FSHADER_COUNT (FSHADER_END - FSHADER_BASE)
+
+void CgCompile ();
+void CgInit ();
+void CgUpdate ();
+void CgUpdateMatrix ();
+void CgSetOffset (GLvector offset);
+void CgShaderSelect (int shader);
 
 #define VSHADER_FILE  "shaders/vertex.cg"
 #define FSHADER_FILE  "shaders/fragment.cg"
@@ -73,22 +95,16 @@ static float          wind;
 static int            vshader_selected;
 static int            fshader_selected;
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
 static void checkForCgError(CGerror error, const char* program, const char *situation)
 {
   if (error != CG_NO_ERROR) 
     ConsoleLog ("%s: %s: %s", program, situation, cgGetErrorString(error));
   else
     ConsoleLog ("%s: %s... ok.", program, situation);
-
 }
 
 static void fshader_select (int select_in)
 {
-  
   FShader*      s;
   Env*          e;
    
@@ -111,13 +127,10 @@ static void fshader_select (int select_in)
   cgGLSetTextureParameter (s->texture, TextureIdFromName ("clouds.png"));
   cgGLSetParameter4f (s->data, wind, e->cloud_cover, 1 - e->star_fade, 0);
   cgGLEnableTextureParameter (s->texture);
-
 }
-
 
 static void vshader_select (int select)
 {
-  
   VShader*      s;
   GLvector      p;
   Env*          e;
@@ -151,16 +164,10 @@ static void vshader_select (int select)
   cgGLSetParameter2f (s->fog, e->fog.rmin, e->fog.rmax);
   cgGLSetParameter4f (s->data, SceneVisibleRange (), SceneVisibleRange () * 0.05, val1, val2);
   glColor3f (1,1,1);
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 void CgCompile ()
 {
-
   VShader*    s;
   FShader*    fs;
   unsigned    i;
@@ -190,15 +197,6 @@ void CgCompile ()
     checkForCgError (cgGetError(), fshader_function[i], "Loading variables");
   }
   
-
-
-
-
-
-
-
-
-
   cgp_vertex = cgGLGetLatestProfile (CG_GL_VERTEX);	
   checkForCgError (cgGetError(), "Init", "Establishing Cg Vertex profile");
   cgGLEnableProfile (cgp_vertex);
@@ -227,34 +225,25 @@ void CgCompile ()
 
   cgGLDisableProfile (cgp_fragment);
   cgGLDisableProfile (cgp_vertex);
-
 }
 
 void CgInit ()
 {
-
   CgCompile ();
-
 }
 
 void CgShaderSelect (int select)
 {
-
   if (select < FSHADER_NONE) {
     vshader_select (select);
     return;
   }
   fshader_select (select);
-
-
 }
-
 
 void CgUpdate ()
 {
-
   float     elapsed;
-
 
   elapsed = SdlElapsed ();
   wind += elapsed * 0.001f;
@@ -262,25 +251,20 @@ void CgUpdate ()
     cgGLSetManageTextureParameters (cgContext,  CG_TRUE);
   else
     cgGLSetManageTextureParameters (cgContext,  CG_FALSE);
-
 }
 
 void CgUpdateMatrix ()
 {
-
   //cgGLSetStateMatrixParameter(modelViewMatrix, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MODELVIEW_MATRIX);
-
 }
 
 void CgSetOffset (GLvector p)
 {
-
   VShader*    s;
-
 
   if (vshader_selected == VSHADER_NONE)
     return;
   s = &vshader_list[vshader_selected];
   cgGLSetParameter3f (s->offset, p.x, p.y, p.z);
-
 }
+*/

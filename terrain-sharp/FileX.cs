@@ -1,26 +1,18 @@
 /*-----------------------------------------------------------------------------
-
   FileXcpp
-
 -------------------------------------------------------------------------------
-
   Reading of Direct X files, which were creatively named .x
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 #include "cfigure.h"
 #include "file.h"
 
 #define DELIMIT   "\n\r\t ;,\""
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
 static void do_frames (char* buffer, CFigure* fig)
 {
-
   char*             token;
   char*             find;
   bool              done;
@@ -93,17 +85,10 @@ static void do_frames (char* buffer, CFigure* fig)
     }
     token = strtok (NULL, DELIMIT);
   }
-    
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 static void do_mesh (char* buffer, CFigure* fig)
 {
-
   char*             token;
   int               count;
   int               poly;
@@ -148,17 +133,10 @@ static void do_mesh (char* buffer, CFigure* fig)
       fig->_skin_static.PushQuad (i1, i2, i3, i4);
     }
   }
-
 }
-
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 static void do_normals (char* buffer, CFigure* fig)
 {
-
   char*             token;
   int               count;
   int               i;
@@ -182,17 +160,10 @@ static void do_normals (char* buffer, CFigure* fig)
     pos.z = (float)atof (token);
     fig->_skin_static._normal[i] = pos;
   }
-
 }
-
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 static void do_uvs (char* buffer, CFigure* fig)
 {
-
   char*             token;
   int               count;
   int               i;
@@ -214,18 +185,10 @@ static void do_uvs (char* buffer, CFigure* fig)
     pos.y = -(float)atof (token);
     fig->_skin_static._uv[i] = pos;
   }
-
 }
-
-
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 static void do_weights (char* buffer, CFigure* fig)
 {
-
   char*             token;
   unsigned          index;
   int               count;
@@ -273,7 +236,8 @@ static void do_weights (char* buffer, CFigure* fig)
       token = strtok (NULL, DELIMIT);
       bw_list[i]._weight = (float)atof (token);
     }
-      /*    
+*/
+      /* Commented out in original
     //Store them
     for (i = 0; i < count; i++) {
       //if (bw_list[i]._weight < 0.9f)
@@ -288,6 +252,7 @@ static void do_weights (char* buffer, CFigure* fig)
       fig->_bone[fig->_bone_index[bid]]._vertex_weights.push_back (bw_list[i]);
     }
     */
+/*
     //Now we have a list of all weights for this joint. Find the highest values for each point.
     for (i = 0; i < count; i++) {
       index = bw_list[i]._index;
@@ -304,17 +269,10 @@ static void do_weights (char* buffer, CFigure* fig)
     bw._weight = 1.0f;
     fig->_bone[fig->_bone_index[bid]]._vertex_weights.push_back (bw);
   }
-
 }
-
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 bool FileXLoad (char* filename, CFigure* fig)
 {
-
   long              size;
   char*             buffer;
 
@@ -331,5 +289,5 @@ bool FileXLoad (char* filename, CFigure* fig)
   do_weights (buffer, fig);
   free (buffer);
   return true;
-
 }
+*/

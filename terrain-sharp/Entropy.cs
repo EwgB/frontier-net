@@ -1,18 +1,18 @@
 /*-----------------------------------------------------------------------------
-
   Entropy.cpp
-
 -------------------------------------------------------------------------------
-
   This provides a map of erosion-simulated terrain data.  This map is kept
   at non-powers-of-2 sizes in order to avoid tiling as much as possible.
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 #include <stdio.h>
 #include "file.h"
 #include "texture.h"
+
+float Entropy (float x, float y);
+float Entropy (int x, int y);
 
 #define ENTROPY_FILE      "entropy.raw"
 #define BLUR_RADIUS       3
@@ -22,12 +22,8 @@ static bool       loaded;
 static GLcoord    size;
 static float*     emap;
 
-/*-----------------------------------------------------------------------------
------------------------------------------------------------------------------*/
-
 static int entropy_index (GLcoord n)
 {
-
   if (n.x < 0)
     n.x = abs (n.x);
   if (n.y < 0)
@@ -35,23 +31,19 @@ static int entropy_index (GLcoord n)
   n.x %= size.x;
   n.y %= size.y;
   return n.x + n.y * size.x;
-
 }
 
 static int entropy_index (int x, int y)
 {
-
   GLcoord   n;
 
   n.x = x;
   n.y = y;
   return entropy_index (n);
-
 }
 
 static void entropy_erode ()
 {
-
   float*  buffer;
   int     x, y;
   float   low, high, val;
@@ -113,7 +105,6 @@ static void entropy_erode ()
     memcpy (emap, buffer, sizeof (float) * size.x * size.y);
   }
 
-
   //Blur the elevations a bit to round off little spikes and divots.
   for (y = 0; y < size.y; y++) {
     for (x = 0; x < size.x; x++) {
@@ -152,12 +143,10 @@ static void entropy_erode ()
       emap[index] /= high;
     }
   }
-
 }
 
 static void entropy_create (char* filename)
 {
-
   FILE*           file;
   char*           buffer;
   int             x, y;
@@ -195,15 +184,10 @@ static void entropy_create (char* filename)
   }
   delete buffer;
   loaded = true;
-
 }
-
-/*-----------------------------------------------------------------------------
------------------------------------------------------------------------------*/
 
 static void entropy_load ()
 {
-
   FILE*     file;
 
   //entropy_create ("textures/noise256.bmp");
@@ -217,24 +201,19 @@ static void entropy_load ()
     loaded = true;
   } else
     entropy_create ("textures/noise256.bmp");
-
 }
-
 
 float Entropy (int x, int y)
 {
-
   if (!loaded) 
     entropy_load ();
   if (!emap || x < 0 || y < 0)
     return 0;
   return emap[(x % size.x) + (y % size.y) * size.x];
-
 }
 
 float Entropy (float x, float y)
 {
-
   int     cell_x;
   int     cell_y;
   float   a;
@@ -262,5 +241,5 @@ float Entropy (float x, float y)
     a = y0;
   }
   return (a + b * dx + c * dy);
-  
 }
+*/

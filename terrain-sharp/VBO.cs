@@ -1,19 +1,45 @@
 /*-----------------------------------------------------------------------------
-
   VBO.cpp
-
 -------------------------------------------------------------------------------
-
   This class manages vertex buffer objects.  Take a list of verticies and 
   indexes, and store them in GPU memory for fast rendering.
- 
 -----------------------------------------------------------------------------*/
+
+/*
+#ifndef HVBO
+#define HVBO
+
+
+class VBO
+{
+
+  unsigned  _id_vertex;
+  unsigned  _id_index;
+  int       _size_vertex;
+  int       _size_uv;
+  int       _size_normal;
+  int       _size_buffer;
+  int       _polygon;
+  unsigned  _index_count;
+  bool      _ready;
+  bool      _use_color;
+  int       _size_color;
+
+public:
+  VBO ();
+  ~VBO ();
+  //void      Create (int polygon, int index_count, int vert_count, unsigned* index_list, GLvector* vert_list, GLvector* normal_list, GLvector2* uv_list);
+  void      Create (int polygon, int index_count, int vert_count, unsigned* index_list, GLvector* vert_list, GLvector* normal_list, GLrgba* color_list, GLvector2* uv_list);
+  void      Create (GLmesh* m);
+  void      Clear ();
+  void      Render ();
+  bool      Ready () { return _ready; };
+};
+#endif
 
 #include "stdafx.h"
 
 #include "VBO.h"
-
-
 
 // VBO Extension Definitions, From glext.h
 #define GL_ARRAY_BUFFER_ARB 0x8892
@@ -29,28 +55,17 @@ PFNGLBINDBUFFERARBPROC    glBindBufferARB = NULL;					// VBO Bind Procedure
 PFNGLBUFFERDATAARBPROC    glBufferDataARB = NULL;					// VBO Data Loading Procedure
 PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB = NULL;				// VBO Deletion Procedure
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
 static void vbo_init ()
 {
-
 	// Get Pointers To The GL Functions
 	glGenBuffersARB = (PFNGLGENBUFFERSARBPROC) wglGetProcAddress("glGenBuffersARB");
 	glBindBufferARB = (PFNGLBINDBUFFERARBPROC) wglGetProcAddress("glBindBufferARB");
 	glBufferDataARB = (PFNGLBUFFERDATAARBPROC) wglGetProcAddress("glBufferDataARB");
 	glDeleteBuffersARB = (PFNGLDELETEBUFFERSARBPROC) wglGetProcAddress("glDeleteBuffersARB");
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 VBO::VBO ()
 {
-
   _id_vertex = _id_index = _size_vertex = _size_uv = _size_normal = _size_buffer = _index_count = 0;
   _ready = false;
   _id_vertex = 0;
@@ -58,23 +73,18 @@ VBO::VBO ()
   _use_color = false;
   _size_color = 0;
   _polygon = 0;
-
 }
 
 VBO::~VBO ()
 {
-
   if (_id_index)
     glDeleteBuffersARB(1, &_id_index);
   if (_id_vertex)
     glDeleteBuffersARB(1, &_id_vertex);
-
-
 }
 
 void VBO::Clear ()
 {
-
   if (_id_vertex)
     glDeleteBuffersARB (1, &_id_vertex);
   if (_id_index)
@@ -85,12 +95,10 @@ void VBO::Clear ()
   _size_color = 0;
   _polygon = 0;
   _ready = false;
-
 }
 
 void VBO::Create (int polygon, int index_count, int vert_count, unsigned* index_list, GLvector* vert_list, GLvector* normal_list, GLrgba* color_list, GLvector2* uv_list)
 {
-
   char*     buffer;
 
   if (glGenBuffersARB == NULL)
@@ -136,23 +144,18 @@ void VBO::Create (int polygon, int index_count, int vert_count, unsigned* index_
   _index_count = index_count;
   delete[] buffer;
   _ready = true;
-
 }
 
 void VBO::Create (GLmesh* m)
 {
-
   if (m->_color.size ())
     Create (GL_TRIANGLES, m->_index.size (), m->Vertices (), &m->_index[0], &m->_vertex[0], &m->_normal[0], &m->_color[0], &m->_uv[0]);
   else
     Create (GL_TRIANGLES, m->_index.size (), m->Vertices (), &m->_index[0], &m->_vertex[0], &m->_normal[0], NULL, &m->_uv[0]);
-
 }
-
 
 void VBO::Render ()
 {
-
   if (!_ready)
     return;
   // bind VBOs for vertex array and index array
@@ -179,5 +182,5 @@ void VBO::Render ()
   // bind with 0, so, switch back to normal pointer operation
   glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
   glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
-
 }
+*/

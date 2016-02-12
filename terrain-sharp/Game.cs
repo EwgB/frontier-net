@@ -1,13 +1,10 @@
 /*-----------------------------------------------------------------------------
-
   Game.cpp
-
 -------------------------------------------------------------------------------
-
   This module handles the launching of new games, quitting games, etc.
-  
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 #include "avatar.h"
 #include "cache.h"
@@ -23,6 +20,16 @@
 #include "sdl.h"
 #include "world.h"
 
+bool  GameCmd (vector<string> *args);
+char* GameDirectory ();
+void  GameInit ();
+void  GameNew (unsigned seed_in);
+void  GameQuit ();
+bool  GameRunning ();
+void  GameTerm ();
+float GameTime ();
+void  GameUpdate ();
+
 #define AUTO_LOAD           1
 #define TIME_SCALE          1000  //how many milliseconds per in-game minute
 #define SECONDS_TO_DECIMAL  (1.0f / 60.0f)
@@ -36,21 +43,14 @@ static long         days;
 static float        decimal_time;
 static bool         loaded_previous;
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
 static void loading (float progress)
 {
-
   SdlUpdate ();
   RenderLoadingScreen (progress);
-
 }
 
 static void precache ()
 {
-
   unsigned  ready, total;
 
   SceneGenerate ();
@@ -66,13 +66,10 @@ static void precache ()
     SceneUpdate (SDL_GetTicks () + 20);
     loading (0.5f + ((float)ready / (float)total) * 0.5f);
   } while (ready < total && !MainIsQuit ());
-
-
 }
 
 void GameLoad (unsigned seed_in)
 {
-
   string            filename;
   vector<string>    sub_group;
 
@@ -105,12 +102,10 @@ void GameLoad (unsigned seed_in)
   seconds = 0;
   GameUpdate ();
   precache ();
-
 }
 
 void GameSave ()
 {
-
   string            filename;
   vector<string>    sub_group;
 
@@ -123,7 +118,6 @@ void GameSave ()
   sub_group.push_back ("game");
   sub_group.push_back ("player");
   CVarUtils::Save (filename, sub_group);
-
 }
 
 void GameInit ()
@@ -136,16 +130,12 @@ void GameInit ()
 
 void GameTerm ()
 {
-
   if (running && seed)
     GameSave ();
-
 }
-
 
 void GameQuit ()
 {
-
   ConsoleLog ("Quit Game");
   WorldSave ();
   SceneClear ();
@@ -153,9 +143,7 @@ void GameQuit ()
   GameSave ();
   seed = 0;
   running = false;
-
 }
-
 
 bool GameRunning ()
 {
@@ -164,7 +152,6 @@ bool GameRunning ()
 
 void GameNew (unsigned seed_in)
 {
-
   int       x;
   World*    w;
   int       start, end, step;
@@ -248,13 +235,10 @@ void GameNew (unsigned seed_in)
   PlayerPositionSet (av_pos);
   GameUpdate ();
   precache (); 
-
-
 }
 
 bool GameCmd (vector<string> *args)
 {
-
   unsigned    new_seed;
 
   if (args->empty ()) {
@@ -283,15 +267,12 @@ bool GameCmd (vector<string> *args)
   return true;
 }
 
-
 char* GameDirectory ()
 {
-
   static char     dir[32];
 
   sprintf (dir, "saves//seed%d//", seed);
   return dir;
-
 }
 
 float GameTime ()
@@ -301,7 +282,6 @@ float GameTime ()
 
 void GameUpdate ()
 {
-
   if (!loaded_previous && AUTO_LOAD) {
     loaded_previous = true;
     seed = CVarUtils::GetCVar<int> ("last_played");
@@ -333,6 +313,5 @@ void GameUpdate ()
   }
   decimal_time = (float)days * 24.0f + (float)hours + (float)minutes * SECONDS_TO_DECIMAL;
   TextPrint ("Day %d: %02d:%02d", days + 1, hours, minutes);
-
 }
-
+*/

@@ -1,13 +1,10 @@
 /*-----------------------------------------------------------------------------
-
   File.cpp
-
 -------------------------------------------------------------------------------
-
   Various useful file i/o functions.
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "StdAfx.h"
 #include <windows.h>
 #include <direct.h>
@@ -19,13 +16,20 @@
 #include <string.h>
 #include <sys/utime.h>
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
+char* FileBinaryLoad (char* name, long* size);
+int   FileCopy (char *from, char *to);
+bool  FileDelete (char* name);
+bool  FileExists (const char *name);
+char* FileLoad (char* name, long* size);
+void  FileMakeDirectory (char* folder);
+long  FileModified (char *filename);
+bool  FileSave (char *name, char *buf, int size);
+void  FileTouch (char *filename);
+bool  FileXLoad (char* filename, class CFigure* fig);
+char* FileImageLoad (char* filename, GLcoord* size_in);
 
 long FileModified (char *filename)
 {
-
   long                search;
   struct _finddata_t  info;
   DWORD               timestamp;
@@ -36,29 +40,17 @@ long FileModified (char *filename)
     _findclose (search);
   } 
   return timestamp;
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 bool FileDelete (char* name)
 {
-
   if (!_unlink (name))
     return true;
   return false;
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 bool FileSave (char *name, char *buf, int size)
 {
-
   int fd;
 
   if ((fd = _open (name, O_WRONLY | O_BINARY | O_CREAT | O_TRUNC, S_IREAD | S_IWRITE)) == -1)
@@ -70,12 +62,7 @@ bool FileSave (char *name, char *buf, int size)
   }
   _close (fd);
   return true;
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 char* FileLoad (char* name, long* size)
 {
@@ -101,9 +88,7 @@ char* FileLoad (char* name, long* size)
   if (size)
     *size = len;
   return buffer;
-
 }
-
 
 char* FileBinaryLoad (char* name, long* size)
 {
@@ -127,17 +112,10 @@ char* FileBinaryLoad (char* name, long* size)
   if (size)
     *size = len;
   return buffer;
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 bool FileExists (const char *name)
 {
-
-
   FILE*     f;
 
   f = fopen (name, "rb");
@@ -145,24 +123,19 @@ bool FileExists (const char *name)
     return false;
   fclose (f);
   return true;
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 void FileTouch (char *filename)
 {
-
   _utime (filename, NULL);
-
 }
+*/
 
 /*-----------------------------------------------------------------------------
                        f i l e  c r e a t e  f o l d e r
 -----------------------------------------------------------------------------*/
 
+/*
 void FileMakeDirectory (char* folder)
 {
 
@@ -193,5 +166,5 @@ void FileMakeDirectory (char* folder)
   if (_mkdir (folder))
     errcode = errno;
   free (dir);
-
 }
+*/

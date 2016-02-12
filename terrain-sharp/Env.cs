@@ -1,13 +1,10 @@
 /*-----------------------------------------------------------------------------
-
   Env.cpp
-
 -------------------------------------------------------------------------------
-
   The environment. Lighting, fog, and so on.
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 #include "avatar.h"
 #include "env.h"
@@ -19,6 +16,40 @@
 #include "text.h"
 #include "texture.h"
 #include "world.h"
+
+
+enum eEnvColor
+{
+  ENV_COLOR_HORIZON,
+  ENV_COLOR_SKY,
+  ENV_COLOR_FOG,
+  ENV_COLOR_LIGHT,
+  ENV_COLOR_AMBIENT,
+  ENV_COLOR_COUNT
+};
+
+struct Range
+{
+  float   rmin;
+  float   rmax;
+};
+
+struct Env
+{
+  GLrgba      color[ENV_COLOR_COUNT];
+  GLvector    light;
+  Range       fog;
+  float       star_fade;
+  float       sunrise_fade;
+  float       sunset_fade;
+  float       sun_angle;
+  float       cloud_cover;
+  bool        draw_sun;
+};
+
+void          EnvInit ();
+void          EnvUpdate ();
+Env*          EnvGet ();
 
 #define TIME_SCALE          300  //how many milliseconds per in-game minute
 //#define max_distance        900
@@ -49,21 +80,14 @@
 #define SUN_ANGLE_AFTERNOON 165
 #define SUN_ANGLE_SUNSET    190
 
-
-
 static Env        desired;
 static Env        current;
 static int        update;
 static int        last_decimal_time;    
 static bool       cycle_on;
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
 static void do_cycle ()
 {
-
   Region*   r;
   int       i;
   GLrgba    average;
@@ -195,36 +219,25 @@ static void do_time (float delta)
   current.cloud_cover = MathInterpolate (current.cloud_cover, desired.cloud_cover, delta);
   current.draw_sun = desired.draw_sun;
   current.light.Normalize ();
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 void    EnvInit ()
 {
-
   do_time (1);
   current = desired;
-
 }
 
 void    EnvUpdate ()
 {
-
   update += SdlElapsed ();
   if (update > UPDATE_INTERVAL) {
     do_time (ENV_TRANSITION);
     update -= UPDATE_INTERVAL;
   }
-  
-  
 }
 
 Env* EnvGet ()
 {
-
   return &current;
-
 }
+*/

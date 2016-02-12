@@ -1,10 +1,6 @@
 /*-----------------------------------------------------------------------------
-
   World.cpp
-
-
 -------------------------------------------------------------------------------
-
   This holds the region grid, which is the main table of information from 
   which ALL OTHER GEOGRAPHICAL DATA is generated or derived.  Note that
   the resulting data is not STORED here. Regions are sets of rules and 
@@ -14,8 +10,135 @@
 
   This also holds tables of random numbers.  Basically, everything needed to
   re-create the world should be stored here.
- 
 -----------------------------------------------------------------------------*/
+
+/*
+#define REGION_FLAG_TEST        0x0001
+#define REGION_FLAG_MESAS       0x0002
+#define REGION_FLAG_CRATER      0x0004
+#define REGION_FLAG_BEACH       0x0008
+#define REGION_FLAG_BEACH_CLIFF 0x0010
+#define REGION_FLAG_SINKHOLE    0x0020
+#define REGION_FLAG_CRACK       0x0040
+#define REGION_FLAG_TIERED      0x0080
+#define REGION_FLAG_CANYON_NS   0x0100
+#define REGION_FLAG_NOBLEND     0x0200
+
+#define REGION_FLAG_RIVERN      0x1000
+#define REGION_FLAG_RIVERE      0x2000
+#define REGION_FLAG_RIVERS      0x4000
+#define REGION_FLAG_RIVERW      0x8000
+
+#define REGION_FLAG_RIVERNS     (REGION_FLAG_RIVERN | REGION_FLAG_RIVERS)
+#define REGION_FLAG_RIVEREW     (REGION_FLAG_RIVERE | REGION_FLAG_RIVERW)
+#define REGION_FLAG_RIVERNW     (REGION_FLAG_RIVERN | REGION_FLAG_RIVERW)
+#define REGION_FLAG_RIVERSE     (REGION_FLAG_RIVERS | REGION_FLAG_RIVERE)
+#define REGION_FLAG_RIVERNE     (REGION_FLAG_RIVERN | REGION_FLAG_RIVERE)
+#define REGION_FLAG_RIVERSW     (REGION_FLAG_RIVERS | REGION_FLAG_RIVERW)
+#define REGION_FLAG_RIVER_ANY   (REGION_FLAG_RIVERNS | REGION_FLAG_RIVEREW)
+
+#define REGION_SIZE             128
+#define REGION_HALF             (REGION_SIZE / 2)
+#define WORLD_GRID              256
+#define WORLD_GRID_EDGE         (WORLD_GRID + 1)
+#define WORLD_GRID_CENTER       (WORLD_GRID / 2)
+#define WORLD_SIZE_METERS       (REGION_SIZE * WORLD_GRID)
+
+#define FLOWERS           3
+//We keep a list of random numbers so we can have deterministic "randomness". 
+//This is the size of that list.
+#define NOISE_BUFFER      1024              
+//This is the size of the grid of trees.  The total number of tree species 
+//in the world is the square of this value, minus one. ("tree zero" is actually
+//"no trees at all".)
+#define TREE_TYPES        6
+
+enum Climate
+{
+  CLIMATE_INVALID,
+  CLIMATE_OCEAN,
+  CLIMATE_COAST,
+  CLIMATE_MOUNTAIN,
+  CLIMATE_RIVER,
+  CLIMATE_RIVER_BANK,
+  CLIMATE_SWAMP,
+  CLIMATE_ROCKY,
+  CLIMATE_LAKE,
+  CLIMATE_DESERT,
+  CLIMATE_FIELD,
+  CLIMATE_PLAINS,
+  CLIMATE_CANYON,
+  CLIMATE_FOREST,
+  CLIMATE_TYPES,
+};
+
+
+struct Region
+{
+  char      title[50];
+  unsigned  tree_type;
+  unsigned  flags_shape;
+  Climate   climate;
+  GLcoord   grid_pos;
+  int       mountain_height;
+  int       river_id;
+  int       river_segment;
+  float     tree_threshold;
+  float     river_width;
+  float     geo_scale; //Number from -1 to 1, lowest to highest elevation. 0 is sea level
+  float     geo_water;
+  float     geo_detail;
+  float     geo_bias;
+  float     temperature;
+  float     moisture;
+  float     cliff_threshold;
+  GLrgba    color_map;
+  GLrgba    color_rock;
+  GLrgba    color_dirt;
+  GLrgba    color_grass;
+  GLrgba    color_atmosphere;
+  GLrgba    color_flowers[FLOWERS];
+  unsigned  flower_shape[FLOWERS];
+  bool      has_flowers;
+};
+
+//Only one of these is ever instanced.  This is everything that goes into a "save file".
+//Using only this, the entire world can be re-created.
+struct World
+{
+  unsigned      seed;
+  bool          wind_from_west;
+  bool          northern_hemisphere;
+  unsigned      river_count;
+  unsigned      lake_count;
+  float         noisef[NOISE_BUFFER];
+  unsigned      noisei[NOISE_BUFFER];
+  Region        map[WORLD_GRID][WORLD_GRID];
+};
+
+Cell          WorldCell (int world_x, int world_y);
+GLrgba        WorldColorGet (int world_x, int world_y, SurfaceColor c);
+char*         WorldLocationName (int world_x, int world_y);
+Region        WorldRegionFromPosition (int world_x, int world_y);
+Region        WorldRegionFromPosition (int world_x, int world_y);
+float         WorldWaterLevel (int world_x, int world_y);
+
+void          WorldGenerate (unsigned seed);
+unsigned      WorldCanopyTree ();
+char*         WorldDirectionFromAngle (float angle);
+//char*         WorldDirectory ();
+void          WorldInit ();
+void          WorldLoad (unsigned seed);
+unsigned      WorldMap ();
+unsigned      WorldNoisei (int index);
+float         WorldNoisef (int index);
+World*        WorldPtr ();
+Region        WorldRegionGet (int index_x, int index_y);
+void          WorldRegionSet (int index_x, int index_y, Region val);
+void          WorldSave ();
+unsigned      WorldTreeType (float moisture, float temperature);
+class CTree*  WorldTree (unsigned id);
+void          WorldTexturePurge ();
 
 #include "stdafx.h"
 #include "ctree.h"
@@ -50,16 +173,17 @@ static unsigned     map_id;
 static World        planet;//THE WHOLE THING!
 static CTree        tree[TREE_TYPES][TREE_TYPES];
 static unsigned     canopy;
+*/
 
 /*-----------------------------------------------------------------------------
 The following functions are used when generating elevation data
 -----------------------------------------------------------------------------*/
 
+/*
 //This modifies the passed elevation value AFTER region cross-fading is complete,
 //For things that should not be mimicked by neighbors. (Like rivers.)
 static float do_height_noblend (float val, Region r, GLvector2 offset, float water)
 {
-
   //return val;
   if (r.flags_shape & REGION_FLAG_RIVER_ANY) {
     GLvector2   cen;
@@ -138,7 +262,6 @@ static float do_height_noblend (float val, Region r, GLvector2 offset, float wat
     }
   }
   return val;
-
 }
 
 //This takes the given properties and generates a single unit of elevation data,
@@ -147,7 +270,6 @@ static float do_height_noblend (float val, Region r, GLvector2 offset, float wat
 //is a direct height added on to these.
 static float do_height (Region r, GLvector2 offset, float water, float detail, float bias)
 {
-
   float     val;
 
   //Modify the detail values before they are applied
@@ -184,9 +306,6 @@ static float do_height (Region r, GLvector2 offset, float water, float detail, f
     strength = max (strength, 0.1f);
     detail *= strength;
   }
-  
-
-
 
   //Apply the values!
   val = water + detail * r.geo_detail + bias;
@@ -221,12 +340,10 @@ static float do_height (Region r, GLvector2 offset, float water, float detail, f
   //if (val < bias)
     //val = min (val, bias - 2.5f);
   return val;
-
 }
 
 static void build_trees ()
 {
-
   unsigned    m, t;
   bool        is_canopy;
   int         rotator;
@@ -242,12 +359,10 @@ static void build_trees ()
       tree[m][t].Create (is_canopy, (float)m / TREE_TYPES, (float)t / TREE_TYPES, rotator++);
     }
   }
-
 }
 
 static void build_map_texture ()
 {
-
   int       x, y, yy;
   Region    r;
 
@@ -274,16 +389,10 @@ static void build_map_texture ()
   }
   glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, WORLD_GRID, WORLD_GRID, 0, GL_RGB, GL_UNSIGNED_BYTE, &buffer[0]);
   delete buffer;
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 float WorldWaterLevel (int world_x, int world_y)
 {
-
   GLcoord   origin;
   GLvector2 offset;
   Region    rul, rur, rbl, rbr;//Four corners: upper left, upper right, etc.
@@ -301,12 +410,10 @@ float WorldWaterLevel (int world_x, int world_y)
   rbl = WorldRegionGet (origin.x, origin.y + 1);
   rbr = WorldRegionGet (origin.x + 1, origin.y + 1);
   return MathInterpolateQuad (rul.geo_water, rur.geo_water, rbl.geo_water, rbr.geo_water, offset, ((origin.x + origin.y) %2) == 0);
-
 }
 
 float WorldBiasLevel (int world_x, int world_y)
 {
-
   GLcoord   origin;
   GLvector2 offset;
   Region    rul, rur, rbl, rbr;//Four corners: upper left, upper right, etc.
@@ -324,12 +431,10 @@ float WorldBiasLevel (int world_x, int world_y)
   rbl = WorldRegionGet (origin.x, origin.y + 1);
   rbr = WorldRegionGet (origin.x + 1, origin.y + 1);
   return MathInterpolateQuad (rul.geo_bias, rur.geo_bias, rbl.geo_bias, rbr.geo_bias, offset, ((origin.x + origin.y) %2) == 0);
-
 }
 
 Cell WorldCell (int world_x, int world_y)
 {
-
   float     detail;
   float     bias;
   Region    rul, rur, rbl, rbr;//Four corners: upper left, upper right, etc.
@@ -381,12 +486,10 @@ Cell WorldCell (int world_x, int world_y)
   result.elevation = MathInterpolateQuad (eul, eur, ebl,ebr, blend, left);
   result.elevation = do_height_noblend (result.elevation, rul, offset, water);
   return result;
-
 }
 
 unsigned WorldTreeType (float moisture, float temperature)
 {
-
   int   m, t;
 
   m = (int)(moisture * TREE_TYPES);
@@ -394,23 +497,19 @@ unsigned WorldTreeType (float moisture, float temperature)
   m = clamp (m, 0, TREE_TYPES - 1);
   t = clamp (t, 0, TREE_TYPES - 1);
   return m + t * TREE_TYPES;
-
 }
 
 CTree* WorldTree (unsigned id)
 {
-
   unsigned    m, t;
 
   m = id % TREE_TYPES;
   t = (id - m) / TREE_TYPES;
   return &tree[m][t];
-
 }
 
 char* WorldLocationName (int world_x, int world_y)
 {
-
   static char   result[20];
   char          lat[20];
   char          lng[20];
@@ -435,12 +534,10 @@ char* WorldLocationName (int world_x, int world_y)
     sprintf (lat, "%d south", world_y);
   sprintf (result, "%s, %s", lat, lng);
   return result;
-
 }
 
 void    WorldInit ()
 {
-
   int         x, y;
 
   //Fill in the dither table - a table of random offsets
@@ -450,28 +547,22 @@ void    WorldInit ()
       dithermap[x][y].y = RandomVal () % DITHER_SIZE + RandomVal () % DITHER_SIZE;
     }
   }
-
 }
 
 float WorldNoisef (int index)
 {
-
   index = abs (index % NOISE_BUFFER);
   return planet.noisef[index];
-
 }
 
 unsigned WorldNoisei (int index)
 {
-
   index = abs (index % NOISE_BUFFER);
   return planet.noisei[index];
-
 }
 
 void WorldSave ()
 {
-
   FILE*     f;
   char      filename[256];
   WHeader   header;
@@ -492,17 +583,13 @@ void WorldSave ()
   fwrite (&planet, sizeof (planet), 1, f);
   fclose (f);
   ConsoleLog ("WorldSave: '%s' saved.", filename);
-
 }
-
 
 void WorldLoad (unsigned seed_in)
 {
-
   FILE*     f;
   char      filename[256];
   WHeader   header;
-
 
   sprintf (filename, "%sworld.sav", GameDirectory ());
   if (!(f = fopen (filename, "rb"))) {
@@ -516,12 +603,10 @@ void WorldLoad (unsigned seed_in)
   ConsoleLog ("WorldLoad: '%s' loaded.", filename);
   build_trees ();
   build_map_texture ();
-
 }
 
 void    WorldGenerate (unsigned seed_in)
 {
-
   int         x;
 
   RandomInit (seed_in);
@@ -550,26 +635,20 @@ void    WorldGenerate (unsigned seed_in)
   TerraformFlora ();
   TerraformColors ();
   build_map_texture ();
-  
 }
 
 Region WorldRegionGet (int index_x, int index_y)
 {
-
   return planet.map[index_x][index_y];
-
 }
 
 void WorldRegionSet (int index_x, int index_y, Region val)
 {
-
   planet.map[index_x][index_y] = val;
-
 }
 
 Region WorldRegionFromPosition (int world_x, int world_y)
 {
-  
   world_x = max (world_x, 0);
   world_y = max (world_y, 0);
   world_x += dithermap[world_x % DITHER_SIZE][world_y % DITHER_SIZE].x;
@@ -579,19 +658,15 @@ Region WorldRegionFromPosition (int world_x, int world_y)
   if (world_x >= WORLD_GRID || world_y >= WORLD_GRID)
     return planet.map[0][0];
   return planet.map[world_x][world_y];
-
 }
 
 Region WorldRegionFromPosition (float world_x, float world_y)
 {
-  
   return WorldRegionFromPosition ((int)world_x, (int)world_y);
-
 }
 
 GLrgba WorldColorGet (int world_x, int world_y, SurfaceColor c)
 {
-
   GLcoord   origin;
   int       x, y;
   GLvector2 offset;
@@ -637,33 +712,25 @@ GLrgba WorldColorGet (int world_x, int world_y, SurfaceColor c)
   result.green = MathInterpolateQuad (c0.green, c1.green, c2.green, c3.green, offset);
   result.blue  = MathInterpolateQuad (c0.blue, c1.blue, c2.blue, c3.blue, offset);
   return result;
-  
 }
 
 unsigned WorldCanopyTree ()
 {
-
   return canopy;
-
 }
 
 unsigned WorldMap ()
 {
-
   return map_id;
-
 }
 
 World* WorldPtr ()
 {
-
   return &planet;
-
 }
 
 void          WorldTexturePurge ()
 {
-
   unsigned    m, t;
 
   for (m = 0; m < TREE_TYPES; m++) {
@@ -672,12 +739,10 @@ void          WorldTexturePurge ()
     }
   }
   build_map_texture ();
-
 }
 
 char* WorldDirectionFromAngle (float angle)
 {
-
   char*   direction;
 
   direction = "North";
@@ -698,17 +763,15 @@ char* WorldDirectionFromAngle (float angle)
   else if (angle < 337.5f)
     direction = "Northeast";
   return direction;
-
 }
-/*
+*/
+
+/* Commented out in original
 char* WorldDirectory ()
 {
-
   static char     dir[32];
 
   sprintf (dir, "saves//seed%d//", planet.seed);
   return dir;
-
 }
-
 */

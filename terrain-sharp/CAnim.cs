@@ -1,13 +1,10 @@
 /*-----------------------------------------------------------------------------
-
   Figure.cpp
-
 -------------------------------------------------------------------------------
-
   Loads animations and applies them to models.  (CFigures)
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 #include "canim.h"
 #include "console.h"
@@ -15,8 +12,91 @@
 #include "file.h"
 #include "math.h"
 
-#define NEWLINE     "\n"
+#define CANIM_H
 
+enum BoneId
+{
+  BONE_ROOT,
+  BONE_PELVIS,
+  BONE_RHIP,
+  BONE_LHIP,
+  BONE_RKNEE,
+  BONE_LKNEE,
+  BONE_RANKLE,
+  BONE_LANKLE,
+  BONE_RTOE,
+  BONE_LTOE,
+  BONE_SPINE1,
+  BONE_SPINE2,
+  BONE_SPINE3,
+  BONE_RARM,
+  BONE_LARM,
+  BONE_RSHOULDER,
+  BONE_LSHOULDER,
+  BONE_RELBOW,
+  BONE_LELBOW,
+  BONE_RWRIST,
+  BONE_LWRIST,
+  BONE_RFINGERS1,
+  BONE_LFINGERS1,
+  BONE_RFINGERS2,
+  BONE_LFINGERS2,
+  BONE_RTHUMB1,
+  BONE_LTHUMB1,
+  BONE_RTHUMB2,
+  BONE_LTHUMB2,
+  BONE_NECK,
+  BONE_HEAD,
+  BONE_FACE,
+  BONE_CROWN,
+  BONE_UNKNOWN0,
+  BONE_UNKNOWN1,
+  BONE_UNKNOWN2,
+  BONE_UNKNOWN3,
+  BONE_UNKNOWN4,
+  BONE_UNKNOWN5,
+  BONE_UNKNOWN6,
+  BONE_UNKNOWN7,
+  BONE_UNKNOWN8,
+  BONE_UNKNOWN9,
+  BONE_UNKNOWN10,
+  BONE_UNKNOWN11,
+  BONE_UNKNOWN12,
+  BONE_UNKNOWN13,
+  BONE_UNKNOWN14,
+  BONE_UNKNOWN15,
+  BONE_COUNT,
+  BONE_INVALID,
+};
+
+struct AnimJoint
+{
+  BoneId    id;
+  GLvector  rotation;
+};
+
+struct AnimFrame
+{
+  vector<AnimJoint> joint;
+};
+
+class CAnim
+{
+public:
+  vector<AnimFrame> _frame;
+  AnimFrame         _current;
+  AnimJoint*        GetFrame (float frame);  
+  void              SetDefaultAnimation ();
+  unsigned          Frames () { return _frame.size (); };
+  unsigned          Joints () { return _frame[0].joint.size (); };
+  unsigned          Id (unsigned frame, unsigned index) { return _frame[frame].joint[index].id; };
+  GLvector          Rotation (unsigned frame, unsigned index) { return _frame[frame].joint[index].rotation; };
+  bool              LoadBvh (char* filename);
+  static BoneId     BoneFromString (char* string);
+  static char*      NameFromBone (BoneId id);
+};
+
+#define NEWLINE     "\n"
 
 char* CAnim::NameFromBone (BoneId id)
 {
@@ -71,13 +151,10 @@ char* CAnim::NameFromBone (BoneId id)
     return "Bone Invalid";
   }
   return "Unknown";
-
 }
-
 
 BoneId CAnim::BoneFromString (char* name)
 {
-
   char*   test;
 
   if (strstr (name, "ROOT")) 
@@ -108,7 +185,8 @@ BoneId CAnim::BoneFromString (char* name)
     //Not left or right.  
     return BONE_INVALID;
   }
-  /*
+*/
+  /* Commented out in original
   if (strstr (name, "KNEE")) {
     if (strchr (name + 4, 'L'))
       return BONE_LKNEE;
@@ -118,7 +196,7 @@ BoneId CAnim::BoneFromString (char* name)
     return BONE_INVALID;
   }
   */
-  
+/*
   if (strstr (name, "FOOT")) {
     if (strchr (name + 4, 'L'))
       return BONE_LANKLE;
@@ -127,8 +205,8 @@ BoneId CAnim::BoneFromString (char* name)
     //Not left or right.  
     return BONE_INVALID;
   }
-  
-  /*
+*/
+  /* Commented out in original
   if (strstr (name, "ANKLE")) {
     if (strchr (name + 5, 'L'))
       return BONE_LANKLE;
@@ -138,6 +216,7 @@ BoneId CAnim::BoneFromString (char* name)
     return BONE_INVALID;
   }
   */
+/*
   if (strstr (name, "BACK")) 
     return BONE_SPINE1;
   if (strstr (name, "SPINE")) 
@@ -170,7 +249,8 @@ BoneId CAnim::BoneFromString (char* name)
     //Not left or right? That can't be right.
     return BONE_INVALID;
   }
-  /*
+*/
+  /* Commented out in original
   if (strstr (name, "ELBOW")) {
     if (strchr (name + 7, 'L'))
       return BONE_LELBOW;
@@ -180,6 +260,7 @@ BoneId CAnim::BoneFromString (char* name)
     return BONE_INVALID;
   }
   */
+/*
   if (strstr (name, "TOE")) {
     if (strchr (name, 'L'))
       return BONE_LTOE;
@@ -229,13 +310,11 @@ BoneId CAnim::BoneFromString (char* name)
     return BONE_INVALID;
   }
   return BONE_INVALID;
-
 }
 
 //This makes a one-frame do-nothing animating, so we don't crash when an animating if missing.
 void CAnim::SetDefaultAnimation ()
 {
-
   AnimJoint       joint;
 
   _frame.clear ();
@@ -243,12 +322,10 @@ void CAnim::SetDefaultAnimation ()
   joint.id = BONE_PELVIS;
   joint.rotation = glVector (0.0f, 0.0f, 0.0f);
   _frame[0].joint.push_back (joint);
-
 }
 
 bool CAnim::LoadBvh (char* filename)
 {
-
   bool            done;
   long            size;
   char*           buffer;
@@ -320,12 +397,10 @@ bool CAnim::LoadBvh (char* filename)
   }
   free (buffer);
   return true;
-
 }
 
 AnimJoint* CAnim::GetFrame (float delta)
 {
-
   unsigned    i;
   unsigned    frame;
   unsigned    next_frame;
@@ -342,8 +417,5 @@ AnimJoint* CAnim::GetFrame (float delta)
     _current.joint.push_back (aj);
   }
   return &_current.joint[0];
-
 }
-    
-
-
+*/

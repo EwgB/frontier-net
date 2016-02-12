@@ -1,14 +1,10 @@
 /*-----------------------------------------------------------------------------
-
   CEmitter.cpp
-
-
 -------------------------------------------------------------------------------
-
   The emitter class generates particle effects.
- 
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 
 #include "console.h"
@@ -17,6 +13,84 @@
 #include "texture.h"
 #include "world.h"
 
+enum PBlend
+{
+  PARTICLE_BLEND_ALPHA,
+  PARTICLE_BLEND_ADD,
+};
+
+enum PType
+{
+  PARTICLE_FACER,
+  PARTICLE_PANEL_X,
+  PARTICLE_PANEL_Y,
+  PARTICLE_PANEL_Z
+};
+
+struct ParticleSet
+{
+  string            texture;
+  GLbbox            volume;
+  GLbbox            speed;
+  GLvector          acceleration;
+  GLbbox            size;
+  GLvector          origin;
+  GLvector          rotation;
+  GLvector          spin;
+  PBlend            blend;
+  PType             panel_type;
+  UINT              fade_in;
+  UINT              fade_out;
+  UINT              lifespan;
+  UINT              emit_interval;
+  UINT              emit_count;
+  UINT              emitter_lifespan;
+  bool              gravity;
+  bool              wind;
+  bool              interpolate;
+  bool              z_buffer;
+  vector<GLrgba>    colors;
+};
+
+struct Particle
+{
+  GLvector          _position;
+  GLvector          _rotation;
+  GLvector          _velocity;
+  GLvector          _spin;
+  GLrgba            _base_color;
+  GLrgba            _draw_color;
+  GLvector          _panel[4];
+  GLvector          _vertex[4];
+  UINT              _released;
+  bool              _dead;
+};
+
+class CEmitter 
+{
+  UINT              _id;
+  ParticleSet       _settings;
+  UINT              _die;
+  UINT              _last_update;
+  UINT              _next_release;
+  GLuvbox           _uv;
+  bool              _dead;
+  vector<Particle>  _particle;
+  
+  void              Emit (UINT number);
+
+public:
+  CEmitter ();
+  UINT              Id () { return _id; };
+  void              Set (ParticleSet* s);
+  void              Update (float elapsed);
+  void              Render ();
+  void              RenderBbox ();
+  void              Retire () { _dead = true; };
+  bool              Dead () { return _dead && _particle.empty (); };
+
+};
+
 //Maximum number of particles in play from a single emitter - because botching
 //emitter properties can create millions if you're not careful!
 #define MAX_PARTICLES       1000
@@ -24,20 +98,13 @@
 static UINT       cycler;
 static UINT       id_pool;
 
-/*-----------------------------------------------------------------------------
-                              
------------------------------------------------------------------------------*/
-
 CEmitter::CEmitter ()
 {
-
   _id = ++id_pool;
-
 }
 
 void CEmitter::Emit (UINT count)
 {
-
   Particle  p;
   GLvector  range;
   float     x, y;
@@ -83,12 +150,10 @@ void CEmitter::Emit (UINT count)
     if (_particle.size () < MAX_PARTICLES) //just make sure they don't get away from us
       _particle.push_back (p);
   }
-
 }
 
 void CEmitter::Set (ParticleSet* ps)
 {
-
   _settings = *ps;
   if (_settings.colors.empty ())
     _settings.colors.push_back (glRgba (1.0f, 1.0f, 1.0f));
@@ -101,21 +166,16 @@ void CEmitter::Set (ParticleSet* ps)
   _particle.clear ();
   _uv.Set (1.0f);
   _dead = false;
-
 }
 
 void CEmitter::RenderBbox ()
 {
-
   glBindTexture (GL_TEXTURE_2D, 0);
   _settings.volume.Render ();
-
-
 }
 
 void CEmitter::Render ()
 {
-
   unsigned      i;
   GLvector2     uv;
 
@@ -142,12 +202,10 @@ void CEmitter::Render ()
   }
   glEnd ();
   glDepthMask (true);
-
 }
 
 void CEmitter::Update (float elapsed)
 {
-
   UINT      now;
   UINT      i, v;
   UINT      fade;
@@ -193,5 +251,5 @@ void CEmitter::Update (float elapsed)
   while (!_particle.empty () && _particle[0]._dead)
     _particle.erase (_particle.begin());
   _last_update = now;
-
 }
+*/

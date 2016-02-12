@@ -1,12 +1,4 @@
-/*-----------------------------------------------------------------------------
-
-  Sdl.cpp
-
--------------------------------------------------------------------------------
-
- 
------------------------------------------------------------------------------*/
-
+/*
 #include "stdafx.h"
 
 #define MOUSE_SCALING       0.01f
@@ -18,6 +10,15 @@
 #include "render.h"
 #include "sdl.h"
 
+long  SdlElapsed ();
+float SdlElapsedSeconds ();
+void  SdlInit ();
+void  SdlSetCaption (const char* caption);
+void  SdlSwapBuffers ();
+void  SdlTerm ();
+long  SdlTick ();
+void  SdlUpdate ();
+
 static bool           lmb;
 static bool           mmb;
 static int            center_x;
@@ -26,13 +27,8 @@ static long           last_update;
 static long           elapsed;
 static float          elapsed_seconds;
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
 void SdlInit ()
 {
-
   if (SDL_Init (SDL_INIT_EVERYTHING | SDL_INIT_JOYSTICK) != 0) {
     ConsoleLog ("Unable to initialize SDL: %s\n", SDL_GetError());
     return;
@@ -48,13 +44,13 @@ void SdlInit ()
 	SDL_EnableUNICODE(1);
 	// We want to enable key repeat
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
-  /*
-  if (!screen) {
-	  Log ("Unable to set video mode: %s\n", SDL_GetError());
-  	return false;
-  }
-  return true;
-  */
+
+  //if (!screen) {
+	 // Log ("Unable to set video mode: %s\n", SDL_GetError());
+  //	return false;
+  //}
+  //return true;
+
   last_update = SDL_GetTicks ();
   ConsoleLog("SDLInit: %i joysticks found.", SDL_NumJoysticks());
   for (int i = 0; i < SDL_NumJoysticks(); i++) {
@@ -62,45 +58,24 @@ void SdlInit ()
     //joystick = 
     SDL_JoystickOpen(i);
   }
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 void SdlTerm ()
 {
-
   SDL_Quit();
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 void SdlSetCaption (const char* caption)
 {
-
   SDL_WM_SetCaption (caption, "Frontier");
-
 }
 
 void SdlSwapBuffers ()
 {
-
-  
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 void SdlUpdate ()
 {
-
   SDL_Event event;
   long      now;
 
@@ -172,30 +147,20 @@ void SdlUpdate ()
   elapsed = now - last_update;
   elapsed_seconds = (float)elapsed / 1000.0f;
   last_update = now;
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 long SdlElapsed ()
 {
-
   return elapsed;
-
 }
 
 float SdlElapsedSeconds ()
 {
-
   return elapsed_seconds;
-
 }
 
 long SdlTick ()
 {
-
-  return SDL_GetTicks ();;
-
+  return SDL_GetTicks ();
 }
+*/

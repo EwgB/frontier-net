@@ -1,15 +1,11 @@
 /*-----------------------------------------------------------------------------
-
   glText.cpp
-
   2009 Shamus Young
-
 -------------------------------------------------------------------------------
-  
   This module has a (theoretically) cross-platform font-loading system.
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 #include "render.h"
 #include "text.h"
@@ -17,6 +13,12 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+
+void  TextInit ();
+void  TextRender ();
+void  TextPrint (const char *fmt, ...);
+char* TextBytes (int bytes);
+void  TextCreate (int width, int height);
 
 #define FONT_GRID     16
 #define max_CHARS     1024
@@ -38,13 +40,8 @@ static char           buffer[max_BUFFER];
 int                   current_scratch;
 static GLfont         font;
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
 static void text_draw (char* text)
 {
-
   int       p;
   int       len;
   unsigned  ch;
@@ -69,16 +66,10 @@ static void text_draw (char* text)
     cursor.x += font.GlyphDraw (ch, cursor) + 4;
   }
   glEnd ();
-
 }
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 char* TextBytes (int bytes)
 {
-
   current_scratch++;
   current_scratch %= SCRATCH_COUNT;
   if (bytes > MEGABYTE) 
@@ -88,17 +79,10 @@ char* TextBytes (int bytes)
   else
     sprintf (scratch[current_scratch].buffer, "%d Bytes", bytes);
   return scratch[current_scratch].buffer;
-  
 }
-
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 void TextInit ()
 {
-
   int         x, y;
   int         i;
 
@@ -107,26 +91,20 @@ void TextInit ()
     y = 255 - (i / FONT_GRID);
     glyph[i] = glVector ((float)x * GLYPH, (float)y * GLYPH);
   }
-
 }
 
 void TextCreate (int width, int height)
 {
-
   GLtexture*    t;
 
   view_size.x = width;
   view_size.y = height;
   t = TextureFromName ("font.png");
   font.FaceSet (t->id);
-
 }
-
-
 
 void TextRender ()
 {
-
   glMatrixMode (GL_PROJECTION);
   glPushMatrix ();
   glLoadIdentity ();
@@ -154,17 +132,10 @@ void TextRender ()
   glPopMatrix ();
   glMatrixMode (GL_MODELVIEW);
   buffer[0] = 0;
-  
 }
-
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 
 void TextPrint (const char *fmt, ...)				
 {
-
   char		  text[2048];	
   va_list		ap;		
   
@@ -177,6 +148,5 @@ void TextPrint (const char *fmt, ...)
   if ((strlen (buffer) + strlen (text)) < max_BUFFER) 
     strcat (buffer, text);
   strcat (buffer, "\n");
-
 }
-
+*/

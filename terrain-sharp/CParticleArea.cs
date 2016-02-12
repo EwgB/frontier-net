@@ -1,16 +1,13 @@
 /*-----------------------------------------------------------------------------
-
   CParticleArea.cpp
-
 -------------------------------------------------------------------------------
-
   This is a GridData subclass, concerned with filling out the world with 
   appropriate particle effects.  You can use Particle.cpp directly to create 
-  localized one-off effects, but this is where the large persistant effects
+  localized one-off effects, but this is where the large persistent effects
   are managed.
-
 -----------------------------------------------------------------------------*/
 
+/*
 #include "stdafx.h"
 #include "cache.h"
 #include "cparticlearea.h"
@@ -19,17 +16,47 @@
 #include "sdl.h"
 #include "world.h"
 
+#define PARTICLE_AREA_SIZE      64
+
+#ifndef GRID
+#include "cgrid.h"
+#endif
+
+enum
+{
+  PARTICLE_STAGE_BEGIN,
+  PARTICLE_STAGE_DONE
+};
+
+class CParticleArea : public GridData
+{
+  int               _stage;
+  vector<UINT>      _emitter;
+  GLcoord           _origin;
+  UINT              _refresh;
+
+  void              DoFog (GLcoord pos);
+  void              DoSandStorm (GLcoord pos);
+  void              DoWindFlower ();
+  void              DoFireflies (GLcoord pos);
+  bool              ZoneCheck ();
+
+public:
+  void              Refresh ();
+  unsigned          Sizeof () { return sizeof (CParticleArea); }; 
+  void              Set (int x, int y, int distance);
+  void              Render ();
+  void              Update (long stop);
+  bool              Ready () { return _stage == PARTICLE_STAGE_DONE; };
+  void              Invalidate ();
+};
+
 #define REFRESH_INTERVAL  15000
 #define STEP_SIZE         8
 #define STEP_GRID         (PARTICLE_AREA_SIZE / STEP_SIZE)
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
 void CParticleArea::Set (int x, int y, int distance)
 {
-
   if (_grid_position.x == x && _grid_position.y == y)
     return;
   Invalidate ();
@@ -38,19 +65,16 @@ void CParticleArea::Set (int x, int y, int distance)
   _grid_position.y = y;
   _origin.x = x * PARTICLE_AREA_SIZE;
   _origin.y = y * PARTICLE_AREA_SIZE;
-  
 }
 
 void CParticleArea::Invalidate ()
 {
-
   UINT    i;
 
   for (i = 0; i < _emitter.size (); i++) {
     ParticleDestroy (_emitter[i]);
   }
   _emitter.clear ();
-
 }
 
 //Every so often, we drop and re-build our emitters
@@ -58,20 +82,16 @@ void CParticleArea::Invalidate ()
 //DESTROYING them and having the particles vanish abruptly. 
 void CParticleArea::Refresh ()
 {
-
   UINT    i;
 
   for (i = 0; i < _emitter.size (); i++) 
     ParticleRetire (_emitter[i]);
   _emitter.clear ();
   _stage = PARTICLE_STAGE_BEGIN;
-
 }
-
 
 void CParticleArea::DoFog (GLcoord world)
 {
-
   ParticleSet   p;
   GLvector      pos;
 
@@ -79,12 +99,10 @@ void CParticleArea::DoFog (GLcoord world)
   pos = CachePosition(world.x, world.y);
   p.colors.push_back (glRgba (1.0f, 1.0f, 1.0f));
   _emitter.push_back (ParticleAdd (&p, pos));
-
 }
 
 void CParticleArea::DoFireflies (GLcoord world)
 {
-
   ParticleSet   p;
   GLvector      pos;
   float         hour;
@@ -96,12 +114,10 @@ void CParticleArea::DoFireflies (GLcoord world)
   pos = CachePosition(world.x, world.y);
   p.colors.push_back (glRgba (0.8f, 1.0f, 0.0f));
   _emitter.push_back (ParticleAdd (&p, pos));
-
 }
 
 void CParticleArea::DoWindFlower ()
 {
-
   GLcoord       walk;
   GLcoord       world;
   Region        r;
@@ -126,13 +142,10 @@ void CParticleArea::DoWindFlower ()
 
     }
   } while (!walk.Walk (STEP_GRID));
-
 }
-
 
 void CParticleArea::DoSandStorm (GLcoord world)
 {
-
   ParticleSet   p;
   GLvector      pos;
 
@@ -140,13 +153,10 @@ void CParticleArea::DoSandStorm (GLcoord world)
   ParticleLoad ("sand", &p);
   p.colors.push_back (WorldColorGet (world.x, world.y, SURFACE_COLOR_SAND));
   _emitter.push_back (ParticleAdd (&p, pos));
-
 }
-
 
 bool CParticleArea::ZoneCheck ()
 {
-
   if (!CachePointAvailable (_origin.x, _origin.y))
     return false;
   if (!CachePointAvailable (_origin.x + PARTICLE_AREA_SIZE, _origin.y))
@@ -156,13 +166,10 @@ bool CParticleArea::ZoneCheck ()
   if (!CachePointAvailable (_origin.x, _origin.y + PARTICLE_AREA_SIZE))
     return false;
   return true;
-
 }
-
 
 void CParticleArea::Update (long stop) 
 {
-
   ParticleSet   p;
   GLcoord       world;
   Region        region;
@@ -190,12 +197,10 @@ void CParticleArea::Update (long stop)
     DoFireflies (world);
   _refresh = SdlTick () + REFRESH_INTERVAL;
   _stage = PARTICLE_STAGE_DONE;
-
 }
 
 void CParticleArea::Render ()
 {
-
   //NOTHING!  Particles are actually drawn by Particle.cpp. 
-
 }
+*/
