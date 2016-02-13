@@ -1,10 +1,5 @@
-/*-----------------------------------------------------------------------------
-  Particle.cpp
--------------------------------------------------------------------------------
-  This manages the list of active particle emitters.
------------------------------------------------------------------------------*/
-
 namespace terrain_sharp {
+	///<summary>Manages the list of active particle emitters.</summary>
 	static internal class Particle {
 		static internal void Init() {
 			// TODO: Init Particle CVars

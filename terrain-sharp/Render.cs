@@ -1,8 +1,58 @@
-/*-----------------------------------------------------------------------------
-  render.cpp
--------------------------------------------------------------------------------
-  This module kicks off most of the rendering jobs and handles the GL setup.
------------------------------------------------------------------------------*/
+namespace terrain_sharp {
+	using System;
+	using SDL2;
+
+	///<summary>This module kicks off most of the rendering jobs and handles the GL setup.</summary>
+	static internal class Render {
+		private static int view_width;
+		private static int view_height;
+		private static IntPtr screen;
+
+		static internal IntPtr Create(int width, int height, int bits, bool fullscreen) {
+			float fovy;
+			int d;
+			int size;
+
+			//ConsoleLog("RenderCreate: Creating %dx%d viewport", width, height);
+			Console.WriteLine("RenderCreate: Creating {0}x{1} viewport", width, height);
+			view_width = width;
+			view_height = height;
+			var view_aspect = (float) width / height;
+			SDL.SDL_WindowFlags flags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL;
+			if (fullscreen)
+				flags |= SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN;
+			else
+				flags |= SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE;
+			screen = SDL.SDL_CreateWindow(Program.APP, SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED,
+				1400, 800, flags);
+			if (screen == IntPtr.Zero)
+				//ConsoleLog("Unable to create window: {0}", SDL.SDL_GetError());
+				Console.WriteLine("Unable to create window: {0}", SDL.SDL_GetError());
+
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+			fovy = FOV;
+			if (view_aspect > 1.0f)
+				fovy /= view_aspect;
+			gluPerspective(fovy, view_aspect, NEAR_CLIP, RENDER_DISTANCE);
+			//gluPerspective (fovy, view_aspect, 0.1f, 400);
+			glMatrixMode(GL_MODELVIEW);
+			size = min(width, height);
+			d = 128;
+			while (d < size) {
+				max_dimension = d;
+				d *= 2;
+			}
+			TexturePurge();
+			SceneTexturePurge();
+			WorldTexturePurge();
+			CgCompile();
+			TextCreate(width, height);
+
+			return screen;
+		}
+	}
+}
 
 /*
 #include "stdafx.h"
@@ -37,10 +87,6 @@ void RenderUpdate (void);
 #define FOV                 120
 #define MAP_SIZE            512
 
-static int            view_width;
-static int            view_height;
-static float          view_aspect;
-static SDL_Surface*   screen;
 static int            max_dimension;
 static bool           show_map;
 static GLrgba         current_ambient;
@@ -172,48 +218,6 @@ void RenderInit  (void)
   CgInit ();
 }
 
-void RenderCreate (int width, int height, int bits, bool fullscreen)
-{
-  int         flags;
-  float       fovy;
-  int         d;
-  int         size;
-
-  ConsoleLog ("RenderCreate: Creating %dx%d viewport", width, height);
-  SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1); 
-  view_width = width;
-  view_height = height;
-  view_aspect = (float)width / (float)height;
-  flags = SDL_OPENGL;
-  if (fullscreen)
-    flags |= SDL_FULLSCREEN;
-  else
-    flags |= SDL_RESIZABLE;
-  screen = SDL_SetVideoMode (width, height, bits, flags); 
-  if (!screen) 
-	  ConsoleLog ("Unable to set video mode: %s\n", SDL_GetError());
-
-  glMatrixMode (GL_PROJECTION);
-  glLoadIdentity ();
-  fovy = FOV;
-  if (view_aspect > 1.0f) 
-    fovy /= view_aspect; 
-  gluPerspective (fovy, view_aspect, NEAR_CLIP, RENDER_DISTANCE);
-  //gluPerspective (fovy, view_aspect, 0.1f, 400);
-	glMatrixMode (GL_MODELVIEW);
-  size = min (width, height); 
-  d = 128;
-  while (d < size) {
-    max_dimension = d;
-    d *= 2;
-  }
-  TexturePurge ();
-  SceneTexturePurge ();
-  WorldTexturePurge ();
-  CgCompile ();
-  TextCreate (width, height);  
-}
-
 //Return the power of 2 closest to the smallest dimension of the canvas
 //(This tells you how much room you have for drawing on textures.)
 int RenderMaxDimension ()
@@ -326,7 +330,7 @@ void RenderLoadingScreen (float progress)
   RenderCanvasEnd ();
   TextRender ();
   ConsoleRender ();
-  SDL_GL_SwapBuffers ();
+  SDL.SDL_GL_SwapBuffers ();
 }
 
 void Render (void)		
@@ -420,7 +424,7 @@ void Render (void)
   if (show_map) 
     RenderTexture (WorldMap ());
   ConsoleRender ();
-  SDL_GL_SwapBuffers ();
+  SDL.SDL_GL_SwapBuffers ();
 }
 */
 
@@ -466,3 +470,4 @@ void Render (void)
     glPolygonMode(GL_BACK, GL_LINE);
   }
   */
+		

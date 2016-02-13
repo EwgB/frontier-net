@@ -17,7 +17,7 @@ namespace terrain_sharp {
 	using System;
 
 	static class Program {
-		const string APP = "Frontier";
+		internal const string APP = "Frontier";
 
 		/// <summary>
 		/// The main entry point for the application.
@@ -58,9 +58,9 @@ namespace terrain_sharp {
 			Console.WriteLine("{0}: Begin startup.", APP);
 			//ConsoleInit();
 			Particle.Init();
-			//ilInit();
+			//ilInit(); What is this anyway?
 			//RandomInit(11);
-			//SdlInit();
+			Sdl.Init();
 			//RenderInit();
 			//EnvInit();
 			//GameInit();
