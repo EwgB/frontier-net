@@ -105,13 +105,13 @@ void TextCreate (int width, int height)
 
 void TextRender ()
 {
-  glMatrixMode (GL_PROJECTION);
+  GL.MatrixMode (MatrixMode.Projection);
   glPushMatrix ();
-  glLoadIdentity ();
+  GL.LoadIdentity ();
   glOrtho (0, view_size.x, view_size.y, 0, 0.1f, 2048);
-	glMatrixMode (GL_MODELVIEW);
+	GL.MatrixMode (MatrixMode.Modelview);
   glPushMatrix ();
-  glLoadIdentity();
+  GL.LoadIdentity();
   glTranslatef(0, 0, -1.0f);				
   
   glDisable (GL_CULL_FACE);
@@ -128,9 +128,9 @@ void TextRender ()
     text_draw (buffer);
 
   glPopMatrix ();
-  glMatrixMode (GL_PROJECTION);
+  GL.MatrixMode (MatrixMode.Projection);
   glPopMatrix ();
-  glMatrixMode (GL_MODELVIEW);
+  GL.MatrixMode (MatrixMode.Modelview);
   buffer[0] = 0;
 }
 

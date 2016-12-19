@@ -1,18 +1,24 @@
 namespace terrain_sharp {
 	using System;
+
+	using OpenTK;
+	using OpenTK.Graphics;
+	using OpenTK.Graphics.OpenGL;
+
 	using SDL2;
 
 	///<summary>This module kicks off most of the rendering jobs and handles the GL setup.</summary>
 	static internal class Render {
+		private const int FOV = 120;
+		private const int RENDER_DISTANCE = 1536;
+		private const float NEAR_CLIP = 0.2f;
+
 		private static int view_width;
 		private static int view_height;
 		private static IntPtr screen;
+		private static int max_dimension;
 
 		static internal IntPtr Create(int width, int height, int bits, bool fullscreen) {
-			float fovy;
-			int d;
-			int size;
-
 			//ConsoleLog("RenderCreate: Creating %dx%d viewport", width, height);
 			Console.WriteLine("RenderCreate: Creating {0}x{1} viewport", width, height);
 			view_width = width;
@@ -29,25 +35,26 @@ namespace terrain_sharp {
 				//ConsoleLog("Unable to create window: {0}", SDL.SDL_GetError());
 				Console.WriteLine("Unable to create window: {0}", SDL.SDL_GetError());
 
-			glMatrixMode(GL_PROJECTION);
-			glLoadIdentity();
-			fovy = FOV;
+			GL.MatrixMode(MatrixMode.Projection);
+			GL.LoadIdentity();
+			float fovy = FOV;
 			if (view_aspect > 1.0f)
 				fovy /= view_aspect;
-			gluPerspective(fovy, view_aspect, NEAR_CLIP, RENDER_DISTANCE);
-			//gluPerspective (fovy, view_aspect, 0.1f, 400);
-			glMatrixMode(GL_MODELVIEW);
-			size = min(width, height);
-			d = 128;
+			var perspectiveMatrix = Matrix4.CreatePerspectiveFieldOfView(fovy, view_aspect, NEAR_CLIP, RENDER_DISTANCE);
+			//var perspectiveMatrix = Matrix4.CreatePerspectiveFieldOfView(fovy, view_aspect, 0.1f, 400);
+			GL.LoadMatrix(ref perspectiveMatrix);
+			GL.MatrixMode(MatrixMode.Modelview);
+			int size = Math.Min(width, height);
+			int d = 128;
 			while (d < size) {
 				max_dimension = d;
 				d *= 2;
 			}
-			TexturePurge();
-			SceneTexturePurge();
-			WorldTexturePurge();
-			CgCompile();
-			TextCreate(width, height);
+			//TexturePurge();
+			//SceneTexturePurge();
+			//WorldTexturePurge();
+			//CgCompile();
+			//TextCreate(width, height);
 
 			return screen;
 		}
@@ -55,22 +62,6 @@ namespace terrain_sharp {
 }
 
 /*
-#include "stdafx.h"
-
-#include <math.h> 
-#include "avatar.h"
-#include "cache.h"
-#include "cg.h"
-#include "console.h"
-#include "env.h"
-#include "input.h"
-#include "render.h"
-#include "scene.h"
-#include "sdl.h"
-#include "texture.h"
-#include "text.h"
-#include "world.h"
-
 void Render (void);
 void RenderCreate (int width, int height, int bits, bool fullscreen);
 void RenderCanvasBegin (int left, int right, int bottom, int top, int size);
@@ -82,12 +73,8 @@ int  RenderMaxDimension ();
 void RenderTexture (unsigned id);
 void RenderUpdate (void);
 
-#define RENDER_DISTANCE     1536
-#define NEAR_CLIP           0.2f
-#define FOV                 120
 #define MAP_SIZE            512
 
-static int            max_dimension;
 static bool           show_map;
 static GLrgba         current_ambient;
 static GLrgba         current_diffuse;
@@ -188,23 +175,23 @@ void RenderCanvasBegin (int left, int right, int bottom, int top, int size)
     glViewport (0, 0, size, size);
   else 
     glViewport (0, 0, view_width, view_height);
-  glMatrixMode (GL_PROJECTION);
+  GL.MatrixMode (MatrixMode.Projection);
   glPushMatrix ();
-  glLoadIdentity ();
+  GL.LoadIdentity ();
   glOrtho (left, right, bottom, top, 0.1f, 2048);
-  glMatrixMode (GL_MODELVIEW);
+  GL.MatrixMode (MatrixMode.Modelview);
   glPushMatrix ();
-  glLoadIdentity();
+  GL.LoadIdentity();
   glTranslatef(0, 0, -10.0f);
 }
 
 void RenderCanvasEnd ()
 {
-  glMatrixMode (GL_PROJECTION);
+  GL.MatrixMode (MatrixMode.Projection);
   glPopMatrix ();  
 	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	
   glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);	
-  glMatrixMode (GL_MODELVIEW);
+  GL.MatrixMode (MatrixMode.Modelview);
   glPopMatrix ();  
 }
 
@@ -228,13 +215,13 @@ int RenderMaxDimension ()
 
 void RenderTexture (unsigned id)
 {
-  glMatrixMode (GL_PROJECTION);
+  GL.MatrixMode (MatrixMode.Projection);
   glPushMatrix ();
-  glLoadIdentity ();
+  GL.LoadIdentity ();
   glOrtho (0, view_width, view_height, 0, 0.1f, 2048);
-	glMatrixMode (GL_MODELVIEW);
+	GL.MatrixMode (MatrixMode.Modelview);
   glPushMatrix ();
-  glLoadIdentity();
+  GL.LoadIdentity();
   glTranslatef(0, 0, -1.0f);				
   glDisable (GL_CULL_FACE);
   glDisable (GL_FOG);
@@ -291,9 +278,9 @@ void RenderTexture (unsigned id)
   }
 
   glPopMatrix ();
-  glMatrixMode (GL_PROJECTION);
+  GL.MatrixMode (MatrixMode.Projection);
   glPopMatrix ();
-  glMatrixMode (GL_MODELVIEW);
+  GL.MatrixMode (MatrixMode.Modelview);
 }
 
 static float    spin;
@@ -398,10 +385,10 @@ void Render (void)
   glLineWidth (2.0f);
   //
 
-  //glMatrixMode (GL_MODELVIEW);
+  //GL.MatrixMode (MatrixMode.Modelview);
 
   //Move into our unique coordanate system
-  glLoadIdentity();
+  GL.LoadIdentity();
   pos = AvatarCameraPosition ();
   glScalef (1, -1, 1);
   angle = AvatarCameraAngle ();
@@ -436,7 +423,7 @@ void Render (void)
     glColorMask (false, false, false, true);
     draw_water (256);
     glColorMask (true, true, true, false);
-    glLoadIdentity();
+    GL.LoadIdentity();
     pos = CameraPosition ();
     glScalef (1, -1, -1);
     //pos *= -1;

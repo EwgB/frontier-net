@@ -177,7 +177,7 @@ void SkyRender ()
   e = EnvGet ();
   angle = AvatarCameraAngle ();
   glPushMatrix ();
-  glLoadIdentity ();
+  GL.LoadIdentity ();
   glScalef (1, -1, 1);
   glRotatef (angle.x, 1.0f, 0.0f, 0.0f);
   glRotatef (angle.y, 0.0f, 1.0f, 0.0f);
