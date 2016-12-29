@@ -6,12 +6,16 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using NLog;
 
 namespace FrontierSharp {
 	internal class Frontier : GameWindow {
 
+		private static Logger logger = LogManager.GetCurrentClassLogger();
+
 		protected override void OnLoad(EventArgs e) {
 			base.OnLoad(e);
+			logger.Trace("OnLoad");
 
 			Title = "Frontier";
 			GL.ClearColor(Color.CornflowerBlue);
@@ -19,6 +23,7 @@ namespace FrontierSharp {
 
 		protected override void OnRenderFrame(FrameEventArgs e) {
 			base.OnRenderFrame(e);
+			logger.Trace("OnRender");
 
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
