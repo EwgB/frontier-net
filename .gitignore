@@ -441,3 +441,4 @@ __pycache__/
 build/
 
 # End of https://www.gitignore.io/api/c++,csharp,visualstudio
+Thumbs.db
