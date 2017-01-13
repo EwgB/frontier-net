@@ -1,60 +1,69 @@
-﻿using System;
-using System.Drawing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OpenTK;
-using OpenTK.Graphics.OpenGL;
-using NLog;
+﻿namespace FrontierSharp {
+    using NLog;
 
-namespace FrontierSharp {
-	internal class Frontier : GameWindow {
+    using OpenTK;
+    using OpenTK.Graphics.OpenGL;
 
-		private static Logger logger = LogManager.GetCurrentClassLogger();
+    using System;
+    using System.Drawing;
 
-		protected override void OnLoad(EventArgs e) {
-			base.OnLoad(e);
-			logger.Trace("OnLoad");
+    using Interfaces;
 
-			Title = "Frontier";
-			GL.ClearColor(Color.CornflowerBlue);
-		}
+    internal class Frontier : GameWindow {
 
-		protected override void OnRenderFrame(FrameEventArgs e) {
-			base.OnRenderFrame(e);
-			logger.Trace("OnRender");
+        // Logger
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        // Modules
+        readonly IParticles particles;
 
-			var modelview = Matrix4.LookAt(Vector3.Zero, Vector3.UnitZ, Vector3.UnitY);
-			GL.MatrixMode(MatrixMode.Modelview);
-			GL.LoadMatrix(ref modelview);
+        public Frontier(IParticles particles) {
+            this.particles = particles;
+        }
 
-			GL.Begin(PrimitiveType.Triangles);
-			{
-				GL.Color3(1.0f, 0.0f, 0.0f);
-				GL.Vertex3(-1.0f, -1.0f, 4.0f);
+        protected override void OnLoad(EventArgs e) {
+            base.OnLoad(e);
+            Log.Info("Begin startup");
 
-				GL.Color3(0.0f, 1.0f, 0.0f);
-				GL.Vertex3(1.0f, -1.0f, 4.0f);
+            Title = "Frontier";
+            GL.ClearColor(Color.CornflowerBlue);
 
-				GL.Color3(0.0f, 0.0f, 1.0f);
-				GL.Vertex3(0.0f, 1.0f, 4.0f);
-			}
-			GL.End();
+        }
 
-			SwapBuffers();
-		}
+        protected override void OnRenderFrame(FrameEventArgs e) {
+            base.OnRenderFrame(e);
+            Log.Trace("OnRender");
 
-		protected override void OnResize(EventArgs e) {
-			base.OnResize(e);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-			GL.Viewport(ClientRectangle.X, ClientRectangle.Y, ClientRectangle.Width, ClientRectangle.Height);
-			var projection = Matrix4.CreatePerspectiveFieldOfView((float) Math.PI / 4, Width / (float) Height, 1.0f, 64.0f);
-			GL.MatrixMode(MatrixMode.Projection);
-			GL.LoadMatrix(ref projection);
-		}
+            var modelview = Matrix4.LookAt(Vector3.Zero, Vector3.UnitZ, Vector3.UnitY);
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.LoadMatrix(ref modelview);
 
-	}
+            GL.Begin(PrimitiveType.Triangles);
+            {
+                GL.Color3(1.0f, 0.0f, 0.0f);
+                GL.Vertex3(-1.0f, -1.0f, 4.0f);
+
+                GL.Color3(0.0f, 1.0f, 0.0f);
+                GL.Vertex3(1.0f, -1.0f, 4.0f);
+
+                GL.Color3(0.0f, 0.0f, 1.0f);
+                GL.Vertex3(0.0f, 1.0f, 4.0f);
+            }
+            GL.End();
+
+            SwapBuffers();
+        }
+
+        protected override void OnResize(EventArgs e) {
+            base.OnResize(e);
+
+            GL.Viewport(ClientRectangle.X, ClientRectangle.Y, ClientRectangle.Width, ClientRectangle.Height);
+            var projection = Matrix4.CreatePerspectiveFieldOfView((float)Math.PI / 4, Width / (float)Height, 1.0f, 64.0f);
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadMatrix(ref projection);
+        }
+
+    }
 }
