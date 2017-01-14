@@ -5,7 +5,6 @@
     using OpenTK.Graphics.OpenGL;
 
     using System;
-    using System.Drawing;
 
     using Interfaces;
 
@@ -16,9 +15,11 @@
 
         // Modules
         readonly IParticles particles;
+        readonly IRenderer renderer;
 
-        public Frontier(IParticles particles) {
+        public Frontier(IParticles particles, IRenderer renderer) {
             this.particles = particles;
+            this.renderer = renderer;
         }
 
         protected override void OnLoad(EventArgs e) {
@@ -26,34 +27,33 @@
             Log.Info("Begin startup");
 
             Title = "Frontier";
-            GL.ClearColor(Color.CornflowerBlue);
 
+            this.renderer.Init();
         }
 
         protected override void OnRenderFrame(FrameEventArgs e) {
             base.OnRenderFrame(e);
             Log.Trace("OnRender");
 
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            var modelview = Matrix4.LookAt(Vector3.Zero, Vector3.UnitZ, Vector3.UnitY);
-            GL.MatrixMode(MatrixMode.Modelview);
-            GL.LoadMatrix(ref modelview);
-
-            GL.Begin(PrimitiveType.Triangles);
-            {
-                GL.Color3(1.0f, 0.0f, 0.0f);
-                GL.Vertex3(-1.0f, -1.0f, 4.0f);
-
-                GL.Color3(0.0f, 1.0f, 0.0f);
-                GL.Vertex3(1.0f, -1.0f, 4.0f);
-
-                GL.Color3(0.0f, 0.0f, 1.0f);
-                GL.Vertex3(0.0f, 1.0f, 4.0f);
-            }
-            GL.End();
+            this.renderer.Render();
 
             SwapBuffers();
+
+            //ConsoleUpdate();
+            //SdlUpdate();
+            //GameUpdate();
+            //AvatarUpdate();
+            //PlayerUpdate();
+            //EnvUpdate();
+            //SkyUpdate();
+            //SceneUpdate(stop);
+            //CacheUpdate(stop);
+            //ParticleUpdate();
+            //RenderUpdate();
+        }
+
+        protected override void OnUpdateFrame(FrameEventArgs e) {
+            base.OnUpdateFrame(e);
         }
 
         protected override void OnResize(EventArgs e) {

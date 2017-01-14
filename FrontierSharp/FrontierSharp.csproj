@@ -60,7 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DummyModules\DummyParticles.cs" />
+    <Compile Include="DummyModules\DummyParticlesImpl.cs" />
     <Compile Include="Frontier.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -84,6 +84,10 @@
     <ProjectReference Include="..\Particles\Particles.csproj">
       <Project>{7dd75da0-f018-42d6-bf27-344cfb8deb85}</Project>
       <Name>Particles</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Renderer\Renderer.csproj">
+      <Project>{f340b706-735d-42a1-8725-77c9d3ecddd0}</Project>
+      <Name>Renderer</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

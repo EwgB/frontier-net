@@ -3,13 +3,15 @@
 
     using DummyModules;
     using Interfaces;
+    using Renderer;
 
     internal class Program {
         private static void Main(string[] args) {
             using (IKernel kernel = new StandardKernel()) {
 
                 // Set up dependecies
-                kernel.Bind<IParticles>().To<DummyParticles>();
+                kernel.Bind<IParticles>().To<DummyParticlesImpl>().InSingletonScope();
+                kernel.Bind<IRenderer>().To<RendererImpl>().InSingletonScope();
 
                 using (var frontier = kernel.Get<Frontier>()) {
                     frontier.Run(30.0);
