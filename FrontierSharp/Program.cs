@@ -12,6 +12,7 @@
                 // Set up dependecies
                 kernel.Bind<IParticles>().To<DummyParticlesImpl>().InSingletonScope();
                 kernel.Bind<IRenderer>().To<RendererImpl>().InSingletonScope();
+                kernel.Bind<IAvatar>().To<DummyAvatarImpl>().InSingletonScope();
 
                 using (var frontier = kernel.Get<Frontier>()) {
                     frontier.Run(30.0);
