@@ -80,6 +80,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Environment\Environment.csproj">
+      <Project>{e7e8aca7-7647-4cdb-8167-7f88951e0d1f}</Project>
+      <Name>Environment</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Interfaces\Interfaces.csproj">
       <Project>{889072ad-5c8d-47d9-8fec-05a9ec728be8}</Project>
       <Name>Interfaces</Name>
