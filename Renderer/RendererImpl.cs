@@ -4,13 +4,17 @@
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
 
+    using System;
     using System.Drawing;
 
     public class RendererImpl : IRenderer {
+        // Dependencies (injected via Ninject)
         private readonly IAvatar avatar;
+        private readonly IWorld world;
 
-        public RendererImpl(IAvatar avatar) {
+        public RendererImpl(IAvatar avatar, IWorld world) {
             this.avatar = avatar;
+            this.world = world;
         }
 
         public void Init() {
@@ -19,6 +23,7 @@
 
         public void Render() {
             Vector3 pos = this.avatar.GetCameraPosition();
+            float water_level = Math.Max(this.world.GetWaterLevel(new Vector2(pos.X, pos.Y)), 0);
 
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
