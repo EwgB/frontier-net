@@ -14,8 +14,8 @@
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         // Modules
-        readonly IParticles particles;
-        readonly IRenderer renderer;
+        private readonly IParticles particles;
+        private readonly IRenderer renderer;
 
         public Frontier(IParticles particles, IRenderer renderer) {
             this.particles = particles;
