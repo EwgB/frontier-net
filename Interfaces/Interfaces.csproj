@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="IAvatar.cs" />
     <Compile Include="IParticles.cs" />
+    <Compile Include="IWorld.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="IRenderer.cs" />
   </ItemGroup>
