@@ -9,19 +9,19 @@
 
     public class EnvironmentData {
         // TODO: maybe replace by some appropriate construct, remove the COUNT value from enum
-        Color4[] color = new Color4[(int) ColorType.ENV_COLOR_COUNT];
-        Vector3 light;
-        Range<float> fog;
-        float star_fade;
-        float sunrise_fade;
-        float sunset_fade;
-        float sun_angle;
-        float cloud_cover;
-        bool draw_sun;
+        public Color4[] color = new Color4[(int)ColorType.ENV_COLOR_COUNT];
+        public Vector3 light;
+        public Range<float> fog;
+        public float star_fade;
+        public float sunrise_fade;
+        public float sunset_fade;
+        public float sun_angle;
+        public float cloud_cover;
+        public bool draw_sun;
     }
 
     // TODO: rename
-    internal enum ColorType {
+    public enum ColorType {
         ENV_COLOR_HORIZON,
         ENV_COLOR_SKY,
         ENV_COLOR_FOG,
@@ -30,9 +30,9 @@
         ENV_COLOR_COUNT
     }
 
-    internal struct Range<T> where T : IComparable<T> {
+    public struct Range<T> where T : IComparable<T> {
         private T min;
-        T Min { 
+        public T Min {
             get { return min; }
             set {
                 if (value.CompareTo(max) > 0)
@@ -42,8 +42,7 @@
         }
 
         private T max;
-        T Max
-        {
+        public T Max {
             get { return max; }
             set {
                 if (value.CompareTo(min) < 0)
@@ -51,5 +50,12 @@
                 max = value;
             }
         }
+
+        public Range(T min, T max) : this() {
+            // Set Max first because of the invariance checks in the setters
+            this.Max = max;
+            this.Min = min;
+        }
+
     }
 }
