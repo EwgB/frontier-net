@@ -28,7 +28,6 @@
 
         public void Init() {
             GL.ClearColor(Color.CornflowerBlue);
-            //CgInit();
         }
 
         public void Render() {
@@ -40,8 +39,8 @@
                 //cfog = (currentDiffuse + Color4.Blue) / 2;
                 //GL.Fog(FogParameter.FogStart, RENDER_DISTANCE / 2);   // Fog Start Depth
                 //GL.Fog(FogParameter.FogEnd, RENDER_DISTANCE);			// Fog End Depth
-                GL.Fog(FogParameter.FogStart, e.fog.Min);          // Fog Start Depth
-                GL.Fog(FogParameter.FogEnd, e.fog.Max);            // Fog End Depth
+                GL.Fog(FogParameter.FogStart, e.Fog.Min);          // Fog Start Depth
+                GL.Fog(FogParameter.FogEnd, e.Fog.Max);            // Fog End Depth
             } else {
                 //cfog = new Color4(0.0f, 0.5f, 0.8f);
                 GL.Fog(FogParameter.FogStart, 1);               // Fog Start Depth
@@ -51,24 +50,24 @@
             GL.Enable(EnableCap.Fog);
             GL.Fog(FogParameter.FogMode, (int)FogMode.Linear);
             //GL.Fog (FogParameter.FogMode, (int) FogMode.Exp);
-            GL.Fog(FogParameter.FogColor, e.color[(int)ColorType.ENV_COLOR_FOG].R);
-            GL.ClearColor(e.color[(int)ColorType.ENV_COLOR_FOG]);
+            GL.Fog(FogParameter.FogColor, e.color[ColorType.Fog].R);
+            GL.ClearColor(e.color[ColorType.Fog]);
             //GL.ClearColor (0, 0, 0, 1.0f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             //GL.Clear (ClearBufferMask.DepthBufferBit);
 
             float[] light = new float[4];
 
-            light[0] = -e.light.X;
-            light[1] = -e.light.Y;
-            light[2] = -e.light.Z;
+            light[0] = -e.Light.X;
+            light[1] = -e.Light.Y;
+            light[2] = -e.Light.Z;
             light[3] = 0.0f;
 
             GL.Enable(EnableCap.Light1);
             GL.Enable(EnableCap.Lighting);
             currentAmbient = Color4.Black;
-            GL.Light(LightName.Light1, LightParameter.Ambient, e.color[(int) ColorType.ENV_COLOR_AMBIENT].R);
-            Color4 c = e.color[(int) ColorType.ENV_COLOR_LIGHT];
+            GL.Light(LightName.Light1, LightParameter.Ambient, e.color[ColorType.Ambient].R);
+            Color4 c = e.color[ColorType.Light];
             //c *= 20.0f;
             GL.Light(LightName.Light1, LightParameter.Diffuse, c.R);
             GL.Light(LightName.Light1, LightParameter.Position, light);

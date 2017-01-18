@@ -16,10 +16,12 @@
         // Modules
         private readonly IParticles particles;
         private readonly IRenderer renderer;
+        private readonly IEnvironment environment;
 
-        public Frontier(IParticles particles, IRenderer renderer) {
+        public Frontier(IParticles particles, IRenderer renderer, IEnvironment environment) {
             this.particles = particles;
             this.renderer = renderer;
+            this.environment = environment;
         }
 
         protected override void OnLoad(EventArgs e) {
@@ -28,7 +30,24 @@
 
             Title = "Frontier";
 
+            //ConsoleInit();
+            //this.particles.Init();
+            //ilInit(); // TODO: what is this?
+            //RandomInit(11);
+            //SdlInit();
+            this.environment.Init();
             this.renderer.Init();
+            //CgInit();
+            //GameInit();
+            //PlayerInit();
+            //AvatarInit();
+            //TextureInit();
+            //WorldInit();
+            //SceneInit();
+            //SkyInit();
+            //TextInit();
+
+            Log.Info("Init done.");
         }
 
         protected override void OnRenderFrame(FrameEventArgs e) {

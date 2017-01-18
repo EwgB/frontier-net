@@ -53,6 +53,10 @@
       <Project>{889072ad-5c8d-47d9-8fec-05a9ec728be8}</Project>
       <Name>Interfaces</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Util\Util.csproj">
+      <Project>{3EF9CAE0-8660-4500-82CB-8F050F0375A6}</Project>
+      <Name>Util</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="OpenTK.dll.config" />

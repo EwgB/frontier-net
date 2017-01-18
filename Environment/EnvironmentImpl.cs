@@ -6,5 +6,9 @@
         public EnvironmentData GetCurrent() {
             throw new NotImplementedException();
         }
+
+        public void Init() {
+            throw new NotImplementedException();
+        }
     }
 }

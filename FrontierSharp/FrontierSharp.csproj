@@ -97,6 +97,10 @@
       <Project>{f340b706-735d-42a1-8725-77c9d3ecddd0}</Project>
       <Name>Renderer</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Util\Util.csproj">
+      <Project>{3ef9cae0-8660-4500-82cb-8f050f0375a6}</Project>
+      <Name>Util</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

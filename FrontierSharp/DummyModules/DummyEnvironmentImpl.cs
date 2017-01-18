@@ -1,28 +1,34 @@
 ﻿namespace FrontierSharp.DummyModules {
+    using System;
     using Interfaces;
 
     using OpenTK;
     using OpenTK.Graphics;
+    using Util;
 
     class DummyEnvironmentImpl : IEnvironment {
         public EnvironmentData GetCurrent() {
             return new EnvironmentData {
-                color = new Color4[] {
-                    Color4.White,
-                    Color4.Blue,
-                    Color4.Gray,
-                    Color4.Yellow,
-                    Color4.Red
+                color = new ColorTypeIndexedArray<Color4> {
+                    [ColorType.Horizon] = Color4.White,
+                    [ColorType.Sky] = Color4.Blue,
+                    [ColorType.Fog] = Color4.Gray,
+                    [ColorType.Light] = Color4.Yellow,
+                    [ColorType.Ambient] = Color4.Red
                 },
-                cloud_cover = 0,
-                draw_sun = true,
-                fog = new Range<float>(1, 2),
-                light = Vector3.UnitZ,
-                star_fade = 0.5f,
-                sunrise_fade = 0.5f,
-                sunset_fade = 0.5f,
-                sun_angle = 45
+                CloudCover = 0,
+                DrawSun = true,
+                Fog = new Range<float>(1, 2),
+                Light = Vector3.UnitZ,
+                StarFade = 0.5f,
+                SunriseFade = 0.5f,
+                SunsetFade = 0.5f,
+                SunAngle = 45
             };
+        }
+
+        public void Init() {
+            // Do nothing
         }
     }
 }
