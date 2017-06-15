@@ -17,7 +17,6 @@
         private Color4 currentAmbient = Color4.Black;
         private Color4 currentDiffuse = Color4.White;
         private Color4 currentFog = Color4.White;
-        private Size viewSize;
 
         public RendererImpl(IAvatar avatar, IWorld world, IEnvironment environment) {
             // Set dependencies
@@ -36,7 +35,7 @@
             float waterLevel = Math.Max(this.world.GetWaterLevel(new Vector2(pos.X, pos.Y)), 0);
 
             if (pos.Z >= waterLevel) {
-                //cfog = (currentDiffuse + Color4.Blue) / 2;
+                //currentFog = (currentDiffuse + Color4.Blue) / 2;
                 //GL.Fog(FogParameter.FogStart, RENDER_DISTANCE / 2);   // Fog Start Depth
                 //GL.Fog(FogParameter.FogEnd, RENDER_DISTANCE);			// Fog End Depth
                 GL.Fog(FogParameter.FogStart, e.Fog.Min);          // Fog Start Depth
@@ -72,7 +71,6 @@
             GL.Light(LightName.Light1, LightParameter.Diffuse, c.R);
             GL.Light(LightName.Light1, LightParameter.Position, light);
 
-            GL.Viewport(Point.Empty, viewSize);
             GL.DepthFunc(DepthFunction.Lequal);
             GL.Enable(EnableCap.DepthTest);
             

@@ -274,7 +274,7 @@ void CTerrain::DoHeightmap ()
 /*-----------------------------------------------------------------------------
 
   In order to avoid having gaps between adjacent terrains, we have to "stitch"
-  them togather.  We analyze the points used along the shared edge, and
+  them together.  We analyze the points used along the shared edge, and
   activate any points used by our neighbor.  
 
 -----------------------------------------------------------------------------*/

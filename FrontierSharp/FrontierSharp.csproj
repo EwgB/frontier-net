@@ -70,6 +70,36 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\icon.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Textures\avatar.png" />
+    <Content Include="Resources\Textures\bark1.bmp" />
+    <Content Include="Resources\Textures\clouds.png" />
+    <Content Include="Resources\Textures\foliage.png" />
+    <Content Include="Resources\Textures\font.png" />
+    <Content Include="Resources\Textures\grass.png" />
+    <Content Include="Resources\Textures\grass2.png" />
+    <Content Include="Resources\Textures\grass3.png" />
+    <Content Include="Resources\Textures\newgrass.png" />
+    <Content Include="Resources\Textures\noise.bmp" />
+    <Content Include="Resources\Textures\noise150.bmp" />
+    <Content Include="Resources\Textures\noise256.bmp" />
+    <Content Include="Resources\Textures\particle.png" />
+    <Content Include="Resources\Textures\particle_dot.png" />
+    <Content Include="Resources\Textures\particle_flower.png" />
+    <Content Include="Resources\Textures\rock3.bmp" />
+    <Content Include="Resources\Textures\rockface.bmp" />
+    <Content Include="Resources\Textures\sand.png" />
+    <Content Include="Resources\Textures\stars1.bmp" />
+    <Content Include="Resources\Textures\stars2.bmp" />
+    <Content Include="Resources\Textures\sun.bmp" />
+    <Content Include="Resources\Textures\sunrise.bmp" />
+    <Content Include="Resources\Textures\terrain.png" />
+    <Content Include="Resources\Textures\terrain_rock.png" />
+    <Content Include="Resources\Textures\terrain_shading.png" />
+    <Content Include="Resources\Textures\vines.png" />
+    <Content Include="Resources\Textures\water1.bmp" />
     <None Include="App.config" />
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -79,6 +109,8 @@
     </None>
     <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
+    <Content Include="Resources\Textures\clouds.pspimage" />
+    <Content Include="Resources\Textures\newgrass.pspimage" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Environment\Environment.csproj">

@@ -7,6 +7,7 @@
     using System;
 
     using Interfaces;
+    using System.Drawing;
 
     internal class Frontier : GameWindow {
 
@@ -29,6 +30,8 @@
             Log.Info("Begin startup");
 
             Title = "Frontier";
+            Icon = new Icon("Resources/icon.bmp");
+            Size = new Size(1400, 800);
 
             //ConsoleInit();
             //this.particles.Init();
@@ -48,6 +51,15 @@
             //TextInit();
 
             Log.Info("Init done.");
+        }
+
+        protected override void OnResize(EventArgs e) {
+            base.OnResize(e);
+
+            GL.Viewport(ClientRectangle.X, ClientRectangle.Y, ClientRectangle.Width, ClientRectangle.Height);
+            var projection = Matrix4.CreatePerspectiveFieldOfView((float)Math.PI / 4, Width / (float)Height, 1.0f, 64.0f);
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadMatrix(ref projection);
         }
 
         protected override void OnRenderFrame(FrameEventArgs e) {
@@ -73,15 +85,6 @@
 
         protected override void OnUpdateFrame(FrameEventArgs e) {
             base.OnUpdateFrame(e);
-        }
-
-        protected override void OnResize(EventArgs e) {
-            base.OnResize(e);
-
-            GL.Viewport(ClientRectangle.X, ClientRectangle.Y, ClientRectangle.Width, ClientRectangle.Height);
-            var projection = Matrix4.CreatePerspectiveFieldOfView((float)Math.PI / 4, Width / (float)Height, 1.0f, 64.0f);
-            GL.MatrixMode(MatrixMode.Projection);
-            GL.LoadMatrix(ref projection);
         }
 
     }
