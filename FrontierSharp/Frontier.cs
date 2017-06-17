@@ -27,17 +27,19 @@
 
         protected override void OnLoad(EventArgs e) {
             base.OnLoad(e);
-            Log.Info("Begin startup");
+            Log.Info("OnLoad: Begin startup");
 
-            Title = "Frontier";
-            Icon = new Icon("Resources/icon.bmp");
-            Size = new Size(1400, 800);
+            base.Title = "Frontier";
+            //Icon = new Icon("Resources/icon.bmp");
+            base.Size = new Size(1400, 800);
+
+            base.Keyboard.KeyRepeat = true;
 
             //ConsoleInit();
             //this.particles.Init();
+
             //ilInit(); // TODO: what is this?
-            //RandomInit(11);
-            //SdlInit();
+
             this.environment.Init();
             this.renderer.Init();
             //CgInit();
