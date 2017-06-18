@@ -13,16 +13,18 @@
         private readonly IAvatar avatar;
         private readonly IWorld world;
         private readonly IEnvironment environment;
+        private readonly IScene scene;
 
         private Color4 currentAmbient = Color4.Black;
         private Color4 currentDiffuse = Color4.White;
         private Color4 currentFog = Color4.White;
 
-        public RendererImpl(IAvatar avatar, IWorld world, IEnvironment environment) {
+        public RendererImpl(IAvatar avatar, IWorld world, IEnvironment environment, IScene scene) {
             // Set dependencies
             this.avatar = avatar;
             this.world = world;
             this.environment = environment;
+            this.scene = scene;
         }
 
         public void Init() {
@@ -102,7 +104,7 @@
 
             //if (CVarUtils::GetCVar<bool>("render.shaders"))
             //    CgUpdate();
-            //SceneRender();
+            this.scene.Render();
             //CgShaderSelect(VSHADER_NONE);
             //if (CVarUtils::GetCVar<bool>("render.wireframe"))
             //    SceneRenderDebug();

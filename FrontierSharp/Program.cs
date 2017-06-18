@@ -15,6 +15,7 @@
                 kernel.Bind<IAvatar>().To<DummyAvatarImpl>().InSingletonScope();
                 kernel.Bind<IWorld>().To<DummyWorldImpl>().InSingletonScope();
                 kernel.Bind<IEnvironment>().To<DummyEnvironmentImpl>().InSingletonScope();
+                kernel.Bind<IScene>().To<DummySceneImpl>().InSingletonScope();
 
                 using (var frontier = kernel.Get<Frontier>()) {
                     frontier.Run(30.0);
