@@ -402,7 +402,4 @@ float GLrgba::Brighness()
 
 }
 
-
-
-
- * /
+ */
