@@ -1,8 +1,8 @@
 ﻿namespace FrontierSharp.Properties {
     public class Property<T> {
-        T Value { get; set; }
-        string Name { get; }
-        string Description { get; }
+        public T Value { get; set; }
+        public string Name { get; }
+        public string Description { get; }
 
         public Property(string name, T initialValue, string description) {
             Name = name;
