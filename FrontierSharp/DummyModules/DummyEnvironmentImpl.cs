@@ -7,6 +7,11 @@
     using Util;
 
     class DummyEnvironmentImpl : IEnvironment {
+        private Properties properties;
+        public Properties Properties {
+            get { return this.properties; }
+        }
+
         public EnvironmentData GetCurrent() {
             return new EnvironmentData {
                 color = new ColorTypeIndexedArray<Color4> {

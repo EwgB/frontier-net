@@ -7,7 +7,7 @@
 
     using Util;
 
-    public interface IEnvironment {
+    public interface IEnvironment : IHasProperties {
         EnvironmentData GetCurrent();
 
         void Init();
