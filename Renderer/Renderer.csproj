@@ -47,11 +47,16 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RendererImpl.cs" />
+    <Compile Include="RendererProperties.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Interfaces\Interfaces.csproj">
       <Project>{889072ad-5c8d-47d9-8fec-05a9ec728be8}</Project>
       <Name>Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Properties\Properties.csproj">
+      <Project>{0d73456a-0969-4ff6-96a2-9435074b9eb8}</Project>
+      <Name>Properties</Name>
     </ProjectReference>
     <ProjectReference Include="..\Util\Util.csproj">
       <Project>{3EF9CAE0-8660-4500-82CB-8F050F0375A6}</Project>
