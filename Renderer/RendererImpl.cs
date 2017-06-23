@@ -121,7 +121,7 @@
             //    CgUpdate();
             this.scene.Render();
             //CgShaderSelect(VSHADER_NONE);
-            if (this.properties.RenderWireframe.Value)
+            if (this.properties.RenderWireframe)
                 this.scene.RenderDebug();
             //if (CVarUtils::GetCVar<bool>("show.pages"))
             //    CacheRenderDebug();
