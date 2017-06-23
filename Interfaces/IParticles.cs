@@ -1,4 +1,4 @@
 ﻿namespace FrontierSharp.Interfaces {
-    public interface IParticles {
+    public interface IParticles : IHasProperties {
     }
 }
