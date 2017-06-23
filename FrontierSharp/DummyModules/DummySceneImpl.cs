@@ -2,11 +2,17 @@
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
 
-    using Interfaces;
-
     using System.Drawing;
 
+    using Interfaces;
+    using Properties;
+
     class DummySceneImpl : IScene {
+        private Properties properties;
+        public Properties Properties {
+            get { return this.properties; }
+        }
+
         public void Render() {
             var modelview = Matrix4.LookAt(Vector3.Zero, Vector3.UnitZ, Vector3.UnitY);
             GL.MatrixMode(MatrixMode.Modelview);

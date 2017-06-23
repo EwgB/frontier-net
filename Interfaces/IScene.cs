@@ -1,5 +1,5 @@
 ﻿namespace FrontierSharp.Interfaces {
-    public interface IScene {
+    public interface IScene : IHasProperties {
         void Render();
         void RenderDebug();
     }
