@@ -7,6 +7,7 @@
     using System;
 
     using Interfaces;
+    using Interfaces.Renderer;
     using System.Drawing;
 
     internal class Frontier : GameWindow {

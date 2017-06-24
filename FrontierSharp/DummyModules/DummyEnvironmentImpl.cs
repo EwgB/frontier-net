@@ -3,14 +3,12 @@
     using OpenTK.Graphics;
 
     using Interfaces;
-    using Properties;
+    using Interfaces.Property;
     using Util;
 
     class DummyEnvironmentImpl : IEnvironment {
-        private Properties properties;
-        public Properties Properties {
-            get { return this.properties; }
-        }
+        private IProperties properties;
+        public IProperties Properties { get { return this.properties; } }
 
         public EnvironmentData GetCurrent() {
             return new EnvironmentData {

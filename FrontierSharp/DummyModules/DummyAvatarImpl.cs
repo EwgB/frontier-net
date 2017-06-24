@@ -2,15 +2,12 @@
     using OpenTK;
 
     using Interfaces;
-    using Properties;
+    using Interfaces.Property;
 
     class DummyAvatarImpl : IAvatar {
 
-        private Properties properties;
-        public Properties Properties {
-            get { return this.properties; }
-            set { this.properties = value; }
-        }
+        private IProperties properties;
+        public IProperties Properties { get { return this.properties; } }
 
         public Vector3 GetCameraPosition() {
             return new Vector3(1, 1, 0);

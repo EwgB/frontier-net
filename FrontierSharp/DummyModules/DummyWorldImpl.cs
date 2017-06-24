@@ -2,13 +2,11 @@
     using OpenTK;
 
     using Interfaces;
-    using Properties;
+    using Interfaces.Property;
 
     internal class DummyWorldImpl : IWorld {
-        private Properties properties;
-        public Properties Properties {
-            get { return this.properties; }
-        }
+        private IProperties properties;
+        public IProperties Properties { get { return this.properties; } }
 
         public uint MapId { get { return 0; } }
 

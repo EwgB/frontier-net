@@ -1,9 +1,10 @@
 ﻿namespace FrontierSharp.Renderer {
     using NLog;
 
+    using Interfaces.Renderer;
     using Properties;
 
-    class RendererProperties : Properties {
+    internal class RendererProperties : Properties, IRendererProperties {
         private const string RENDER_WIREFRAME = "render_wireframe";
         private const string RENDER_SHADERS = "render_shaders";
         private const string SHOW_PAGES = "show_pages";

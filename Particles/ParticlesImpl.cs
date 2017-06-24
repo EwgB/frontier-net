@@ -1,14 +1,12 @@
 ﻿namespace FrontierSharp.Particles {
     using Interfaces;
-    using Properties;
+    using Interfaces.Property;
 
     ///<summary>Manages the list of active particle emitters.</summary>
     public class ParticlesImpl : IParticles {
 
-        private Properties properties;
-        public Properties Properties {
-            get { return this.properties; }
-        }
+        private IProperties properties;
+        public IProperties Properties { get { return this.properties; } }
 
         //private static readonly List<CEmitter> EmitterList = new List<CEmitter>();
 

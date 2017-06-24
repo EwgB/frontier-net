@@ -3,6 +3,7 @@
 
     using DummyModules;
     using Interfaces;
+    using Interfaces.Renderer;
     using Renderer;
 
     internal class Program {

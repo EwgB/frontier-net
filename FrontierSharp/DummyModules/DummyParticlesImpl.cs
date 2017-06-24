@@ -1,11 +1,9 @@
 ﻿namespace FrontierSharp.DummyModules {
     using Interfaces;
-    using Properties;
+    using Interfaces.Property;
 
     class DummyParticlesImpl : IParticles {
-        private Properties properties;
-        public Properties Properties {
-            get { return this.properties; }
-        }
+        private IProperties properties;
+        public IProperties Properties { get { return this.properties; } }
     }
 }

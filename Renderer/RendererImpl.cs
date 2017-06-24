@@ -7,7 +7,8 @@
     using System.Drawing;
 
     using Interfaces;
-    using Properties;
+    using Interfaces.Property;
+    using Interfaces.Renderer;
     using Util;
 
     public class RendererImpl : IRenderer {
@@ -29,10 +30,9 @@
         private int viewHeight;
         private int r = 0;
 
-        private RendererProperties properties = new RendererProperties();
-        public Properties Properties { 
-            get { return this.properties; }
-        }
+        private IRendererProperties properties = new RendererProperties();
+        public IProperties Properties { get { return this.properties; } }
+        public IRendererProperties RendererProperties { get { return this.properties; } }
 
         public RendererImpl(IAvatar avatar, IWorld world, IEnvironment environment, IScene scene) {
             // Set dependencies

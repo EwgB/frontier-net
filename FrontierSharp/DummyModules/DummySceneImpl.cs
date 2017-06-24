@@ -5,13 +5,11 @@
     using System.Drawing;
 
     using Interfaces;
-    using Properties;
+    using Interfaces.Property;
 
     class DummySceneImpl : IScene {
-        private Properties properties;
-        public Properties Properties {
-            get { return this.properties; }
-        }
+        private IProperties properties;
+        public IProperties Properties { get { return this.properties; } }
 
         public void Render() {
             var modelview = Matrix4.LookAt(Vector3.Zero, Vector3.UnitZ, Vector3.UnitY);

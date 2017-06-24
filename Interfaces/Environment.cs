@@ -5,6 +5,7 @@
     using OpenTK;
     using OpenTK.Graphics;
 
+    using Interfaces.Property;
     using Util;
 
     public interface IEnvironment : IHasProperties {

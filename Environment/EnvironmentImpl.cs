@@ -1,12 +1,12 @@
 ﻿namespace FrontierSharp.Environment {
     using System;
     using Interfaces;
-    using Properties;
+    using Interfaces.Property;
 
     public class EnvironmentImpl : IEnvironment {
 
         private EnvironmentProperties properties = new EnvironmentProperties();
-        public Properties Properties {
+        public IProperties Properties {
             get { return this.properties; }
         }
 

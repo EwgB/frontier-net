@@ -4,14 +4,13 @@
 
     using System.Drawing;
 
-    using Interfaces;
-    using Properties;
+    using Interfaces.Renderer;
+    using Interfaces.Property;
 
     public class DummyRendererImpl : IRenderer {
-        private Properties properties;
-        public Properties Properties {
-            get { return this.properties; }
-        }
+        private IRendererProperties properties;
+        public IProperties Properties { get { return this.properties; } }
+        public IRendererProperties RendererProperties { get { return this.properties; } }
 
         public void Init() {
             GL.ClearColor(Color.CornflowerBlue);

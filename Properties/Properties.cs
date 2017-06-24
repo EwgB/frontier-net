@@ -2,19 +2,30 @@
     using System;
     using System.Collections.Generic;
 
-    public class Properties {
-        private Dictionary<string, Property<object>> properties = new Dictionary<string, Property<object>>();
+    using Interfaces.Property;
 
-        protected void AddProperty<T>(Property<T> property) {
+    public class Properties :  IProperties {
+        private Dictionary<string, IProperty> properties = new Dictionary<string, IProperty>();
+
+        public void AddProperty<T>(IProperty<T> property) {
             try {
-                this.properties.Add(property.Name, property as Property<object>);
+                this.properties.Add(property.Name, property);
             } catch (ArgumentException e) {
-                throw new PropertyAddException<T>(property, e);
+                throw new PropertyAddException(property, e);
             }
         }
 
-        protected Property<T> GetProperty<T>(string name) {
-            return this.properties[name] as Property<T>;
+        public IProperty<T> GetProperty<T>(string name) {
+            if (this.properties.ContainsKey(name)) {
+                var property = this.properties[name] as IProperty<T>;
+                if (null != property) {
+                    return property;
+                } else {
+                    throw new PropertyTypeException(properties[name].GetType(), typeof(T));
+                }
+            } else {
+                throw new PropertyNotFoundException(name);
+            }
         }
     }
 }
