@@ -1,12 +1,15 @@
 ﻿namespace FrontierSharp.DummyModules {
-    using System;
-    using Interfaces;
-
     using OpenTK;
     using OpenTK.Graphics;
+
+    using Interfaces;
+    using Interfaces.Property;
     using Util;
 
     class DummyEnvironmentImpl : IEnvironment {
+        private IProperties properties;
+        public IProperties Properties { get { return this.properties; } }
+
         public EnvironmentData GetCurrent() {
             return new EnvironmentData {
                 color = new ColorTypeIndexedArray<Color4> {

@@ -1,12 +1,17 @@
 ﻿namespace FrontierSharp.Renderer {
-    using Interfaces;
-
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
 
     using System.Drawing;
 
+    using Interfaces.Renderer;
+    using Interfaces.Property;
+
     public class DummyRendererImpl : IRenderer {
+        private IRendererProperties properties;
+        public IProperties Properties { get { return this.properties; } }
+        public IRendererProperties RendererProperties { get { return this.properties; } }
+
         public void Init() {
             GL.ClearColor(Color.CornflowerBlue);
         }

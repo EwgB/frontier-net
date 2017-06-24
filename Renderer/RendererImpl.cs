@@ -1,13 +1,15 @@
 ﻿namespace FrontierSharp.Renderer {
-    using Interfaces;
-    using Util;
-
     using OpenTK;
     using OpenTK.Graphics;
     using OpenTK.Graphics.OpenGL;
 
     using System;
     using System.Drawing;
+
+    using Interfaces;
+    using Interfaces.Property;
+    using Interfaces.Renderer;
+    using Util;
 
     public class RendererImpl : IRenderer {
         // Constants
@@ -27,6 +29,10 @@
         private int viewWidth;
         private int viewHeight;
         private int r = 0;
+
+        private IRendererProperties properties = new RendererProperties();
+        public IProperties Properties { get { return this.properties; } }
+        public IRendererProperties RendererProperties { get { return this.properties; } }
 
         public RendererImpl(IAvatar avatar, IWorld world, IEnvironment environment, IScene scene) {
             // Set dependencies
@@ -115,8 +121,8 @@
             //    CgUpdate();
             this.scene.Render();
             //CgShaderSelect(VSHADER_NONE);
-            //if (CVarUtils::GetCVar<bool>("render.wireframe"))
-            //    this.scene.RenderDebug();
+            if (this.properties.RenderWireframe)
+                this.scene.RenderDebug();
             //if (CVarUtils::GetCVar<bool>("show.pages"))
             //    CacheRenderDebug();
             //TextRender();

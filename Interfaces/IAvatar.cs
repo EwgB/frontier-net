@@ -1,7 +1,9 @@
 ﻿namespace FrontierSharp.Interfaces {
     using OpenTK;
 
-    public interface IAvatar {
+    using Property;
+
+    public interface IAvatar : IHasProperties {
         Vector3 GetCameraPosition();
         Vector3 GetCameraAngle();
     }

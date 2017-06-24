@@ -5,9 +5,10 @@
     using OpenTK;
     using OpenTK.Graphics;
 
+    using Interfaces.Property;
     using Util;
 
-    public interface IEnvironment {
+    public interface IEnvironment : IHasProperties {
         EnvironmentData GetCurrent();
 
         void Init();

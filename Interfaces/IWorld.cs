@@ -1,7 +1,9 @@
 ﻿namespace FrontierSharp.Interfaces {
     using OpenTK;
 
-    public interface IWorld {
+    using Property;
+
+    public interface IWorld : IHasProperties {
 
         uint MapId { get; }
 
