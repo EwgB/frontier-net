@@ -35,7 +35,7 @@
         private const string Z_BUFFER = "z_buffer";
         private const string CURRENT_PARTICLE = "current_particle";
 
-        ParticlesProperties() {
+        internal ParticlesProperties() {
             try {
                 base.AddProperty(new Property<string>(TEXTURE, ""));
                 base.AddProperty(new Property<Vector3>(ACCELERARTION, Vector3.Zero));

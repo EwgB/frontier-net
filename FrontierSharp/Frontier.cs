@@ -41,7 +41,7 @@
             base.Keyboard.KeyRepeat = true;
 
             //ConsoleInit();
-            //this.particles.Init();
+            this.particles.Init();
 
             //ilInit(); // TODO: what is this?
 

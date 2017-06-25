@@ -29,9 +29,9 @@
 
         public RendererProperties() {
             try {
-                base.AddProperty<bool>(new Property<bool>(RENDER_WIREFRAME, false, "Overlay scene with wireframe."));
-                base.AddProperty<bool>(new Property<bool>(RENDER_SHADERS, true, "Enable vertex, fragment shaders."));
-                base.AddProperty<bool>(new Property<bool>(SHOW_PAGES, false, "Show bounding boxes for paged data."));
+                base.AddProperty(new Property<bool>(RENDER_WIREFRAME, false, "Overlay scene with wireframe."));
+                base.AddProperty(new Property<bool>(RENDER_SHADERS, true, "Enable vertex, fragment shaders."));
+                base.AddProperty(new Property<bool>(SHOW_PAGES, false, "Show bounding boxes for paged data."));
             } catch (PropertyException e) {
                 Log.Error(e.Message);
             }
