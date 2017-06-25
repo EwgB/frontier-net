@@ -7,6 +7,7 @@
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
 
+    using Interfaces;
     using Interfaces.Environment;
     using Interfaces.Particles;
     using Interfaces.Renderer;
@@ -17,17 +18,49 @@
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         // Modules
-        private readonly IParticles particles;
-        private readonly IRenderer renderer;
+        private readonly IAvatar avatar;
+        private readonly IConsole console;
         private readonly IEnvironment environment;
+        private readonly IGame game;
+        private readonly IParticles particles;
+        private readonly IPlayer player;
+        private readonly IRenderer renderer;
+        private readonly IScene scene;
+        private readonly IShaders shaders;
+        private readonly ISky sky;
+        private readonly IText text;
+        private readonly ITexture texture;
+        private readonly IWorld world;
 
         // Constants
         private const float MOUSE_SCALING = 0.01f;
 
-        public Frontier(IParticles particles, IRenderer renderer, IEnvironment environment) {
-            this.particles = particles;
-            this.renderer = renderer;
+        public Frontier(IAvatar avatar,
+                        IConsole console,
+                        IEnvironment environment,
+                        IGame game,
+                        IParticles particles,
+                        IPlayer player,
+                        IRenderer renderer,
+                        IScene scene,
+                        IShaders shaders,
+                        ISky sky,
+                        IText text,
+                        ITexture texture,
+                        IWorld world) {
+            this.avatar = avatar;
+            this.console = console;
             this.environment = environment;
+            this.game = game;
+            this.particles = particles;
+            this.player = player;
+            this.renderer = renderer;
+            this.scene = scene;
+            this.shaders = shaders;
+            this.sky = sky;
+            this.text = text;
+            this.texture = texture;
+            this.world = world;
         }
 
         protected override void OnLoad(EventArgs e) {
@@ -40,22 +73,20 @@
 
             base.Keyboard.KeyRepeat = true;
 
-            //ConsoleInit();
+            this.console.Init();
             this.particles.Init();
-
             //ilInit(); // TODO: what is this?
-
             this.environment.Init();
             this.renderer.Init();
-            //CgInit();
-            //GameInit();
-            //PlayerInit();
-            //AvatarInit();
-            //TextureInit();
-            //WorldInit();
-            //SceneInit();
-            //SkyInit();
-            //TextInit();
+            this.shaders.Init();
+            this.game.Init();
+            this.player.Init();
+            this.avatar.Init();
+            this.texture.Init();
+            this.world.Init();
+            this.scene.Init();
+            this.sky.Init();
+            this.text.Init();
 
             Log.Info("Init done.");
         }

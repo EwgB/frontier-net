@@ -23,6 +23,7 @@
                 kernel.Bind<IRenderer>().To<RendererImpl>().InSingletonScope();
                 kernel.Bind<IScene>().To<DummyScene>().InSingletonScope();
                 kernel.Bind<IShaders>().To<DummyShaders>().InSingletonScope();
+                kernel.Bind<ISky>().To<DummySky>().InSingletonScope();
                 kernel.Bind<IText>().To<DummyText>().InSingletonScope();
                 kernel.Bind<ITexture>().To<DummyTexture>().InSingletonScope();
                 kernel.Bind<IWorld>().To<DummyWorld>().InSingletonScope();
