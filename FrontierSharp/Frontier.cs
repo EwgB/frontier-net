@@ -7,8 +7,8 @@
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
 
-    using Interfaces;
     using Interfaces.Environment;
+    using Interfaces.Particles;
     using Interfaces.Renderer;
 
     internal class Frontier : GameWindow {
@@ -20,6 +20,9 @@
         private readonly IParticles particles;
         private readonly IRenderer renderer;
         private readonly IEnvironment environment;
+
+        // Constants
+        private const float MOUSE_SCALING = 0.01f;
 
         public Frontier(IParticles particles, IRenderer renderer, IEnvironment environment) {
             this.particles = particles;

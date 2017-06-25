@@ -1,5 +1,5 @@
 ﻿namespace FrontierSharp.DummyModules {
-    using Interfaces;
+    using Interfaces.Particles;
     using Interfaces.Property;
 
     class DummyParticlesImpl : IParticles {

@@ -1,5 +1,5 @@
 ﻿namespace FrontierSharp.Particles {
-    using Interfaces;
+    using Interfaces.Particles;
     using Interfaces.Property;
 
     ///<summary>Manages the list of active particle emitters.</summary>

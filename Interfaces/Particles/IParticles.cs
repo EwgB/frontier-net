@@ -1,4 +1,4 @@
-﻿namespace FrontierSharp.Interfaces {
+﻿namespace FrontierSharp.Interfaces.Particles {
     using Property;
 
     public interface IParticles : IHasProperties, IModule {

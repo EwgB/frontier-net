@@ -3,6 +3,7 @@
 
     using Interfaces;
     using Interfaces.Environment;
+    using Interfaces.Particles;
     using Interfaces.Renderer;
 
     using DummyModules;
