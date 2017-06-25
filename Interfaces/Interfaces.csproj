@@ -45,6 +45,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Environment\EnvironmentTypes.cs" />
+    <Compile Include="IPlayer.cs" />
+    <Compile Include="ISky.cs" />
+    <Compile Include="IText.cs" />
+    <Compile Include="ITexture.cs" />
+    <Compile Include="IGame.cs" />
+    <Compile Include="IConsole.cs" />
     <Compile Include="IModule.cs" />
     <Compile Include="IShaders.cs" />
     <Compile Include="Particles\IParticlesProperties.cs" />

@@ -14,13 +14,18 @@
             using (IKernel kernel = new StandardKernel()) {
 
                 // Set up dependecies
-                kernel.Bind<IParticles>().To<DummyParticlesImpl>().InSingletonScope();
-                kernel.Bind<IRenderer>().To<RendererImpl>().InSingletonScope();
                 kernel.Bind<IAvatar>().To<DummyAvatarImpl>().InSingletonScope();
-                kernel.Bind<IWorld>().To<DummyWorldImpl>().InSingletonScope();
+                kernel.Bind<IConsole>().To<DummyConsoleImpl>().InSingletonScope();
                 kernel.Bind<IEnvironment>().To<DummyEnvironmentImpl>().InSingletonScope();
+                kernel.Bind<IGame>().To<DummyGameImpl>().InSingletonScope();
+                kernel.Bind<IParticles>().To<DummyParticlesImpl>().InSingletonScope();
+                kernel.Bind<IPlayer>().To<DummyPlayerImpl>().InSingletonScope();
+                kernel.Bind<IRenderer>().To<RendererImpl>().InSingletonScope();
                 kernel.Bind<IScene>().To<DummySceneImpl>().InSingletonScope();
                 kernel.Bind<IShaders>().To<DummyShadersImpl>().InSingletonScope();
+                kernel.Bind<IText>().To<DummyTextImpl>().InSingletonScope();
+                kernel.Bind<ITexture>().To<DummyTextureImpl>().InSingletonScope();
+                kernel.Bind<IWorld>().To<DummyWorldImpl>().InSingletonScope();
 
                 using (var frontier = kernel.Get<Frontier>()) {
                     frontier.Run(30.0);

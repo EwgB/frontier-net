@@ -65,6 +65,12 @@
     <Compile Include="DummyModules\DummyParticlesImpl.cs" />
     <Compile Include="DummyModules\DummyRendererImpl.cs" />
     <Compile Include="DummyModules\DummySceneImpl.cs" />
+    <Compile Include="DummyModules\DummyTextImpl.cs" />
+    <Compile Include="DummyModules\DummySkyImpl.cs" />
+    <Compile Include="DummyModules\DummyTextureImpl.cs" />
+    <Compile Include="DummyModules\DummyPlayerImpl.cs" />
+    <Compile Include="DummyModules\DummyConsoleImpl.cs" />
+    <Compile Include="DummyModules\DummyGameImpl.cs" />
     <Compile Include="DummyModules\DummyWorldImpl.cs" />
     <Compile Include="DummyModules\DummyShadersImpl.cs" />
     <Compile Include="Frontier.cs" />
