@@ -5,5 +5,9 @@
     class DummyParticlesImpl : IParticles {
         private IProperties properties;
         public IProperties Properties { get { return this.properties; } }
+
+        public void Init() {
+            // Do nothing
+        }
     }
 }

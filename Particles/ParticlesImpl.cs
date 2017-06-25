@@ -10,6 +10,34 @@
 
         //private static readonly List<CEmitter> EmitterList = new List<CEmitter>();
 
+        public void Init() {
+            //  CVarUtils::CreateCVar<string> ("particle.texture", "");
+            //  CVarUtils::CreateCVar ("particle.acceleration", glVector (0.0f, 0.0f, 0.0f));
+            //  CVarUtils::CreateCVar ("particle.blend", 0);
+            //  CVarUtils::CreateCVar ("particle.emitter_lifespan", 0);
+            //  CVarUtils::CreateCVar ("particle.emit_count", 0);
+            //  CVarUtils::CreateCVar ("particle.emit_interval", 0);
+            //  CVarUtils::CreateCVar ("particle.fade_in", 0);
+            //  CVarUtils::CreateCVar ("particle.fade_out", 0);
+            //  CVarUtils::CreateCVar ("particle.interpolate", 0);
+            //  CVarUtils::CreateCVar ("particle.lifespan", 0);
+            //  CVarUtils::CreateCVar ("particle.origin", glVector (0.0f, 0.0f, 0.0f));
+            //  CVarUtils::CreateCVar ("particle.panel_type", 0);
+            //  CVarUtils::CreateCVar ("particle.rotation", glVector (0.0f, 0.0f, 0.0f));
+            //  CVarUtils::CreateCVar ("particle.size.min", glVector (0.0f, 0.0f, 0.0f));
+            //  CVarUtils::CreateCVar ("particle.size.max", glVector (0.0f, 0.0f, 0.0f));
+            //  CVarUtils::CreateCVar ("particle.speed.min", glVector (0.0f, 0.0f, 0.0f));
+            //  CVarUtils::CreateCVar ("particle.speed.max", glVector (0.0f, 0.0f, 0.0f));
+            //  CVarUtils::CreateCVar ("particle.spin", glVector (0.0f, 0.0f, 0.0f));
+            //  CVarUtils::CreateCVar ("particle.volume.min", glVector (0.0f, 0.0f, 0.0f));
+            //  CVarUtils::CreateCVar ("particle.volume.max", glVector (0.0f, 0.0f, 0.0f));
+            //  CVarUtils::CreateCVar<bool> ("particle.wind", false);
+            //  CVarUtils::CreateCVar<bool> ("particle.gravity", false);
+            //  CVarUtils::CreateCVar<bool> ("particle.z_buffer", false);
+
+            //  CVarUtils::CreateCVar<string> ("current_particle", "");
+        }
+
         ////For debugging.  Place an emitter at our feet
         //void place_emitter ()
         //{
@@ -76,38 +104,6 @@
 
         //}
 
-
-        //void ParticleInit ()
-        //{
-
-        //  CVarUtils::CreateCVar<string> ("particle.texture", "");
-        //  CVarUtils::CreateCVar ("particle.acceleration", glVector (0.0f, 0.0f, 0.0f));
-        //  CVarUtils::CreateCVar ("particle.blend", 0);
-        //  CVarUtils::CreateCVar ("particle.emitter_lifespan", 0);
-        //  CVarUtils::CreateCVar ("particle.emit_count", 0);
-        //  CVarUtils::CreateCVar ("particle.emit_interval", 0);
-        //  CVarUtils::CreateCVar ("particle.fade_in", 0);
-        //  CVarUtils::CreateCVar ("particle.fade_out", 0);
-        //  CVarUtils::CreateCVar ("particle.interpolate", 0);
-        //  CVarUtils::CreateCVar ("particle.lifespan", 0);
-        //  CVarUtils::CreateCVar ("particle.origin", glVector (0.0f, 0.0f, 0.0f));
-        //  CVarUtils::CreateCVar ("particle.panel_type", 0);
-        //  CVarUtils::CreateCVar ("particle.rotation", glVector (0.0f, 0.0f, 0.0f));
-        //  CVarUtils::CreateCVar ("particle.size.min", glVector (0.0f, 0.0f, 0.0f));
-        //  CVarUtils::CreateCVar ("particle.size.max", glVector (0.0f, 0.0f, 0.0f));
-        //  CVarUtils::CreateCVar ("particle.speed.min", glVector (0.0f, 0.0f, 0.0f));
-        //  CVarUtils::CreateCVar ("particle.speed.max", glVector (0.0f, 0.0f, 0.0f));
-        //  CVarUtils::CreateCVar ("particle.spin", glVector (0.0f, 0.0f, 0.0f));
-        //  CVarUtils::CreateCVar ("particle.volume.min", glVector (0.0f, 0.0f, 0.0f));
-        //  CVarUtils::CreateCVar ("particle.volume.max", glVector (0.0f, 0.0f, 0.0f));
-        //  CVarUtils::CreateCVar<bool> ("particle.wind", false);
-        //  CVarUtils::CreateCVar<bool> ("particle.gravity", false);
-        //  CVarUtils::CreateCVar<bool> ("particle.z_buffer", false);
-
-        //  CVarUtils::CreateCVar<string> ("current_particle", "");
-
-
-        //}
 
         //void ParticleUpdate ()
         //{

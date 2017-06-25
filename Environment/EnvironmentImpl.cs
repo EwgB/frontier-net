@@ -1,6 +1,7 @@
 ﻿namespace FrontierSharp.Environment {
     using System;
-    using Interfaces;
+
+    using Interfaces.Environment;
     using Interfaces.Property;
 
     public class EnvironmentImpl : IEnvironment {

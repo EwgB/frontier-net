@@ -1,18 +1,11 @@
-﻿namespace FrontierSharp.Interfaces {
+﻿namespace FrontierSharp.Interfaces.Environment {
     using System;
     using System.Collections;
 
     using OpenTK;
     using OpenTK.Graphics;
 
-    using Interfaces.Property;
     using Util;
-
-    public interface IEnvironment : IHasProperties {
-        EnvironmentData GetCurrent();
-
-        void Init();
-    }
 
     public class EnvironmentData {
         public ColorTypeIndexedArray<Color4> color = new ColorTypeIndexedArray<Color4>();
@@ -43,5 +36,4 @@
         }
         public IEnumerator GetEnumerator() => elements.GetEnumerator();
     }
-
 }

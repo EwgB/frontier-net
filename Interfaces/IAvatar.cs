@@ -3,7 +3,7 @@
 
     using Property;
 
-    public interface IAvatar : IHasProperties {
+    public interface IAvatar : IHasProperties, IModule {
         Vector3 GetCameraPosition();
         Vector3 GetCameraAngle();
     }

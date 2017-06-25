@@ -1,9 +1,11 @@
 ﻿namespace FrontierSharp {
     using Ninject;
 
-    using DummyModules;
     using Interfaces;
+    using Interfaces.Environment;
     using Interfaces.Renderer;
+
+    using DummyModules;
     using Renderer;
 
     internal class Program {
@@ -17,6 +19,7 @@
                 kernel.Bind<IWorld>().To<DummyWorldImpl>().InSingletonScope();
                 kernel.Bind<IEnvironment>().To<DummyEnvironmentImpl>().InSingletonScope();
                 kernel.Bind<IScene>().To<DummySceneImpl>().InSingletonScope();
+                kernel.Bind<IShaders>().To<DummyShadersImpl>().InSingletonScope();
 
                 using (var frontier = kernel.Get<Frontier>()) {
                     frontier.Run(30.0);

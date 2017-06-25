@@ -1,14 +1,15 @@
 ﻿namespace FrontierSharp {
+    using System;
+    using System.Drawing;
+
     using NLog;
 
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
 
-    using System;
-
     using Interfaces;
+    using Interfaces.Environment;
     using Interfaces.Renderer;
-    using System.Drawing;
 
     internal class Frontier : GameWindow {
 

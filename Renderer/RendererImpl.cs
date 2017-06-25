@@ -7,6 +7,7 @@
     using System.Drawing;
 
     using Interfaces;
+    using Interfaces.Environment;
     using Interfaces.Property;
     using Interfaces.Renderer;
     using Util;
@@ -117,17 +118,19 @@
 
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
-            //if (CVarUtils::GetCVar<bool>("render.shaders"))
+            //if (this.properties.RenderShaders)
             //    CgUpdate();
             this.scene.Render();
             //CgShaderSelect(VSHADER_NONE);
-            if (this.properties.RenderWireframe)
+            if (this.properties.RenderWireframe) {
                 this.scene.RenderDebug();
-            //if (CVarUtils::GetCVar<bool>("show.pages"))
+            }
+            //if (this.properties.ShowPages)
             //    CacheRenderDebug();
             //TextRender();
-            if (showMap)
+            if (showMap) {
                 RenderTexture(this.world.MapId);
+            }
             //ConsoleRender();
         }
 

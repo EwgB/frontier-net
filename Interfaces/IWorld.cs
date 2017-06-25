@@ -3,7 +3,7 @@
 
     using Property;
 
-    public interface IWorld : IHasProperties {
+    public interface IWorld : IHasProperties, IModule {
 
         uint MapId { get; }
 

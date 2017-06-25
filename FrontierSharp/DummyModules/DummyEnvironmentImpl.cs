@@ -2,8 +2,9 @@
     using OpenTK;
     using OpenTK.Graphics;
 
-    using Interfaces;
+    using Interfaces.Environment;
     using Interfaces.Property;
+
     using Util;
 
     class DummyEnvironmentImpl : IEnvironment {

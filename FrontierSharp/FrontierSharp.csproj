@@ -66,6 +66,7 @@
     <Compile Include="DummyModules\DummyRendererImpl.cs" />
     <Compile Include="DummyModules\DummySceneImpl.cs" />
     <Compile Include="DummyModules\DummyWorldImpl.cs" />
+    <Compile Include="DummyModules\DummyShadersImpl.cs" />
     <Compile Include="Frontier.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
