@@ -1,7 +1,7 @@
 ﻿namespace FrontierSharp.DummyModules {
     using Interfaces;
 
-    internal class DummyGameImpl : IGame {
+    internal class DummyGame : IGame {
         public void Init() {
             // Do nothing
         }

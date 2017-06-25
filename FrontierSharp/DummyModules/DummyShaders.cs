@@ -1,7 +1,7 @@
 ﻿namespace FrontierSharp.DummyModules {
     using Interfaces;
 
-    internal class DummySkyImpl : ISky {
+    internal class DummyShaders : IShaders {
         public void Init() {
             // Do nothing
         }

@@ -7,7 +7,7 @@
 
     using Util;
 
-    class DummyEnvironmentImpl : IEnvironment {
+    class DummyEnvironment : IEnvironment {
         private IProperties properties;
         public IProperties Properties { get { return this.properties; } }
 

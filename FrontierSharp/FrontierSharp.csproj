@@ -60,19 +60,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DummyModules\DummyAvatarImpl.cs" />
-    <Compile Include="DummyModules\DummyEnvironmentImpl.cs" />
-    <Compile Include="DummyModules\DummyParticlesImpl.cs" />
-    <Compile Include="DummyModules\DummyRendererImpl.cs" />
-    <Compile Include="DummyModules\DummySceneImpl.cs" />
-    <Compile Include="DummyModules\DummyTextImpl.cs" />
-    <Compile Include="DummyModules\DummySkyImpl.cs" />
-    <Compile Include="DummyModules\DummyTextureImpl.cs" />
-    <Compile Include="DummyModules\DummyPlayerImpl.cs" />
-    <Compile Include="DummyModules\DummyConsoleImpl.cs" />
-    <Compile Include="DummyModules\DummyGameImpl.cs" />
-    <Compile Include="DummyModules\DummyWorldImpl.cs" />
-    <Compile Include="DummyModules\DummyShadersImpl.cs" />
+    <Compile Include="DummyModules\DummyAvatar.cs" />
+    <Compile Include="DummyModules\DummyEnvironment.cs" />
+    <Compile Include="DummyModules\DummyParticles.cs" />
+    <Compile Include="DummyModules\DummyRenderer.cs" />
+    <Compile Include="DummyModules\DummyScene.cs" />
+    <Compile Include="DummyModules\DummyText.cs" />
+    <Compile Include="DummyModules\DummySky.cs" />
+    <Compile Include="DummyModules\DummyTexture.cs" />
+    <Compile Include="DummyModules\DummyPlayer.cs" />
+    <Compile Include="DummyModules\DummyConsole.cs" />
+    <Compile Include="DummyModules\DummyGame.cs" />
+    <Compile Include="DummyModules\DummyWorld.cs" />
+    <Compile Include="DummyModules\DummyShaders.cs" />
     <Compile Include="Frontier.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

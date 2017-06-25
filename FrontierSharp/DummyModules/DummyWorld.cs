@@ -4,21 +4,18 @@
     using Interfaces;
     using Interfaces.Property;
 
-    class DummyAvatarImpl : IAvatar {
-
+    internal class DummyWorld : IWorld {
         private IProperties properties;
         public IProperties Properties { get { return this.properties; } }
+
+        public uint MapId { get { return 0; } }
 
         public void Init() {
             // Do nothing
         }
 
-        public Vector3 GetCameraPosition() {
-            return new Vector3(1, 1, 0);
-        }
-
-        public Vector3 GetCameraAngle() {
-            return Vector3.UnitX;
+        public float GetWaterLevel(Vector2 coord) {
+            return 0;
         }
     }
 }

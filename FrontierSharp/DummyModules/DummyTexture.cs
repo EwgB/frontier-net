@@ -1,7 +1,7 @@
 ﻿namespace FrontierSharp.DummyModules {
     using Interfaces;
 
-    internal class DummyShadersImpl : IShaders {
+    internal class DummyTexture : ITexture {
         public void Init() {
             // Do nothing
         }
