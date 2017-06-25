@@ -7,7 +7,7 @@
     public class Properties :  IProperties {
         private Dictionary<string, IProperty> properties = new Dictionary<string, IProperty>();
 
-        public void AddProperty<T>(IProperty<T> property) {
+        public void AddProperty(IProperty property) {
             try {
                 this.properties.Add(property.Name, property);
             } catch (ArgumentException e) {

@@ -47,6 +47,7 @@
     <Compile Include="Environment\EnvironmentTypes.cs" />
     <Compile Include="IModule.cs" />
     <Compile Include="IShaders.cs" />
+    <Compile Include="Particles\IParticlesProperties.cs" />
     <Compile Include="Property\IHasProperties.cs" />
     <Compile Include="IAvatar.cs" />
     <Compile Include="Environment\IEnvironment.cs" />

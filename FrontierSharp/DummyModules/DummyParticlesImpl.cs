@@ -3,8 +3,9 @@
     using Interfaces.Property;
 
     class DummyParticlesImpl : IParticles {
-        private IProperties properties;
+        private IParticlesProperties properties;
         public IProperties Properties { get { return this.properties; } }
+        public IParticlesProperties ParticlesProperties { get { return this.properties; } }
 
         public void Init() {
             // Do nothing
