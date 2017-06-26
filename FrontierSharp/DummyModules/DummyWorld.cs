@@ -14,6 +14,10 @@
             // Do nothing
         }
 
+        public void Update() {
+            // Do nothing
+        }
+
         public float GetWaterLevel(Vector2 coord) {
             return 0;
         }

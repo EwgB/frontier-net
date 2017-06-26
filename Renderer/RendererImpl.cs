@@ -29,7 +29,7 @@
         private bool showMap;
         private int viewWidth;
         private int viewHeight;
-        private int r = 0;
+        private Range<float> fog;
 
         private IRendererProperties properties = new RendererProperties();
         public IProperties Properties { get { return this.properties; } }
@@ -134,6 +134,7 @@
             //ConsoleRender();
         }
 
+        private int r = 0;
         private void RenderTexture(uint id) {
             GL.MatrixMode(MatrixMode.Projection);
             GL.PushMatrix();
@@ -175,6 +176,7 @@
             GL.TexCoord2(1, 0);
             GL.Vertex3(MAP_SIZE, viewHeight, 0);
             GL.End();
+
             {
                 r++;
                 Color4 c = ColorUtils.Color4Unique(r);
@@ -198,6 +200,19 @@
             GL.PopMatrix();
             GL.MatrixMode(MatrixMode.Modelview);
         }
+
+        public void Update() {
+            var envData = this.environment.GetCurrent();
+
+            this.currentDiffuse = envData.color[ColorType.Light];
+            this.currentAmbient = envData.color[ColorType.Ambient];
+            this.currentFog = envData.color[ColorType.Fog];
+            this.fog = envData.Fog;
+        }
+
+        public void ToggleShowMap() {
+            showMap = !showMap;
+        }
     }
 }
 
@@ -211,11 +226,6 @@
         static float view_aspect;
         static SDL_Surface* screen;
         static int max_dimension;
-        static GLrgba current_ambient;
-        static GLrgba current_diffuse;
-        static GLrgba current_fog;
-        static float fog_min;
-        static float fog_max;
 
         static void draw_water(float tile)
         {
@@ -334,11 +344,11 @@
         void RenderInit(void)
         {
 
-            current_ambient = glRgba(0.0f);
-            current_diffuse = glRgba(1.0f);
-            current_fog = glRgba(1.0f);
-            fog_max = 1000;
-            fog_min = 1;
+            currentAmbient = glRgba(0.0f);
+            currentDiffuse = glRgba(1.0f);
+            currentFog = glRgba(1.0f);
+            fogMax = 1000;
+            fogMin = 1;
             CgInit();
 
         }
@@ -399,22 +409,6 @@
         }
 
         static float spin;
-
-        void RenderUpdate(void)
-        {
-
-            Env* e;
-
-            e = EnvGet();
-            current_diffuse = e->color[ENV_COLOR_LIGHT];
-            current_ambient = e->color[ENV_COLOR_AMBIENT];
-            current_fog = e->color[ENV_COLOR_FOG];
-            fog_min = e->fog.rmin;
-            fog_max = e->fog.rmax;
-            if (InputKeyPressed(SDLK_TAB))
-                showMap = !showMap;
-
-        }
 
         void RenderLoadingScreen(float progress)
         {

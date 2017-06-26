@@ -3,6 +3,7 @@
 
     using Interfaces;
     using Interfaces.Property;
+    using System;
 
     class DummyAvatar : IAvatar {
 
@@ -10,6 +11,10 @@
         public IProperties Properties { get { return this.properties; } }
 
         public void Init() {
+            // Do nothing
+        }
+
+        public void Update() {
             // Do nothing
         }
 

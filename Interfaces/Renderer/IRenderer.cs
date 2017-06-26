@@ -5,5 +5,6 @@
         IRendererProperties RendererProperties { get; }
 
         void Render();
+        void ToggleShowMap();
     }
 }

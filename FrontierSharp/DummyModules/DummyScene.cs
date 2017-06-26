@@ -15,6 +15,10 @@
             // Do nothing
         }
 
+        public void Update() {
+            // Do nothing
+        }
+
         public void Render() {
             var modelview = Matrix4.LookAt(Vector3.Zero, Vector3.UnitZ, Vector3.UnitY);
             GL.MatrixMode(MatrixMode.Modelview);

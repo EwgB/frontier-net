@@ -6,6 +6,7 @@
 
     using Interfaces.Renderer;
     using Interfaces.Property;
+    using System;
 
     public class DummyRenderer : IRenderer {
         private IRendererProperties properties;
@@ -14,6 +15,10 @@
 
         public void Init() {
             GL.ClearColor(Color.CornflowerBlue);
+        }
+
+        public void Update() {
+            // Do nothing
         }
 
         public void Render() {
@@ -35,6 +40,10 @@
                 GL.Vertex3(0.0f, 1.0f, 4.0f);
             }
             GL.End();
+        }
+
+        public void ToggleShowMap() {
+            // Do nothing
         }
     }
 }

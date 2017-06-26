@@ -11,6 +11,7 @@
     using Interfaces.Environment;
     using Interfaces.Particles;
     using Interfaces.Renderer;
+    using OpenTK.Input;
 
     internal class Frontier : GameWindow {
 
@@ -123,6 +124,14 @@
 
         protected override void OnUpdateFrame(FrameEventArgs e) {
             base.OnUpdateFrame(e);
+        }
+
+        protected override void OnKeyDown(KeyboardKeyEventArgs e) {
+            base.OnKeyDown(e);
+
+            if (Key.Tab == e.Key) {
+                this.renderer.ToggleShowMap();
+            }
         }
 
     }

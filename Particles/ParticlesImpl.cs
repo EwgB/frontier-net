@@ -11,8 +11,28 @@
 
         //private static readonly List<CEmitter> EmitterList = new List<CEmitter>();
 
-        public void Init() {
+        public void Init() { }
+
+        public void Update() {
+
+            //  unsigned    i;
+
+            //  for (i = 0; i < EmitterList.size (); i++) 
+            //    EmitterList[i].Update (SdlElapsedSeconds ());
+            //  for (i = 0; i < EmitterList.size (); i++) {
+            //    if (EmitterList[i].Dead ()) {
+            //      EmitterList.erase (EmitterList.begin () + i);
+            //      break;
+            //    }
+            //  }
+            //  if (InputKeyPressed (SDLK_f)) 
+            //    place_emitter ();
+
         }
+    }
+}
+
+// From Particle.cpp
 
         ////For debugging.  Place an emitter at our feet
         //void place_emitter ()
@@ -77,25 +97,6 @@
         //    }
         //  }
         //  ConsoleLog ("ParticleRetire: Effect #%d not found.", id);
-
-        //}
-
-
-        //void ParticleUpdate ()
-        //{
-
-        //  unsigned    i;
-
-        //  for (i = 0; i < EmitterList.size (); i++) 
-        //    EmitterList[i].Update (SdlElapsedSeconds ());
-        //  for (i = 0; i < EmitterList.size (); i++) {
-        //    if (EmitterList[i].Dead ()) {
-        //      EmitterList.erase (EmitterList.begin () + i);
-        //      break;
-        //    }
-        //  }
-        //  if (InputKeyPressed (SDLK_f)) 
-        //    place_emitter ();
 
         //}
 
@@ -201,6 +202,3 @@
         //  return true;
 
         //}
-
-    }
-}
