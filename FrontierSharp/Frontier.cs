@@ -13,7 +13,7 @@
     using Interfaces.Renderer;
     using OpenTK.Input;
 
-    internal class Frontier : GameWindow {
+    internal class Frontier : GameWindow, IModule {
 
         // Logger
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
@@ -66,7 +66,72 @@
 
         protected override void OnLoad(EventArgs e) {
             base.OnLoad(e);
-            Log.Info("OnLoad: Begin startup");
+            Log.Trace("OnLoad");
+            this.Init();
+        }
+
+        protected override void OnResize(EventArgs e) {
+            base.OnResize(e);
+            Log.Trace("OnResize");
+
+            GL.Viewport(ClientRectangle.X, ClientRectangle.Y, ClientRectangle.Width, ClientRectangle.Height);
+            var projection = Matrix4.CreatePerspectiveFieldOfView((float)Math.PI / 4, Width / (float)Height, 1.0f, 64.0f);
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadMatrix(ref projection);
+        }
+
+        protected override void OnRenderFrame(FrameEventArgs e) {
+            base.OnRenderFrame(e);
+            Log.Trace("OnRenderFrame");
+
+            this.renderer.Render();
+
+            SwapBuffers();
+        }
+
+        protected override void OnUpdateFrame(FrameEventArgs e) {
+            base.OnUpdateFrame(e);
+            Log.Trace("OnUpdateFrame");
+
+            this.console.Update();
+            this.Update();
+            this.game.Update();
+            this.avatar.Update();
+            this.player.Update();
+            this.environment.Update();
+            this.sky.Update();
+            //this.scene.Update(stop);
+            //this.cache.Update(stop);
+            this.particles.Update();
+            this.renderer.Update();
+        }
+
+        protected override void OnKeyDown(KeyboardKeyEventArgs e) {
+            base.OnKeyDown(e);
+            Log.Trace("OnKeyDown");
+
+            Log.Info("Button " + e.Key.ToString() + " pushed.");
+
+            // Process the key to toggle the console first, so that, if the console is open,
+            // we can pass all other input to it
+            if (Key.Grave == e.Key) {
+                this.console.ToggleConsole();
+            } else if (this.console.IsOpen) {
+                this.console.ProcessKey(e);
+            } else {
+                switch (e.Key) {
+                    case Key.Escape:
+                        this.Close();
+                        break;
+                    case Key.Tab:
+                        this.renderer.ToggleShowMap();
+                        break;
+                }
+            }
+        }
+
+        public void Init() {
+            Log.Info("Init start...");
 
             base.Title = "Frontier";
             //Icon = new Icon("Resources/icon.bmp");
@@ -92,47 +157,65 @@
             Log.Info("Init done.");
         }
 
-        protected override void OnResize(EventArgs e) {
-            base.OnResize(e);
+        public void Update() {
+            /*
+            SDL_Event event;
+            long      now;
 
-            GL.Viewport(ClientRectangle.X, ClientRectangle.Y, ClientRectangle.Width, ClientRectangle.Height);
-            var projection = Matrix4.CreatePerspectiveFieldOfView((float)Math.PI / 4, Width / (float)Height, 1.0f, 64.0f);
-            GL.MatrixMode(MatrixMode.Projection);
-            GL.LoadMatrix(ref projection);
+            while (SDL_PollEvent(&event)) { 
+                switch(event.type){ 
+                case SDL_JOYAXISMOTION:
+                    InputJoystickSet (event.jaxis.axis, event.jaxis.value);
+                    break;
+                case SDL_KEYUP:
+                    InputKeyUp (event.key.keysym.sym);
+                    break;
+                case SDL_MOUSEBUTTONDOWN:
+                    if (event.button.button == SDL_BUTTON_RIGHT) {
+                        InputMouselookSet (!InputMouselook ());
+                        SDL_ShowCursor (false);
+                        SDL_WM_GrabInput (SDL_GRAB_ON);
+                    }
+                    if(event.button.button == SDL_BUTTON_WHEELUP)
+                        InputKeyDown (INPUT_MWHEEL_UP);
+                    if(event.button.button == SDL_BUTTON_WHEELDOWN)
+                        InputKeyDown (INPUT_MWHEEL_DOWN);
+                    if (event.button.button == SDL_BUTTON_LEFT && !InputMouselook ())
+                        RenderClick (event.motion.x, event.motion.y);        
+                    break;
+                case SDL_MOUSEBUTTONUP:
+                    if (event.button.button == SDL_BUTTON_LEFT)
+                        lmb = false;
+                    else if (event.button.button == SDL_BUTTON_MIDDLE)
+                        mmb = false;
+                    if (InputMouselook ())
+                        SDL_ShowCursor (false);
+                    else { 
+                        SDL_ShowCursor (true);
+                        SDL_WM_GrabInput (SDL_GRAB_OFF);
+                    }
+                    if(event.button.button == SDL_BUTTON_WHEELUP)
+                        InputKeyUp (INPUT_MWHEEL_UP);
+                    if(event.button.button == SDL_BUTTON_WHEELDOWN)
+                        InputKeyUp (INPUT_MWHEEL_DOWN);
+                    break;
+                case SDL_MOUSEMOTION:
+                    if (InputMouselook ()) 
+                        AvatarLook (event.motion.yrel, -event.motion.xrel);
+                    break;
+                case SDL_VIDEORESIZE: //User resized window
+                    center_x = event.resize.w / 2;
+                    center_y = event.resize.h / 2;
+                    RenderCreate (event.resize.w, event.resize.h, 32, false);
+                    break; 
+                } //Finished with current event
+
+            } //Done with all events for now
+            now = SDL_GetTicks ();
+            elapsed = now - last_update;
+            elapsed_seconds = (float)elapsed / 1000.0f;
+            last_update = now;
+            */
         }
-
-        protected override void OnRenderFrame(FrameEventArgs e) {
-            base.OnRenderFrame(e);
-            Log.Trace("OnRender");
-
-            this.renderer.Render();
-
-            SwapBuffers();
-
-            //ConsoleUpdate();
-            //SdlUpdate();
-            //GameUpdate();
-            //AvatarUpdate();
-            //PlayerUpdate();
-            //EnvUpdate();
-            //SkyUpdate();
-            //SceneUpdate(stop);
-            //CacheUpdate(stop);
-            //ParticleUpdate();
-            //RenderUpdate();
-        }
-
-        protected override void OnUpdateFrame(FrameEventArgs e) {
-            base.OnUpdateFrame(e);
-        }
-
-        protected override void OnKeyDown(KeyboardKeyEventArgs e) {
-            base.OnKeyDown(e);
-
-            if (Key.Tab == e.Key) {
-                this.renderer.ToggleShowMap();
-            }
-        }
-
     }
 }

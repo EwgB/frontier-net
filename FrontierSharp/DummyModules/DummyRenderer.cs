@@ -6,7 +6,6 @@
 
     using Interfaces.Renderer;
     using Interfaces.Property;
-    using System;
 
     public class DummyRenderer : IRenderer {
         private IRendererProperties properties;
