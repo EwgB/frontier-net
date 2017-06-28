@@ -8,7 +8,7 @@
     using Util;
 
     public class EnvironmentData {
-        public ColorTypeIndexedArray<Color4> color = new ColorTypeIndexedArray<Color4>();
+        public ColorTypeIndexedArray<Color4> Color = new ColorTypeIndexedArray<Color4>();
 
         //public Color4 color2[ColorType c] { get; set; }
         public Vector3 Light { get; set; }

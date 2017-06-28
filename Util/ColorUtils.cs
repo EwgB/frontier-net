@@ -55,6 +55,14 @@
             return c;
         }
 
+        public static Color4 Interpolate(Color4 c1, Color4 c2, float delta) {
+            return new Color4(
+                MathUtils.Interpolate(c1.R, c2.R, delta),
+                MathUtils.Interpolate(c1.G, c2.G, delta),
+                MathUtils.Interpolate(c1.B, c2.B, delta),
+                MathUtils.Interpolate(c1.A, c2.A, delta));
+        }
+
     }
 }
 
@@ -113,27 +121,14 @@ GLrgba glRgbaFromHsl(float h, float sl, float l)
 
 }
 
-GLrgba glRgbaInterpolate(GLrgba c1, GLrgba c2, float delta)
-{
-
-    GLrgba result;
-
-    result.red = MathInterpolate(c1.red, c2.red, delta);
-    result.green = MathInterpolate(c1.green, c2.green, delta);
-    result.blue = MathInterpolate(c1.blue, c2.blue, delta);
-    result.alpha = MathInterpolate(c1.alpha, c2.alpha, delta);
-    return result;
-
-}
-
 GLrgba glRgbaAdd(GLrgba c1, GLrgba c2)
 {
 
     GLrgba result;
 
-    result.red = c1.red + c2.red;
-    result.green = c1.green + c2.green;
-    result.blue = c1.blue + c2.blue;
+    result.R = c1.R + c2.R;
+    result.G = c1.G + c2.G;
+    result.B = c1.B + c2.B;
     return result;
 
 }
@@ -143,9 +138,9 @@ GLrgba glRgbaSubtract(GLrgba c1, GLrgba c2)
 
     GLrgba result;
 
-    result.red = c1.red - c2.red;
-    result.green = c1.green - c2.green;
-    result.blue = c1.blue - c2.blue;
+    result.R = c1.R - c2.R;
+    result.G = c1.G - c2.G;
+    result.B = c1.B - c2.B;
     return result;
 
 }
@@ -156,9 +151,9 @@ GLrgba glRgbaMultiply(GLrgba c1, GLrgba c2)
 
     GLrgba result;
 
-    result.red = c1.red * c2.red;
-    result.green = c1.green * c2.green;
-    result.blue = c1.blue * c2.blue;
+    result.R = c1.R * c2.R;
+    result.G = c1.G * c2.G;
+    result.B = c1.B * c2.B;
     return result;
 
 }
@@ -166,9 +161,9 @@ GLrgba glRgbaMultiply(GLrgba c1, GLrgba c2)
 GLrgba glRgbaScale(GLrgba c, float scale)
 {
 
-    c.red *= scale;
-    c.green *= scale;
-    c.blue *= scale;
+    c.R *= scale;
+    c.G *= scale;
+    c.B *= scale;
     return c;
 
 }
@@ -186,10 +181,10 @@ GLrgba glRgba(char* string)
         pound[0] = ' ';
     if (sscanf(string, "%x", &color) != 1)
         return glRgba(0.0f);
-    result.red = (float)GetBValue(color) / 255.0f;
-    result.green = (float)GetGValue(color) / 255.0f;
-    result.blue = (float)GetRValue(color) / 255.0f;
-    result.alpha = 1.0f;
+    result.R = (float)GetBValue(color) / 255.0f;
+    result.G = (float)GetGValue(color) / 255.0f;
+    result.B = (float)GetRValue(color) / 255.0f;
+    result.A = 1.0f;
     return result;
 
 }
@@ -199,10 +194,10 @@ GLrgba glRgba(int red, int green, int blue)
 
     GLrgba result;
 
-    result.red = (float)red / 255.0f;
-    result.green = (float)green / 255.0f;
-    result.blue = (float)blue / 255.0f;
-    result.alpha = 1.0f;
+    result.R = (float)red / 255.0f;
+    result.G = (float)green / 255.0f;
+    result.B = (float)blue / 255.0f;
+    result.A = 1.0f;
     return result;
 
 }
@@ -212,10 +207,10 @@ GLrgba glRgba(float red, float green, float blue)
 
     GLrgba result;
 
-    result.red = red;
-    result.green = green;
-    result.blue = blue;
-    result.alpha = 1.0f;
+    result.R = red;
+    result.G = green;
+    result.B = blue;
+    result.A = 1.0f;
     return result;
 
 }
@@ -225,10 +220,10 @@ GLrgba glRgba(float red, float green, float blue, float alpha)
 
     GLrgba result;
 
-    result.red = red;
-    result.green = green;
-    result.blue = blue;
-    result.alpha = alpha;
+    result.R = red;
+    result.G = green;
+    result.B = blue;
+    result.A = alpha;
     return result;
 
 }
@@ -238,10 +233,10 @@ GLrgba glRgba(long c)
 
     GLrgba result;
 
-    result.red = (float)GetRValue(c) / 255.0f;
-    result.green = (float)GetGValue(c) / 255.0f;
-    result.blue = (float)GetBValue(c) / 255.0f;
-    result.alpha = 1.0f;
+    result.R = (float)GetRValue(c) / 255.0f;
+    result.G = (float)GetGValue(c) / 255.0f;
+    result.B = (float)GetBValue(c) / 255.0f;
+    result.A = 1.0f;
     return result;
 
 }
@@ -251,10 +246,10 @@ GLrgba glRgba(float luminance)
 
     GLrgba result;
 
-    result.red = luminance;
-    result.green = luminance;
-    result.blue = luminance;
-    result.alpha = 1.0f;
+    result.R = luminance;
+    result.G = luminance;
+    result.B = luminance;
+    result.A = 1.0f;
     return result;
 
 }
@@ -263,7 +258,7 @@ GLrgba glRgba(float luminance)
 
 GLrgba GLrgba::operator+ (const GLrgba& c)
 {
-    return glRgba(red + c.red, green + c.green, blue + c.blue, alpha);
+    return glRgba(red + c.R, green + c.G, blue + c.B, alpha);
 }
 
 GLrgba GLrgba::operator+ (const float& c)
@@ -273,9 +268,9 @@ GLrgba GLrgba::operator+ (const float& c)
 
 void GLrgba::operator+= (const GLrgba& c)
 {
-    red += c.red;
-    green += c.green;
-    blue += c.blue;
+    red += c.R;
+    green += c.G;
+    blue += c.B;
 }
 
 void GLrgba::operator+= (const float& c)
@@ -289,7 +284,7 @@ void GLrgba::operator+= (const float& c)
 
 GLrgba GLrgba::operator- (const GLrgba& c)
 {
-    return glRgba(red - c.red, green - c.green, blue - c.blue);
+    return glRgba(red - c.R, green - c.G, blue - c.B);
 }
 
 GLrgba GLrgba::operator- (const float& c)
@@ -299,9 +294,9 @@ GLrgba GLrgba::operator- (const float& c)
 
 void GLrgba::operator-= (const GLrgba& c)
 {
-    red -= c.red;
-    green -= c.green;
-    blue -= c.blue;
+    red -= c.R;
+    green -= c.G;
+    blue -= c.B;
 }
 
 void GLrgba::operator-= (const float& c)
@@ -315,7 +310,7 @@ void GLrgba::operator-= (const float& c)
 
 GLrgba GLrgba::operator* (const GLrgba& c)
 {
-    return glRgba(red * c.red, green * c.green, blue * c.blue);
+    return glRgba(red * c.R, green * c.G, blue * c.B);
 }
 
 GLrgba GLrgba::operator* (const float& c)
@@ -325,9 +320,9 @@ GLrgba GLrgba::operator* (const float& c)
 
 void GLrgba::operator*= (const GLrgba& c)
 {
-    red *= c.red;
-    green *= c.green;
-    blue *= c.blue;
+    red *= c.R;
+    green *= c.G;
+    blue *= c.B;
 }
 
 void GLrgba::operator*= (const float& c)
@@ -341,7 +336,7 @@ void GLrgba::operator*= (const float& c)
 
 GLrgba GLrgba::operator/ (const GLrgba& c)
 {
-    return glRgba(red / c.red, green / c.green, blue / c.blue);
+    return glRgba(red / c.R, green / c.G, blue / c.B);
 }
 
 GLrgba GLrgba::operator/ (const float& c)
@@ -351,9 +346,9 @@ GLrgba GLrgba::operator/ (const float& c)
 
 void GLrgba::operator/= (const GLrgba& c)
 {
-    red /= c.red;
-    green /= c.green;
-    blue /= c.blue;
+    red /= c.R;
+    green /= c.G;
+    blue /= c.B;
 }
 
 void GLrgba::operator/= (const float& c)
@@ -365,7 +360,7 @@ void GLrgba::operator/= (const float& c)
 
 bool GLrgba::operator==  (const GLrgba& c)
 {
-    return (red == c.red && green == c.green && blue == c.blue);
+    return (red == c.R && green == c.G && blue == c.B);
 }
 
 

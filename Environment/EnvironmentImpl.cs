@@ -1,31 +1,179 @@
 ﻿namespace FrontierSharp.Environment {
     using System;
 
+    using OpenTK;
+
+    using Interfaces;
     using Interfaces.Environment;
     using Interfaces.Property;
+    using Util;
 
     public class EnvironmentImpl : IEnvironment {
+        // Modules
+        private readonly IGame game;
 
         private EnvironmentProperties properties = new EnvironmentProperties();
         public IProperties Properties { get { return this.properties; } }
 
-        public EnvironmentData GetCurrent() {
-            throw new NotImplementedException();
+        public EnvironmentData Current { get; private set; }
+
+        private EnvironmentData Desired { get; set; }
+
+        private float lastDecimalTime;
+
+        public EnvironmentImpl(IGame game) {
+            this.game = game;
+
+            this.Current = new EnvironmentData();
+            this.Desired = new EnvironmentData();
         }
 
         public void Init() {
-            throw new NotImplementedException();
-            //  do_time (1);
-            //  current = desired;
+            doTime(1);
+            this.Current = this.Desired;
         }
 
         public void Update() {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
             //  update += SdlElapsed ();
             //  if (update > UPDATE_INTERVAL) {
-            //    do_time (ENV_TRANSITION);
+            //    doTime (ENV_TRANSITION);
             //    update -= UPDATE_INTERVAL;
             //  }
+        }
+
+        private void doTime(float delta) {
+            //Convert out hours and minutes into a decimal number. (100 "minutes" per hour.)
+            Desired.Light = new Vector3(-0.5f, 0.0f, -0.5f);
+            if (this.game.Time != lastDecimalTime)
+                doCycle();
+            lastDecimalTime = this.game.Time;
+            foreach (ColorType colorType in Enum.GetValues(typeof(ColorType))) {
+                Current.Color[colorType] = ColorUtils.Interpolate(Current.Color[colorType], Desired.Color[colorType], delta);
+            }
+            Current.Fog = new Range<float>(
+                MathUtils.Interpolate(Current.Fog.Min, Desired.Fog.Min, delta),
+                MathUtils.Interpolate(Current.Fog.Max, Desired.Fog.Max, delta));
+            Current.StarFade = MathUtils.Interpolate(Current.StarFade, Desired.StarFade, delta);
+            Current.SunsetFade = MathUtils.Interpolate(Current.SunsetFade, Desired.SunsetFade, delta);
+            Current.SunriseFade = MathUtils.Interpolate(Current.SunriseFade, Desired.SunriseFade, delta);
+            Current.Light = MathUtils.Interpolate(Current.Light, Desired.Light, delta);
+            Current.SunAngle = MathUtils.Interpolate(Current.SunAngle, Desired.SunAngle, delta);
+            Current.CloudCover = MathUtils.Interpolate(Current.CloudCover, Desired.CloudCover, delta);
+            Current.DrawSun = Desired.DrawSun;
+            Current.Light.Normalize();
+        }
+
+        private void doCycle() {
+            //  Region*   r;
+            //  int       i;
+            //  GLrgba    average;
+            //  GLrgba    base_color;
+            //  GLrgba    color_scaling;
+            //  GLrgba    atmosphere;
+            //  float     fade;
+            //  float     late_fade;
+            //  //float     humid_Fog;
+            //  float     decimal_time;
+            //  float     max_distance;
+            //  Range     time_Fog;
+            //  Range     humid_Fog;
+
+            //  max_distance = SceneVisibleRange ();
+            //  r = (Region*)AvatarRegion ();
+            //  //atmosphere = r->color_atmosphere;
+            //  humid_Fog.Max = MathUtils.Interpolate (max_distance, max_distance * 0.75f, r->moisture);
+            //  humid_Fog.Min = MathUtils.Interpolate (max_distance * 0.85f, max_distance * 0.25f, r->moisture);
+            //  if (r->climate == CLIMATE_SWAMP) {
+            //    humid_Fog.Max /= 2.0f;
+            //    humid_Fog.Min /= 2.0f;
+            //  }
+            //  Desired.cloud_cover = clamp (r->moisture, 0.20f, 0.6f);
+            //  Desired.sunrise_fade = Desired.sunset_fade = 0.0f;
+            //  decimal_time = fmod (GameTime (), 24.0f);
+            //  if (decimal_time >= TIME_DAWN && decimal_time < TIME_DAY) { //sunrise
+            //    fade = (decimal_time - TIME_DAWN) / (TIME_DAY - TIME_DAWN);
+            //    late_fade = max ((fade -0.5f) * 2.0f, 0);
+            //    base_color = ColorUtils.InterpolateColors (NIGHT_COLOR, DAY_COLOR, late_fade);
+            //    atmosphere = ColorUtils.InterpolateColors (glRgba (0.0f), glRgba (1.0f), late_fade);
+            //    time_Fog.Max = MathUtils.Interpolate (NIGHT_FOG, max_distance, fade);
+            //    time_Fog.Min = time_Fog.Max / 2.0f;
+            //    Desired.star_fade = max (1.0f - fade * 2.0f, 0.0f);
+            //    //Sunrise fades in, then back out
+            //    Desired.sunrise_fade = 1.0f - abs (fade -0.5f) * 2.0f;
+            //    color_scaling = ColorUtils.InterpolateColors (NIGHT_SCALING, DAY_SCALING, fade);
+            //    //The Light in the sky doesn't Lighten until the second half of sunrise
+            //    if (fade > 0.5f)
+            //      Desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 1.0f, 0.5f);
+            //    else
+            //      Desired.color[ENV_COLOR_LIGHT] = glRgba (0.5f, 0.7f, 1.0f);
+            //    Desired.Light = glVectorInterpolate (VECTOR_SUNRISE, VECTOR_MORNING, fade);
+            //    Desired.SunAngle = MathUtils.Interpolate (SUN_ANGLE_SUNRISE, SUN_ANGLE_MORNING, fade);
+            //    Desired.draw_sun = true;
+            //    Desired.color[ENV_COLOR_AMBIENT] = glRgba (0.3f, 0.3f, 0.6f);
+            //  } else if (decimal_time >= TIME_DAY && decimal_time < TIME_SUNSET)  { //day
+            //    atmosphere = glRgba (1.0f);
+            //    fade = (decimal_time - TIME_DAY) / (TIME_SUNSET - TIME_DAY);
+            //    base_color = DAY_COLOR;
+            //    time_Fog.Max = max_distance;
+            //    time_Fog.Min = time_Fog.Max / 2.0f;
+            //    Desired.star_fade = 0.0f;
+            //    color_scaling = DAY_SCALING;
+            //    Desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f) + r->color_atmosphere;
+            //    Desired.color[ENV_COLOR_LIGHT].Normalize ();
+            //    Desired.Light = glVector (0, 0.5f, -0.5f);
+            //    Desired.Light = glVectorInterpolate (VECTOR_MORNING, VECTOR_AFTERNOON, fade);
+            //    Desired.SunAngle = MathUtils.Interpolate (SUN_ANGLE_MORNING, SUN_ANGLE_AFTERNOON, fade);
+            //    Desired.draw_sun = true;
+            //    Desired.color[ENV_COLOR_AMBIENT] = glRgba (0.4f, 0.4f, 0.4f);
+            //  } else if (decimal_time >= TIME_SUNSET && decimal_time < TIME_DUSK) { // sunset
+            //    fade = (decimal_time - TIME_SUNSET) / (TIME_DUSK - TIME_SUNSET);
+            //    base_color = ColorUtils.InterpolateColors (DAY_COLOR, NIGHT_COLOR, fade);
+            //    time_Fog.Max = MathUtils.Interpolate (max_distance, NIGHT_FOG, fade);
+            //    time_Fog.Min = time_Fog.Max / 2.0f;
+            //    if (fade > 0.5f)
+            //      Desired.star_fade = (fade - 0.5f) * 2.0f;
+            //    //Sunset fades in, then back out
+            //    atmosphere = ColorUtils.InterpolateColors (glRgba (1.0f), glRgba (0.0f), min (1.0f, fade * 2.0f));
+            //    Desired.sunset_fade = 1.0f - abs (fade -0.5f) * 2.0f;
+            //    color_scaling = ColorUtils.InterpolateColors (DAY_SCALING, NIGHT_SCALING, fade);
+            //    Desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 0.5f, 0.5f);
+            //    Desired.Light = glVector (0.8f, 0.0f, -0.2f);
+            //    Desired.Light = glVectorInterpolate (VECTOR_AFTERNOON, VECTOR_SUNSET, fade);
+            //    Desired.SunAngle = MathUtils.Interpolate (SUN_ANGLE_AFTERNOON, SUN_ANGLE_SUNSET, fade);
+            //    Desired.draw_sun = true;
+            //    Desired.color[ENV_COLOR_AMBIENT] = glRgba (0.3f, 0.3f, 0.6f);
+            // } else { //night
+            //   atmosphere = glRgba (0.0f);
+            //    color_scaling = NIGHT_SCALING;
+            //    base_color = NIGHT_COLOR;
+            //    time_Fog.Min = 1;
+            //    time_Fog.Max = NIGHT_FOG;
+            //    Desired.star_fade = 1.0f;
+            //    Desired.color[ENV_COLOR_LIGHT] = glRgba (0.1f, 0.3f, 0.7f);
+            //    Desired.color[ENV_COLOR_AMBIENT] = glRgba (0.0f, 0.0f, 0.4f);
+            //    Desired.Light = VECTOR_NIGHT;
+            //    Desired.SunAngle = -90.0f;
+            //    Desired.draw_sun = false;
+            //  }
+            //  Desired.Fog.Max = min (humid_Fog.Max, time_Fog.Max);
+            //  Desired.Fog.Min = min (humid_Fog.Min, time_Fog.Min);
+            //  for (i = 0; i < ENV_COLOR_COUNT; i++) {
+            //    if (i == ENV_COLOR_LIGHT || i == ENV_COLOR_AMBIENT) 
+            //      continue;
+            //    average = base_color * atmosphere;
+            //    //average.Normalize ();
+            //    //average /= 3;
+            //    Desired.color[i] = average;
+            //    if (i == ENV_COLOR_SKY) 
+            //      Desired.color[i] = base_color * 0.75f;
+            //    Desired.color[i] *= color_scaling;
+            //  }   
+            //  Desired.color[ENV_COLOR_SKY] = r->color_atmosphere;
+            //  Desired.color[ENV_COLOR_HORIZON] = (Desired.color[ENV_COLOR_SKY] + atmosphere + atmosphere) / 3.0f;
+            //  Desired.color[ENV_COLOR_FOG] = Desired.color[ENV_COLOR_HORIZON];//Desired.color[ENV_COLOR_SKY];
+            //  //Desired.color[ENV_COLOR_SKY] = Desired.color[ENV_COLOR_HORIZON] * glRgba (0.2f, 0.2f, 0.8f);
+
         }
     }
 }
@@ -63,145 +211,6 @@
 
 
 
-//static Env        desired;
-//static Env        current;
 //static int        update;
-//static int        last_decimal_time;    
 //static bool       cycle_on;
 
-//static void do_cycle ()
-//{
-
-//  Region*   r;
-//  int       i;
-//  GLrgba    average;
-//  GLrgba    base_color;
-//  GLrgba    color_scaling;
-//  GLrgba    atmosphere;
-//  float     fade;
-//  float     late_fade;
-//  //float     humid_fog;
-//  float     decimal_time;
-//  float     max_distance;
-//  Range     time_fog;
-//  Range     humid_fog;
-
-//  max_distance = SceneVisibleRange ();
-//  r = (Region*)AvatarRegion ();
-//  //atmosphere = r->color_atmosphere;
-//  humid_fog.rmax = MathInterpolate (max_distance, max_distance * 0.75f, r->moisture);
-//  humid_fog.rmin = MathInterpolate (max_distance * 0.85f, max_distance * 0.25f, r->moisture);
-//  if (r->climate == CLIMATE_SWAMP) {
-//    humid_fog.rmax /= 2.0f;
-//    humid_fog.rmin /= 2.0f;
-//  }
-//  desired.cloud_cover = clamp (r->moisture, 0.20f, 0.6f);
-//  desired.sunrise_fade = desired.sunset_fade = 0.0f;
-//  decimal_time = fmod (GameTime (), 24.0f);
-//  if (decimal_time >= TIME_DAWN && decimal_time < TIME_DAY) { //sunrise
-//    fade = (decimal_time - TIME_DAWN) / (TIME_DAY - TIME_DAWN);
-//    late_fade = max ((fade -0.5f) * 2.0f, 0);
-//    base_color = glRgbaInterpolate (NIGHT_COLOR, DAY_COLOR, late_fade);
-//    atmosphere = glRgbaInterpolate (glRgba (0.0f), glRgba (1.0f), late_fade);
-//    time_fog.rmax = MathInterpolate (NIGHT_FOG, max_distance, fade);
-//    time_fog.rmin = time_fog.rmax / 2.0f;
-//    desired.star_fade = max (1.0f - fade * 2.0f, 0.0f);
-//    //Sunrise fades in, then back out
-//    desired.sunrise_fade = 1.0f - abs (fade -0.5f) * 2.0f;
-//    color_scaling = glRgbaInterpolate (NIGHT_SCALING, DAY_SCALING, fade);
-//    //The light in the sky doesn't lighten until the second half of sunrise
-//    if (fade > 0.5f)
-//      desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 1.0f, 0.5f);
-//    else
-//      desired.color[ENV_COLOR_LIGHT] = glRgba (0.5f, 0.7f, 1.0f);
-//    desired.light = glVectorInterpolate (VECTOR_SUNRISE, VECTOR_MORNING, fade);
-//    desired.sun_angle = MathInterpolate (SUN_ANGLE_SUNRISE, SUN_ANGLE_MORNING, fade);
-//    desired.draw_sun = true;
-//    desired.color[ENV_COLOR_AMBIENT] = glRgba (0.3f, 0.3f, 0.6f);
-//  } else if (decimal_time >= TIME_DAY && decimal_time < TIME_SUNSET)  { //day
-//    atmosphere = glRgba (1.0f);
-//    fade = (decimal_time - TIME_DAY) / (TIME_SUNSET - TIME_DAY);
-//    base_color = DAY_COLOR;
-//    time_fog.rmax = max_distance;
-//    time_fog.rmin = time_fog.rmax / 2.0f;
-//    desired.star_fade = 0.0f;
-//    color_scaling = DAY_SCALING;
-//    desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f) + r->color_atmosphere;
-//    desired.color[ENV_COLOR_LIGHT].Normalize ();
-//    desired.light = glVector (0, 0.5f, -0.5f);
-//    desired.light = glVectorInterpolate (VECTOR_MORNING, VECTOR_AFTERNOON, fade);
-//    desired.sun_angle = MathInterpolate (SUN_ANGLE_MORNING, SUN_ANGLE_AFTERNOON, fade);
-//    desired.draw_sun = true;
-//    desired.color[ENV_COLOR_AMBIENT] = glRgba (0.4f, 0.4f, 0.4f);
-//  } else if (decimal_time >= TIME_SUNSET && decimal_time < TIME_DUSK) { // sunset
-//    fade = (decimal_time - TIME_SUNSET) / (TIME_DUSK - TIME_SUNSET);
-//    base_color = glRgbaInterpolate (DAY_COLOR, NIGHT_COLOR, fade);
-//    time_fog.rmax = MathInterpolate (max_distance, NIGHT_FOG, fade);
-//    time_fog.rmin = time_fog.rmax / 2.0f;
-//    if (fade > 0.5f)
-//      desired.star_fade = (fade - 0.5f) * 2.0f;
-//    //Sunset fades in, then back out
-//    atmosphere = glRgbaInterpolate (glRgba (1.0f), glRgba (0.0f), min (1.0f, fade * 2.0f));
-//    desired.sunset_fade = 1.0f - abs (fade -0.5f) * 2.0f;
-//    color_scaling = glRgbaInterpolate (DAY_SCALING, NIGHT_SCALING, fade);
-//    desired.color[ENV_COLOR_LIGHT] = glRgba (1.0f, 0.5f, 0.5f);
-//    desired.light = glVector (0.8f, 0.0f, -0.2f);
-//    desired.light = glVectorInterpolate (VECTOR_AFTERNOON, VECTOR_SUNSET, fade);
-//    desired.sun_angle = MathInterpolate (SUN_ANGLE_AFTERNOON, SUN_ANGLE_SUNSET, fade);
-//    desired.draw_sun = true;
-//    desired.color[ENV_COLOR_AMBIENT] = glRgba (0.3f, 0.3f, 0.6f);
-// } else { //night
-//   atmosphere = glRgba (0.0f);
-//    color_scaling = NIGHT_SCALING;
-//    base_color = NIGHT_COLOR;
-//    time_fog.rmin = 1;
-//    time_fog.rmax = NIGHT_FOG;
-//    desired.star_fade = 1.0f;
-//    desired.color[ENV_COLOR_LIGHT] = glRgba (0.1f, 0.3f, 0.7f);
-//    desired.color[ENV_COLOR_AMBIENT] = glRgba (0.0f, 0.0f, 0.4f);
-//    desired.light = VECTOR_NIGHT;
-//    desired.sun_angle = -90.0f;
-//    desired.draw_sun = false;
-//  }
-//  desired.fog.rmax = min (humid_fog.rmax, time_fog.rmax);
-//  desired.fog.rmin = min (humid_fog.rmin, time_fog.rmin);
-//  for (i = 0; i < ENV_COLOR_COUNT; i++) {
-//    if (i == ENV_COLOR_LIGHT || i == ENV_COLOR_AMBIENT) 
-//      continue;
-//    average = base_color * atmosphere;
-//    //average.Normalize ();
-//    //average /= 3;
-//    desired.color[i] = average;
-//    if (i == ENV_COLOR_SKY) 
-//      desired.color[i] = base_color * 0.75f;
-//    desired.color[i] *= color_scaling;
-//  }   
-//  desired.color[ENV_COLOR_SKY] = r->color_atmosphere;
-//  desired.color[ENV_COLOR_HORIZON] = (desired.color[ENV_COLOR_SKY] + atmosphere + atmosphere) / 3.0f;
-//  desired.color[ENV_COLOR_FOG] = desired.color[ENV_COLOR_HORIZON];//desired.color[ENV_COLOR_SKY];
-//  //desired.color[ENV_COLOR_SKY] = desired.color[ENV_COLOR_HORIZON] * glRgba (0.2f, 0.2f, 0.8f);
-
-//}
-
-//static void do_time (float delta)
-//{
-
-//  //Convert out hours and minutes into a decimal number. (100 "minutes" per hour.)
-//  desired.light = glVector (-0.5f, 0.0f, -0.5f);
-//  if (GameTime () != last_decimal_time)
-//    do_cycle ();
-//  last_decimal_time = GameTime ();     
-//  for (int i = 0; i < ENV_COLOR_COUNT; i++) 
-//    current.color[i] = glRgbaInterpolate (current.color[i], desired.color[i], delta);
-//  current.fog.rmin = MathInterpolate (current.fog.rmin, desired.fog.rmin, delta);
-//  current.fog.rmax = MathInterpolate (current.fog.rmax, desired.fog.rmax, delta);
-//  current.star_fade = MathInterpolate (current.star_fade, desired.star_fade, delta);
-//  current.sunset_fade = MathInterpolate (current.sunset_fade, desired.sunset_fade, delta);
-//  current.sunrise_fade = MathInterpolate (current.sunrise_fade, desired.sunrise_fade, delta);
-//  current.light = glVectorInterpolate (current.light, desired.light, delta);
-//  current.sun_angle = MathInterpolate (current.sun_angle, desired.sun_angle, delta);
-//  current.cloud_cover = MathInterpolate (current.cloud_cover, desired.cloud_cover, delta);
-//  current.draw_sun = desired.draw_sun;
-//  current.light.Normalize ();
-
-//}

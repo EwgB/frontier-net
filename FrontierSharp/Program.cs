@@ -7,6 +7,7 @@
     using Interfaces.Renderer;
 
     using DummyModules;
+    using Environment;
     using Renderer;
 
     internal class Program {
@@ -16,7 +17,7 @@
                 // Set up dependecies
                 kernel.Bind<IAvatar>().To<DummyAvatar>().InSingletonScope();
                 kernel.Bind<IConsole>().To<DummyConsole>().InSingletonScope();
-                kernel.Bind<IEnvironment>().To<DummyEnvironment>().InSingletonScope();
+                kernel.Bind<IEnvironment>().To<EnvironmentImpl>().InSingletonScope();
                 kernel.Bind<IGame>().To<DummyGame>().InSingletonScope();
                 kernel.Bind<IParticles>().To<DummyParticles>().InSingletonScope();
                 kernel.Bind<IPlayer>().To<DummyPlayer>().InSingletonScope();
