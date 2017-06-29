@@ -10,7 +10,9 @@
     using Interfaces.Environment;
     using Interfaces.Property;
     using Interfaces.Renderer;
+
     using Util;
+    using World;
 
     public class RendererImpl : IRenderer {
         // Constants
@@ -49,7 +51,7 @@
 
         public void Render() {
             EnvironmentData envData = this.environment.Current;
-            Vector3 pos = this.avatar.GetCameraPosition();
+            Vector3 pos = this.avatar.CameraPosition;
             float waterLevel = Math.Max(this.world.GetWaterLevel(new Vector2(pos.X, pos.Y)), 0);
 
             if (pos.Z >= waterLevel) {
@@ -110,7 +112,7 @@
             //Move into our unique coordanate system
             GL.LoadIdentity();
             GL.Scale(1, -1, 1);
-            Vector3 angle = this.avatar.GetCameraAngle();
+            Vector3 angle = this.avatar.CameraAngle;
             GL.Rotate(angle.X, Vector3.UnitX);
             GL.Rotate(angle.Y, Vector3.UnitY);
             GL.Rotate(angle.Z, Vector3.UnitZ);
@@ -181,7 +183,7 @@
                 r++;
                 Color4 c = ColorUtils.Color4Unique(r);
                 GL.BindTexture(TextureTarget.Texture2D, 0);
-                Vector3 pos = this.avatar.GetCameraPosition();
+                Vector3 pos = this.avatar.CameraPosition;
                 pos /= (WorldUtils.GRID_SIZE * WorldUtils.REGION_SIZE);
                 //pos.Y /= (WorldUtil.WORLD_GRID * WorldUtil.REGION_SIZE);
                 pos *= MAP_SIZE;

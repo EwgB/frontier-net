@@ -11,6 +11,10 @@
         private IProperties properties;
         public IProperties Properties { get { return this.properties; } }
 
+        public Vector3 CameraPosition { get { return new Vector3(1, 1, 0); } }
+
+        public Vector3 CameraAngle { get { return Vector3.UnitX; } }
+
         [Inject]
         public IRegion Region { get; private set; }
 
@@ -20,14 +24,6 @@
 
         public void Update() {
             // Do nothing
-        }
-
-        public Vector3 GetCameraPosition() {
-            return new Vector3(1, 1, 0);
-        }
-
-        public Vector3 GetCameraAngle() {
-            return Vector3.UnitX;
         }
     }
 }

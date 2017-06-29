@@ -8,7 +8,7 @@
     using Util;
 
     public class EnvironmentData {
-        public ColorTypeIndexedArray<Color4> Color = new ColorTypeIndexedArray<Color4>();
+        public ColorTypeArray Color = new ColorTypeArray();
 
         //public Color4 color2[ColorType c] { get; set; }
         public Vector3 Light { get; set; }
@@ -26,14 +26,15 @@
         Sky,
         Fog,
         Light,
-        Ambient
+        Ambient,
+        Max
     }
-    public class ColorTypeIndexedArray<T> : IEnumerable {
-        private T[] elements = new T[Enum.GetNames(typeof(ColorType)).Length];
-        public T this[ColorType index] {
+
+    public class ColorTypeArray {
+        private Color4[] elements = new Color4[(int)ColorType.Max];
+        public Color4 this[ColorType index] {
             get { return elements[(int)index]; }
             set { elements[(int)index] = value; }
         }
-        public IEnumerator GetEnumerator() => elements.GetEnumerator();
     }
 }
