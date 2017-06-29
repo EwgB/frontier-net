@@ -184,7 +184,7 @@
                 Color4 c = ColorUtils.Color4Unique(r);
                 GL.BindTexture(TextureTarget.Texture2D, 0);
                 Vector3 pos = this.avatar.CameraPosition;
-                pos /= (WorldUtils.GRID_SIZE * WorldUtils.REGION_SIZE);
+                pos /= (WorldUtils.WORLD_GRID * WorldUtils.REGION_SIZE);
                 //pos.Y /= (WorldUtil.WORLD_GRID * WorldUtil.REGION_SIZE);
                 pos *= MAP_SIZE;
                 pos.Y += viewHeight - MAP_SIZE;
