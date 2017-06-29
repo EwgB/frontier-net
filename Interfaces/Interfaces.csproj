@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Environment\EnvironmentTypes.cs" />
     <Compile Include="IPlayer.cs" />
+    <Compile Include="Region\IRegion.cs" />
     <Compile Include="ISky.cs" />
     <Compile Include="IText.cs" />
     <Compile Include="ITexture.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Property\IProperties.cs" />
     <Compile Include="Property\IProperty.cs" />
+    <Compile Include="Region\RegionTypes.cs" />
     <Compile Include="Renderer\IRenderer.cs" />
     <Compile Include="Renderer\IRendererProperties.cs" />
   </ItemGroup>

@@ -63,6 +63,7 @@
     <Compile Include="DummyModules\DummyAvatar.cs" />
     <Compile Include="DummyModules\DummyEnvironment.cs" />
     <Compile Include="DummyModules\DummyParticles.cs" />
+    <Compile Include="DummyModules\DummyRegion.cs" />
     <Compile Include="DummyModules\DummyRenderer.cs" />
     <Compile Include="DummyModules\DummyScene.cs" />
     <Compile Include="DummyModules\DummyText.cs" />

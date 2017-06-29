@@ -1,14 +1,18 @@
 ﻿namespace FrontierSharp.DummyModules {
+    using Ninject;
     using OpenTK;
 
     using Interfaces;
     using Interfaces.Property;
-    using System;
+    using Interfaces.Region;
 
     class DummyAvatar : IAvatar {
 
         private IProperties properties;
         public IProperties Properties { get { return this.properties; } }
+
+        [Inject]
+        public IRegion Region { get; private set; }
 
         public void Init() {
             // Do nothing

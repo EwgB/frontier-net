@@ -15,6 +15,8 @@
             using (IKernel kernel = new StandardKernel()) {
 
                 // Set up dependecies
+
+                // Modules
                 kernel.Bind<IAvatar>().To<DummyAvatar>().InSingletonScope();
                 kernel.Bind<IConsole>().To<DummyConsole>().InSingletonScope();
                 kernel.Bind<IEnvironment>().To<EnvironmentImpl>().InSingletonScope();
@@ -28,6 +30,9 @@
                 kernel.Bind<IText>().To<DummyText>().InSingletonScope();
                 kernel.Bind<ITexture>().To<DummyTexture>().InSingletonScope();
                 kernel.Bind<IWorld>().To<DummyWorld>().InSingletonScope();
+
+                // Other types
+                kernel.Bind<IRegion>().To<DummyRegion>();
 
                 using (var frontier = kernel.Get<Frontier>()) {
                     frontier.Run(30.0);
