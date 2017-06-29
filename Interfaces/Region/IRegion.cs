@@ -7,7 +7,7 @@
         uint TreeType { get; }
         RegionFlag ShapeFlags { get; }
         Climate Climate { get; }
-        Vector2 GridPos { get; }
+        Vector2 GridPosition { get; }
         int MountainHeight { get; }
         int RiverId { get; }
         int RiverSegment { get; }

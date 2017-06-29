@@ -1,15 +1,17 @@
 ﻿namespace FrontierSharp.DummyModules {
-    using System;
-    using Interfaces.Region;
     using OpenTK;
     using OpenTK.Graphics;
+
+    using Interfaces.Region;
+
+    using World;
 
     class DummyRegion : IRegion {
         public string Title { get { return "DUMMY_REGION"; } }
         public float GeoBias { get { return 0; } }
         public float GeoDetail { get { return 0; } }
         public int MountainHeight { get { return 0; } }
-        public Vector2 GridPos { get; private set; }
+        public Vector2 GridPosition { get; private set; }
         public float TreeThreshold { get { return 0.15f; } }
         public float GeoScale { get { return 0; } }
         public float GeoWater { get { return 0; } }
@@ -22,13 +24,17 @@
         public Color4 ColorGrass { get { return Color4.Green; } }
         public Color4 ColorRock { get { return Color4.DarkSlateGray; } }
         public RegionFlag ShapeFlags { get { return RegionFlag.Beach; } }
-        public uint[] FlowerShape
-        public bool HasFlowers
-        public float Moisture
-        public int RiverId
-        public int RiverSegment
-        public float RiverWidth
-        public float Temperature
-        public uint TreeType
+        public uint[] FlowerShape { get { return 1; } }
+        public bool HasFlowers { get { return false; } }
+        public float Moisture { get { return 0; } }
+        public int RiverId { get { return 0; } }
+        public int RiverSegment { get { return 1; } }
+        public float RiverWidth { get { return 1; } }
+        public float Temperature { get { return (this.GridPosition.Y - (WorldUtils.WORLD_GRID / 4)) / WorldUtils.WORLD_GRID_CENTER; } }
+        public uint TreeType { get { return 3; } }
+
+        public DummyRegion() {
+            this.GridPosition = new Vector2(0, 0);
+        }
     }
 }

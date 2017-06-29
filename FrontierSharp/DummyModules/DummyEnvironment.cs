@@ -13,7 +13,7 @@
 
         public EnvironmentData Current { get {
                 return new EnvironmentData {
-                    Color = new ColorTypeIndexedArray<Color4> {
+                    Color = new ColorTypeArray {
                         [ColorType.Horizon] = Color4.White,
                         [ColorType.Sky] = Color4.Blue,
                         [ColorType.Fog] = Color4.Gray,

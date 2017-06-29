@@ -6,6 +6,8 @@
     using Interfaces;
     using Interfaces.Environment;
     using Interfaces.Property;
+    using Interfaces.Region;
+
     using Util;
 
     public class EnvironmentImpl : IEnvironment {
@@ -34,7 +36,7 @@
         }
 
         public void Update() {
-            //throw new NotImplementedException();
+            // TODO
             //  update += SdlElapsed ();
             //  if (update > UPDATE_INTERVAL) {
             //    doTime (ENV_TRANSITION);
@@ -48,7 +50,7 @@
             if (this.game.Time != lastDecimalTime)
                 doCycle();
             lastDecimalTime = this.game.Time;
-            foreach (ColorType colorType in Enum.GetValues(typeof(ColorType))) {
+            for (var colorType = ColorType.Horizon; colorType < ColorType.Max; colorType++) {
                 Current.Color[colorType] = ColorUtils.Interpolate(Current.Color[colorType], Desired.Color[colorType], delta);
             }
             Current.Fog = new Range<float>(

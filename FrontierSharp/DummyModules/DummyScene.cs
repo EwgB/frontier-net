@@ -6,10 +6,13 @@
 
     using Interfaces;
     using Interfaces.Property;
+    using System;
 
     class DummyScene : IScene {
         private IProperties properties;
         public IProperties Properties { get { return this.properties; } }
+
+        public float VisibleRange { get { return 576; } }
 
         public void Init() {
             // Do nothing
