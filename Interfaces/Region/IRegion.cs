@@ -1,6 +1,7 @@
 ﻿namespace FrontierSharp.Interfaces.Region {
     using OpenTK;
-    using OpenTK.Graphics;
+
+    using Util;
 
     public interface IRegion {
         string Title { get; }
@@ -21,12 +22,12 @@
         float Temperature { get; }
         float Moisture { get; }
         float CliffThreshold { get; }
-        Color4 ColorMap { get; }
-        Color4 ColorRock { get; }
-        Color4 ColorDirt { get; }
-        Color4 ColorGrass { get; }
-        Color4 ColorAtmosphere { get; }
-        Color4[] ColorFlowers { get; }
+        Color3 ColorMap { get; }
+        Color3 ColorRock { get; }
+        Color3 ColorDirt { get; }
+        Color3 ColorGrass { get; }
+        Color3 ColorAtmosphere { get; }
+        Color3[] ColorFlowers { get; }
         uint[] FlowerShape { get; }
         bool HasFlowers { get; }
     }

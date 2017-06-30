@@ -24,9 +24,9 @@
         private readonly IEnvironment environment;
         private readonly IScene scene;
 
-        private Color4 currentAmbient = Color4.Black;
-        private Color4 currentDiffuse = Color4.White;
-        private Color4 currentFog = Color4.White;
+        private Color3 currentAmbient = Color3.Black;
+        private Color3 currentDiffuse = Color3.White;
+        private Color3 currentFog = Color3.White;
 
         private bool showMap;
         private int viewWidth;
@@ -55,13 +55,13 @@
             float waterLevel = Math.Max(this.world.GetWaterLevel(new Vector2(pos.X, pos.Y)), 0);
 
             if (pos.Z >= waterLevel) {
-                //currentFog = (currentDiffuse + Color4.Blue) / 2;
+                //currentFog = (currentDiffuse + Color3.Blue) / 2;
                 //GL.Fog(FogParameter.FogStart, RENDER_DISTANCE / 2);   // Fog Start Depth
                 //GL.Fog(FogParameter.FogEnd, RENDER_DISTANCE);			// Fog End Depth
                 GL.Fog(FogParameter.FogStart, envData.Fog.Min);         // Fog Start Depth
                 GL.Fog(FogParameter.FogEnd, envData.Fog.Max);           // Fog End Depth
             } else {
-                //cfog = new Color4(0.0f, 0.5f, 0.8f);
+                //cfog = new Color3(0.0f, 0.5f, 0.8f);
                 GL.Fog(FogParameter.FogStart, 1);               // Fog Start Depth
                 GL.Fog(FogParameter.FogEnd, 32);				// Fog End Depth
             }
@@ -70,7 +70,7 @@
             GL.Fog(FogParameter.FogMode, (int)FogMode.Linear);
             //GL.Fog (FogParameter.FogMode, (int) FogMode.Exp);
             GL.Fog(FogParameter.FogColor, envData.Color[ColorType.Fog].R);
-            GL.ClearColor(envData.Color[ColorType.Fog]);
+            GL.ClearColor((Color) envData.Color[ColorType.Fog]);
             //GL.ClearColor (0, 0, 0, 1.0f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             //GL.Clear (ClearBufferMask.DepthBufferBit);
@@ -84,9 +84,9 @@
 
             GL.Enable(EnableCap.Light1);
             GL.Enable(EnableCap.Lighting);
-            currentAmbient = Color4.Black;
+            currentAmbient = Color3.Black;
             GL.Light(LightName.Light1, LightParameter.Ambient, envData.Color[ColorType.Ambient].R);
-            Color4 c = envData.Color[ColorType.Light];
+            Color3 c = envData.Color[ColorType.Light];
             //c *= 20.0f;
             GL.Light(LightName.Light1, LightParameter.Diffuse, c.R);
             GL.Light(LightName.Light1, LightParameter.Position, light);
@@ -181,14 +181,14 @@
 
             {
                 r++;
-                Color4 c = ColorUtils.Color4Unique(r);
+                Color3 c = ColorUtils.UniqueColor(r);
                 GL.BindTexture(TextureTarget.Texture2D, 0);
                 Vector3 pos = this.avatar.CameraPosition;
                 pos /= (WorldUtils.WORLD_GRID * WorldUtils.REGION_SIZE);
                 //pos.Y /= (WorldUtil.WORLD_GRID * WorldUtil.REGION_SIZE);
                 pos *= MAP_SIZE;
                 pos.Y += viewHeight - MAP_SIZE;
-                GL.Color4(c);
+                GL.Color3((Color) c);
                 GL.Begin(PrimitiveType.Quads);
                 GL.Vertex3(pos.X, pos.Y, 0);
                 GL.Vertex3(pos.X + 10, pos.Y, 0);

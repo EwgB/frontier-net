@@ -1,6 +1,5 @@
 ﻿namespace FrontierSharp.DummyModules {
     using OpenTK;
-    using OpenTK.Graphics;
 
     using Interfaces.Environment;
     using Interfaces.Property;
@@ -14,11 +13,11 @@
         public EnvironmentData Current { get {
                 return new EnvironmentData {
                     Color = new ColorTypeArray {
-                        [ColorType.Horizon] = Color4.White,
-                        [ColorType.Sky] = Color4.Blue,
-                        [ColorType.Fog] = Color4.Gray,
-                        [ColorType.Light] = Color4.Yellow,
-                        [ColorType.Ambient] = Color4.Red
+                        [ColorType.Horizon] = Color3.White,
+                        [ColorType.Sky] = Color3.Blue,
+                        [ColorType.Fog] = Color3.Gray,
+                        [ColorType.Light] = Color3.Yellow,
+                        [ColorType.Ambient] = Color3.Red
                     },
                     CloudCover = 0,
                     DrawSun = true,

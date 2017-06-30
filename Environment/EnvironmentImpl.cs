@@ -27,11 +27,11 @@
         private const float TIME_SUNSET = 19.5f;    // 7:30pm
         private const float TIME_DUSK = 20.5f;      // 8:30pm
 
-        private static readonly Color4 NIGHT_COLOR = new Color4(0, 0, 0.3f, 1);
-        private static readonly Color4 DAY_COLOR = Color4.White;
+        private static readonly Color3 NIGHT_COLOR = new Color3(0, 0, 0.3f);
+        private static readonly Color3 DAY_COLOR = Color3.White;
 
-        private static readonly Color4 NIGHT_SCALING = new Color4(0.0f, 0.1f, 0.4f, 1);
-        private static readonly Color4 DAY_SCALING = Color4.White;
+        private static readonly Color3 NIGHT_SCALING = new Color3(0.0f, 0.1f, 0.4f);
+        private static readonly Color3 DAY_SCALING = Color3.White;
 
         private static readonly Vector3 VECTOR_NIGHT = new Vector3(0.0f, 0.0f, -1.0f);
         private static readonly Vector3 VECTOR_SUNRISE = new Vector3(-0.8f, 0.0f, -0.2f);
