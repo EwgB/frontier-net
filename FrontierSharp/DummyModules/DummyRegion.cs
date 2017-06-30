@@ -24,7 +24,7 @@
         public Color4 ColorGrass { get { return Color4.Green; } }
         public Color4 ColorRock { get { return Color4.DarkSlateGray; } }
         public RegionFlag ShapeFlags { get { return RegionFlag.Beach; } }
-        public uint[] FlowerShape { get { return 1; } }
+        public uint[] FlowerShape { get { return new uint[] { 1 }; } }
         public bool HasFlowers { get { return false; } }
         public float Moisture { get { return 0; } }
         public int RiverId { get { return 0; } }
