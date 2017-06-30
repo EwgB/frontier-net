@@ -2,6 +2,7 @@
     using System;
 
     using OpenTK;
+    using OpenTK.Graphics;
 
     using Interfaces;
     using Interfaces.Environment;
@@ -11,9 +12,44 @@
     using Util;
 
     public class EnvironmentImpl : IEnvironment {
-        // Modules
-        private readonly IGame game;
+        #region Constants
+        /// <summary>How many milliseconds per in-game minute</summary>
+        private const int TIME_SCALE = 300;
+        //private const int MAX_DISTANCE = 900;
+        //private const float NIGHT_FOG = (MAX_DISTANCE / 5);
+        private const float ENV_TRANSITION = 0.02f;
+        /// <summary>In milliseconds</summary>
+        private const float UPDATE_INTERVAL = 50;
+        private const float SECONDS_TO_DECIMAL = (1.0f / 60.0f);
 
+        private const float TIME_DAWN = 5.5f;       // 5:30am
+        private const float TIME_DAY = 6.5f;        // 6:30am
+        private const float TIME_SUNSET = 19.5f;    // 7:30pm
+        private const float TIME_DUSK = 20.5f;      // 8:30pm
+
+        private static readonly Color4 NIGHT_COLOR = new Color4(0, 0, 0.3f, 1);
+        private static readonly Color4 DAY_COLOR = Color4.White;
+
+        private static readonly Color4 NIGHT_SCALING = new Color4(0.0f, 0.1f, 0.4f, 1);
+        private static readonly Color4 DAY_SCALING = Color4.White;
+
+        private static readonly Vector3 VECTOR_NIGHT = new Vector3(0.0f, 0.0f, -1.0f);
+        private static readonly Vector3 VECTOR_SUNRISE = new Vector3(-0.8f, 0.0f, -0.2f);
+        private static readonly Vector3 VECTOR_MORNING = new Vector3(-0.5f, 0.0f, -0.5f);
+        private static readonly Vector3 VECTOR_AFTERNOON = new Vector3(0.5f, 0.0f, -0.5f);
+        private static readonly Vector3 VECTOR_SUNSET = new Vector3(0.8f, 0.0f, -0.2f);
+
+        private const int SUN_ANGLE_SUNRISE = -10;
+        private const int SUN_ANGLE_MORNING = 15;
+        private const int SUN_ANGLE_AFTERNOON = 165;
+        private const int SUN_ANGLE_SUNSET = 190;
+        #endregion
+
+        #region Modules
+        private readonly IGame game;
+        #endregion
+
+        #region Properties and variables
         private EnvironmentProperties properties = new EnvironmentProperties();
         public IProperties Properties { get { return this.properties; } }
 
@@ -22,6 +58,9 @@
         private EnvironmentData Desired { get; set; }
 
         private float lastDecimalTime;
+        //static int        update;
+        //static bool       cycle_on;
+        #endregion
 
         public EnvironmentImpl(IGame game) {
             this.game = game;
@@ -179,40 +218,3 @@
         }
     }
 }
-
-// From Env.cpp
-
-//#define TIME_SCALE          300  //how many milliseconds per in-game minute
-////#define max_distance        900
-//#define NIGHT_FOG           (max_distance / 5)
-//#define ENV_TRANSITION      0.02f
-//#define UPDATE_INTERVAL     50 //milliseconds
-//#define SECONDS_TO_DECIMAL  (1.0f / 60.0f)
-
-//#define TIME_DAWN           5.5f  // 5:30am
-//#define TIME_DAY            6.5f  // 6:30am
-//#define TIME_SUNSET         19.5f // 7:30pm
-//#define TIME_DUSK           20.5f // 8:30pm
-
-//#define NIGHT_COLOR         glRgba (0.0f, 0.0f, 0.3f)
-//#define DAY_COLOR           glRgba (1.0f, 1.0f, 1.0f)
-
-//#define NIGHT_SCALING       glRgba (0.0f, 0.1f, 0.4f)
-//#define DAY_SCALING         glRgba (1.0f)
-
-//#define VECTOR_NIGHT        glVector ( 0.0f, 0.0f, -1.0f)
-//#define VECTOR_SUNRISE      glVector (-0.8f, 0.0f, -0.2f)
-//#define VECTOR_MORNING      glVector (-0.5f, 0.0f, -0.5f)
-//#define VECTOR_AFTERNOON    glVector ( 0.5f, 0.0f, -0.5f)
-//#define VECTOR_SUNSET       glVector ( 0.8f, 0.0f, -0.2f)
-
-//#define SUN_ANGLE_SUNRISE   -10
-//#define SUN_ANGLE_MORNING   15
-//#define SUN_ANGLE_AFTERNOON 165
-//#define SUN_ANGLE_SUNSET    190
-
-
-
-//static int        update;
-//static bool       cycle_on;
-
