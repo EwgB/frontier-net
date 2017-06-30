@@ -1,5 +1,4 @@
 ﻿namespace FrontierSharp.DummyModules {
-    using Ninject;
     using OpenTK;
 
     using Interfaces;
@@ -15,8 +14,8 @@
 
         public Vector3 CameraAngle { get { return Vector3.UnitX; } }
 
-        [Inject]
-        public IRegion Region { get; private set; }
+        private IRegion region = new DummyRegion();
+        public IRegion Region { get { return this.region; } }
 
         public void Init() {
             // Do nothing

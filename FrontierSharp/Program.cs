@@ -32,9 +32,6 @@
                 kernel.Bind<ITexture>().To<DummyTexture>().InSingletonScope();
                 kernel.Bind<IWorld>().To<DummyWorld>().InSingletonScope();
 
-                // Other types
-                kernel.Bind<IRegion>().To<DummyRegion>();
-
                 using (var frontier = kernel.Get<Frontier>()) {
                     frontier.Run(30.0);
                 }

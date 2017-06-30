@@ -129,11 +129,11 @@
             IRegion region = this.avatar.Region;
             //atmosphere = region.ColorAtmosphere;
             var humidFog = new Range<float>(
-                MathUtils.Interpolate(maxDistance, maxDistance * 0.75f, region.Moisture),
-                MathUtils.Interpolate(maxDistance * 0.85f, maxDistance * 0.25f, region.Moisture));
+                MathUtils.Interpolate(maxDistance * 0.85f, maxDistance * 0.25f, region.Moisture),
+                MathUtils.Interpolate(maxDistance, maxDistance * 0.75f, region.Moisture));
             if (region.Climate == Climate.Swamp) {
-                humidFog.Max /= 2.0f;
                 humidFog.Min /= 2.0f;
+                humidFog.Max /= 2.0f;
             }
             Desired.CloudCover = MathHelper.Clamp(region.Moisture, 0.20f, 0.6f);
             Desired.SunriseFade = Desired.SunsetFade = 0.0f;
@@ -152,8 +152,8 @@
             }
 
             Desired.Fog = new Range<float>(
-                Math.Min(humidFog.Max, outParams.TimeFog.Max),
-                Math.Min(humidFog.Min, outParams.TimeFog.Min));
+                Math.Min(humidFog.Min, outParams.TimeFog.Min),
+                Math.Min(humidFog.Max, outParams.TimeFog.Max));
 
             for (var colorType = ColorType.Horizon; colorType < ColorType.Max; colorType++) {
                 if (colorType == ColorType.Light || colorType == ColorType.Ambient)
