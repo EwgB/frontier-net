@@ -4,7 +4,6 @@
     using Interfaces;
     using Interfaces.Environment;
     using Interfaces.Particles;
-    using Interfaces.Region;
     using Interfaces.Renderer;
 
     using DummyModules;

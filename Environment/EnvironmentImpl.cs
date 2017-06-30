@@ -2,7 +2,6 @@
     using System;
 
     using OpenTK;
-    using OpenTK.Graphics;
 
     using Interfaces;
     using Interfaces.Environment;
@@ -10,6 +9,7 @@
     using Interfaces.Region;
 
     using Util;
+    using NLog;
 
     public class EnvironmentImpl : IEnvironment {
         #region Constants
@@ -19,7 +19,7 @@
         //private const float NIGHT_FOG = (MAX_DISTANCE / 5);
         private const float ENV_TRANSITION = 0.02f;
         /// <summary>In milliseconds</summary>
-        private const float UPDATE_INTERVAL = 50;
+        //private const float UPDATE_INTERVAL = 50;
         private const float SECONDS_TO_DECIMAL = (1.0f / 60.0f);
 
         private const float TIME_DAWN = 5.5f;       // 5:30am
@@ -52,6 +52,10 @@
         #endregion
 
         #region Properties and variables
+
+        // Logger
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+
         private EnvironmentProperties properties = new EnvironmentProperties();
         public IProperties Properties { get { return this.properties; } }
 
@@ -60,8 +64,7 @@
         private EnvironmentData Desired { get; set; }
 
         private float lastDecimalTime;
-        //static int        update;
-        //static bool       cycle_on;
+
         #endregion
 
         public EnvironmentImpl(IAvatar avatar, IGame game, IScene scene) {
@@ -74,17 +77,19 @@
         }
 
         public void Init() {
+            Log.Info("Init");
             DoTime(1);
             this.Current = this.Desired;
         }
 
         public void Update() {
-            // TODO
-            //  update += SdlElapsed ();
-            //  if (update > UPDATE_INTERVAL) {
-            //    doTime (ENV_TRANSITION);
+            // Original code had updates bound to framerate, so it used the following mechanic to simulate a constant update rate.
+            // We don't really need it here.
+            //update += SdlElapsed();
+            //if (update > UPDATE_INTERVAL) {
+            DoTime(ENV_TRANSITION);
             //    update -= UPDATE_INTERVAL;
-            //  }
+            //}
         }
 
         private void DoTime(float delta) {
@@ -108,7 +113,7 @@
             Current.DrawSun = Desired.DrawSun;
             Current.Light.Normalize();
         }
-
+        
         private struct CycleInParameters {
             internal float DecimalTime;
             internal float MaxDistance;
