@@ -2,7 +2,7 @@
     using System;
     using System.Collections.Generic;
 
-    using Interfaces.Property;
+    using Common.Property;
 
     public class Properties :  IProperties {
         private Dictionary<string, IProperty> properties = new Dictionary<string, IProperty>();

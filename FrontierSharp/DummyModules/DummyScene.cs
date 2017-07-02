@@ -4,9 +4,8 @@
 
     using System.Drawing;
 
-    using Interfaces;
-    using Interfaces.Property;
-    using System;
+    using Common;
+    using Common.Property;
 
     class DummyScene : IScene {
         private IProperties properties;

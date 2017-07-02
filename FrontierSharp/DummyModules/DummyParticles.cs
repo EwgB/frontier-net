@@ -1,6 +1,6 @@
 ﻿namespace FrontierSharp.DummyModules {
-    using Interfaces.Particles;
-    using Interfaces.Property;
+    using Common.Particles;
+    using Common.Property;
 
     class DummyParticles : IParticles {
         private IParticlesProperties properties;

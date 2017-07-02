@@ -1,15 +1,15 @@
 ﻿namespace FrontierSharp.Environment {
     using System;
+    using NLog;
 
     using OpenTK;
 
-    using Interfaces;
-    using Interfaces.Environment;
-    using Interfaces.Property;
-    using Interfaces.Region;
-
-    using Util;
-    using NLog;
+    using Common;
+    using Common.Avatar;
+    using Common.Environment;
+    using Common.Property;
+    using Common.Region;
+    using Common.Util;
 
     public class EnvironmentImpl : IEnvironment {
         #region Constants

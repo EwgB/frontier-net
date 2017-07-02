@@ -1,7 +1,7 @@
 ﻿namespace FrontierSharp.Renderer {
     using NLog;
 
-    using Interfaces.Renderer;
+    using Common.Renderer;
     using Properties;
 
     internal class RendererProperties : Properties, IRendererProperties {

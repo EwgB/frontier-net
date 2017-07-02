@@ -126,13 +126,13 @@
       <Project>{690e5640-15e7-4eb0-8189-4735ed9d0d92}</Project>
       <Name>Avatar</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{889072ad-5c8d-47d9-8fec-05a9ec728be8}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Environment\Environment.csproj">
       <Project>{e7e8aca7-7647-4cdb-8167-7f88951e0d1f}</Project>
       <Name>Environment</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Interfaces\Interfaces.csproj">
-      <Project>{889072ad-5c8d-47d9-8fec-05a9ec728be8}</Project>
-      <Name>Interfaces</Name>
     </ProjectReference>
     <ProjectReference Include="..\Particles\Particles.csproj">
       <Project>{7dd75da0-f018-42d6-bf27-344cfb8deb85}</Project>
@@ -145,10 +145,6 @@
     <ProjectReference Include="..\Renderer\Renderer.csproj">
       <Project>{f340b706-735d-42a1-8725-77c9d3ecddd0}</Project>
       <Name>Renderer</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Util\Util.csproj">
-      <Project>{3ef9cae0-8660-4500-82cb-8f050f0375a6}</Project>
-      <Name>Util</Name>
     </ProjectReference>
     <ProjectReference Include="..\World\World.csproj">
       <Project>{312819a2-8006-477f-8c01-110e0f0ba40d}</Project>

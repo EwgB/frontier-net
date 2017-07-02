@@ -1,5 +1,5 @@
 ﻿namespace FrontierSharp.DummyModules {
-    using Interfaces;
+    using Common;
 
     internal class DummyPlayer : IPlayer {
         public void Init() {

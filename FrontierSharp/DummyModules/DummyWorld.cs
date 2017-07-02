@@ -1,8 +1,8 @@
 ﻿namespace FrontierSharp.DummyModules {
     using OpenTK;
 
-    using Interfaces;
-    using Interfaces.Property;
+    using Common;
+    using Common.Property;
 
     internal class DummyWorld : IWorld {
         private IProperties properties;

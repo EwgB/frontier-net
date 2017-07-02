@@ -1,17 +1,17 @@
 ﻿namespace FrontierSharp.Renderer {
     using OpenTK;
-    using OpenTK.Graphics;
     using OpenTK.Graphics.OpenGL;
 
     using System;
     using System.Drawing;
 
-    using Interfaces;
-    using Interfaces.Environment;
-    using Interfaces.Property;
-    using Interfaces.Renderer;
+    using Common;
+    using Common.Avatar;
+    using Common.Environment;
+    using Common.Property;
+    using Common.Renderer;
+    using Common.Util;
 
-    using Util;
     using World;
 
     public class RendererImpl : IRenderer {

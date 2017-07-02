@@ -1,5 +1,5 @@
 ﻿namespace FrontierSharp.DummyModules {
-    using Interfaces;
+    using Common;
 
     internal class DummyText : IText {
         public void Init() {

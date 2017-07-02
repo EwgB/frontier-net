@@ -54,17 +54,13 @@
     <Compile Include="RendererProperties.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Interfaces\Interfaces.csproj">
+    <ProjectReference Include="..\Common\Common.csproj">
       <Project>{889072ad-5c8d-47d9-8fec-05a9ec728be8}</Project>
-      <Name>Interfaces</Name>
+      <Name>Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\Properties\Properties.csproj">
       <Project>{0d73456a-0969-4ff6-96a2-9435074b9eb8}</Project>
       <Name>Properties</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Util\Util.csproj">
-      <Project>{3EF9CAE0-8660-4500-82CB-8F050F0375A6}</Project>
-      <Name>Util</Name>
     </ProjectReference>
     <ProjectReference Include="..\World\World.csproj">
       <Project>{312819a2-8006-477f-8c01-110e0f0ba40d}</Project>

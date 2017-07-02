@@ -1,7 +1,7 @@
 ﻿namespace FrontierSharp.Properties {
     using System;
 
-    using Interfaces.Property;
+    using Common.Property;
 
     [Serializable]
     public class PropertyException : Exception {

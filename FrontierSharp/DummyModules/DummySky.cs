@@ -1,5 +1,5 @@
 ﻿namespace FrontierSharp.DummyModules {
-    using Interfaces;
+    using Common;
 
     internal class DummySky : ISky {
         public void Init() {

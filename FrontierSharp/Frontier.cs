@@ -6,12 +6,13 @@
 
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
-
-    using Interfaces;
-    using Interfaces.Environment;
-    using Interfaces.Particles;
-    using Interfaces.Renderer;
     using OpenTK.Input;
+
+    using Common;
+    using Common.Avatar;
+    using Common.Environment;
+    using Common.Particles;
+    using Common.Renderer;
 
     internal class Frontier : GameWindow, IModule {
 

@@ -1,6 +1,6 @@
 ﻿namespace FrontierSharp.Particles {
-    using Interfaces.Particles;
-    using Interfaces.Property;
+    using Common.Particles;
+    using Common.Property;
 
     ///<summary>Manages the list of active particle emitters.</summary>
     public class ParticlesImpl : IParticles {
@@ -14,7 +14,7 @@
         public void Init() { }
 
         public void Update() {
-
+            // TODO
             //  unsigned    i;
 
             //  for (i = 0; i < EmitterList.size (); i++) 

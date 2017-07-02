@@ -4,8 +4,8 @@
 
     using System.Drawing;
 
-    using Interfaces.Renderer;
-    using Interfaces.Property;
+    using Common.Property;
+    using Common.Renderer;
 
     public class DummyRenderer : IRenderer {
         private IRendererProperties properties;

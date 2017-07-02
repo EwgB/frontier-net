@@ -1,9 +1,9 @@
 ﻿namespace FrontierSharp.DummyModules {
     using OpenTK;
 
-    using Interfaces;
-    using Interfaces.Property;
-    using Interfaces.Region;
+    using Common.Avatar;
+    using Common.Property;
+    using Common.Region;
 
     class DummyAvatar : IAvatar {
 

@@ -1,5 +1,5 @@
 ﻿namespace FrontierSharp.DummyModules {
-    using Interfaces;
+    using Common;
 
     internal class DummyGame : IGame {
         public float Time {  get { return 6.5f; } }

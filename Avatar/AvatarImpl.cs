@@ -3,8 +3,8 @@
 
     using OpenTK;
 
-    using Interfaces;
-    using Interfaces.Region;
+    using Common.Avatar;
+    using Common.Region;
 
     public class AvatarImpl : IAvatar {
         public Vector3 CameraAngle {

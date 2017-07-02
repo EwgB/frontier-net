@@ -46,9 +46,9 @@
     <Compile Include="PropertyExceptions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Interfaces\Interfaces.csproj">
+    <ProjectReference Include="..\Common\Common.csproj">
       <Project>{889072ad-5c8d-47d9-8fec-05a9ec728be8}</Project>
-      <Name>Interfaces</Name>
+      <Name>Common</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

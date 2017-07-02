@@ -3,7 +3,7 @@
 
     using OpenTK.Input;
 
-    using Interfaces;
+    using Common;
 
     internal class DummyConsole : IConsole {
         // Logger

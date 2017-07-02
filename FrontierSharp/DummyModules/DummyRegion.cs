@@ -1,9 +1,9 @@
 ﻿namespace FrontierSharp.DummyModules {
     using OpenTK;
 
-    using Interfaces.Region;
+    using Common.Region;
+    using Common.Util;
 
-    using Util;
     using World;
 
     class DummyRegion : IRegion {

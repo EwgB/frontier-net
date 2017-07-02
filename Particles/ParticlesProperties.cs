@@ -2,7 +2,7 @@
     using NLog;
     using OpenTK;
 
-    using Interfaces.Particles;
+    using Common.Particles;
 
     using Properties;
 

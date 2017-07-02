@@ -1,10 +1,11 @@
 ﻿namespace FrontierSharp {
     using Ninject;
 
-    using Interfaces;
-    using Interfaces.Environment;
-    using Interfaces.Particles;
-    using Interfaces.Renderer;
+    using Common;
+    using Common.Avatar;
+    using Common.Environment;
+    using Common.Particles;
+    using Common.Renderer;
 
     using Avatar;
     using DummyModules;

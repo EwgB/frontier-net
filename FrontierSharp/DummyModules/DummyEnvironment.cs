@@ -1,10 +1,9 @@
 ﻿namespace FrontierSharp.DummyModules {
     using OpenTK;
 
-    using Interfaces.Environment;
-    using Interfaces.Property;
-
-    using Util;
+    using Common.Environment;
+    using Common.Property;
+    using Common.Util;
 
     class DummyEnvironment : IEnvironment {
         private IProperties properties;

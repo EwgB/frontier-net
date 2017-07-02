@@ -1,5 +1,5 @@
 ﻿namespace FrontierSharp.Properties {
-    using Interfaces.Property;
+    using Common.Property;
 
     public class Property<T> : IProperty<T> {
         public T Value { get; set; }
