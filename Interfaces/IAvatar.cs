@@ -1,10 +1,10 @@
 ﻿namespace FrontierSharp.Interfaces {
     using OpenTK;
 
-    using Property;
     using Region;
 
-    public interface IAvatar : IHasProperties, IModule {
+    /// <summary>Handles movement and player input.</summary>
+    public interface IAvatar : IModule {
         Vector3 CameraPosition { get; }
         Vector3 CameraAngle { get; }
         IRegion Region { get; }

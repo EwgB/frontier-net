@@ -122,6 +122,10 @@
     <Content Include="Resources\Textures\newgrass.pspimage" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Avatar\Avatar.csproj">
+      <Project>{690e5640-15e7-4eb0-8189-4735ed9d0d92}</Project>
+      <Name>Avatar</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Environment\Environment.csproj">
       <Project>{e7e8aca7-7647-4cdb-8167-7f88951e0d1f}</Project>
       <Name>Environment</Name>

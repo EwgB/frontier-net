@@ -6,6 +6,7 @@
     using Interfaces.Particles;
     using Interfaces.Renderer;
 
+    using Avatar;
     using DummyModules;
     using Environment;
     using Renderer;
@@ -17,7 +18,7 @@
                 // Set up dependecies
 
                 // Modules
-                kernel.Bind<IAvatar>().To<DummyAvatar>().InSingletonScope();
+                kernel.Bind<IAvatar>().To<AvatarImpl>().InSingletonScope();
                 kernel.Bind<IConsole>().To<DummyConsole>().InSingletonScope();
                 kernel.Bind<IEnvironment>().To<EnvironmentImpl>().InSingletonScope();
                 kernel.Bind<IGame>().To<DummyGame>().InSingletonScope();
