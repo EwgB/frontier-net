@@ -52,9 +52,17 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Animation\Animation.csproj">
+      <Project>{808790f8-6668-4e82-a1e8-58d2e3e86b95}</Project>
+      <Name>Animation</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{889072ad-5c8d-47d9-8fec-05a9ec728be8}</Project>
       <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\World\World.csproj">
+      <Project>{312819a2-8006-477f-8c01-110e0f0ba40d}</Project>
+      <Name>World</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

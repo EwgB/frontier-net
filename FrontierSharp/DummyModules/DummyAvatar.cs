@@ -17,11 +17,19 @@
         private IRegion region = new DummyRegion();
         public IRegion Region { get { return this.region; } }
 
+        public Vector3 Position { get; set; }
+
+        public AnimType AnimationType { get { return AnimType.Idle; } }
+
         public void Init() {
             // Do nothing
         }
 
         public void Update() {
+            // Do nothing
+        }
+
+        public void Render() {
             // Do nothing
         }
     }
