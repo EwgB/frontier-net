@@ -74,6 +74,7 @@
     <Compile Include="Util\BoundingBox.cs" />
     <Compile Include="Util\Color3.cs" />
     <Compile Include="Util\ColorUtils.cs" />
+    <Compile Include="Util\Coord.cs" />
     <Compile Include="Util\MathUtils.cs" />
     <Compile Include="Util\Range.cs" />
   </ItemGroup>
