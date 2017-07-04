@@ -53,7 +53,7 @@
     <Compile Include="Region\IRegion.cs" />
     <Compile Include="ISky.cs" />
     <Compile Include="IText.cs" />
-    <Compile Include="ITexture.cs" />
+    <Compile Include="ITextures.cs" />
     <Compile Include="IGame.cs" />
     <Compile Include="IConsole.cs" />
     <Compile Include="IModule.cs" />
@@ -75,8 +75,10 @@
     <Compile Include="Util\Color3.cs" />
     <Compile Include="Util\ColorUtils.cs" />
     <Compile Include="Util\Coord.cs" />
+    <Compile Include="Util\FileUtils.cs" />
     <Compile Include="Util\MathUtils.cs" />
     <Compile Include="Util\Range.cs" />
+    <Compile Include="Util\Texture.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="OpenTK.dll.config" />

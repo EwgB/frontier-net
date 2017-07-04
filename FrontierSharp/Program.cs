@@ -30,7 +30,7 @@
                 kernel.Bind<IShaders>().To<DummyShaders>().InSingletonScope();
                 kernel.Bind<ISky>().To<DummySky>().InSingletonScope();
                 kernel.Bind<IText>().To<DummyText>().InSingletonScope();
-                kernel.Bind<ITexture>().To<DummyTexture>().InSingletonScope();
+                kernel.Bind<ITextures>().To<DummyTextures>().InSingletonScope();
                 kernel.Bind<IWorld>().To<DummyWorld>().InSingletonScope();
 
                 using (var frontier = kernel.Get<Frontier>()) {

@@ -15,17 +15,17 @@
         /// <summary>
         /// The R component of this Color3 structure.
         /// </summary>
-        public float R;
+        public float R { get; }
 
         /// <summary>
         /// The G component of this Color3 structure.
         /// </summary>
-        public float G;
+        public float G { get; }
 
         /// <summary>
         /// The B component of this Color3 structure.
         /// </summary>
-        public float B;
+        public float B { get; }
 
         #endregion
 
@@ -49,18 +49,17 @@
         /// <param name="r">The R component of the new Color3 structure.</param>
         /// <param name="g">The G component of the new Color3 structure.</param>
         /// <param name="b">The B component of the new Color3 structure.</param>
-        public Color3(byte r, byte g, byte b) {
-            R = r / (float)Byte.MaxValue;
-            G = g / (float)Byte.MaxValue;
-            B = b / (float)Byte.MaxValue;
-        }
+        public Color3(byte r, byte g, byte b)
+            : this(
+                  r / (float)byte.MaxValue,
+                  g / (float)byte.MaxValue,
+                  b / (float)byte.MaxValue) { }
 
         /// <summary>
         /// Constructs a new Color3 structure from the specified System.Drawing.Color.
         /// </summary>
         /// <param name="color">The System.Drawing.Color containing the component values.</param>
-        public Color3(Color color)
-            : this(color.R, color.G, color.B) { }
+        public Color3(Color color) : this(color.R, color.G, color.B) { }
 
         #endregion
 

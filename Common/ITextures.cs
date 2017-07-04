@@ -1,4 +1,4 @@
 ﻿namespace FrontierSharp.Common {
-    public interface ITexture : IModule {
+    public interface ITextures : IModule {
     }
 }

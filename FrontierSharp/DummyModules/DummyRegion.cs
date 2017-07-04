@@ -11,7 +11,7 @@
         public float GeoBias { get { return 0; } }
         public float GeoDetail { get { return 0; } }
         public int MountainHeight { get { return 0; } }
-        public Vector2 GridPosition { get; private set; }
+        public Vector2 GridPosition { get; }
         public float TreeThreshold { get { return 0.15f; } }
         public float GeoScale { get { return 0; } }
         public float GeoWater { get { return 0; } }
