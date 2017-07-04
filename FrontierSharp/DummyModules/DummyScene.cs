@@ -4,12 +4,13 @@
 
     using System.Drawing;
 
-    using Common;
+    using Common.Scene;
     using Common.Property;
 
     class DummyScene : IScene {
-        private IProperties properties;
+        private ISceneProperties properties;
         public IProperties Properties { get { return this.properties; } }
+        public ISceneProperties SceneProperties { get { return this.properties; } }
 
         public float VisibleRange { get { return 576; } }
 

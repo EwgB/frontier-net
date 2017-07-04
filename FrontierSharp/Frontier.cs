@@ -13,6 +13,7 @@
     using Common.Environment;
     using Common.Particles;
     using Common.Renderer;
+    using Common.Scene;
 
     internal class Frontier : GameWindow, IModule {
 

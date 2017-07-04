@@ -10,6 +10,7 @@
     using Common.Environment;
     using Common.Property;
     using Common.Renderer;
+    using Common.Scene;
     using Common.Util;
 
     using World;

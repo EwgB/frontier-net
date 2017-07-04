@@ -9,6 +9,7 @@
     using Common.Environment;
     using Common.Property;
     using Common.Region;
+    using Common.Scene;
     using Common.Util;
 
     public class EnvironmentImpl : IEnvironment {

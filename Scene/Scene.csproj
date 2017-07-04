@@ -40,8 +40,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SceneUtils.cs" />
+    <Compile Include="SceneImpl.cs" />
+    <Compile Include="SceneProperties.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{889072ad-5c8d-47d9-8fec-05a9ec728be8}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Properties\Properties.csproj">
+      <Project>{0d73456a-0969-4ff6-96a2-9435074b9eb8}</Project>
+      <Name>Properties</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
