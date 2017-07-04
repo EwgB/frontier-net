@@ -1,24 +1,6 @@
 ﻿namespace FrontierSharp.Common.Region {
     using System;
 
-    public enum Climate {
-        Invalid,
-        Ocean,
-        Coast,
-        Mountain,
-        River,
-        RiverBank,
-        Swamp,
-        Rocky,
-        Lake,
-        Desert,
-        Field,
-        Plains,
-        Canyon,
-        Forest,
-        Max
-    }
-
     [Flags]
     public enum RegionFlag {
         Test = 0x0001,
