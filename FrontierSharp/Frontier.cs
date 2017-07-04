@@ -31,7 +31,7 @@
         private readonly IShaders shaders;
         private readonly ISky sky;
         private readonly IText text;
-        private readonly ITexture texture;
+        private readonly ITextures texture;
         private readonly IWorld world;
 
         // Constants
@@ -48,7 +48,7 @@
                         IShaders shaders,
                         ISky sky,
                         IText text,
-                        ITexture texture,
+                        ITextures texture,
                         IWorld world) {
             this.avatar = avatar;
             this.console = console;
@@ -142,7 +142,6 @@
 
             this.console.Init();
             this.particles.Init();
-            //ilInit(); // TODO: what is this?
             this.environment.Init();
             this.renderer.Init();
             this.shaders.Init();

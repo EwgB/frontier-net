@@ -9,5 +9,9 @@
         public void Update() {
             // Do nothing
         }
+
+        public uint TextureIdFromName(string name) {
+            return 0;
+        }
     }
 }
