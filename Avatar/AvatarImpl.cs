@@ -7,11 +7,11 @@
     using Common.Avatar;
     using Common.Particles;
     using Common.Region;
+    using Common.Textures;
 
     using Animation;
     using World;
     using Common.Property;
-    using System;
 
     public class AvatarImpl : IAvatar {
 

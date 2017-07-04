@@ -8,6 +8,7 @@
     using Common.Particles;
     using Common.Renderer;
     using Common.Scene;
+    using Common.Textures;
 
     using Avatar;
     using DummyModules;

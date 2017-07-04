@@ -4,7 +4,7 @@
 
     using OpenTK.Graphics.OpenGL;
 
-    using Common;
+    using Common.Textures;
     using Common.Util;
     using System.Drawing.Imaging;
 

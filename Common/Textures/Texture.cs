@@ -1,4 +1,4 @@
-﻿namespace FrontierSharp.Common.Util {
+﻿namespace FrontierSharp.Common.Textures {
     public class Texture {
         public Texture next;
         public uint id;

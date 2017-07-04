@@ -56,7 +56,7 @@
     <Compile Include="Region\IRegion.cs" />
     <Compile Include="ISky.cs" />
     <Compile Include="IText.cs" />
-    <Compile Include="ITextures.cs" />
+    <Compile Include="Textures\ITextures.cs" />
     <Compile Include="IGame.cs" />
     <Compile Include="IConsole.cs" />
     <Compile Include="IModule.cs" />
@@ -75,6 +75,7 @@
     <Compile Include="Renderer\IRenderer.cs" />
     <Compile Include="Renderer\IRendererProperties.cs" />
     <Compile Include="Scene\ISceneProperties.cs" />
+    <Compile Include="Terrain\TerrainUtils.cs" />
     <Compile Include="Util\BoundingBox.cs" />
     <Compile Include="Util\Color3.cs" />
     <Compile Include="Util\ColorUtils.cs" />
@@ -82,7 +83,7 @@
     <Compile Include="Util\FileUtils.cs" />
     <Compile Include="Util\MathUtils.cs" />
     <Compile Include="Util\Range.cs" />
-    <Compile Include="Util\Texture.cs" />
+    <Compile Include="Textures\Texture.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="OpenTK.dll.config" />
