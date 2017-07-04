@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Animation\IFigure.cs" />
     <Compile Include="Avatar\AnimType.cs" />
     <Compile Include="Environment\EnvironmentTypes.cs" />
     <Compile Include="IPlayer.cs" />

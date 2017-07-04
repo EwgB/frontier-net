@@ -2,6 +2,7 @@
     using Ninject;
 
     using Common;
+    using Common.Animation;
     using Common.Avatar;
     using Common.Environment;
     using Common.Particles;
@@ -32,6 +33,9 @@
                 kernel.Bind<IText>().To<DummyText>().InSingletonScope();
                 kernel.Bind<ITextures>().To<DummyTextures>().InSingletonScope();
                 kernel.Bind<IWorld>().To<DummyWorld>().InSingletonScope();
+
+                // Other dependencies
+                kernel.Bind<IFigure>().To<DummyFigure>();
 
                 using (var frontier = kernel.Get<Frontier>()) {
                     frontier.Run(30.0);

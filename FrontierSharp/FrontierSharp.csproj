@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="DummyModules\DummyAvatar.cs" />
     <Compile Include="DummyModules\DummyEnvironment.cs" />
+    <Compile Include="DummyModules\DummyFigure.cs" />
     <Compile Include="DummyModules\DummyParticles.cs" />
     <Compile Include="DummyModules\DummyRegion.cs" />
     <Compile Include="DummyModules\DummyRenderer.cs" />
