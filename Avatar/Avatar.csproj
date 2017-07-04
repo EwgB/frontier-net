@@ -30,6 +30,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.4.11\lib\net45\NLog.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="OpenTK, Version=2.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <HintPath>..\packages\OpenTK.2.0.0\lib\net20\OpenTK.dll</HintPath>
       <Private>True</Private>
@@ -45,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AvatarImpl.cs" />
+    <Compile Include="AvatarProperties.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -59,6 +64,10 @@
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{889072ad-5c8d-47d9-8fec-05a9ec728be8}</Project>
       <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Properties\Properties.csproj">
+      <Project>{0d73456a-0969-4ff6-96a2-9435074b9eb8}</Project>
+      <Name>Properties</Name>
     </ProjectReference>
     <ProjectReference Include="..\World\World.csproj">
       <Project>{312819a2-8006-477f-8c01-110e0f0ba40d}</Project>

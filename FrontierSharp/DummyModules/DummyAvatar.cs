@@ -4,11 +4,13 @@
     using Common.Avatar;
     using Common.Property;
     using Common.Region;
+    using System;
 
     class DummyAvatar : IAvatar {
 
-        private IProperties properties;
+        private IAvatarProperties properties;
         public IProperties Properties { get { return this.properties; } }
+        public IAvatarProperties AvatarProperties { get { return this.properties; } }
 
         public Vector3 CameraPosition { get { return new Vector3(1, 1, 0); } }
 

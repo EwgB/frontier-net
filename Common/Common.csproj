@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="Animation\IFigure.cs" />
     <Compile Include="Avatar\AnimType.cs" />
+    <Compile Include="Avatar\IAvatarProperties.cs" />
     <Compile Include="Environment\EnvironmentTypes.cs" />
     <Compile Include="IPlayer.cs" />
     <Compile Include="IRenderable.cs" />

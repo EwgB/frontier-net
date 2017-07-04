@@ -1,10 +1,13 @@
 ﻿namespace FrontierSharp.Common.Avatar {
     using OpenTK;
 
+    using Property;
     using Region;
 
     /// <summary>Handles movement and player input.</summary>
-    public interface IAvatar : IModule, IRenderable {
+    public interface IAvatar : IModule, IHasProperties, IRenderable {
+        IAvatarProperties AvatarProperties { get; }
+
         IRegion Region { get; }
         Vector3 Position { get; set; }
         AnimType AnimationType { get; }

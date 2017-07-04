@@ -1,19 +1,26 @@
 ﻿namespace FrontierSharp.Avatar {
     using OpenTK;
+    using OpenTK.Graphics.OpenGL;
 
     using Common;
+    using Common.Animation;
     using Common.Avatar;
     using Common.Particles;
     using Common.Region;
 
     using Animation;
     using World;
+    using Common.Property;
+    using System;
 
     public class AvatarImpl : IAvatar {
 
         #region Modules
 
         private IGame game;
+        private ITextures textures;
+
+        private IFigure avatar;
 
         #endregion
 
@@ -39,6 +46,10 @@
         public Vector3 CameraPosition { get; private set; }
         public AnimType AnimationType { get; private set; }
 
+        private IAvatarProperties properties = new AvatarProperties();
+        public IProperties Properties { get { return this.properties; } }
+        public IAvatarProperties AvatarProperties { get { return this.properties; } }
+
         #endregion
 
         #region Member variables
@@ -53,7 +64,6 @@
         private bool swimming;
         private bool sprinting;
         private uint last_update;
-        private Figure avatar;
         private Anim[] anim = new Anim[(int)AnimType.Max];
         private AnimType anim_id;
         private float distance_walked;
@@ -66,14 +76,16 @@
 
         #endregion
 
-        public AvatarImpl(IGame game) {
+        public AvatarImpl(IGame game, ITextures textures, IFigure avatar) {
             this.game = game;
+            this.textures = textures;
+            this.avatar = avatar;
         }
 
         public void Init() {
             /*
             desiredCamDistance = IniFloat("Avatar", "CameraDistance");
-            do_model();
+            DoModel();
             for (int i = 0; i < ANIM_COUNT; i++) {
                 anim[i].LoadBvh(IniString("Animations", anim_names[i]));
                 IniStringSet("Animations", anim_names[i], IniString("Animations", anim_names[i]));
@@ -240,13 +252,12 @@
         }
 
         public void Render() {
-            /*
-            glBindTexture(GL_TEXTURE_2D, TextureIdFromName("avatar.png"));
-            //glBindTexture (GL_TEXTURE_2D, 0);
+            GL.BindTexture(TextureTarget.Texture2D, this.textures.TextureIdFromName("avatar.png"));
+            GL.BindTexture(TextureTarget.Texture2D, 0);
             avatar.Render();
-            if (CVarUtils::GetCVar<bool>("show.skeleton"))
+            if (this.properties.ShowSkeleton) {
                 avatar.RenderSkeleton();
-             */
+            }
         }
 
         private void DoModel() {
