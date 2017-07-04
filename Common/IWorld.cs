@@ -1,4 +1,5 @@
 ﻿namespace FrontierSharp.Common {
+    using Region;
     using OpenTK;
 
     using Property;
@@ -8,5 +9,6 @@
         uint MapId { get; }
 
         float GetWaterLevel(Vector2 coord);
+        IRegion GetRegion(int x, int y);
     }
 }

@@ -19,6 +19,7 @@
 
         private IGame game;
         private ITextures textures;
+        private IWorld world;
 
         private IFigure avatar;
 
@@ -76,16 +77,20 @@
 
         #endregion
 
-        public AvatarImpl(IGame game, ITextures textures, IFigure avatar) {
+        public AvatarImpl(IFigure avatar, IGame game, ITextures textures, IWorld world) {
+            this.avatar = avatar;
             this.game = game;
             this.textures = textures;
-            this.avatar = avatar;
+            this.world = world;
+
+            // TODO: Is this the desired behaviour? Where should this be initialised?
+            this.Region = this.world.GetRegion(0, 0);
         }
 
         public void Init() {
-            /*
-            desiredCamDistance = IniFloat("Avatar", "CameraDistance");
+            //desiredCamDistance = IniFloat("Avatar", "CameraDistance");
             DoModel();
+            /*
             for (int i = 0; i < ANIM_COUNT; i++) {
                 anim[i].LoadBvh(IniString("Animations", anim_names[i]));
                 IniStringSet("Animations", anim_names[i], IniString("Animations", anim_names[i]));
@@ -245,7 +250,11 @@
             time_passed = GameTime() - last_time;
             last_time = GameTime();
             TextPrint("%s elapsed: %f", anim_names[anim_id], elapsed);
-            region = WorldRegionGet((int)(position.x + REGION_HALF) / REGION_SIZE, (int)(position.y + REGION_HALF) / REGION_SIZE);
+            */
+            this.Region = this.world.GetRegion(
+                (int)(this.position.X + WorldUtils.REGION_HALF) / WorldUtils.REGION_SIZE,
+                (int)(this.position.Y + WorldUtils.REGION_HALF) / WorldUtils.REGION_SIZE);
+            /*
             do_camera();
             do_location();
             */
