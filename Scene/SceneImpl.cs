@@ -1,5 +1,6 @@
 ﻿namespace FrontierSharp.Scene {
     using Common;
+    using Common.Grid;
     using Common.Property;
     using Common.Scene;
     using Common.Terrain;
@@ -28,6 +29,12 @@
         public ISceneProperties SceneProperties { get { return this.properties; } }
 
         public float VisibleRange { get { return (TERRAIN_GRID / 2f) * TerrainUtils.TERRAIN_SIZE; } }
+
+        #endregion
+
+        #region Memeber variables
+
+        private IGridManager gm_terrain;
 
         #endregion
 
@@ -145,7 +152,7 @@
             gm_grass.Update(stopAt);
             gm_forest.Update(stopAt);
             gm_brush.Update(stopAt);
-            TextPrint("Scene: %d of %d terrains ready", gm_terrain.ItemsReady(), gm_terrain.ItemsViewable());
+            this.text.Print(string.Format( "Scene: %d of %d terrains ready", gm_terrain.ItemsReadyCount, gm_terrain.ItemsViewableCount));
         }
     }
 }
@@ -159,7 +166,6 @@ static int              polygons;
 static int              polygons_counter;
 
 
-static GridManager gm_terrain;
 static vector<CTerrain> il_terrain;
 static GridManager gm_forest;
 static vector<CForest> il_forest;

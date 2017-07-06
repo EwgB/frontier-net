@@ -6,7 +6,7 @@
     /// and deleted at various times.If it gets drawn, and if there's more than
     /// one of it, then it should go here.
     /// </summary>
-    public interface IScene : IHasProperties, ITimeCappedModule, IRenderable {
+    public interface IScene : IBaseModule, IHasProperties, ITimeCapped, IRenderable {
         ISceneProperties SceneProperties { get; }
 
         /// <summary>How far it is from the center of the terrain grid to the outer edge</summary>

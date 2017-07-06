@@ -49,10 +49,12 @@
     <Compile Include="Avatar\AnimType.cs" />
     <Compile Include="Avatar\IAvatarProperties.cs" />
     <Compile Include="Environment\EnvironmentTypes.cs" />
+    <Compile Include="Grid\IGridData.cs" />
+    <Compile Include="Grid\IGridManager.cs" />
     <Compile Include="IBaseModule.cs" />
     <Compile Include="IPlayer.cs" />
     <Compile Include="IRenderable.cs" />
-    <Compile Include="ITimeCappedModule.cs" />
+    <Compile Include="ITimeCapped.cs" />
     <Compile Include="Particles\ParticleTypes.cs" />
     <Compile Include="Region\Climate.cs" />
     <Compile Include="Region\IRegion.cs" />
@@ -91,9 +93,7 @@
     <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Grid\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -1,5 +1,5 @@
 ﻿namespace FrontierSharp.Common {
-	public interface ITimeCappedModule : IBaseModule {
+	public interface ITimeCapped {
 		void Update(double stopAt);
 	}
 }

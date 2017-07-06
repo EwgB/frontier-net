@@ -30,7 +30,7 @@ protected:
   unsigned              _item_size;  //Size of an item in world units.
   unsigned              _item_count; //How many total items in the table?
   unsigned              _item_bytes; //size of items, in bytes
-  unsigned              _view_items; //How many items in the table are withing the viewable circle?
+  unsigned              _view_items; //How many items in the table are within the viewable circle?
   GLcoord               _last_viewer;
   unsigned              _list_pos;
 
