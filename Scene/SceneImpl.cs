@@ -1,4 +1,6 @@
 ﻿namespace FrontierSharp.Scene {
+    using System.Collections.Generic;
+
     using Common;
     using Common.Grid;
     using Common.Property;
@@ -28,13 +30,22 @@
         public IProperties Properties { get { return this.properties; } }
         public ISceneProperties SceneProperties { get { return this.properties; } }
 
-        public float VisibleRange { get { return (TERRAIN_GRID / 2f) * TerrainUtils.TERRAIN_SIZE; } }
+        public float VisibleRange { get { return (TERRAIN_GRID / 2f) * GridUtils.TERRAIN_SIZE; } }
 
         #endregion
 
         #region Memeber variables
 
         private IGridManager gm_terrain;
+        private List<ITerrain> il_terrain;
+        private IGridManager gm_forest;
+        private List<IForest> il_forest;
+        private IGridManager gm_grass;
+        private List<IGrass> il_grass;
+        private IGridManager gm_brush;
+        private List<IBrush> il_brush;
+        private IGridManager gm_particle;
+        private List<IParticleArea> il_particle;
 
         #endregion
 
@@ -165,16 +176,6 @@ static int              texture_bytes_counter;
 static int              polygons;
 static int              polygons_counter;
 
-
-static vector<CTerrain> il_terrain;
-static GridManager gm_forest;
-static vector<CForest> il_forest;
-static GridManager gm_grass;
-static vector<CGrass> il_grass;
-static GridManager gm_brush;
-static vector<CBrush> il_brush;
-static GridManager gm_particle;
-static vector<CParticleArea> il_particle;
 
 
 void SceneClear() {

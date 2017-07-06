@@ -51,6 +51,11 @@
     <Compile Include="Environment\EnvironmentTypes.cs" />
     <Compile Include="Grid\IGridData.cs" />
     <Compile Include="Grid\IGridManager.cs" />
+    <Compile Include="Grid\IGrass.cs" />
+    <Compile Include="Grid\IBrush.cs" />
+    <Compile Include="Grid\IParticleArea.cs" />
+    <Compile Include="Grid\IForest.cs" />
+    <Compile Include="Grid\ITerrain.cs" />
     <Compile Include="IBaseModule.cs" />
     <Compile Include="IPlayer.cs" />
     <Compile Include="IRenderable.cs" />
@@ -79,7 +84,7 @@
     <Compile Include="Renderer\IRenderer.cs" />
     <Compile Include="Renderer\IRendererProperties.cs" />
     <Compile Include="Scene\ISceneProperties.cs" />
-    <Compile Include="Terrain\TerrainUtils.cs" />
+    <Compile Include="Grid\GridUtils.cs" />
     <Compile Include="Util\BoundingBox.cs" />
     <Compile Include="Util\Color3.cs" />
     <Compile Include="Util\ColorUtils.cs" />
