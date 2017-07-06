@@ -2,6 +2,7 @@
     using Common;
     using Common.Property;
     using Common.Scene;
+    using Common.Terrain;
 
     public class SceneImpl : IScene {
 
@@ -16,6 +17,7 @@
         #region Modules
 
         private IGame game;
+        private IText text;
 
         #endregion
 
@@ -25,12 +27,13 @@
         public IProperties Properties { get { return this.properties; } }
         public ISceneProperties SceneProperties { get { return this.properties; } }
 
-        public float VisibleRange { get { return (TERRAIN_GRID / 2f) * TERRAIN_SIZE; } }
+        public float VisibleRange { get { return (TERRAIN_GRID / 2f) * TerrainUtils.TERRAIN_SIZE; } }
 
         #endregion
 
-        public SceneImpl(IGame game) {
+        public SceneImpl(IGame game, IText text) {
             this.game = game;
+            this.text = text;
         }
 
         public void Init() {

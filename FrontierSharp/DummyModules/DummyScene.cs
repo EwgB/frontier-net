@@ -18,7 +18,7 @@
             // Do nothing
         }
 
-        public void Update() {
+        public void Update(double stopAt) {
             // Do nothing
         }
 

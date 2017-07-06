@@ -2,14 +2,20 @@
     using Common;
 
     internal class DummyGame : IGame {
+        public bool IsRunning { get; private set; }
+
         public float Time {  get { return 6.5f; } }
 
         public void Init() {
-            // Do nothing
+            this.IsRunning = true;
         }
 
         public void Update() {
             // Do nothing
+        }
+
+        public void Quit() {
+            this.IsRunning = false;
         }
     }
 }
