@@ -1,5 +1,5 @@
 ﻿namespace FrontierSharp.Scene {
-    using System;
+    using Common;
     using Common.Property;
     using Common.Scene;
 
@@ -13,13 +13,25 @@
         private const int PARTICLE_GRID = 3;
         #endregion
 
+        #region Modules
+
+        private IGame game;
+
+        #endregion
+
         #region Properties
+
         private ISceneProperties properties = new SceneProperties();
         public IProperties Properties { get { return this.properties; } }
         public ISceneProperties SceneProperties { get { return this.properties; } }
 
-        public float VisibleRange { get { return (TERRAIN_GRID / 2f) * /*TERRAIN_SIZE*/1; } }
+        public float VisibleRange { get { return (TERRAIN_GRID / 2f) * TERRAIN_SIZE; } }
+
         #endregion
+
+        public SceneImpl(IGame game) {
+            this.game = game;
+        }
 
         public void Init() {
             /*
@@ -103,8 +115,34 @@
              */
         }
 
-        public void Update() {
-            throw new NotImplementedException();
+        private byte updateType = 0;
+        public void Update(double stopAt) {
+
+            if (!this.game.IsRunning)
+                return;
+            //We don't want any grid to starve the others, so we rotate the order of priority.
+            updateType = (byte)((updateType + 1) % 4);
+            switch (updateType) {
+                case 0:
+                    gm_terrain.Update(stopAt);
+                    break;
+                case 1:
+                    gm_grass.Update(stopAt);
+                    break;
+                case 2:
+                    gm_forest.Update(stopAt);
+                    break;
+                case 3:
+                    gm_brush.Update(stopAt);
+                    break;
+            }
+            //any time left over goes to the losers...
+            gm_particle.Update(stopAt);
+            gm_terrain.Update(stopAt);
+            gm_grass.Update(stopAt);
+            gm_forest.Update(stopAt);
+            gm_brush.Update(stopAt);
+            TextPrint("Scene: %d of %d terrains ready", gm_terrain.ItemsReady(), gm_terrain.ItemsViewable());
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿namespace FrontierSharp.Common {
-    public interface IModule {
-        void Init();
+    public interface IModule : IBaseModule {
         void Update();
     }
 }

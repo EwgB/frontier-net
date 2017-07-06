@@ -18,10 +18,17 @@
 
     internal class Frontier : GameWindow, IModule {
 
+        #region Constants
+
+        private const float MOUSE_SCALING = 0.01f;
+        private const double UPDATE_INTERVAL = 15 / 1000;
+        
+        #endregion
+
         // Logger
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        // Modules
+        #region Modules
         private readonly IAvatar avatar;
         private readonly IConsole console;
         private readonly IEnvironment environment;
@@ -35,9 +42,7 @@
         private readonly IText text;
         private readonly ITextures texture;
         private readonly IWorld world;
-
-        // Constants
-        private const float MOUSE_SCALING = 0.01f;
+        #endregion
 
         public Frontier(IAvatar avatar,
                         IConsole console,
@@ -78,7 +83,7 @@
             Log.Trace("OnResize");
 
             GL.Viewport(ClientRectangle.X, ClientRectangle.Y, ClientRectangle.Width, ClientRectangle.Height);
-            var projection = Matrix4.CreatePerspectiveFieldOfView((float)Math.PI / 4, Width / (float)Height, 1.0f, 64.0f);
+            var projection = Matrix4.CreatePerspectiveFieldOfView((float) Math.PI / 4, Width / (float) Height, 1.0f, 64.0f);
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadMatrix(ref projection);
         }
@@ -103,8 +108,8 @@
             this.player.Update();
             this.environment.Update();
             this.sky.Update();
-            //this.scene.Update(stop);
-            //this.cache.Update(stop);
+            this.scene.Update(UPDATE_INTERVAL);
+            //this.cache.Update(UPDATE_INTERVAL);
             this.particles.Update();
             this.renderer.Update();
         }
