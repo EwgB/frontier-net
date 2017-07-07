@@ -1,11 +1,17 @@
 ﻿namespace FrontierSharp.Scene {
     using System.Collections.Generic;
 
+    using OpenTK.Graphics.OpenGL;
+
     using Common;
+    using Common.Avatar;
     using Common.Grid;
+    using Common.Particles;
     using Common.Property;
     using Common.Scene;
+    using Common.Shaders;
     using Common.Terrain;
+    using Common.Textures;
 
     public class SceneImpl : IScene {
 
@@ -19,8 +25,14 @@
 
         #region Modules
 
+        private IAvatar avatar;
         private IGame game;
+        private IParticles particles;
+        private IShaders shaders;
+        private ISky sky;
         private IText text;
+        private ITextures textures;
+        private IWater water;
 
         #endregion
 
@@ -49,9 +61,23 @@
 
         #endregion
 
-        public SceneImpl(IGame game, IText text) {
+        public SceneImpl(
+                IAvatar avatar,
+                IGame game,
+                IParticles particles,
+                IShaders shaders,
+                ISky sky,
+                IText text,
+                ITextures textures,
+                IWater water) {
+            this.avatar = avatar;
             this.game = game;
+            this.particles = particles;
+            this.shaders = shaders;
+            this.sky = sky;
             this.text = text;
+            this.textures = textures;
+            this.water = water;
         }
 
         public void Init() {
@@ -79,61 +105,56 @@
         }
 
         public void Render() {
-            /*
-                 if (!GameRunning())
-                    return;
-                if (!CVarUtils::GetCVar<bool>("render.textured"))
-                    glDisable(GL_TEXTURE_2D);
-                else
-                    glEnable(GL_TEXTURE_2D);
-                SkyRender();
-                glDisable(GL_CULL_FACE);
-                CgShaderSelect(VSHADER_TREES);
-                CgShaderSelect(FSHADER_GREEN);
-                glColor3f(1, 1, 1);
-                glDisable(GL_TEXTURE_2D);
-                gm_forest.Render();
-                glEnable(GL_CULL_FACE);
-                CgShaderSelect(VSHADER_NORMAL);
-                glColor3f(1, 1, 1);
-                gm_terrain.Render();
-                WaterRender();
-                glBindTexture(GL_TEXTURE_2D, TextureIdFromName("grass3.png"));
-                CgShaderSelect(VSHADER_GRASS);
-                glColorMask(false, false, false, false);
-                gm_grass.Render();
-                gm_brush.Render();
-                glColorMask(true, true, true, true);
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                gm_grass.Render();
-                gm_brush.Render();
-                CgShaderSelect(VSHADER_NORMAL);
-                AvatarRender();
-                CgShaderSelect(FSHADER_NONE);
-                CgShaderSelect(VSHADER_NONE);
-                ParticleRender();
-                gm_particle.Render();
-
-            */
+            if (!this.game.IsRunning)
+                return;
+            if (!this.properties.RenderTextured)
+                GL.Disable(EnableCap.Texture2D);
+            else
+                GL.Enable(EnableCap.Texture2D);
+            this.sky.Render();
+            GL.Disable(EnableCap.CullFace);
+            this.shaders.SelectShader(VShaderTypes.Trees);
+            this.shaders.SelectShader(FShaderTypes.Green);
+            GL.Color3(1, 1, 1);
+            GL.Disable(EnableCap.Texture2D);
+            gm_forest.Render();
+            GL.Enable(EnableCap.CullFace);
+            this.shaders.SelectShader(VShaderTypes.Normal);
+            GL.Color3(1, 1, 1);
+            gm_terrain.Render();
+            this.water.Render();
+            GL.BindTexture(TextureTarget.Texture2D, this.textures.TextureIdFromName("grass3.png"));
+            this.shaders.SelectShader(VShaderTypes.Grass);
+            GL.ColorMask(false, false, false, false);
+            gm_grass.Render();
+            gm_brush.Render();
+            GL.ColorMask(true, true, true, true);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            gm_grass.Render();
+            gm_brush.Render();
+            this.shaders.SelectShader(VShaderTypes.Normal);
+            this.avatar.Render();
+            this.shaders.SelectShader(FShaderTypes.None);
+            this.shaders.SelectShader(VShaderTypes.None);
+            this.particles.Render();
+            gm_particle.Render();
         }
 
         public void RenderDebug() {
-            /*
-            glEnable(GL_BLEND);
-            glDisable(GL_TEXTURE_2D);
-            glDisable(GL_LIGHTING);
-            glBlendFunc(GL_ONE, GL_ONE);
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            glColor3f(1, 1, 1);
+            GL.Enable(EnableCap.Blend);
+            GL.Disable(EnableCap.Texture2D);
+            GL.Disable(EnableCap.Lighting);
+            GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.One);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+            GL.Color3(1, 1, 1);
             gm_forest.Render();
             gm_terrain.Render();
             gm_grass.Render();
             gm_brush.Render();
-            glColor3f(1, 1, 1);
-            AvatarRender();
-            WaterRender();
-             */
+            GL.Color3(1, 1, 1);
+            this.avatar.Render();
+            this.water.Render();
         }
 
         private byte updateType = 0;

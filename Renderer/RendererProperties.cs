@@ -2,6 +2,7 @@
     using NLog;
 
     using Common.Renderer;
+
     using Properties;
 
     internal class RendererProperties : Properties, IRendererProperties {

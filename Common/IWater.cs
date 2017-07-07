@@ -1,4 +1,4 @@
 ﻿namespace FrontierSharp.Common {
-    public interface IShaders : IModule {
+    public interface IWater : IRenderable {
     }
 }

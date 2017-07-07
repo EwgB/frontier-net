@@ -8,6 +8,7 @@
     using Common.Particles;
     using Common.Renderer;
     using Common.Scene;
+    using Common.Shaders;
     using Common.Textures;
 
     using Avatar;

@@ -1,4 +1,8 @@
 ﻿namespace FrontierSharp.Particles {
+    using System.Collections.Generic;
+
+    using OpenTK.Graphics.OpenGL;
+
     using Common.Particles;
     using Common.Property;
 
@@ -9,13 +13,13 @@
         public IProperties Properties { get { return this.properties; } }
         public IParticlesProperties ParticlesProperties { get { return this.properties; } }
 
-        //private static readonly List<CEmitter> EmitterList = new List<CEmitter>();
+        private readonly List<IEmitter> EmitterList = new List<IEmitter>();
 
         public void Init() { }
 
         public void Update() {
             // TODO
-            //  unsigned    i;
+            //  uint    i;
 
             //  for (i = 0; i < EmitterList.size (); i++) 
             //    EmitterList[i].Update (SdlElapsedSeconds ());
@@ -28,6 +32,16 @@
             //  if (InputKeyPressed (SDLK_f)) 
             //    place_emitter ();
 
+        }
+
+        public void Render() {
+            GL.Enable(EnableCap.Blend);
+            GL.Enable(EnableCap.Texture2D);
+            GL.Disable(EnableCap.Lighting);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            for (var i = 0; i < EmitterList.Count; i++) {
+                EmitterList[i].Render();
+            }
         }
     }
 }
@@ -70,7 +84,7 @@
         //void ParticleDestroy (UINT id)
         //{
 
-        //  unsigned    i;
+        //  uint    i;
 
         //  for (i = 0; i < EmitterList.size (); i++) {
         //    if (EmitterList[i].Id () == id) {
@@ -87,7 +101,7 @@
         //void ParticleRetire (UINT id)
         //{
 
-        //  unsigned    i;
+        //  uint    i;
 
         //  for (i = 0; i < EmitterList.size (); i++) {
         //    if (EmitterList[i].Id () == id) {
@@ -97,20 +111,6 @@
         //    }
         //  }
         //  ConsoleLog ("ParticleRetire: Effect #%d not found.", id);
-
-        //}
-
-        //void ParticleRender ()
-        //{
-
-        //  unsigned    i;
-
-        //  glEnable (GL_BLEND);
-        //  glEnable (GL_TEXTURE_2D);
-        //  glDisable (GL_LIGHTING);
-        //  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        //  for (i = 0; i < EmitterList.size (); i++) 
-        //    EmitterList[i].Render ();
 
         //}
 

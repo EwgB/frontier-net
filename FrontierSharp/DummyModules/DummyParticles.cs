@@ -1,4 +1,5 @@
 ﻿namespace FrontierSharp.DummyModules {
+    using System;
     using Common.Particles;
     using Common.Property;
 
@@ -12,6 +13,10 @@
         }
 
         public void Update() {
+            // Do nothing
+        }
+
+        public void Render() {
             // Do nothing
         }
     }
