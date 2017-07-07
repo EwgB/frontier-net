@@ -3,8 +3,7 @@
 
     using Common.Region;
     using Common.Util;
-
-    using World;
+    using Common.World;
 
     class DummyRegion : IRegion {
         public string Title { get { return "DUMMY_REGION"; } }

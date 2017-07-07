@@ -99,7 +99,7 @@
             if (this.game.Time != lastDecimalTime)
                 DoCycle();
             lastDecimalTime = this.game.Time;
-            for (var colorType = ColorType.Horizon; colorType < ColorType.Max; colorType++) {
+            for (var colorType = ColorTypes.Horizon; colorType < ColorTypes.Max; colorType++) {
                 Current.Color[colorType] = ColorUtils.Interpolate(Current.Color[colorType], Desired.Color[colorType], delta);
             }
             Current.Fog = new Range<float>(
@@ -161,26 +161,26 @@
                 Math.Min(humidFog.Min, outParams.TimeFog.Min),
                 Math.Min(humidFog.Max, outParams.TimeFog.Max));
 
-            for (var colorType = ColorType.Horizon; colorType < ColorType.Max; colorType++) {
-                if (colorType == ColorType.Light || colorType == ColorType.Ambient)
+            for (var colorType = ColorTypes.Horizon; colorType < ColorTypes.Max; colorType++) {
+                if (colorType == ColorTypes.Light || colorType == ColorTypes.Ambient)
                     continue;
                 Color3 average = outParams.BaseColor * outParams.Atmosphere;
                 //average = average.Normalize() / 3;
                 Desired.Color[colorType] = average;
-                if (colorType == ColorType.Sky)
+                if (colorType == ColorTypes.Sky)
                     Desired.Color[colorType] = outParams.BaseColor * 0.75f;
                 Desired.Color[colorType] *= outParams.ColorScaling;
             }
 
-            Desired.Color[ColorType.Sky] = region.ColorAtmosphere;
-            Desired.Color[ColorType.Fog] = Desired.Color[ColorType.Horizon] = (Desired.Color[ColorType.Sky] + outParams.Atmosphere * 2) / 3;
-            //Desired.Color[ColorType.Sky] = Desired.Color[ColorType.Horizon] * (new Color3 (0.2f, 0.2f, 0.8f));
+            Desired.Color[ColorTypes.Sky] = region.ColorAtmosphere;
+            Desired.Color[ColorTypes.Fog] = Desired.Color[ColorTypes.Horizon] = (Desired.Color[ColorTypes.Sky] + outParams.Atmosphere * 2) / 3;
+            //Desired.Color[ColorTypes.Sky] = Desired.Color[ColorTypes.Horizon] * (new Color3 (0.2f, 0.2f, 0.8f));
         }
 
         private void ProcessSunrise(CycleInParameters inParams, out CycleOutParameters outParams) {
             float fade = (inParams.DecimalTime - TIME_DAWN) / (TIME_DAY - TIME_DAWN);
             float lateFade = Math.Max((fade - 0.5f) * 2.0f, 0);
-                Desired.Color[ColorType.Light] = new Color3(0.5f, 0.7f, 1.0f);
+                Desired.Color[ColorTypes.Light] = new Color3(0.5f, 0.7f, 1.0f);
             outParams.BaseColor = ColorUtils.Interpolate(NIGHT_COLOR, DAY_COLOR, lateFade);
             outParams.Atmosphere = ColorUtils.Interpolate(Color3.Black, Color3.White, lateFade);
             var timeFog = new Range<float>();
@@ -193,13 +193,13 @@
             outParams.ColorScaling = ColorUtils.Interpolate(NIGHT_SCALING, DAY_SCALING, fade);
             //The light in the sky doesn't lighten until the second half of sunrise
             if (fade > 0.5f)
-                Desired.Color[ColorType.Light] = new Color3(1.0f, 1.0f, 0.5f);
+                Desired.Color[ColorTypes.Light] = new Color3(1.0f, 1.0f, 0.5f);
             else
-                Desired.Color[ColorType.Light] = new Color3(0.5f, 0.7f, 1.0f);
+                Desired.Color[ColorTypes.Light] = new Color3(0.5f, 0.7f, 1.0f);
             Desired.Light = MathUtils.Interpolate(VECTOR_SUNRISE, VECTOR_MORNING, fade);
             Desired.SunAngle = MathUtils.Interpolate(SUN_ANGLE_SUNRISE, SUN_ANGLE_MORNING, fade);
             Desired.DrawSun = true;
-            Desired.Color[ColorType.Ambient] = new Color3(0.3f, 0.3f, 0.6f);
+            Desired.Color[ColorTypes.Ambient] = new Color3(0.3f, 0.3f, 0.6f);
         }
 
         private void ProcessDay(CycleInParameters inParams, out CycleOutParameters outParams) {
@@ -212,12 +212,12 @@
             outParams.TimeFog = timeFog;
             Desired.StarFade = 0.0f;
             outParams.ColorScaling = DAY_SCALING;
-            Desired.Color[ColorType.Light] = (Color3.White + inParams.Region.ColorAtmosphere).Normalize();
+            Desired.Color[ColorTypes.Light] = (Color3.White + inParams.Region.ColorAtmosphere).Normalize();
             Desired.Light = new Vector3(0, 0.5f, -0.5f);
             Desired.Light = MathUtils.Interpolate(VECTOR_MORNING, VECTOR_AFTERNOON, fade);
             Desired.SunAngle = MathUtils.Interpolate(SUN_ANGLE_MORNING, SUN_ANGLE_AFTERNOON, fade);
             Desired.DrawSun = true;
-            Desired.Color[ColorType.Ambient] = new Color3(0.4f, 0.4f, 0.4f);
+            Desired.Color[ColorTypes.Ambient] = new Color3(0.4f, 0.4f, 0.4f);
         }
 
         private void ProcessSunset(CycleInParameters inParams, out CycleOutParameters outParams) {
@@ -233,12 +233,12 @@
             outParams.Atmosphere = ColorUtils.Interpolate(Color3.White, Color3.Black, Math.Min(1.0f, fade * 2.0f));
             Desired.SunsetFade = 1.0f - Math.Abs(fade - 0.5f) * 2.0f;
             outParams.ColorScaling = ColorUtils.Interpolate(DAY_SCALING, NIGHT_SCALING, fade);
-            Desired.Color[ColorType.Light] = new Color3(1.0f, 0.5f, 0.5f);
+            Desired.Color[ColorTypes.Light] = new Color3(1.0f, 0.5f, 0.5f);
             Desired.Light = new Vector3(0.8f, 0.0f, -0.2f);
             Desired.Light = MathUtils.Interpolate(VECTOR_AFTERNOON, VECTOR_SUNSET, fade);
             Desired.SunAngle = MathUtils.Interpolate(SUN_ANGLE_AFTERNOON, SUN_ANGLE_SUNSET, fade);
             Desired.DrawSun = true;
-            Desired.Color[ColorType.Ambient] = new Color3(0.3f, 0.3f, 0.6f);
+            Desired.Color[ColorTypes.Ambient] = new Color3(0.3f, 0.3f, 0.6f);
         }
 
         private void ProcessNight(CycleInParameters inParams, out CycleOutParameters outParams) {
@@ -247,8 +247,8 @@
             outParams.BaseColor = NIGHT_COLOR;
             outParams.TimeFog = new Range<float>(1, inParams.NightFog);
             Desired.StarFade = 1.0f;
-            Desired.Color[ColorType.Light] = new Color3(0.1f, 0.3f, 0.7f);
-            Desired.Color[ColorType.Ambient] = new Color3(0.0f, 0.0f, 0.4f);
+            Desired.Color[ColorTypes.Light] = new Color3(0.1f, 0.3f, 0.7f);
+            Desired.Color[ColorTypes.Ambient] = new Color3(0.0f, 0.0f, 0.4f);
             Desired.Light = VECTOR_NIGHT;
             Desired.SunAngle = -90.0f;
             Desired.DrawSun = false;

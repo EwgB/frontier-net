@@ -5,15 +5,13 @@
     using System;
     using System.Drawing;
 
-    using Common;
     using Common.Avatar;
     using Common.Environment;
     using Common.Property;
     using Common.Renderer;
     using Common.Scene;
     using Common.Util;
-
-    using World;
+    using Common.World;
 
     public class RendererImpl : IRenderer {
         // Constants
@@ -70,8 +68,8 @@
             GL.Enable(EnableCap.Fog);
             GL.Fog(FogParameter.FogMode, (int)FogMode.Linear);
             //GL.Fog (FogParameter.FogMode, (int) FogMode.Exp);
-            GL.Fog(FogParameter.FogColor, envData.Color[ColorType.Fog].R);
-            GL.ClearColor((Color) envData.Color[ColorType.Fog]);
+            GL.Fog(FogParameter.FogColor, envData.Color[ColorTypes.Fog].R);
+            GL.ClearColor((Color) envData.Color[ColorTypes.Fog]);
             //GL.ClearColor (0, 0, 0, 1.0f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             //GL.Clear (ClearBufferMask.DepthBufferBit);
@@ -86,8 +84,8 @@
             GL.Enable(EnableCap.Light1);
             GL.Enable(EnableCap.Lighting);
             currentAmbient = Color3.Black;
-            GL.Light(LightName.Light1, LightParameter.Ambient, envData.Color[ColorType.Ambient].R);
-            Color3 c = envData.Color[ColorType.Light];
+            GL.Light(LightName.Light1, LightParameter.Ambient, envData.Color[ColorTypes.Ambient].R);
+            Color3 c = envData.Color[ColorTypes.Light];
             //c *= 20.0f;
             GL.Light(LightName.Light1, LightParameter.Diffuse, c.R);
             GL.Light(LightName.Light1, LightParameter.Position, light);
@@ -207,9 +205,9 @@
         public void Update() {
             var envData = this.environment.Current;
 
-            this.currentDiffuse = envData.Color[ColorType.Light];
-            this.currentAmbient = envData.Color[ColorType.Ambient];
-            this.currentFog = envData.Color[ColorType.Fog];
+            this.currentDiffuse = envData.Color[ColorTypes.Light];
+            this.currentAmbient = envData.Color[ColorTypes.Ambient];
+            this.currentFog = envData.Color[ColorTypes.Fog];
             this.fog = envData.Fog;
         }
 

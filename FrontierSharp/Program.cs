@@ -10,6 +10,7 @@
     using Common.Scene;
     using Common.Shaders;
     using Common.Textures;
+    using Common.World;
 
     using Avatar;
     using DummyModules;

@@ -1,10 +1,15 @@
 ﻿namespace FrontierSharp.Animation {
-    using System;
+    using OpenTK;
+
     using Common.Animation;
+    using System;
 
     public class Figure : IFigure {
+        public Vector3 Position { get; set; }
+        public Vector3 Rotation { get; set; }
+
         public void Render() {
-            throw new NotImplementedException();
+            // TODO
             /*
             glColor3f(1, 1, 1);
             glPushMatrix();
@@ -18,8 +23,19 @@
             */
         }
 
+        void Animate(IAnimation animation, float delta) {
+            // TODO
+            //AnimJoint aj;
+
+            //if (delta > 1.0f)
+            //    delta -= (float)((int)delta);
+            //aj = animation.GetFrame(delta);
+            //for (var i = 0; i < animation.Joints(); i++)
+            //    RotateBone(aj[i].id, aj[i].rotation);
+        }
+
         public void RenderSkeleton() {
-            throw new NotImplementedException();
+            // TODO
             /*
             uint i;
             uint parent;
@@ -50,6 +66,38 @@
             CgUpdateMatrix();
 
         */
+        }
+
+        public void Update() {
+            // TODO
+            //uint i;
+            //uint c;
+            //GLmatrix m;
+            //Bone* b;
+            //vector<Bone>::reverse_iterator rit;
+
+            //_skin_render = _skin_deform;
+            //for (i = 1; i < _bone.size(); i++)
+            //    _bone[i]._position = _bone[i]._origin;
+            //for (rit = _bone.rbegin(); rit < _bone.rend(); ++rit) {
+            //    b = &(*rit);
+            //    if (b._rotation == Vector3(0.0f, 0.0f, 0.0f))
+            //        continue;
+            //    m.Identity();
+            //    m.Rotate(b._rotation.x, 1.0f, 0.0f, 0.0f);
+            //    m.Rotate(b._rotation.z, 0.0f, 0.0f, 1.0f);
+            //    m.Rotate(b._rotation.y, 0.0f, 1.0f, 0.0f);
+            //    RotatePoints(b._id, b._position, m);
+            //    for (c = 0; c < b._children.size(); c++) {
+            //        //Root is self-parent, but shouldn't rotate self!
+            //        if (b._children[c])
+            //            RotateHierarchy(b._children[c], b._position, m);
+            //    }
+            //}
+        }
+
+        void IFigure.Animate(IAnimation animation, float delta) {
+            throw new NotImplementedException();
         }
     }
 }
@@ -102,7 +150,6 @@ public:
   
 
   CFigure ();
-  void              Animate (CAnim* anim, float delta);
   void              Clear ();
   bool              LoadX (char* filename);
   BoneId            IdentifyBone (char* name);
@@ -115,7 +162,6 @@ public:
   void              BoneInflate (BoneId id, float distance, bool do_children);
 
   GLmesh*           Skin () { return &_skin_static; };
-  void              Update ();
 };
 */
 
@@ -157,20 +203,6 @@ void CFigure::Clear() {
 
 }
 
-void CFigure::Animate(CAnim* anim, float delta) {
-
-    AnimJoint* aj;
-
-    if (delta > 1.0f)
-        delta -= (float)((int)delta);
-    aj = anim->GetFrame(delta);
-    for (uint i = 0; i < anim->Joints(); i++)
-        RotateBone(aj[i].id, aj[i].rotation);
-
-
-
-}
-
 //We take a string and turn it into a BoneId, using unknowns as needed
 BoneId CFigure::IdentifyBone(char* name) {
 
@@ -202,13 +234,13 @@ void CFigure::RotatePoints(uint id, Vector3 offset, GLmatrix m) {
 
 
     b = &_bone[_bone_index[id]];
-    for (i = 0; i < b->_vertex_weights.size(); i++) {
-        index = b->_vertex_weights[i]._index;
+    for (i = 0; i < b._vertex_weights.size(); i++) {
+        index = b._vertex_weights[i]._index;
         _skin_render._vertex[index] = glMatrixTransformPoint(m, _skin_render._vertex[index] - offset) + offset;
         //from = _skin_render._vertex[index] - offset;
         //to = glMatrixTransformPoint (m, from);
         //movement = movement - _skin_static._vertex[index]; 
-        //_skin_render._vertex[index] = Vector3Interpolate (from, to, b->_vertex_weights[i]._weight) + offset;
+        //_skin_render._vertex[index] = Vector3Interpolate (from, to, b._vertex_weights[i]._weight) + offset;
     }
 
 }
@@ -219,40 +251,11 @@ void CFigure::RotateHierarchy(uint id, Vector3 offset, GLmatrix m) {
     uint i;
 
     b = &_bone[_bone_index[id]];
-    b->_position = glMatrixTransformPoint(m, b->_position - offset) + offset;
+    b._position = glMatrixTransformPoint(m, b._position - offset) + offset;
     RotatePoints(id, offset, m);
-    for (i = 0; i < b->_children.size(); i++) {
-        if (b->_children[i])
-            RotateHierarchy(b->_children[i], offset, m);
-    }
-
-}
-
-void CFigure::Update() {
-
-    uint i;
-    uint c;
-    GLmatrix m;
-    Bone* b;
-    vector<Bone>::reverse_iterator rit;
-
-    _skin_render = _skin_deform;
-    for (i = 1; i < _bone.size(); i++)
-        _bone[i]._position = _bone[i]._origin;
-    for (rit = _bone.rbegin(); rit < _bone.rend(); ++rit) {
-        b = &(*rit);
-        if (b->_rotation == Vector3(0.0f, 0.0f, 0.0f))
-            continue;
-        m.Identity();
-        m.Rotate(b->_rotation.x, 1.0f, 0.0f, 0.0f);
-        m.Rotate(b->_rotation.z, 0.0f, 0.0f, 1.0f);
-        m.Rotate(b->_rotation.y, 0.0f, 1.0f, 0.0f);
-        RotatePoints(b->_id, b->_position, m);
-        for (c = 0; c < b->_children.size(); c++) {
-            //Root is self-parent, but shouldn't rotate self!
-            if (b->_children[c])
-                RotateHierarchy(b->_children[c], b->_position, m);
-        }
+    for (i = 0; i < b._children.size(); i++) {
+        if (b._children[i])
+            RotateHierarchy(b._children[i], offset, m);
     }
 
 }
@@ -292,14 +295,14 @@ void CFigure::BoneInflate(BoneId id, float distance, bool do_children) {
     uint index;
 
     b = &_bone[_bone_index[id]];
-    for (i = 0; i < b->_vertex_weights.size(); i++) {
-        index = b->_vertex_weights[i]._index;
+    for (i = 0; i < b._vertex_weights.size(); i++) {
+        index = b._vertex_weights[i]._index;
         _skin_deform._vertex[index] = _skin_static._vertex[index] + _skin_static._normal[index] * distance;
     }
     if (!do_children)
         return;
-    for (c = 0; c < b->_children.size(); c++)
-        BoneInflate((BoneId)b->_children[c], distance, do_children);
+    for (c = 0; c < b._children.size(); c++)
+        BoneInflate((BoneId)b._children[c], distance, do_children);
 
 
 }

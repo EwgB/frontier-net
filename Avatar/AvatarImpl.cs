@@ -1,4 +1,6 @@
 ﻿namespace FrontierSharp.Avatar {
+    using System;
+
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
 
@@ -6,18 +8,35 @@
     using Common.Animation;
     using Common.Avatar;
     using Common.Particles;
+    using Common.Property;
     using Common.Region;
     using Common.Textures;
-
-    using Animation;
-    using World;
-    using Common.Property;
+    using Common.World;
+    using Common.Util;
 
     public class AvatarImpl : IAvatar {
+
+        #region Constants
+
+        private const float JUMP_SPEED = 4.0f;
+        private const float MOVE_SPEED = 5.5f;
+        private const float SLOW_SPEED = (MOVE_SPEED * 0.15f);
+        private const float SPRINT_SPEED = 8.0f;
+        private const float EYE_HEIGHT = 1.75f;
+        private const float CAM_MIN = 1;
+        private const float CAM_MAX = 12;
+        private const float STOP_SPEED = 0.02f;
+        private const float SWIM_DEPTH = 1.4f;
+        private const float ACCEL = 0.66f;
+        private const float DECEL = 1.5f;
+
+        #endregion
 
         #region Modules
 
         private IGame game;
+        private IParticles particles;
+        private IText text;
         private ITextures textures;
         private IWorld world;
 
@@ -36,7 +55,7 @@
                 this.position.Y = MathHelper.Clamp(value.Y, 0, (WorldUtils.REGION_SIZE * WorldUtils.WORLD_GRID));
                 CameraPosition = this.position;
                 this.angle = CameraAngle = new Vector3(90.0f, 0.0f, 0.0f);
-                this.last_time = this.game.Time;
+                this.lastTime = this.game.Time;
                 DoModel();
 
             }
@@ -45,7 +64,7 @@
         public IRegion Region { get; private set; }
         public Vector3 CameraAngle { get; private set; }
         public Vector3 CameraPosition { get; private set; }
-        public AnimType AnimationType { get; private set; }
+        public AnimTypes AnimationType { get; private set; }
 
         private IAvatarProperties properties = new AvatarProperties();
         public IProperties Properties { get { return this.properties; } }
@@ -56,30 +75,32 @@
         #region Member variables
 
         private Vector3 angle;
-        private Vector3 avatar_facing;
-        private Vector2 current_movement;
-        private Vector2 desired_movement;
-        private float cam_distance;
+        private Vector3 avatarFacing;
+        private Vector2 currentMovement;
+        private Vector2 desiredMovement;
+        private float camDistance;
         private float desiredCamDistance;
-        private bool on_ground;
+        private bool onGround;
         private bool swimming;
         private bool sprinting;
-        private uint last_update;
-        private Anim[] anim = new Anim[(int)AnimType.Max];
-        private AnimType anim_id;
-        private float distance_walked;
-        private float last_time;
-        private float current_speed;
-        private float current_angle;
+        private uint lastUpdate;
+        private AnimationTypeArray anim = new AnimationTypeArray();
+        private AnimTypes animType;
+        private float distanceWalked;
+        private float lastTime;
+        private float currentSpeed;
+        private float currentAngle;
         private float velocity;
-        private ParticleSet dust_particle;
-        private float last_step_tracking;
+        private ParticleSet dustParticle;
+        private float lastStepTracking;
 
         #endregion
 
-        public AvatarImpl(IFigure avatar, IGame game, ITextures textures, IWorld world) {
+        public AvatarImpl(IFigure avatar, IGame game, IParticles particles, IText text, ITextures textures, IWorld world) {
             this.avatar = avatar;
             this.game = game;
+            this.particles = particles;
+            this.text = text;
             this.textures = textures;
             this.world = world;
 
@@ -88,15 +109,15 @@
         }
 
         public void Init() {
-            //desiredCamDistance = IniFloat("Avatar", "CameraDistance");
+            //this.desiredCamDistance = IniFloat("Avatar", "CameraDistance"); // TODO: do we want to add ini options?
             DoModel();
-            /*
-            for (int i = 0; i < ANIM_COUNT; i++) {
-                anim[i].LoadBvh(IniString("Animations", anim_names[i]));
-                IniStringSet("Animations", anim_names[i], IniString("Animations", anim_names[i]));
+            for (var i = AnimTypes.Idle; i < AnimTypes.Max; i++) {
+                /*
+                    anim[i].LoadBvh(IniString("Animations", AnimTypes.names[i]));
+                    IniStringSet("Animations", AnimTypes.names[i], IniString("Animations", AnimTypes.names[i]));
+                */
             }
-            ParticleLoad("step", &dust_particle);
-            */
+            this.particles.LoadParticles("step", this.dustParticle);
         }
 
         public void Update() {
@@ -282,101 +303,58 @@
             //}
         }
 
+        private void DoCamera() {
+            // TODO
+            //Vector3 cam;
+            //float vert_delta;
+            //float horz_delta;
+            //float ground;
+            //Vector2 rads;
+
+
+            //rads.X = this.angle.X * DEGREES_TO_RADIANS;
+            //vert_delta = Math.Cos(rads.X) * this.camDistance;
+            //horz_delta = Math.Sin(rads.X);
+
+
+            //cam = position;
+            //cam.Z += EYE_HEIGHT;
+
+            //cam.X += Math.Sin(this.angle.Z * DEGREES_TO_RADIANS) * this.camDistance * horz_delta;
+            //cam.Y += Math.Cos(this.angle.Z * DEGREES_TO_RADIANS) * this.camDistance * horz_delta;
+            //cam.Z += vert_delta;
+
+            //ground = CacheElevation(cam.X, cam.Y) + 0.2f;
+            //cam.Z = max(cam.Z, ground);
+            //CameraAngle = this.angle;
+            //CameraPosition = cam;
+        }
+
+        private void DoLocation() {
+            // TODO
+            //ostringstream oss(ostringstream::in);
+            //oss << APP << " ";
+            ////oss << WorldLocationName (region.grid_pos.X, region.grid_pos.Y) << " (" << region.title << ") ";
+            //oss << WorldLocationName((int)position.X, (int)position.Y) << " (" << region.title << ") ";
+            //oss << "Looking " << WorldDirectionFromAngle(this.angle.Z);
+            //SdlSetCaption(oss.str().c_str());
+        }
+
+        private void DoMove(Vector3 delta) {
+            // TODO
+            //Vector3 movement;
+            //float forward;
+
+            //if (CVarUtils::GetCVar<bool>("flying")) {
+            //    forward = Math.Sin(this.angle.X * DEGREES_TO_RADIANS);
+            //    movement.X = Math.Cos(this.angle.Z * DEGREES_TO_RADIANS) * delta.X + Math.Sin(this.angle.Z * DEGREES_TO_RADIANS) * delta.Y * forward;
+            //    movement.Y = -Math.Sin(this.angle.Z * DEGREES_TO_RADIANS) * delta.X + Math.Cos(this.angle.Z * DEGREES_TO_RADIANS) * delta.Y * forward;
+            //    movement.Z = Math.Cos(this.angle.X * DEGREES_TO_RADIANS) * delta.Y;
+            //    position += movement;
+            //} else {
+            //    this.desiredMovement.X += Math.Cos(this.angle.Z * DEGREES_TO_RADIANS) * delta.X + Math.Sin(this.angle.Z * DEGREES_TO_RADIANS) * delta.Y;
+            //    this.desiredMovement.Y += -Math.Sin(this.angle.Z * DEGREES_TO_RADIANS) * delta.X + Math.Cos(this.angle.Z * DEGREES_TO_RADIANS) * delta.Y;
+            //}
+        }
     }
 }
-
-/* From Avatar.cpp
-#define JUMP_SPEED      4.0f
-#define MOVE_SPEED      5.5f
-#define SLOW_SPEED      (MOVE_SPEED * 0.15f)
-#define SPRINT_SPEED    8.0f
-#define EYE_HEIGHT      1.75f
-#define CAM_MIN         1
-#define CAM_MAX         12
-#define STOP_SPEED      0.02f
-#define SWIM_DEPTH      1.4f
-#define ACCEL           0.66f
-#define DECEL           1.5f
-
-static void do_move(Vector3 delta) {
-
-    Vector3 movement;
-    float forward;
-
-    if (CVarUtils::GetCVar<bool>("flying")) {
-        forward = sin(angle.x * DEGREES_TO_RADIANS);
-        movement.x = cos(angle.z * DEGREES_TO_RADIANS) * delta.x + sin(angle.z * DEGREES_TO_RADIANS) * delta.y * forward;
-        movement.y = -sin(angle.z * DEGREES_TO_RADIANS) * delta.x + cos(angle.z * DEGREES_TO_RADIANS) * delta.y * forward;
-        movement.z = cos(angle.x * DEGREES_TO_RADIANS) * delta.y;
-        position += movement;
-    } else {
-        desired_movement.x += cos(angle.z * DEGREES_TO_RADIANS) * delta.x + sin(angle.z * DEGREES_TO_RADIANS) * delta.y;
-        desired_movement.y += -sin(angle.z * DEGREES_TO_RADIANS) * delta.x + cos(angle.z * DEGREES_TO_RADIANS) * delta.y;
-    }
-
-}
-
-void do_camera() {
-
-    Vector3 cam;
-    float vert_delta;
-    float horz_delta;
-    float ground;
-    Vector2 rads;
-
-
-    rads.x = angle.x * DEGREES_TO_RADIANS;
-    vert_delta = cos(rads.x) * cam_distance;
-    horz_delta = sin(rads.x);
-
-
-    cam = position;
-    cam.z += EYE_HEIGHT;
-
-    cam.x += sin(angle.z * DEGREES_TO_RADIANS) * cam_distance * horz_delta;
-    cam.y += cos(angle.z * DEGREES_TO_RADIANS) * cam_distance * horz_delta;
-    cam.z += vert_delta;
-
-    ground = CacheElevation(cam.x, cam.y) + 0.2f;
-    cam.z = max(cam.z, ground);
-    CameraAngle = angle;
-    CameraPosition = cam;
-
-}
-
-
-
-void do_location() {
-
-    ostringstream oss(ostringstream::in);
-
-    oss << APP << " ";
-    //oss << WorldLocationName (region.grid_pos.x, region.grid_pos.y) << " (" << region.title << ") ";
-    oss << WorldLocationName((int)position.x, (int)position.y) << " (" << region.title << ") ";
-    oss << "Looking " << WorldDirectionFromAngle(angle.z);
-    SdlSetCaption(oss.str().c_str());
-
-}
-
-AnimType AvatarAnim() {
-    return anim_id;
-}
-
-void AvatarLook(int x, int y) {
-
-    float mouse_sense;
-
-    if (CVarUtils::GetCVar<bool>("mouse.invert"))
-        x = -x;
-    mouse_sense = CVarUtils::GetCVar<float>("mouse.sensitivity");
-    angle.x -= (float)x * mouse_sense;
-    angle.z += (float)y * mouse_sense;
-    angle.x = clamp(angle.x, 0.0f, 180.0f);
-    angle.z = fmod(angle.z, 360.0f);
-    if (angle.z < 0.0f)
-        angle.z += 360.0f;
-
-
-}
-
-*/

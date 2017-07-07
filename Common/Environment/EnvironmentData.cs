@@ -16,21 +16,4 @@
         public float CloudCover { get; set; }
         public bool DrawSun { get; set; }
     }
-
-    public enum ColorType {
-        Horizon,
-        Sky,
-        Fog,
-        Light,
-        Ambient,
-        Max
-    }
-
-    public class ColorTypeArray {
-        private Color3[] elements = new Color3[(int)ColorType.Max];
-        public Color3 this[ColorType index] {
-            get { return elements[(int)index]; }
-            set { elements[(int)index] = value; }
-        }
-    }
 }

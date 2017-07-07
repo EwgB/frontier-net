@@ -1,4 +1,4 @@
-﻿namespace FrontierSharp.World {
+﻿namespace FrontierSharp.Common.World {
     public static class WorldUtils {
         public static int REGION_SIZE = 128;
         public static int REGION_HALF = (REGION_SIZE / 2);

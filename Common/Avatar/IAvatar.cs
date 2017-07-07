@@ -1,6 +1,7 @@
 ﻿namespace FrontierSharp.Common.Avatar {
     using OpenTK;
 
+    using Animation;
     using Property;
     using Region;
 
@@ -10,15 +11,10 @@
 
         IRegion Region { get; }
         Vector3 Position { get; set; }
-        AnimType AnimationType { get; }
+        AnimTypes AnimationType { get; }
         Vector3 CameraAngle { get; }
         Vector3 CameraPosition { get; }
+
+        void Look(int x, int y);
     }
 }
-
-/* From Avatar.h
-
-AnimType  AvatarAnim ();
-void      AvatarLook (int x, int y);
-
-*/

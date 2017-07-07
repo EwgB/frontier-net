@@ -16,6 +16,7 @@
     using Common.Scene;
     using Common.Shaders;
     using Common.Textures;
+    using Common.World;
 
     internal class Frontier : GameWindow, IModule {
 
@@ -30,6 +31,7 @@
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         #region Modules
+
         private readonly IAvatar avatar;
         private readonly IConsole console;
         private readonly IEnvironment environment;
@@ -43,6 +45,7 @@
         private readonly IText text;
         private readonly ITextures texture;
         private readonly IWorld world;
+
         #endregion
 
         public Frontier(IAvatar avatar,

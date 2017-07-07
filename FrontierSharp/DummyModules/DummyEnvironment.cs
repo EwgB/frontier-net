@@ -12,11 +12,11 @@
         public EnvironmentData Current { get {
                 return new EnvironmentData {
                     Color = new ColorTypeArray {
-                        [ColorType.Horizon] = Color3.White,
-                        [ColorType.Sky] = Color3.Blue,
-                        [ColorType.Fog] = Color3.Gray,
-                        [ColorType.Light] = Color3.Yellow,
-                        [ColorType.Ambient] = Color3.Red
+                        [ColorTypes.Horizon] = Color3.White,
+                        [ColorTypes.Sky] = Color3.Blue,
+                        [ColorTypes.Fog] = Color3.Gray,
+                        [ColorTypes.Light] = Color3.Yellow,
+                        [ColorTypes.Ambient] = Color3.Red
                     },
                     CloudCover = 0,
                     DrawSun = true,

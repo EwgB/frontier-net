@@ -81,27 +81,7 @@
         }
 
         public void Init() {
-            /*
-                static uint update_type;
-
-                if (!GameRunning())
-                    return;
-                //We don't want any grid to starve the others, so we rotate the order of priority.
-                update_type++;
-                switch (update_type % 4) {
-                    case 0: gm_terrain.Update(stop); break;
-                    case 1: gm_grass.Update(stop); break;
-                    case 2: gm_forest.Update(stop); break;
-                    case 3: gm_brush.Update(stop); break;
-                }
-                //any time left over goes to the losers...
-                gm_particle.Update(stop);
-                gm_terrain.Update(stop);
-                gm_grass.Update(stop);
-                gm_forest.Update(stop);
-                gm_brush.Update(stop);
-                TextPrint("Scene: %d of %d terrains ready", gm_terrain.ItemsReady(), gm_terrain.ItemsViewable());
-             */
+            // Do nothing
         }
 
         public void Render() {
@@ -159,7 +139,6 @@
 
         private byte updateType = 0;
         public void Update(double stopAt) {
-
             if (!this.game.IsRunning)
                 return;
             //We don't want any grid to starve the others, so we rotate the order of priority.
@@ -184,7 +163,7 @@
             gm_grass.Update(stopAt);
             gm_forest.Update(stopAt);
             gm_brush.Update(stopAt);
-            this.text.Print(string.Format( "Scene: %d of %d terrains ready", gm_terrain.ItemsReadyCount, gm_terrain.ItemsViewableCount));
+            this.text.Print(string.Format( "Scene: {0} of {0} terrains ready", gm_terrain.ItemsReadyCount, gm_terrain.ItemsViewableCount));
         }
     }
 }

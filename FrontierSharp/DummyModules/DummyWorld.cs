@@ -1,9 +1,10 @@
 ﻿namespace FrontierSharp.DummyModules {
     using OpenTK;
 
-    using Common;
     using Common.Property;
     using Common.Region;
+    using Common.World;
+    using System;
 
     internal class DummyWorld : IWorld {
         private IProperties properties;
@@ -25,6 +26,10 @@
 
         public IRegion GetRegion(int x, int y) {
             return new DummyRegion();
+        }
+
+        public float GetWaterLevel(float x, float y) {
+            return 0;
         }
     }
 }

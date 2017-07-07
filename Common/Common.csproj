@@ -49,10 +49,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Animation\IAnimation.cs" />
     <Compile Include="Animation\IFigure.cs" />
-    <Compile Include="Avatar\AnimType.cs" />
+    <Compile Include="Animation\AnimTypes.cs" />
     <Compile Include="Avatar\IAvatarProperties.cs" />
-    <Compile Include="Environment\EnvironmentTypes.cs" />
+    <Compile Include="Environment\ColorTypes.cs" />
+    <Compile Include="Environment\EnvironmentData.cs" />
     <Compile Include="Grid\IGridData.cs" />
     <Compile Include="Grid\IGridManager.cs" />
     <Compile Include="Grid\IGrass.cs" />
@@ -84,7 +86,7 @@
     <Compile Include="Particles\IParticles.cs" />
     <Compile Include="Region\RegionFlag.cs" />
     <Compile Include="Scene\IScene.cs" />
-    <Compile Include="IWorld.cs" />
+    <Compile Include="World\IWorld.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Property\IProperties.cs" />
     <Compile Include="Property\IProperty.cs" />
@@ -100,6 +102,7 @@
     <Compile Include="Util\MathUtils.cs" />
     <Compile Include="Util\Range.cs" />
     <Compile Include="Textures\Texture.cs" />
+    <Compile Include="World\WorldUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="OpenTK.dll.config" />

@@ -4,7 +4,7 @@
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
 
-    struct BoundingBox : IRenderable {
+    public struct BoundingBox : IRenderable {
         private const float MAX_VALUE = 999999999999999.9f;
 
         private Vector3 min;

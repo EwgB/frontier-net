@@ -2,6 +2,7 @@
     using System;
     using Common.Particles;
     using Common.Property;
+    using OpenTK;
 
     class DummyParticles : IParticles {
         private IParticlesProperties properties;
@@ -17,6 +18,18 @@
         }
 
         public void Render() {
+            // Do nothing
+        }
+
+        public uint AddParticles(ParticleSet particleSet, Vector3 position) {
+            return 0;
+        }
+
+        public void LoadParticles(string filename, ParticleSet particleSet) {
+            // Do nothing
+        }
+
+        public void SaveParticles(string filename, ParticleSet particleSet) {
             // Do nothing
         }
     }

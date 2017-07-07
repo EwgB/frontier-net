@@ -10,26 +10,26 @@
     public enum ParticleType { Facer, PanelX, PanelY, PanelZ }
 
     public struct ParticleSet {
-        string texture;
-        BoundingBox volume;
-        BoundingBox speed;
-        Vector3 acceleration;
-        BoundingBox size;
-        Vector3 origin;
-        Vector3 rotation;
-        Vector3 spin;
-        ParticleBlend blend;
-        ParticleType panelType;
-        uint fadeIn;
-        uint fadeOut;
-        uint lifespan;
-        uint emitInterval;
-        uint emitCount;
-        uint emitterLifespan;
-        bool gravity;
-        bool wind;
-        bool interpolate;
-        bool zBuffer;
-        List<Color3> colors;
+        public string texture;
+        public BoundingBox volume;
+        public BoundingBox speed;
+        public Vector3 acceleration;
+        public BoundingBox size;
+        public Vector3 origin;
+        public Vector3 rotation;
+        public Vector3 spin;
+        public ParticleBlend blend;
+        public ParticleType panelType;
+        public uint fadeIn;
+        public uint fadeOut;
+        public uint lifespan;
+        public uint emitInterval;
+        public uint emitCount;
+        public uint emitterLifespan;
+        public bool gravity;
+        public bool wind;
+        public bool interpolate;
+        public bool zBuffer;
+        public List<Color3> colors;
     }
 }

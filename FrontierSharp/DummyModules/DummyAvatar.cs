@@ -1,10 +1,10 @@
 ﻿namespace FrontierSharp.DummyModules {
     using OpenTK;
 
+    using Common.Animation;
     using Common.Avatar;
     using Common.Property;
     using Common.Region;
-    using System;
 
     class DummyAvatar : IAvatar {
 
@@ -21,7 +21,7 @@
 
         public Vector3 Position { get; set; }
 
-        public AnimType AnimationType { get { return AnimType.Idle; } }
+        public AnimTypes AnimationType { get { return AnimTypes.Idle; } }
 
         public void Init() {
             // Do nothing
@@ -32,6 +32,10 @@
         }
 
         public void Render() {
+            // Do nothing
+        }
+
+        public void Look(int x, int y) {
             // Do nothing
         }
     }
