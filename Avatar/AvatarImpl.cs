@@ -121,14 +121,10 @@
         }
 
         public void Update() {
-            /*
             float ground;
             float water;
-            float elapsed;
             float movement_animation;
             float time_passed;
-            Vector3 old;
-            bool flying;
             bool moving;
             float max_speed;
             float min_speed;
@@ -137,169 +133,179 @@
             float angle_adjust;
             float step_tracking;
 
-            if (!GameRunning())
+            if (!this.game.IsRunning)
                 return;
+
             if (InputKeyState(SDLK_LCTRL))
-                AvatarLook(0, 1);
-            flying = CVarUtils::GetCVar<bool>("flying");
-            elapsed = SdlElapsedSeconds();
-            elapsed = min(elapsed, 0.25f);
-            old = position;
-            desired_movement = Vector3(0.0f, 0.0f);
-            if (InputKeyPressed(SDLK_SPACE) && on_ground) {
-                velocity = JUMP_SPEED;
-                on_ground = false;
+                this.Look(0, 1);
+
+            float elapsed = Math.Min(SdlElapsedSeconds(), 0.25f);
+            Vector3 old = position;
+            this.desiredMovement = Vector2.Zero;
+            if (InputKeyPressed(SDLK_SPACE) && this.onGround) {
+                this.velocity = JUMP_SPEED;
+                this.onGround = false;
             }
             if (InputKeyPressed(SDLK_F2))
                 CVarUtils::SetCVar("flying", !CVarUtils::GetCVar<bool>("flying"));
             //Joystick movement
-            AvatarLook((int)(InputJoystickGet(3) * 5.0f), (int)(InputJoystickGet(4) * -5.0f));
-            do_move(Vector3(InputJoystickGet(0), InputJoystickGet(1), 0.0f));
+            this.Look((int)(InputJoystickGet(3) * 5.0f), (int)(InputJoystickGet(4) * -5.0f));
+            DoMove(new Vector3(InputJoystickGet(0), InputJoystickGet(1), 0.0f));
             if (InputMouselook()) {
                 if (InputKeyPressed(INPUT_MWHEEL_UP))
-                    desiredCamDistance -= 1.0f;
+                    this.desiredCamDistance -= 1.0f;
                 if (InputKeyPressed(INPUT_MWHEEL_DOWN))
-                    desiredCamDistance += 1.0f;
+                    this.desiredCamDistance += 1.0f;
                 if (InputKeyState(SDLK_w))
-                    do_move(Vector3(0, -1, 0));
+                    DoMove(-Vector3.UnitY);
                 if (InputKeyState(SDLK_s))
-                    do_move(Vector3(0, 1, 0));
+                    DoMove(Vector3.UnitY);
                 if (InputKeyState(SDLK_a))
-                    do_move(Vector3(-1, 0, 0));
+                    DoMove(-Vector3.UnitX);
                 if (InputKeyState(SDLK_d))
-                    do_move(Vector3(1, 0, 0));
-                do_move(Vector3(InputJoystickGet(0), InputJoystickGet(1), 0.0f));
+                    DoMove(Vector3.UnitX);
+                DoMove(new Vector3(InputJoystickGet(0), InputJoystickGet(1), 0.0f));
             }
             //Figure out our   speed
             max_speed = MOVE_SPEED;
             min_speed = 0.0f;
-            moving = desired_movement.Length() > 0.0f;//"moving" means, "trying to move". (Pressing buttons.)
+            moving = this.desiredMovement.Length > 0.0f;//"moving" means, "trying to move". (Pressing buttons.)
             if (moving)
                 min_speed = MOVE_SPEED * 0.33f;
             if (InputKeyState(SDLK_LSHIFT)) {
-                sprinting = true;
+                this.sprinting = true;
                 max_speed = SPRINT_SPEED;
             } else
-                sprinting = false;
-            desired_angle = current_angle;
+                this.sprinting = false;
+            desired_angle = this.currentAngle;
             if (moving) {//We're trying to accelerate
-                desired_angle = MathAngle(0.0f, 0.0f, desired_movement.x, desired_movement.y);
-                current_speed += elapsed * MOVE_SPEED * ACCEL;
+                desired_angle = MathAngle(0.0f, 0.0f, this.desiredMovement.X, this.desiredMovement.Y);
+                this.currentSpeed += elapsed * MOVE_SPEED * ACCEL;
             } else //We've stopped pushing forward
-                current_speed -= elapsed * MOVE_SPEED * DECEL;
-            current_speed = clamp(current_speed, min_speed, max_speed);
+                this.currentSpeed -= elapsed * MOVE_SPEED * DECEL;
+            this.currentSpeed = MathHelper.Clamp(this.currentSpeed, min_speed, max_speed);
             //Now figure out the angle of movement
-            angle_adjust = MathAngleDifference(current_angle, desired_angle);
+            angle_adjust = MathAngleDifference(this.currentAngle, desired_angle);
             //if we're trying to reverse direction, don't do a huge, arcing turn.  Just slow and double back
             lean_angle = 0.0f;
-            if (abs(angle_adjust) > 135)
-                current_speed = SLOW_SPEED;
-            if (abs(angle_adjust) < 1.0f || current_speed <= SLOW_SPEED) {
-                current_angle = desired_angle;
+            if (Math.Abs(angle_adjust) > 135)
+                this.currentSpeed = SLOW_SPEED;
+            if (Math.Abs(angle_adjust) < 1.0f || this.currentSpeed <= SLOW_SPEED) {
+                this.currentAngle = desired_angle;
                 angle_adjust = 0.0f;
             } else {
-                if (abs(angle_adjust) < 135) {
-                    current_angle -= angle_adjust * elapsed * 2.0f;
-                    lean_angle = clamp(angle_adjust / 4.0f, -15, 15);
+                if (Math.Abs(angle_adjust) < 135) {
+                    this.currentAngle -= angle_adjust * elapsed * 2.0f;
+                    lean_angle = MathHelper.Clamp(angle_adjust / 4.0f, -15, 15);
                 }
             }
-            current_movement.x = -sin(current_angle * DEGREES_TO_RADIANS);
-            current_movement.y = -cos(current_angle * DEGREES_TO_RADIANS);
+            this.currentMovement.X = -Math.Sin(this.currentAngle * DEGREES_TO_RADIANS);
+            this.currentMovement.Y = -Math.Cos(this.currentAngle * DEGREES_TO_RADIANS);
             //Apply the movement
-            current_movement *= current_speed * elapsed;
-            position.x += current_movement.x;
-            position.y += current_movement.y;
-            desiredCamDistance = clamp(desiredCamDistance, CAM_MIN, CAM_MAX);
-            cam_distance = MathInterpolate(cam_distance, desiredCamDistance, elapsed);
-            ground = CacheElevation(position.x, position.y);
-            water = WorldWaterLevel((int)position.x, (int)position.y);
-            avatar_facing.y = MathInterpolate(avatar_facing.y, lean_angle, elapsed);
+            this.currentMovement *= this.currentSpeed * elapsed;
+            position.X += this.currentMovement.X;
+            position.Y += this.currentMovement.Y;
+            this.desiredCamDistance = MathHelper.Clamp(this.desiredCamDistance, CAM_MIN, CAM_MAX);
+            this.camDistance = MathUtils.Interpolate(this.camDistance, this.desiredCamDistance, elapsed);
+            ground = CacheElevation(position.X, position.Y);
+            water = this.world.GetWaterLevel(position.X, position.Y);
+            this.avatarFacing.Y = MathUtils.Interpolate(this.avatarFacing.Y, lean_angle, elapsed);
+            bool flying = CVarUtils::GetCVar<bool>("flying");
             if (!flying) {
-                velocity -= GRAVITY * elapsed;
-                position.z += velocity * elapsed;
-                if (position.z <= ground) {
-                    on_ground = true;
-                    swimming = false;
-                    position.z = ground;
-                    velocity = 0.0f;
-                } else if (position.z > ground + GRAVITY * 0.1f)
-                    on_ground = false;
-                if (position.z + SWIM_DEPTH < water) {
-                    swimming = true;
-                    velocity = 0.0f;
+                this.velocity -= GRAVITY * elapsed;
+                position.Z += this.velocity * elapsed;
+                if (position.Z <= ground) {
+                    this.onGround = true;
+                    this.swimming = false;
+                    position.Z = ground;
+                    this.velocity = 0.0f;
+                } else if (position.Z > ground + GRAVITY * 0.1f)
+                    this.onGround = false;
+                if (position.Z + SWIM_DEPTH < water) {
+                    this.swimming = true;
+                    this.velocity = 0.0f;
                 }
             }
-            movement_animation = distance_walked / 4.0f;
-            if (on_ground)
-                distance_walked += current_speed * elapsed;
-            if (current_movement.x != 0.0f && current_movement.y != 0.0f)
-                avatar_facing.z = -MathAngle(0.0f, 0.0f, current_movement.x, current_movement.y);
+            movement_animation = this.distanceWalked / 4.0f;
+            if (this.onGround)
+                this.distanceWalked += this.currentSpeed * elapsed;
+            if (this.currentMovement.X != 0.0f && this.currentMovement.Y != 0.0f)
+                this.avatarFacing.Z = -MathAngle(0.0f, 0.0f, this.currentMovement.X, this.currentMovement.Y);
             if (flying)
-                anim_id = ANIM_FLYING;
-            else if (swimming) {
-                if (current_speed == 0.0f)
-                    anim_id = ANIM_FLOAT;
+                this.animType = AnimTypes.Flying;
+            else if (this.swimming) {
+                if (this.currentSpeed == 0.0f)
+                    this.animType = AnimTypes.Float;
                 else
-                    anim_id = ANIM_SWIM;
-            } else if (!on_ground) {
-                if (velocity > 0.0f)
-                    anim_id = ANIM_JUMP;
+                    this.animType = AnimTypes.Swim;
+            } else if (!this.onGround) {
+                if (this.velocity > 0.0f)
+                    this.animType = AnimTypes.Jump;
                 else
-                    anim_id = ANIM_FALL;
-            } else if (current_speed == 0.0f)
-                anim_id = ANIM_IDLE;
-            else if (sprinting)
-                anim_id = ANIM_SPRINT;
+                    this.animType = AnimTypes.Fall;
+            } else if (this.currentSpeed == 0.0f)
+                this.animType = AnimTypes.Idle;
+            else if (this.sprinting)
+                this.animType = AnimTypes.Sprint;
             else
-                anim_id = ANIM_RUN;
-            avatar.Animate(&anim[anim_id], movement_animation);
-            avatar.PositionSet(position);
-            avatar.RotationSet(avatar_facing);
-            avatar.Update();
-            step_tracking = fmod(movement_animation, 1.0f);
-            if (anim_id == ANIM_RUN || anim_id == ANIM_SPRINT) {
-                if (step_tracking < last_step_tracking || (step_tracking > 0.5f && last_step_tracking < 0.5f)) {
-                    dust_particle.colors.clear();
-                    if (position.z < 0.0f)
-                        dust_particle.colors.push_back(glRgba(0.4f, 0.7f, 1.0f));
+                this.animType = AnimTypes.Run;
+            this.avatar.Animate(anim[this.animType], movement_animation);
+            this.avatar.Position = position;
+            this.avatar.Rotation = this.avatarFacing;
+            this.avatar.Update();
+            step_tracking = movement_animation % 1.0f;
+            if (this.animType == AnimTypes.Run || this.animType == AnimTypes.Sprint) {
+                if (step_tracking < this.lastStepTracking || (step_tracking > 0.5f && this.lastStepTracking < 0.5f)) {
+                    this.dustParticle.colors.Clear();
+                    if (position.Z < 0.0f)
+                        this.dustParticle.colors.Add(new Color3(0.4f, 0.7f, 1.0f));
                     else
-                        dust_particle.colors.push_back(CacheSurfaceColor((int)position.x, (int)position.y));
-                    ParticleAdd(&dust_particle, position);
+                        this.dustParticle.colors.Add(CacheSurfaceColor((int)position.X, (int)position.Y));
+                    this.particles.AddParticles(this.dustParticle, position);
                 }
             }
-            last_step_tracking = step_tracking;
-            time_passed = GameTime() - last_time;
-            last_time = GameTime();
-            TextPrint("%s elapsed: %f", anim_names[anim_id], elapsed);
-            */
+            this.lastStepTracking = step_tracking;
+            time_passed = this.game.Time - this.lastTime;
+            this.lastTime = this.game.Time;
+            this.text.Print("{0} elapsed: {1}", this.animType.ToString(), elapsed);
             this.Region = this.world.GetRegion(
                 (int)(this.position.X + WorldUtils.REGION_HALF) / WorldUtils.REGION_SIZE,
                 (int)(this.position.Y + WorldUtils.REGION_HALF) / WorldUtils.REGION_SIZE);
-            /*
-            do_camera();
-            do_location();
-            */
+            DoCamera();
+            DoLocation();
         }
 
         public void Render() {
             GL.BindTexture(TextureTarget.Texture2D, this.textures.TextureIdFromName("avatar.png"));
             GL.BindTexture(TextureTarget.Texture2D, 0);
-            avatar.Render();
+            this.avatar.Render();
             if (this.properties.ShowSkeleton) {
-                avatar.RenderSkeleton();
+                this.avatar.RenderSkeleton();
             }
+        }
+
+        public void Look(int x, int y) {
+            if (this.properties.InvertMouse)
+                x = -x;
+            float mouseSensitivity = this.properties.MouseSensitivity;
+            this.angle.X -= MathHelper.Clamp(x * mouseSensitivity, 0.0f, 180.0f);
+            this.angle.Z += y * mouseSensitivity;
+            this.angle.Z %= 360.0f;
+            if (this.angle.Z < 0.0f)
+                this.angle.Z += 360.0f;
+
         }
 
         private void DoModel() {
             // TODO
-            //avatar.LoadX("models//male.x");
+            //this.avatar.LoadX("models//male.X");
             //if (CVarUtils::GetCVar<bool>("avatar.expand")) {
-            //    avatar.BoneInflate(BONE_PELVIS, 0.02f, true);
-            //    avatar.BoneInflate(BONE_HEAD, 0.025f, true);
-            //    avatar.BoneInflate(BONE_LWRIST, 0.03f, true);
-            //    avatar.BoneInflate(BONE_RWRIST, 0.03f, true);
-            //    avatar.BoneInflate(BONE_RANKLE, 0.05f, true);
-            //    avatar.BoneInflate(BONE_LANKLE, 0.05f, true);
+            //    this.avatar.BoneInflate(BONE_PELVIS, 0.02f, true);
+            //    this.avatar.BoneInflate(BONE_HEAD, 0.025f, true);
+            //    this.avatar.BoneInflate(BONE_LWRIST, 0.03f, true);
+            //    this.avatar.BoneInflate(BONE_RWRIST, 0.03f, true);
+            //    this.avatar.BoneInflate(BONE_RANKLE, 0.05f, true);
+            //    this.avatar.BoneInflate(BONE_LANKLE, 0.05f, true);
             //}
         }
 
