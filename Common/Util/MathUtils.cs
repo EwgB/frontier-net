@@ -1,8 +1,13 @@
 ﻿namespace FrontierSharp.Common.Util {
+    using System;
     using OpenTK;
 
     ///<summary>Various useful math functions</summary>
     public static class MathUtils {
+        public static float DEGREES_TO_RADIANS = .017453292f;
+        public static float RADIANS_TO_DEGREES = 57.29577951f;
+        public static float NEGLIGIBLE = 0.000000000001f;
+
         ///<summary>Interpolate between two values</summary>
         public static float Interpolate(float n1, float n2, float delta) {
             return n1 * (1.0f - delta) + n2 * delta;
@@ -15,51 +20,50 @@
                 Interpolate(v1.Z, v2.Z, scalar));
         }
 
+        /// <summary>
+        /// Keeps an angle between 0 and 360
+        /// </summary>
+        public static float Angle(float angle) {
+            if (angle < 0.0f)
+                angle = 360 - (Math.Abs(angle) % 360.0f);
+            else
+                angle %= 360;
+            return angle;
+        }
+
+        /// <summary>
+        /// Get an angle between two given points on a grid
+        /// </summary>
+        public static float Angle(float x1, float y1, float x2, float y2) {
+            var z_delta = (y1 - y2);
+            var x_delta = (x1 - x2);
+            if (x_delta == 0) {
+                if (z_delta > 0)
+                    return 0;
+                else
+                    return 180;
+            }
+
+            float angle;
+            if (Math.Abs(x_delta) < Math.Abs(z_delta)) {
+                angle = 90 - (float)Math.Atan(z_delta / x_delta) * RADIANS_TO_DEGREES;
+                if (x_delta < 0)
+                    angle -= 180;
+            } else {
+                angle = (float)Math.Atan(x_delta / z_delta) * RADIANS_TO_DEGREES;
+                if (z_delta < 0)
+                    angle += 180;
+            }
+            if (angle < 0)
+                angle += 360;
+            return angle;
+
+        }
+
     }
 }
 
 /*  
-//Keep an angle between 0 and 360
-float MathAngle(float angle) {
-
-    if (angle < 0.0f)
-        angle = 360.0f - (float)fmod(fabs(angle), 360.0f);
-    else
-        angle = (float)fmod(angle, 360.0f);
-    return angle;
-
-}
-
-//Get an angle between two given points on a grid
-float MathAngle(float x1, float y1, float x2, float y2) {
-
-    float x_delta;
-    float z_delta;
-    float angle;
-
-    z_delta = (y1 - y2);
-    x_delta = (x1 - x2);
-    if (x_delta == 0) {
-        if (z_delta > 0)
-            return 0.0f;
-        else
-            return 180.0f;
-    }
-    if (fabs(x_delta) < fabs(z_delta)) {
-        angle = 90 - (float)atan(z_delta / x_delta) * RADIANS_TO_DEGREES;
-        if (x_delta < 0)
-            angle -= 180.0f;
-    } else {
-        angle = (float)atan(x_delta / z_delta) * RADIANS_TO_DEGREES;
-        if (z_delta < 0.0f)
-            angle += 180.0f;
-    }
-    if (angle < 0.0f)
-        angle += 360.0f;
-    return angle;
-
-}
-
 //Get distance (squared) between 2 points on a plane
 float MathDistance2(float x1, float y1, float x2, float y2) {
 

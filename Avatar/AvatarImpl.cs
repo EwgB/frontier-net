@@ -54,7 +54,7 @@
                 this.position.X = MathHelper.Clamp(value.X, 0, (WorldUtils.REGION_SIZE * WorldUtils.WORLD_GRID));
                 this.position.Y = MathHelper.Clamp(value.Y, 0, (WorldUtils.REGION_SIZE * WorldUtils.WORLD_GRID));
                 CameraPosition = this.position;
-                this.angle = CameraAngle = new Vector3(90.0f, 0.0f, 0.0f);
+                this.angle = CameraAngle = new Vector3(90, 0, 0);
                 this.lastTime = this.game.Time;
                 DoModel();
 
@@ -147,15 +147,15 @@
                 this.onGround = false;
             }
             if (InputKeyPressed(SDLK_F2))
-                CVarUtils::SetCVar("flying", !CVarUtils::GetCVar<bool>("flying"));
+                this.properties.Flying ^= true; // Invert Flying
             //Joystick movement
             this.Look((int)(InputJoystickGet(3) * 5.0f), (int)(InputJoystickGet(4) * -5.0f));
-            DoMove(new Vector3(InputJoystickGet(0), InputJoystickGet(1), 0.0f));
+            DoMove(new Vector3(InputJoystickGet(0), InputJoystickGet(1), 0));
             if (InputMouselook()) {
                 if (InputKeyPressed(INPUT_MWHEEL_UP))
-                    this.desiredCamDistance -= 1.0f;
+                    this.desiredCamDistance -= 1;
                 if (InputKeyPressed(INPUT_MWHEEL_DOWN))
-                    this.desiredCamDistance += 1.0f;
+                    this.desiredCamDistance += 1;
                 if (InputKeyState(SDLK_w))
                     DoMove(-Vector3.UnitY);
                 if (InputKeyState(SDLK_s))
@@ -164,12 +164,12 @@
                     DoMove(-Vector3.UnitX);
                 if (InputKeyState(SDLK_d))
                     DoMove(Vector3.UnitX);
-                DoMove(new Vector3(InputJoystickGet(0), InputJoystickGet(1), 0.0f));
+                DoMove(new Vector3(InputJoystickGet(0), InputJoystickGet(1), 0));
             }
             //Figure out our   speed
             max_speed = MOVE_SPEED;
-            min_speed = 0.0f;
-            moving = this.desiredMovement.Length > 0.0f;//"moving" means, "trying to move". (Pressing buttons.)
+            min_speed = 0;
+            moving = this.desiredMovement.Length > 0;//"moving" means, "trying to move". (Pressing buttons.)
             if (moving)
                 min_speed = MOVE_SPEED * 0.33f;
             if (InputKeyState(SDLK_LSHIFT)) {
@@ -179,7 +179,7 @@
                 this.sprinting = false;
             desired_angle = this.currentAngle;
             if (moving) {//We're trying to accelerate
-                desired_angle = MathAngle(0.0f, 0.0f, this.desiredMovement.X, this.desiredMovement.Y);
+                desired_angle = MathUtils.Angle(0, 0, this.desiredMovement.X, this.desiredMovement.Y);
                 this.currentSpeed += elapsed * MOVE_SPEED * ACCEL;
             } else //We've stopped pushing forward
                 this.currentSpeed -= elapsed * MOVE_SPEED * DECEL;
@@ -187,20 +187,20 @@
             //Now figure out the angle of movement
             angle_adjust = MathAngleDifference(this.currentAngle, desired_angle);
             //if we're trying to reverse direction, don't do a huge, arcing turn.  Just slow and double back
-            lean_angle = 0.0f;
+            lean_angle = 0;
             if (Math.Abs(angle_adjust) > 135)
                 this.currentSpeed = SLOW_SPEED;
-            if (Math.Abs(angle_adjust) < 1.0f || this.currentSpeed <= SLOW_SPEED) {
+            if (Math.Abs(angle_adjust) < 1 || this.currentSpeed <= SLOW_SPEED) {
                 this.currentAngle = desired_angle;
-                angle_adjust = 0.0f;
+                angle_adjust = 0;
             } else {
                 if (Math.Abs(angle_adjust) < 135) {
                     this.currentAngle -= angle_adjust * elapsed * 2.0f;
                     lean_angle = MathHelper.Clamp(angle_adjust / 4.0f, -15, 15);
                 }
             }
-            this.currentMovement.X = -Math.Sin(this.currentAngle * DEGREES_TO_RADIANS);
-            this.currentMovement.Y = -Math.Cos(this.currentAngle * DEGREES_TO_RADIANS);
+            this.currentMovement.X = (float)-Math.Sin(this.currentAngle * MathUtils.MathUtils.DEGREES_TO_RADIANS);
+            this.currentMovement.Y = (float)-Math.Cos(this.currentAngle * MathUtils.MathUtils.DEGREES_TO_RADIANS);
             //Apply the movement
             this.currentMovement *= this.currentSpeed * elapsed;
             position.X += this.currentMovement.X;
@@ -210,40 +210,39 @@
             ground = CacheElevation(position.X, position.Y);
             water = this.world.GetWaterLevel(position.X, position.Y);
             this.avatarFacing.Y = MathUtils.Interpolate(this.avatarFacing.Y, lean_angle, elapsed);
-            bool flying = CVarUtils::GetCVar<bool>("flying");
-            if (!flying) {
-                this.velocity -= GRAVITY * elapsed;
+            if (!this.properties.Flying) {
+                this.velocity -= WorldUtils.GRAVITY * elapsed;
                 position.Z += this.velocity * elapsed;
                 if (position.Z <= ground) {
                     this.onGround = true;
                     this.swimming = false;
                     position.Z = ground;
-                    this.velocity = 0.0f;
-                } else if (position.Z > ground + GRAVITY * 0.1f)
+                    this.velocity = 0;
+                } else if (position.Z > ground + WorldUtils.GRAVITY * 0.1f)
                     this.onGround = false;
                 if (position.Z + SWIM_DEPTH < water) {
                     this.swimming = true;
-                    this.velocity = 0.0f;
+                    this.velocity = 0;
                 }
             }
             movement_animation = this.distanceWalked / 4.0f;
             if (this.onGround)
                 this.distanceWalked += this.currentSpeed * elapsed;
-            if (this.currentMovement.X != 0.0f && this.currentMovement.Y != 0.0f)
-                this.avatarFacing.Z = -MathAngle(0.0f, 0.0f, this.currentMovement.X, this.currentMovement.Y);
-            if (flying)
+            if (this.currentMovement.X != 0 && this.currentMovement.Y != 0)
+                this.avatarFacing.Z = -MathUtils.Angle(0, 0, this.currentMovement.X, this.currentMovement.Y);
+            if (this.properties.Flying)
                 this.animType = AnimTypes.Flying;
             else if (this.swimming) {
-                if (this.currentSpeed == 0.0f)
+                if (this.currentSpeed == 0)
                     this.animType = AnimTypes.Float;
                 else
                     this.animType = AnimTypes.Swim;
             } else if (!this.onGround) {
-                if (this.velocity > 0.0f)
+                if (this.velocity > 0)
                     this.animType = AnimTypes.Jump;
                 else
                     this.animType = AnimTypes.Fall;
-            } else if (this.currentSpeed == 0.0f)
+            } else if (this.currentSpeed == 0)
                 this.animType = AnimTypes.Idle;
             else if (this.sprinting)
                 this.animType = AnimTypes.Sprint;
@@ -253,12 +252,12 @@
             this.avatar.Position = position;
             this.avatar.Rotation = this.avatarFacing;
             this.avatar.Update();
-            step_tracking = movement_animation % 1.0f;
+            step_tracking = movement_animation % 1;
             if (this.animType == AnimTypes.Run || this.animType == AnimTypes.Sprint) {
                 if (step_tracking < this.lastStepTracking || (step_tracking > 0.5f && this.lastStepTracking < 0.5f)) {
                     this.dustParticle.colors.Clear();
-                    if (position.Z < 0.0f)
-                        this.dustParticle.colors.Add(new Color3(0.4f, 0.7f, 1.0f));
+                    if (position.Z < 0)
+                        this.dustParticle.colors.Add(new Color3(0.4f, 0.7f, 1));
                     else
                         this.dustParticle.colors.Add(CacheSurfaceColor((int)position.X, (int)position.Y));
                     this.particles.AddParticles(this.dustParticle, position);
@@ -288,25 +287,25 @@
             if (this.properties.InvertMouse)
                 x = -x;
             float mouseSensitivity = this.properties.MouseSensitivity;
-            this.angle.X -= MathHelper.Clamp(x * mouseSensitivity, 0.0f, 180.0f);
+            this.angle.X -= MathHelper.Clamp(x * mouseSensitivity, 0, 180);
             this.angle.Z += y * mouseSensitivity;
-            this.angle.Z %= 360.0f;
-            if (this.angle.Z < 0.0f)
-                this.angle.Z += 360.0f;
+            this.angle.Z %= 360;
+            if (this.angle.Z < 0)
+                this.angle.Z += 360;
 
         }
 
         private void DoModel() {
             // TODO
             //this.avatar.LoadX("models//male.X");
-            //if (CVarUtils::GetCVar<bool>("avatar.expand")) {
-            //    this.avatar.BoneInflate(BONE_PELVIS, 0.02f, true);
-            //    this.avatar.BoneInflate(BONE_HEAD, 0.025f, true);
-            //    this.avatar.BoneInflate(BONE_LWRIST, 0.03f, true);
-            //    this.avatar.BoneInflate(BONE_RWRIST, 0.03f, true);
-            //    this.avatar.BoneInflate(BONE_RANKLE, 0.05f, true);
-            //    this.avatar.BoneInflate(BONE_LANKLE, 0.05f, true);
-            //}
+            if (this.properties.ExpandAvatar) {
+                //    this.avatar.BoneInflate(BONE_PELVIS, 0.02f, true);
+                //    this.avatar.BoneInflate(BONE_HEAD, 0.025f, true);
+                //    this.avatar.BoneInflate(BONE_LWRIST, 0.03f, true);
+                //    this.avatar.BoneInflate(BONE_RWRIST, 0.03f, true);
+                //    this.avatar.BoneInflate(BONE_RANKLE, 0.05f, true);
+                //    this.avatar.BoneInflate(BONE_LANKLE, 0.05f, true);
+            }
         }
 
         private void DoCamera() {
@@ -318,7 +317,7 @@
             //Vector2 rads;
 
 
-            //rads.X = this.angle.X * DEGREES_TO_RADIANS;
+            //rads.X = this.angle.X * MathUtils.DEGREES_TO_RADIANS;
             //vert_delta = Math.Cos(rads.X) * this.camDistance;
             //horz_delta = Math.Sin(rads.X);
 
@@ -326,8 +325,8 @@
             //cam = position;
             //cam.Z += EYE_HEIGHT;
 
-            //cam.X += Math.Sin(this.angle.Z * DEGREES_TO_RADIANS) * this.camDistance * horz_delta;
-            //cam.Y += Math.Cos(this.angle.Z * DEGREES_TO_RADIANS) * this.camDistance * horz_delta;
+            //cam.X += Math.Sin(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * this.camDistance * horz_delta;
+            //cam.Y += Math.Cos(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * this.camDistance * horz_delta;
             //cam.Z += vert_delta;
 
             //ground = CacheElevation(cam.X, cam.Y) + 0.2f;
@@ -348,19 +347,18 @@
 
         private void DoMove(Vector3 delta) {
             // TODO
-            //Vector3 movement;
-            //float forward;
 
-            //if (CVarUtils::GetCVar<bool>("flying")) {
-            //    forward = Math.Sin(this.angle.X * DEGREES_TO_RADIANS);
-            //    movement.X = Math.Cos(this.angle.Z * DEGREES_TO_RADIANS) * delta.X + Math.Sin(this.angle.Z * DEGREES_TO_RADIANS) * delta.Y * forward;
-            //    movement.Y = -Math.Sin(this.angle.Z * DEGREES_TO_RADIANS) * delta.X + Math.Cos(this.angle.Z * DEGREES_TO_RADIANS) * delta.Y * forward;
-            //    movement.Z = Math.Cos(this.angle.X * DEGREES_TO_RADIANS) * delta.Y;
-            //    position += movement;
-            //} else {
-            //    this.desiredMovement.X += Math.Cos(this.angle.Z * DEGREES_TO_RADIANS) * delta.X + Math.Sin(this.angle.Z * DEGREES_TO_RADIANS) * delta.Y;
-            //    this.desiredMovement.Y += -Math.Sin(this.angle.Z * DEGREES_TO_RADIANS) * delta.X + Math.Cos(this.angle.Z * DEGREES_TO_RADIANS) * delta.Y;
-            //}
+            if (this.properties.Flying) {
+                var forward = Math.Sin(this.angle.X * MathUtils.DEGREES_TO_RADIANS);
+                var movement = new Vector3(
+                    (float)(Math.Cos(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.X + Math.Sin(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.Y * forward),
+                    (float)(-Math.Sin(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.X + Math.Cos(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.Y * forward),
+                    (float)Math.Cos(this.angle.X * MathUtils.DEGREES_TO_RADIANS) * delta.Y);
+                position += movement;
+            } else {
+                this.desiredMovement.X += (float)(Math.Cos(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.X + Math.Sin(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.Y);
+                this.desiredMovement.Y += (float)(-Math.Sin(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.X + Math.Cos(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.Y);
+            }
         }
     }
 }

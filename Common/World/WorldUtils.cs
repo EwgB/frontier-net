@@ -6,5 +6,6 @@
         public static int WORLD_GRID_EDGE = (WORLD_GRID + 1);
         public static int WORLD_GRID_CENTER = (WORLD_GRID / 2);
         public static int WORLD_SIZE_METERS = (REGION_SIZE * WORLD_GRID);
+        public static float GRAVITY = 9.5f;
     }
 }
