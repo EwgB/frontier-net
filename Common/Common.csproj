@@ -62,7 +62,9 @@
     <Compile Include="Grid\IParticleArea.cs" />
     <Compile Include="Grid\IForest.cs" />
     <Compile Include="Grid\ITerrain.cs" />
+    <Compile Include="Grid\SurfaceTypes.cs" />
     <Compile Include="IBaseModule.cs" />
+    <Compile Include="ICache.cs" />
     <Compile Include="IPlayer.cs" />
     <Compile Include="IRenderable.cs" />
     <Compile Include="ITimeCapped.cs" />

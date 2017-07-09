@@ -60,6 +60,16 @@
 
         }
 
+        /// <summary>Difference between two angles</summary>
+        public static float AngleDifference(float a1, float a2) {
+
+            float result = (a1 - a2) % 360;
+            if (result > 180)
+                return result - 360;
+            if (result < -180)
+                return result + 360;
+            return result;
+        }
     }
 }
 
@@ -86,20 +96,6 @@ float MathDistance(float x1, float y1, float x2, float y2) {
     dx = x1 - x2;
     dy = y1 - y2;
     return (float)sqrt(dx * dx + dy * dy);
-
-}
-
-//difference between two angles
-float MathAngleDifference(float a1, float a2) {
-
-    float result;
-
-    result = (float)fmod(a1 - a2, 360.0f);
-    if (result > 180.0)
-        return result - 360.0F;
-    if (result < -180.0)
-        return result + 360.0F;
-    return result;
 
 }
 

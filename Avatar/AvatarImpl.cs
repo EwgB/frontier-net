@@ -34,6 +34,7 @@
 
         #region Modules
 
+        private ICache cache;
         private IGame game;
         private IParticles particles;
         private IText text;
@@ -96,8 +97,16 @@
 
         #endregion
 
-        public AvatarImpl(IFigure avatar, IGame game, IParticles particles, IText text, ITextures textures, IWorld world) {
+        public AvatarImpl(
+                IFigure avatar,
+                ICache cache,
+                IGame game,
+                IParticles particles,
+                IText text,
+                ITextures textures,
+                IWorld world) {
             this.avatar = avatar;
+            this.cache = cache;
             this.game = game;
             this.particles = particles;
             this.text = text;
@@ -185,7 +194,7 @@
                 this.currentSpeed -= elapsed * MOVE_SPEED * DECEL;
             this.currentSpeed = MathHelper.Clamp(this.currentSpeed, min_speed, max_speed);
             //Now figure out the angle of movement
-            angle_adjust = MathAngleDifference(this.currentAngle, desired_angle);
+            angle_adjust = MathUtils.AngleDifference(this.currentAngle, desired_angle);
             //if we're trying to reverse direction, don't do a huge, arcing turn.  Just slow and double back
             lean_angle = 0;
             if (Math.Abs(angle_adjust) > 135)
@@ -199,15 +208,15 @@
                     lean_angle = MathHelper.Clamp(angle_adjust / 4.0f, -15, 15);
                 }
             }
-            this.currentMovement.X = (float)-Math.Sin(this.currentAngle * MathUtils.MathUtils.DEGREES_TO_RADIANS);
-            this.currentMovement.Y = (float)-Math.Cos(this.currentAngle * MathUtils.MathUtils.DEGREES_TO_RADIANS);
+            this.currentMovement.X = (float)-Math.Sin(this.currentAngle * MathUtils.DEGREES_TO_RADIANS);
+            this.currentMovement.Y = (float)-Math.Cos(this.currentAngle * MathUtils.DEGREES_TO_RADIANS);
             //Apply the movement
             this.currentMovement *= this.currentSpeed * elapsed;
             position.X += this.currentMovement.X;
             position.Y += this.currentMovement.Y;
             this.desiredCamDistance = MathHelper.Clamp(this.desiredCamDistance, CAM_MIN, CAM_MAX);
             this.camDistance = MathUtils.Interpolate(this.camDistance, this.desiredCamDistance, elapsed);
-            ground = CacheElevation(position.X, position.Y);
+            ground = this.cache.GetElevation(position.X, position.Y);
             water = this.world.GetWaterLevel(position.X, position.Y);
             this.avatarFacing.Y = MathUtils.Interpolate(this.avatarFacing.Y, lean_angle, elapsed);
             if (!this.properties.Flying) {
@@ -259,7 +268,7 @@
                     if (position.Z < 0)
                         this.dustParticle.colors.Add(new Color3(0.4f, 0.7f, 1));
                     else
-                        this.dustParticle.colors.Add(CacheSurfaceColor((int)position.X, (int)position.Y));
+                        this.dustParticle.colors.Add(this.cache.GetSurfaceColor((int)position.X, (int)position.Y));
                     this.particles.AddParticles(this.dustParticle, position);
                 }
             }
