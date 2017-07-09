@@ -28,17 +28,17 @@
         private const float TIME_SUNSET = 19.5f;    // 7:30pm
         private const float TIME_DUSK = 20.5f;      // 8:30pm
 
-        private static readonly Color3 NIGHT_COLOR = new Color3(0, 0, 0.3f);
-        private static readonly Color3 DAY_COLOR = Color3.White;
+        private static readonly Color3 NightColor = new Color3(0, 0, 0.3f);
+        private static readonly Color3 DayColor = Color3.White;
 
-        private static readonly Color3 NIGHT_SCALING = new Color3(0.0f, 0.1f, 0.4f);
-        private static readonly Color3 DAY_SCALING = Color3.White;
+        private static readonly Color3 NightScaling = new Color3(0.0f, 0.1f, 0.4f);
+        private static readonly Color3 DayScaling = Color3.White;
 
-        private static readonly Vector3 VECTOR_NIGHT = new Vector3(0.0f, 0.0f, -1.0f);
-        private static readonly Vector3 VECTOR_SUNRISE = new Vector3(-0.8f, 0.0f, -0.2f);
-        private static readonly Vector3 VECTOR_MORNING = new Vector3(-0.5f, 0.0f, -0.5f);
-        private static readonly Vector3 VECTOR_AFTERNOON = new Vector3(0.5f, 0.0f, -0.5f);
-        private static readonly Vector3 VECTOR_SUNSET = new Vector3(0.8f, 0.0f, -0.2f);
+        private static readonly Vector3 VectorNight = new Vector3(0.0f, 0.0f, -1.0f);
+        private static readonly Vector3 VectorSunrise = new Vector3(-0.8f, 0.0f, -0.2f);
+        private static readonly Vector3 VectorMorning = new Vector3(-0.5f, 0.0f, -0.5f);
+        private static readonly Vector3 VectorAfternoon = new Vector3(0.5f, 0.0f, -0.5f);
+        private static readonly Vector3 VectorSunset = new Vector3(0.8f, 0.0f, -0.2f);
 
         private const int SUN_ANGLE_SUNRISE = -10;
         private const int SUN_ANGLE_MORNING = 15;
@@ -95,24 +95,24 @@
 
         private void DoTime(float delta) {
             //Convert out hours and minutes into a decimal number. (100 "minutes" per hour.)
-            Desired.Light = new Vector3(-0.5f, 0.0f, -0.5f);
-            if (this.game.Time != lastDecimalTime)
+            this.Desired.Light = new Vector3(-0.5f, 0.0f, -0.5f);
+            if (this.game.Time != this.lastDecimalTime)
                 DoCycle();
-            lastDecimalTime = this.game.Time;
+            this.lastDecimalTime = this.game.Time;
             for (var colorType = ColorTypes.Horizon; colorType < ColorTypes.Max; colorType++) {
-                Current.Color[colorType] = ColorUtils.Interpolate(Current.Color[colorType], Desired.Color[colorType], delta);
+                this.Current.Color[colorType] = ColorUtils.Interpolate(this.Current.Color[colorType], this.Desired.Color[colorType], delta);
             }
-            Current.Fog = new Range<float>(
-                MathUtils.Interpolate(Current.Fog.Min, Desired.Fog.Min, delta),
-                MathUtils.Interpolate(Current.Fog.Max, Desired.Fog.Max, delta));
-            Current.StarFade = MathUtils.Interpolate(Current.StarFade, Desired.StarFade, delta);
-            Current.SunsetFade = MathUtils.Interpolate(Current.SunsetFade, Desired.SunsetFade, delta);
-            Current.SunriseFade = MathUtils.Interpolate(Current.SunriseFade, Desired.SunriseFade, delta);
-            Current.Light = MathUtils.Interpolate(Current.Light, Desired.Light, delta);
-            Current.SunAngle = MathUtils.Interpolate(Current.SunAngle, Desired.SunAngle, delta);
-            Current.CloudCover = MathUtils.Interpolate(Current.CloudCover, Desired.CloudCover, delta);
-            Current.DrawSun = Desired.DrawSun;
-            Current.Light.Normalize();
+            this.Current.Fog = new Range<float>(
+                MathUtils.Interpolate(this.Current.Fog.Min, this.Desired.Fog.Min, delta),
+                MathUtils.Interpolate(this.Current.Fog.Max, this.Desired.Fog.Max, delta));
+            this.Current.StarFade = MathUtils.Interpolate(this.Current.StarFade, this.Desired.StarFade, delta);
+            this.Current.SunsetFade = MathUtils.Interpolate(this.Current.SunsetFade, this.Desired.SunsetFade, delta);
+            this.Current.SunriseFade = MathUtils.Interpolate(this.Current.SunriseFade, this.Desired.SunriseFade, delta);
+            this.Current.Light = MathUtils.Interpolate(this.Current.Light, this.Desired.Light, delta);
+            this.Current.SunAngle = MathUtils.Interpolate(this.Current.SunAngle, this.Desired.SunAngle, delta);
+            this.Current.CloudCover = MathUtils.Interpolate(this.Current.CloudCover, this.Desired.CloudCover, delta);
+            this.Current.DrawSun = this.Desired.DrawSun;
+            this.Current.Light.Normalize();
         }
         
         private struct CycleInParameters {
@@ -141,8 +141,8 @@
                 humidFog.Min /= 2.0f;
                 humidFog.Max /= 2.0f;
             }
-            Desired.CloudCover = MathHelper.Clamp(region.Moisture, 0.20f, 0.6f);
-            Desired.SunriseFade = Desired.SunsetFade = 0.0f;
+            this.Desired.CloudCover = MathHelper.Clamp(region.Moisture, 0.20f, 0.6f);
+            this.Desired.SunriseFade = this.Desired.SunsetFade = 0.0f;
 
             float decimalTime = this.game.Time % 24;
             var inParams = new CycleInParameters() { DecimalTime = decimalTime, MaxDistance = maxDistance, NightFog = nightFog, Region = region };
@@ -157,7 +157,7 @@
                 ProcessNight(inParams, out outParams);
             }
 
-            Desired.Fog = new Range<float>(
+            this.Desired.Fog = new Range<float>(
                 Math.Min(humidFog.Min, outParams.TimeFog.Min),
                 Math.Min(humidFog.Max, outParams.TimeFog.Max));
 
@@ -166,92 +166,92 @@
                     continue;
                 Color3 average = outParams.BaseColor * outParams.Atmosphere;
                 //average = average.Normalize() / 3;
-                Desired.Color[colorType] = average;
+                this.Desired.Color[colorType] = average;
                 if (colorType == ColorTypes.Sky)
-                    Desired.Color[colorType] = outParams.BaseColor * 0.75f;
-                Desired.Color[colorType] *= outParams.ColorScaling;
+                    this.Desired.Color[colorType] = outParams.BaseColor * 0.75f;
+                this.Desired.Color[colorType] *= outParams.ColorScaling;
             }
 
-            Desired.Color[ColorTypes.Sky] = region.ColorAtmosphere;
-            Desired.Color[ColorTypes.Fog] = Desired.Color[ColorTypes.Horizon] = (Desired.Color[ColorTypes.Sky] + outParams.Atmosphere * 2) / 3;
+            this.Desired.Color[ColorTypes.Sky] = region.ColorAtmosphere;
+            this.Desired.Color[ColorTypes.Fog] = this.Desired.Color[ColorTypes.Horizon] = (this.Desired.Color[ColorTypes.Sky] + outParams.Atmosphere * 2) / 3;
             //Desired.Color[ColorTypes.Sky] = Desired.Color[ColorTypes.Horizon] * (new Color3 (0.2f, 0.2f, 0.8f));
         }
 
         private void ProcessSunrise(CycleInParameters inParams, out CycleOutParameters outParams) {
             float fade = (inParams.DecimalTime - TIME_DAWN) / (TIME_DAY - TIME_DAWN);
             float lateFade = Math.Max((fade - 0.5f) * 2.0f, 0);
-                Desired.Color[ColorTypes.Light] = new Color3(0.5f, 0.7f, 1.0f);
-            outParams.BaseColor = ColorUtils.Interpolate(NIGHT_COLOR, DAY_COLOR, lateFade);
+            this.Desired.Color[ColorTypes.Light] = new Color3(0.5f, 0.7f, 1.0f);
+            outParams.BaseColor = ColorUtils.Interpolate(NightColor, DayColor, lateFade);
             outParams.Atmosphere = ColorUtils.Interpolate(Color3.Black, Color3.White, lateFade);
             var timeFog = new Range<float>();
             timeFog.Max = MathUtils.Interpolate(inParams.NightFog, inParams.MaxDistance, fade);
             timeFog.Min = timeFog.Max / 2.0f;
             outParams.TimeFog = timeFog;
-            Desired.StarFade = Math.Max(1.0f - fade * 2.0f, 0.0f);
+            this.Desired.StarFade = Math.Max(1.0f - fade * 2.0f, 0.0f);
             // Sunrise fades in, then back out
-            Desired.SunriseFade = 1.0f - Math.Abs(fade - 0.5f) * 2.0f;
-            outParams.ColorScaling = ColorUtils.Interpolate(NIGHT_SCALING, DAY_SCALING, fade);
+            this.Desired.SunriseFade = 1.0f - Math.Abs(fade - 0.5f) * 2.0f;
+            outParams.ColorScaling = ColorUtils.Interpolate(NightScaling, DayScaling, fade);
             //The light in the sky doesn't lighten until the second half of sunrise
             if (fade > 0.5f)
-                Desired.Color[ColorTypes.Light] = new Color3(1.0f, 1.0f, 0.5f);
+                this.Desired.Color[ColorTypes.Light] = new Color3(1.0f, 1.0f, 0.5f);
             else
-                Desired.Color[ColorTypes.Light] = new Color3(0.5f, 0.7f, 1.0f);
-            Desired.Light = MathUtils.Interpolate(VECTOR_SUNRISE, VECTOR_MORNING, fade);
-            Desired.SunAngle = MathUtils.Interpolate(SUN_ANGLE_SUNRISE, SUN_ANGLE_MORNING, fade);
-            Desired.DrawSun = true;
-            Desired.Color[ColorTypes.Ambient] = new Color3(0.3f, 0.3f, 0.6f);
+                this.Desired.Color[ColorTypes.Light] = new Color3(0.5f, 0.7f, 1.0f);
+            this.Desired.Light = MathUtils.Interpolate(VectorSunrise, VectorMorning, fade);
+            this.Desired.SunAngle = MathUtils.Interpolate(SUN_ANGLE_SUNRISE, SUN_ANGLE_MORNING, fade);
+            this.Desired.DrawSun = true;
+            this.Desired.Color[ColorTypes.Ambient] = new Color3(0.3f, 0.3f, 0.6f);
         }
 
         private void ProcessDay(CycleInParameters inParams, out CycleOutParameters outParams) {
             outParams.Atmosphere = Color3.White;
             float fade = (inParams.DecimalTime - TIME_DAY) / (TIME_SUNSET - TIME_DAY);
-            outParams.BaseColor = DAY_COLOR;
+            outParams.BaseColor = DayColor;
             var timeFog = new Range<float>();
             timeFog.Max = inParams.MaxDistance;
             timeFog.Min = timeFog.Max / 2.0f;
             outParams.TimeFog = timeFog;
-            Desired.StarFade = 0.0f;
-            outParams.ColorScaling = DAY_SCALING;
-            Desired.Color[ColorTypes.Light] = (Color3.White + inParams.Region.ColorAtmosphere).Normalize();
-            Desired.Light = new Vector3(0, 0.5f, -0.5f);
-            Desired.Light = MathUtils.Interpolate(VECTOR_MORNING, VECTOR_AFTERNOON, fade);
-            Desired.SunAngle = MathUtils.Interpolate(SUN_ANGLE_MORNING, SUN_ANGLE_AFTERNOON, fade);
-            Desired.DrawSun = true;
-            Desired.Color[ColorTypes.Ambient] = new Color3(0.4f, 0.4f, 0.4f);
+            this.Desired.StarFade = 0.0f;
+            outParams.ColorScaling = DayScaling;
+            this.Desired.Color[ColorTypes.Light] = (Color3.White + inParams.Region.ColorAtmosphere).Normalize();
+            this.Desired.Light = new Vector3(0, 0.5f, -0.5f);
+            this.Desired.Light = MathUtils.Interpolate(VectorMorning, VectorAfternoon, fade);
+            this.Desired.SunAngle = MathUtils.Interpolate(SUN_ANGLE_MORNING, SUN_ANGLE_AFTERNOON, fade);
+            this.Desired.DrawSun = true;
+            this.Desired.Color[ColorTypes.Ambient] = new Color3(0.4f, 0.4f, 0.4f);
         }
 
         private void ProcessSunset(CycleInParameters inParams, out CycleOutParameters outParams) {
             float fade = (inParams.DecimalTime - TIME_SUNSET) / (TIME_DUSK - TIME_SUNSET);
-            outParams.BaseColor = ColorUtils.Interpolate(DAY_COLOR, NIGHT_COLOR, fade);
+            outParams.BaseColor = ColorUtils.Interpolate(DayColor, NightColor, fade);
             var timeFog = new Range<float>();
             timeFog.Max = MathUtils.Interpolate(inParams.MaxDistance, inParams.NightFog, fade);
             timeFog.Min = timeFog.Max / 2.0f;
             outParams.TimeFog = timeFog;
             if (fade > 0.5f)
-                Desired.StarFade = (fade - 0.5f) * 2.0f;
+                this.Desired.StarFade = (fade - 0.5f) * 2.0f;
             //Sunset fades in, then back out
             outParams.Atmosphere = ColorUtils.Interpolate(Color3.White, Color3.Black, Math.Min(1.0f, fade * 2.0f));
-            Desired.SunsetFade = 1.0f - Math.Abs(fade - 0.5f) * 2.0f;
-            outParams.ColorScaling = ColorUtils.Interpolate(DAY_SCALING, NIGHT_SCALING, fade);
-            Desired.Color[ColorTypes.Light] = new Color3(1.0f, 0.5f, 0.5f);
-            Desired.Light = new Vector3(0.8f, 0.0f, -0.2f);
-            Desired.Light = MathUtils.Interpolate(VECTOR_AFTERNOON, VECTOR_SUNSET, fade);
-            Desired.SunAngle = MathUtils.Interpolate(SUN_ANGLE_AFTERNOON, SUN_ANGLE_SUNSET, fade);
-            Desired.DrawSun = true;
-            Desired.Color[ColorTypes.Ambient] = new Color3(0.3f, 0.3f, 0.6f);
+            this.Desired.SunsetFade = 1.0f - Math.Abs(fade - 0.5f) * 2.0f;
+            outParams.ColorScaling = ColorUtils.Interpolate(DayScaling, NightScaling, fade);
+            this.Desired.Color[ColorTypes.Light] = new Color3(1.0f, 0.5f, 0.5f);
+            this.Desired.Light = new Vector3(0.8f, 0.0f, -0.2f);
+            this.Desired.Light = MathUtils.Interpolate(VectorAfternoon, VectorSunset, fade);
+            this.Desired.SunAngle = MathUtils.Interpolate(SUN_ANGLE_AFTERNOON, SUN_ANGLE_SUNSET, fade);
+            this.Desired.DrawSun = true;
+            this.Desired.Color[ColorTypes.Ambient] = new Color3(0.3f, 0.3f, 0.6f);
         }
 
         private void ProcessNight(CycleInParameters inParams, out CycleOutParameters outParams) {
             outParams.Atmosphere = Color3.Black;
-            outParams.ColorScaling = NIGHT_SCALING;
-            outParams.BaseColor = NIGHT_COLOR;
+            outParams.ColorScaling = NightScaling;
+            outParams.BaseColor = NightColor;
             outParams.TimeFog = new Range<float>(1, inParams.NightFog);
-            Desired.StarFade = 1.0f;
-            Desired.Color[ColorTypes.Light] = new Color3(0.1f, 0.3f, 0.7f);
-            Desired.Color[ColorTypes.Ambient] = new Color3(0.0f, 0.0f, 0.4f);
-            Desired.Light = VECTOR_NIGHT;
-            Desired.SunAngle = -90.0f;
-            Desired.DrawSun = false;
+            this.Desired.StarFade = 1.0f;
+            this.Desired.Color[ColorTypes.Light] = new Color3(0.1f, 0.3f, 0.7f);
+            this.Desired.Color[ColorTypes.Ambient] = new Color3(0.0f, 0.0f, 0.4f);
+            this.Desired.Light = VectorNight;
+            this.Desired.SunAngle = -90.0f;
+            this.Desired.DrawSun = false;
         }
     }
 }

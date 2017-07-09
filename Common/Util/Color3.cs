@@ -38,9 +38,9 @@
         /// <param name="g">The G component of the new Color3 structure.</param>
         /// <param name="b">The B component of the new Color3 structure.</param>
         public Color3(float r, float g, float b) {
-            R = r;
-            G = g;
-            B = b;
+            this.R = r;
+            this.G = g;
+            this.B = b;
         }
 
         /// <summary>
@@ -74,9 +74,9 @@
         public int ToArgb() {
             uint value =
                 (uint)(Byte.MaxValue) << 24 |       // Alpha is always 1
-                (uint)(R * Byte.MaxValue) << 16 |
-                (uint)(G * Byte.MaxValue) << 8 |
-                (uint)(B * Byte.MaxValue);
+                (uint)(this.R * Byte.MaxValue) << 16 |
+                (uint)(this.G * Byte.MaxValue) << 8 |
+                (uint)(this.B * Byte.MaxValue);
 
             return unchecked((int)value);
         }
@@ -106,7 +106,7 @@
         /// </summary>
         /// <returns>A System.String that describes this Color3 structure.</returns>
         public override string ToString() {
-            return String.Format("{{(R, G, B) = ({0}, {1}, {2})}}", R.ToString(), G.ToString(), B.ToString());
+            return String.Format("{{(R, G, B) = ({0}, {1}, {2})}}", this.R.ToString(), this.G.ToString(), this.B.ToString());
         }
 
         /// <summary>
@@ -114,7 +114,7 @@
         /// </summary>
         /// <returns>A new Color3 with normalized RGB values</returns>
         public Color3 Normalize() {
-            return this / Math.Min(Math.Max(R, Math.Max(G, B)), 1);
+            return this / Math.Min(Math.Max(this.R, Math.Max(this.G, this.B)), 1);
         }
 
         #region Operators
@@ -1013,43 +1013,43 @@
             var saturation = hsl.Y;
             var lightness = hsl.Z;
 
-            var C = (1.0f - Math.Abs(2.0f * lightness - 1.0f)) * saturation;
+            var c = (1.0f - Math.Abs(2.0f * lightness - 1.0f)) * saturation;
 
             var h = hue / 60.0f;
-            var X = C * (1.0f - Math.Abs(h % 2.0f - 1.0f));
+            var x = c * (1.0f - Math.Abs(h % 2.0f - 1.0f));
 
             float r, g, b;
             if (0.0f <= h && h < 1.0f) {
-                r = C;
-                g = X;
+                r = c;
+                g = x;
                 b = 0.0f;
             } else if (1.0f <= h && h < 2.0f) {
-                r = X;
-                g = C;
+                r = x;
+                g = c;
                 b = 0.0f;
             } else if (2.0f <= h && h < 3.0f) {
                 r = 0.0f;
-                g = C;
-                b = X;
+                g = c;
+                b = x;
             } else if (3.0f <= h && h < 4.0f) {
                 r = 0.0f;
-                g = X;
-                b = C;
+                g = x;
+                b = c;
             } else if (4.0f <= h && h < 5.0f) {
-                r = X;
+                r = x;
                 g = 0.0f;
-                b = C;
+                b = c;
             } else if (5.0f <= h && h < 6.0f) {
-                r = C;
+                r = c;
                 g = 0.0f;
-                b = X;
+                b = x;
             } else {
                 r = 0.0f;
                 g = 0.0f;
                 b = 0.0f;
             }
 
-            var m = lightness - (C / 2.0f);
+            var m = lightness - (c / 2.0f);
             return new Color3(r + m, g + m, b + m);
         }
 
@@ -1066,15 +1066,15 @@
         public static Vector4 ToHsl(Color3 rgb) {
             var M = Math.Max(rgb.R, Math.Max(rgb.G, rgb.B));
             var m = Math.Min(rgb.R, Math.Min(rgb.G, rgb.B));
-            var C = M - m;
+            var c = M - m;
 
             float h = 0.0f;
             if (M == rgb.R) {
-                h = ((rgb.G - rgb.B) / C);
+                h = ((rgb.G - rgb.B) / c);
             } else if (M == rgb.G) {
-                h = ((rgb.B - rgb.R) / C) + 2.0f;
+                h = ((rgb.B - rgb.R) / c) + 2.0f;
             } else if (M == rgb.B) {
-                h = ((rgb.R - rgb.G) / C) + 4.0f;
+                h = ((rgb.R - rgb.G) / c) + 4.0f;
             }
 
             var hue = h / 6.0f;
@@ -1086,7 +1086,7 @@
 
             var saturation = 0.0f;
             if (0.0f != lightness && lightness != 1.0f) {
-                saturation = C / (1.0f - Math.Abs(2.0f * lightness - 1.0f));
+                saturation = c / (1.0f - Math.Abs(2.0f * lightness - 1.0f));
             }
 
             return new Vector4(hue, saturation, lightness, 1);
@@ -1113,43 +1113,43 @@
             var saturation = hsv.Y;
             var value = hsv.Z;
 
-            var C = value * saturation;
+            var c = value * saturation;
 
             var h = hue / 60.0f;
-            var X = C * (1.0f - Math.Abs(h % 2.0f - 1.0f));
+            var x = c * (1.0f - Math.Abs(h % 2.0f - 1.0f));
 
             float r, g, b;
             if (0.0f <= h && h < 1.0f) {
-                r = C;
-                g = X;
+                r = c;
+                g = x;
                 b = 0.0f;
             } else if (1.0f <= h && h < 2.0f) {
-                r = X;
-                g = C;
+                r = x;
+                g = c;
                 b = 0.0f;
             } else if (2.0f <= h && h < 3.0f) {
                 r = 0.0f;
-                g = C;
-                b = X;
+                g = c;
+                b = x;
             } else if (3.0f <= h && h < 4.0f) {
                 r = 0.0f;
-                g = X;
-                b = C;
+                g = x;
+                b = c;
             } else if (4.0f <= h && h < 5.0f) {
-                r = X;
+                r = x;
                 g = 0.0f;
-                b = C;
+                b = c;
             } else if (5.0f <= h && h < 6.0f) {
-                r = C;
+                r = c;
                 g = 0.0f;
-                b = X;
+                b = x;
             } else {
                 r = 0.0f;
                 g = 0.0f;
                 b = 0.0f;
             }
 
-            var m = value - C;
+            var m = value - c;
             return new Color3(r + m, g + m, b + m);
         }
 
@@ -1166,22 +1166,22 @@
         public static Vector4 ToHsv(Color3 rgb) {
             var M = Math.Max(rgb.R, Math.Max(rgb.G, rgb.B));
             var m = Math.Min(rgb.R, Math.Min(rgb.G, rgb.B));
-            var C = M - m;
+            var c = M - m;
 
             float h = 0.0f;
             if (M == rgb.R) {
-                h = ((rgb.G - rgb.B) / C) % 6.0f;
+                h = ((rgb.G - rgb.B) / c) % 6.0f;
             } else if (M == rgb.G) {
-                h = ((rgb.B - rgb.R) / C) + 2.0f;
+                h = ((rgb.B - rgb.R) / c) + 2.0f;
             } else if (M == rgb.B) {
-                h = ((rgb.R - rgb.G) / C) + 4.0f;
+                h = ((rgb.R - rgb.G) / c) + 4.0f;
             }
 
             var hue = (h * 60.0f) / 360.0f;
 
             var saturation = 0.0f;
             if (0.0f != M) {
-                saturation = C / M;
+                saturation = c / M;
             }
 
             return new Vector4(hue, saturation, M, 1);
@@ -1286,37 +1286,37 @@
         /// </param>
         public static Color3 FromHcy(Vector4 hcy) {
             var hue = hcy.X * 360.0f;
-            var C = hcy.Y;
+            var c = hcy.Y;
             var luminance = hcy.Z;
 
             var h = hue / 60.0f;
-            var X = C * (1.0f - Math.Abs(h % 2.0f - 1.0f));
+            var x = c * (1.0f - Math.Abs(h % 2.0f - 1.0f));
 
             float r, g, b;
             if (0.0f <= h && h < 1.0f) {
-                r = C;
-                g = X;
+                r = c;
+                g = x;
                 b = 0.0f;
             } else if (1.0f <= h && h < 2.0f) {
-                r = X;
-                g = C;
+                r = x;
+                g = c;
                 b = 0.0f;
             } else if (2.0f <= h && h < 3.0f) {
                 r = 0.0f;
-                g = C;
-                b = X;
+                g = c;
+                b = x;
             } else if (3.0f <= h && h < 4.0f) {
                 r = 0.0f;
-                g = X;
-                b = C;
+                g = x;
+                b = c;
             } else if (4.0f <= h && h < 5.0f) {
-                r = X;
+                r = x;
                 g = 0.0f;
-                b = C;
+                b = c;
             } else if (5.0f <= h && h < 6.0f) {
-                r = C;
+                r = c;
                 g = 0.0f;
-                b = X;
+                b = x;
             } else {
                 r = 0.0f;
                 g = 0.0f;
@@ -1340,22 +1340,22 @@
         public static Vector4 ToHcy(Color3 rgb) {
             var M = Math.Max(rgb.R, Math.Max(rgb.G, rgb.B));
             var m = Math.Min(rgb.R, Math.Min(rgb.G, rgb.B));
-            var C = M - m;
+            var c = M - m;
 
             float h = 0.0f;
             if (M == rgb.R) {
-                h = ((rgb.G - rgb.B) / C) % 6.0f;
+                h = ((rgb.G - rgb.B) / c) % 6.0f;
             } else if (M == rgb.G) {
-                h = ((rgb.B - rgb.R) / C) + 2.0f;
+                h = ((rgb.B - rgb.R) / c) + 2.0f;
             } else if (M == rgb.B) {
-                h = ((rgb.R - rgb.G) / C) + 4.0f;
+                h = ((rgb.R - rgb.G) / c) + 4.0f;
             }
 
             var hue = (h * 60.0f) / 360.0f;
 
             var luminance = 0.30f * rgb.R + 0.59f * rgb.G + 0.11f * rgb.B;
 
-            return new Vector4(hue, C, luminance, 1);
+            return new Vector4(hue, c, luminance, 1);
         }
 
         #endregion
@@ -1370,10 +1370,7 @@
         /// <param name="other">The Color3 structure to compare to.</param>
         /// <returns>True if both Color3 structures contain the same components; false otherwise.</returns>
         public bool Equals(Color3 other) {
-            return
-                this.R == other.R &&
-                this.G == other.G &&
-                this.B == other.B;
+            return this.R == other.R && this.G == other.G && this.B == other.B;
         }
 
         #endregion

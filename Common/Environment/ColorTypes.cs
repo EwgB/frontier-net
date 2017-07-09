@@ -13,8 +13,8 @@
     public class ColorTypeArray {
         private readonly Color3[] elements = new Color3[(int)ColorTypes.Max];
         public Color3 this[ColorTypes index] {
-            get { return elements[(int)index]; }
-            set { elements[(int)index] = value; }
+            get { return this.elements[(int)index]; }
+            set { this.elements[(int)index] = value; }
         }
     }
 }

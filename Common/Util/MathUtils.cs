@@ -4,9 +4,9 @@
 
     ///<summary>Various useful math functions</summary>
     public static class MathUtils {
-        public static float DEGREES_TO_RADIANS = .017453292f;
-        public static float RADIANS_TO_DEGREES = 57.29577951f;
-        public static float NEGLIGIBLE = 0.000000000001f;
+        public const float DEGREES_TO_RADIANS = .017453292f;
+        public const float RADIANS_TO_DEGREES = 57.29577951f;
+        public const float NEGLIGIBLE = 0.000000000001f;
 
         ///<summary>Interpolate between two values</summary>
         public static float Interpolate(float n1, float n2, float delta) {
@@ -15,9 +15,9 @@
 
         public static Vector3 Interpolate(Vector3 v1, Vector3 v2, float scalar) {
             return new Vector3(
-                Interpolate(v1.X, v2.X, scalar),
-                Interpolate(v1.Y, v2.Y, scalar),
-                Interpolate(v1.Z, v2.Z, scalar));
+                MathUtils.Interpolate(v1.X, v2.X, scalar),
+                MathUtils.Interpolate(v1.Y, v2.Y, scalar),
+                MathUtils.Interpolate(v1.Z, v2.Z, scalar));
         }
 
         /// <summary>
@@ -35,23 +35,23 @@
         /// Get an angle between two given points on a grid
         /// </summary>
         public static float Angle(float x1, float y1, float x2, float y2) {
-            var z_delta = (y1 - y2);
-            var x_delta = (x1 - x2);
-            if (x_delta == 0) {
-                if (z_delta > 0)
+            var zDelta = (y1 - y2);
+            var xDelta = (x1 - x2);
+            if (xDelta == 0) {
+                if (zDelta > 0)
                     return 0;
                 else
                     return 180;
             }
 
             float angle;
-            if (Math.Abs(x_delta) < Math.Abs(z_delta)) {
-                angle = 90 - (float)Math.Atan(z_delta / x_delta) * RADIANS_TO_DEGREES;
-                if (x_delta < 0)
+            if (Math.Abs(xDelta) < Math.Abs(zDelta)) {
+                angle = 90 - (float)Math.Atan(zDelta / xDelta) * RADIANS_TO_DEGREES;
+                if (xDelta < 0)
                     angle -= 180;
             } else {
-                angle = (float)Math.Atan(x_delta / z_delta) * RADIANS_TO_DEGREES;
-                if (z_delta < 0)
+                angle = (float)Math.Atan(xDelta / zDelta) * RADIANS_TO_DEGREES;
+                if (zDelta < 0)
                     angle += 180;
             }
             if (angle < 0)

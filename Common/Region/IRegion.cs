@@ -1,7 +1,7 @@
 ﻿namespace FrontierSharp.Common.Region {
     using OpenTK;
 
-    using Common.Util;
+    using Util;
 
     public interface IRegion {
         string Title { get; }

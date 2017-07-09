@@ -21,12 +21,11 @@
 
         private const float JUMP_SPEED = 4.0f;
         private const float MOVE_SPEED = 5.5f;
-        private const float SLOW_SPEED = (MOVE_SPEED * 0.15f);
+        private const float SLOW_SPEED = MOVE_SPEED * 0.15f;
         private const float SPRINT_SPEED = 8.0f;
         private const float EYE_HEIGHT = 1.75f;
         private const float CAM_MIN = 1;
         private const float CAM_MAX = 12;
-        private const float STOP_SPEED = 0.02f;
         private const float SWIM_DEPTH = 1.4f;
         private const float ACCEL = 0.66f;
         private const float DECEL = 1.5f;
@@ -55,11 +54,10 @@
             get { return this.position; }
             set {
                 this.position.Z = MathHelper.Clamp(value.Z, -25, 2048);
-                this.position.X = MathHelper.Clamp(value.X, 0, (WorldUtils.REGION_SIZE * WorldUtils.WORLD_GRID));
-                this.position.Y = MathHelper.Clamp(value.Y, 0, (WorldUtils.REGION_SIZE * WorldUtils.WORLD_GRID));
-                CameraPosition = this.position;
-                this.angle = CameraAngle = new Vector3(90, 0, 0);
-                this.lastTime = this.game.Time;
+                this.position.X = MathHelper.Clamp(value.X, 0, WorldUtils.REGION_SIZE * WorldUtils.WORLD_GRID);
+                this.position.Y = MathHelper.Clamp(value.Y, 0, WorldUtils.REGION_SIZE * WorldUtils.WORLD_GRID);
+                this.CameraPosition = this.position;
+                this.angle = this.CameraAngle = new Vector3(90, 0, 0);
                 DoModel();
 
             }
@@ -70,9 +68,8 @@
         public Vector3 CameraPosition { get; private set; }
         public AnimTypes AnimationType { get; private set; }
 
-        private readonly IAvatarProperties properties = new AvatarProperties();
-        public IProperties Properties { get { return this.properties; } }
-        public IAvatarProperties AvatarProperties { get { return this.properties; } }
+        public IAvatarProperties AvatarProperties { get; } = new AvatarProperties();
+        public IProperties Properties => this.AvatarProperties;
 
         #endregion
 
@@ -87,11 +84,9 @@
         private bool onGround;
         private bool swimming;
         private bool sprinting;
-        private uint lastUpdate;
         private readonly AnimationTypeArray anim = new AnimationTypeArray();
         private AnimTypes animType;
         private float distanceWalked;
-        private float lastTime;
         private float currentSpeed;
         private float currentAngle;
         private float velocity;
@@ -127,13 +122,14 @@
         public void Init() {
             //this.desiredCamDistance = IniFloat("Avatar", "CameraDistance"); // TODO: do we want to add ini options?
             DoModel();
+            // TODO: Convert body
             for (var i = AnimTypes.Idle; i < AnimTypes.Max; i++) {
                 /*
                     anim[i].LoadBvh(IniString("Animations", AnimTypes.names[i]));
                     IniStringSet("Animations", AnimTypes.names[i], IniString("Animations", AnimTypes.names[i]));
                 */
             }
-            this.particles.LoadParticles("step", this.dustParticle);
+            this.dustParticle = this.particles.LoadParticles("step");
         }
 
         public void Update() {
@@ -141,19 +137,18 @@
                 return;
 
             if (this.input.KeyState(Key.ControlLeft))
-                this.Look(0, 1);
+                Look(0, 1);
 
-            float elapsed = (float)Math.Min(this.gameWindow.UpdateTime, 0.25f);
-            Vector3 old = position;
+            var elapsed = (float)Math.Min(this.gameWindow.UpdateTime, 0.25f);
             this.desiredMovement = Vector2.Zero;
             if (this.input.KeyPressed(Key.Space) && this.onGround) {
                 this.velocity = JUMP_SPEED;
                 this.onGround = false;
             }
             if (this.input.KeyPressed(Key.F2))
-                this.properties.Flying ^= true; // Invert Flying
+                this.AvatarProperties.Flying ^= true; // Invert Flying
             //Joystick movement
-            this.Look((int)(this.input.JoystickGet(3) * 5.0f), (int)(this.input.JoystickGet(4) * -5.0f));
+            Look((int)(this.input.JoystickGet(3) * 5.0f), (int)(this.input.JoystickGet(4) * -5.0f));
             DoMove(new Vector3(this.input.JoystickGet(0), this.input.JoystickGet(1), 0));
             if (this.input.Mouselook) {
                 if (this.input.MouseWheelUp)
@@ -171,9 +166,9 @@
                 DoMove(new Vector3(this.input.JoystickGet(0), this.input.JoystickGet(1), 0));
             }
             //Figure out our   speed
-            float maxSpeed = MOVE_SPEED;
+            var maxSpeed = MOVE_SPEED;
             float minSpeed = 0;
-            bool moving = this.desiredMovement.Length > 0;//"moving" means, "trying to move". (Pressing buttons.)
+            var moving = this.desiredMovement.Length > 0;//"moving" means, "trying to move". (Pressing buttons.)
             if (moving)
                 minSpeed = MOVE_SPEED * 0.33f;
             if (this.input.KeyState(Key.ShiftLeft)) {
@@ -182,7 +177,7 @@
             } else {
                 this.sprinting = false;
             }
-            float desiredAngle = this.currentAngle;
+            var desiredAngle = this.currentAngle;
             if (moving) {//We're trying to accelerate
                 desiredAngle = MathUtils.Angle(0, 0, this.desiredMovement.X, this.desiredMovement.Y);
                 this.currentSpeed += elapsed * MOVE_SPEED * ACCEL;
@@ -190,14 +185,13 @@
                 this.currentSpeed -= elapsed * MOVE_SPEED * DECEL;
             this.currentSpeed = MathHelper.Clamp(this.currentSpeed, minSpeed, maxSpeed);
             //Now figure out the angle of movement
-            float angleAdjust = MathUtils.AngleDifference(this.currentAngle, desiredAngle);
+            var angleAdjust = MathUtils.AngleDifference(this.currentAngle, desiredAngle);
             //if we're trying to reverse direction, don't do a huge, arcing turn.  Just slow and double back
             float leanAngle = 0;
             if (Math.Abs(angleAdjust) > 135)
                 this.currentSpeed = SLOW_SPEED;
             if (Math.Abs(angleAdjust) < 1 || this.currentSpeed <= SLOW_SPEED) {
                 this.currentAngle = desiredAngle;
-                angleAdjust = 0;
             } else {
                 if (Math.Abs(angleAdjust) < 135) {
                     this.currentAngle -= angleAdjust * elapsed * 2.0f;
@@ -208,24 +202,24 @@
             this.currentMovement.Y = (float)-Math.Cos(this.currentAngle * MathUtils.DEGREES_TO_RADIANS);
             //Apply the movement
             this.currentMovement *= this.currentSpeed * elapsed;
-            position.X += this.currentMovement.X;
-            position.Y += this.currentMovement.Y;
+            this.position.X += this.currentMovement.X;
+            this.position.Y += this.currentMovement.Y;
             this.desiredCamDistance = MathHelper.Clamp(this.desiredCamDistance, CAM_MIN, CAM_MAX);
             this.camDistance = MathUtils.Interpolate(this.camDistance, this.desiredCamDistance, elapsed);
-            float ground = this.cache.GetElevation(position.X, position.Y);
-            float water = this.world.GetWaterLevel(position.X, position.Y);
+            float ground = this.cache.GetElevation(this.position.X, this.position.Y);
+            float water = this.world.GetWaterLevel(this.position.X, this.position.Y);
             this.avatarFacing.Y = MathUtils.Interpolate(this.avatarFacing.Y, leanAngle, elapsed);
-            if (!this.properties.Flying) {
+            if (!this.AvatarProperties.Flying) {
                 this.velocity -= WorldUtils.GRAVITY * elapsed;
-                position.Z += this.velocity * elapsed;
-                if (position.Z <= ground) {
+                this.position.Z += this.velocity * elapsed;
+                if (this.position.Z <= ground) {
                     this.onGround = true;
                     this.swimming = false;
-                    position.Z = ground;
+                    this.position.Z = ground;
                     this.velocity = 0;
-                } else if (position.Z > ground + WorldUtils.GRAVITY * 0.1f)
+                } else if (this.position.Z > ground + WorldUtils.GRAVITY * 0.1f)
                     this.onGround = false;
-                if (position.Z + SWIM_DEPTH < water) {
+                if (this.position.Z + SWIM_DEPTH < water) {
                     this.swimming = true;
                     this.velocity = 0;
                 }
@@ -235,41 +229,35 @@
                 this.distanceWalked += this.currentSpeed * elapsed;
             if (this.currentMovement.X != 0 && this.currentMovement.Y != 0)
                 this.avatarFacing.Z = -MathUtils.Angle(0, 0, this.currentMovement.X, this.currentMovement.Y);
-            if (this.properties.Flying)
+            if (this.AvatarProperties.Flying)
                 this.animType = AnimTypes.Flying;
             else if (this.swimming) {
-                if (this.currentSpeed == 0)
-                    this.animType = AnimTypes.Float;
-                else
-                    this.animType = AnimTypes.Swim;
+                this.animType = this.currentSpeed == 0 ? AnimTypes.Float : AnimTypes.Swim;
             } else if (!this.onGround) {
-                if (this.velocity > 0)
-                    this.animType = AnimTypes.Jump;
-                else
-                    this.animType = AnimTypes.Fall;
-            } else if (this.currentSpeed == 0)
+                this.animType = this.velocity > 0 ? AnimTypes.Jump : AnimTypes.Fall;
+            }
+            else if (this.currentSpeed == 0)
                 this.animType = AnimTypes.Idle;
             else if (this.sprinting)
                 this.animType = AnimTypes.Sprint;
             else
                 this.animType = AnimTypes.Run;
-            this.avatar.Animate(anim[this.animType], movementAnimation);
-            this.avatar.Position = position;
+            this.avatar.Animate(this.anim[this.animType], movementAnimation);
+            this.avatar.Position = this.position;
             this.avatar.Rotation = this.avatarFacing;
             this.avatar.Update();
             float stepTracking = movementAnimation % 1;
             if (this.animType == AnimTypes.Run || this.animType == AnimTypes.Sprint) {
                 if (stepTracking < this.lastStepTracking || (stepTracking > 0.5f && this.lastStepTracking < 0.5f)) {
-                    this.dustParticle.colors.Clear();
-                    if (position.Z < 0)
-                        this.dustParticle.colors.Add(new Color3(0.4f, 0.7f, 1));
+                    this.dustParticle.Colors.Clear();
+                    if (this.position.Z < 0)
+                        this.dustParticle.Colors.Add(new Color3(0.4f, 0.7f, 1));
                     else
-                        this.dustParticle.colors.Add(this.cache.GetSurfaceColor((int)position.X, (int)position.Y));
-                    this.particles.AddParticles(this.dustParticle, position);
+                        this.dustParticle.Colors.Add(this.cache.GetSurfaceColor((int) this.position.X, (int) this.position.Y));
+                    this.particles.AddParticles(this.dustParticle, this.position);
                 }
             }
             this.lastStepTracking = stepTracking;
-            this.lastTime = this.game.Time;
             this.text.Print("{0} elapsed: {1}", this.animType.ToString(), elapsed);
             this.Region = this.world.GetRegion(
                 (int)(this.position.X + WorldUtils.REGION_HALF) / WorldUtils.REGION_SIZE,
@@ -282,15 +270,15 @@
             GL.BindTexture(TextureTarget.Texture2D, this.textures.TextureIdFromName("avatar.png"));
             GL.BindTexture(TextureTarget.Texture2D, 0);
             this.avatar.Render();
-            if (this.properties.ShowSkeleton) {
+            if (this.AvatarProperties.ShowSkeleton) {
                 this.avatar.RenderSkeleton();
             }
         }
 
         public void Look(int x, int y) {
-            if (this.properties.InvertMouse)
+            if (this.AvatarProperties.InvertMouse)
                 x = -x;
-            float mouseSensitivity = this.properties.MouseSensitivity;
+            float mouseSensitivity = this.AvatarProperties.MouseSensitivity;
             this.angle.X -= MathHelper.Clamp(x * mouseSensitivity, 0, 180);
             this.angle.Z += y * mouseSensitivity;
             this.angle.Z %= 360;
@@ -302,7 +290,7 @@
         private void DoModel() {
             // TODO
             //this.avatar.LoadX("models//male.X");
-            if (this.properties.ExpandAvatar) {
+            if (this.AvatarProperties.ExpandAvatar) {
                 //    this.avatar.BoneInflate(BONE_PELVIS, 0.02f, true);
                 //    this.avatar.BoneInflate(BONE_HEAD, 0.025f, true);
                 //    this.avatar.BoneInflate(BONE_LWRIST, 0.03f, true);
@@ -352,13 +340,13 @@
         private void DoMove(Vector3 delta) {
             // TODO
 
-            if (this.properties.Flying) {
+            if (this.AvatarProperties.Flying) {
                 var forward = Math.Sin(this.angle.X * MathUtils.DEGREES_TO_RADIANS);
                 var movement = new Vector3(
                     (float)(Math.Cos(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.X + Math.Sin(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.Y * forward),
                     (float)(-Math.Sin(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.X + Math.Cos(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.Y * forward),
                     (float)Math.Cos(this.angle.X * MathUtils.DEGREES_TO_RADIANS) * delta.Y);
-                position += movement;
+                this.position += movement;
             } else {
                 this.desiredMovement.X += (float)(Math.Cos(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.X + Math.Sin(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.Y);
                 this.desiredMovement.Y += (float)(-Math.Sin(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.X + Math.Cos(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.Y);

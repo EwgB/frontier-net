@@ -4,21 +4,21 @@
     public struct Range<T> where T : IComparable<T> {
         private T min;
         public T Min {
-            get { return min; }
+            get { return this.min; }
             set {
-                if (value.CompareTo(max) > 0)
+                if (value.CompareTo(this.max) > 0)
                     throw new ArgumentOutOfRangeException("Min can't be larger than Max");
-                min = value;
+                this.min = value;
             }
         }
 
         private T max;
         public T Max {
-            get { return max; }
+            get { return this.max; }
             set {
-                if (value.CompareTo(min) < 0)
+                if (value.CompareTo(this.min) < 0)
                     throw new ArgumentOutOfRangeException("Max can't be smaller than Min");
-                max = value;
+                this.max = value;
             }
         }
 

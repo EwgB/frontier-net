@@ -10,7 +10,6 @@
     using Common.Property;
     using Common.Scene;
     using Common.Shaders;
-    using Common.Terrain;
     using Common.Textures;
 
     public class SceneImpl : IScene {
@@ -48,16 +47,16 @@
 
         #region Memeber variables
 
-        private IGridManager gm_terrain;
-        private List<ITerrain> il_terrain;
-        private IGridManager gm_forest;
-        private List<IForest> il_forest;
-        private IGridManager gm_grass;
-        private List<IGrass> il_grass;
-        private IGridManager gm_brush;
-        private List<IBrush> il_brush;
-        private IGridManager gm_particle;
-        private List<IParticleArea> il_particle;
+        private IGridManager gmTerrain;
+        private List<ITerrain> ilTerrain;
+        private IGridManager gmForest;
+        private List<IForest> ilForest;
+        private IGridManager gmGrass;
+        private List<IGrass> ilGrass;
+        private IGridManager gmBrush;
+        private List<IBrush> ilBrush;
+        private IGridManager gmParticle;
+        private List<IParticleArea> ilParticle;
 
         #endregion
 
@@ -97,28 +96,28 @@
             this.shaders.SelectShader(FShaderTypes.Green);
             GL.Color3(1, 1, 1);
             GL.Disable(EnableCap.Texture2D);
-            gm_forest.Render();
+            this.gmForest.Render();
             GL.Enable(EnableCap.CullFace);
             this.shaders.SelectShader(VShaderTypes.Normal);
             GL.Color3(1, 1, 1);
-            gm_terrain.Render();
+            this.gmTerrain.Render();
             this.water.Render();
             GL.BindTexture(TextureTarget.Texture2D, this.textures.TextureIdFromName("grass3.png"));
             this.shaders.SelectShader(VShaderTypes.Grass);
             GL.ColorMask(false, false, false, false);
-            gm_grass.Render();
-            gm_brush.Render();
+            this.gmGrass.Render();
+            this.gmBrush.Render();
             GL.ColorMask(true, true, true, true);
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-            gm_grass.Render();
-            gm_brush.Render();
+            this.gmGrass.Render();
+            this.gmBrush.Render();
             this.shaders.SelectShader(VShaderTypes.Normal);
             this.avatar.Render();
             this.shaders.SelectShader(FShaderTypes.None);
             this.shaders.SelectShader(VShaderTypes.None);
             this.particles.Render();
-            gm_particle.Render();
+            this.gmParticle.Render();
         }
 
         public void RenderDebug() {
@@ -128,10 +127,10 @@
             GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.One);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
             GL.Color3(1, 1, 1);
-            gm_forest.Render();
-            gm_terrain.Render();
-            gm_grass.Render();
-            gm_brush.Render();
+            this.gmForest.Render();
+            this.gmTerrain.Render();
+            this.gmGrass.Render();
+            this.gmBrush.Render();
             GL.Color3(1, 1, 1);
             this.avatar.Render();
             this.water.Render();
@@ -142,28 +141,28 @@
             if (!this.game.IsRunning)
                 return;
             //We don't want any grid to starve the others, so we rotate the order of priority.
-            updateType = (byte)((updateType + 1) % 4);
-            switch (updateType) {
+            this.updateType = (byte)((this.updateType + 1) % 4);
+            switch (this.updateType) {
                 case 0:
-                    gm_terrain.Update(stopAt);
+                    this.gmTerrain.Update(stopAt);
                     break;
                 case 1:
-                    gm_grass.Update(stopAt);
+                    this.gmGrass.Update(stopAt);
                     break;
                 case 2:
-                    gm_forest.Update(stopAt);
+                    this.gmForest.Update(stopAt);
                     break;
                 case 3:
-                    gm_brush.Update(stopAt);
+                    this.gmBrush.Update(stopAt);
                     break;
             }
             //any time left over goes to the losers...
-            gm_particle.Update(stopAt);
-            gm_terrain.Update(stopAt);
-            gm_grass.Update(stopAt);
-            gm_forest.Update(stopAt);
-            gm_brush.Update(stopAt);
-            this.text.Print(string.Format( "Scene: {0} of {0} terrains ready", gm_terrain.ItemsReadyCount, gm_terrain.ItemsViewableCount));
+            this.gmParticle.Update(stopAt);
+            this.gmTerrain.Update(stopAt);
+            this.gmGrass.Update(stopAt);
+            this.gmForest.Update(stopAt);
+            this.gmBrush.Update(stopAt);
+            this.text.Print(string.Format( "Scene: {0} of {0} terrains ready", this.gmTerrain.ItemsReadyCount, this.gmTerrain.ItemsViewableCount));
         }
     }
 }
@@ -180,14 +179,14 @@ static int              polygons_counter;
 
 void SceneClear() {
 
-    il_grass.clear();
-    il_brush.clear();
-    il_forest.clear();
-    il_terrain.clear();
-    gm_grass.Clear();
-    gm_brush.Clear();
-    gm_forest.Clear();
-    gm_terrain.Clear();
+    ilGrass.clear();
+    ilBrush.clear();
+    ilForest.clear();
+    ilTerrain.clear();
+    gmGrass.Clear();
+    gmBrush.Clear();
+    gmForest.Clear();
+    gmTerrain.Clear();
 
 }
 
@@ -201,21 +200,21 @@ void SceneGenerate() {
     camera = AvatarPosition();
     current.x = (int)(camera.x) / GRASS_SIZE;
 
-    il_grass.clear();
-    il_grass.resize(GRASS_GRID * GRASS_GRID);
-    gm_grass.Init(&il_grass[0], GRASS_GRID, GRASS_SIZE);
+    ilGrass.clear();
+    ilGrass.resize(GRASS_GRID * GRASS_GRID);
+    gmGrass.Init(&ilGrass[0], GRASS_GRID, GRASS_SIZE);
 
-    il_forest.clear();
-    il_forest.resize(FOREST_GRID * FOREST_GRID);
-    gm_forest.Init(&il_forest[0], FOREST_GRID, FOREST_SIZE);
+    ilForest.clear();
+    ilForest.resize(FOREST_GRID * FOREST_GRID);
+    gmForest.Init(&ilForest[0], FOREST_GRID, FOREST_SIZE);
 
-    il_terrain.clear();
-    il_terrain.resize(TERRAIN_GRID * TERRAIN_GRID);
-    gm_terrain.Init(&il_terrain[0], TERRAIN_GRID, TERRAIN_SIZE);
+    ilTerrain.clear();
+    ilTerrain.resize(TERRAIN_GRID * TERRAIN_GRID);
+    gmTerrain.Init(&ilTerrain[0], TERRAIN_GRID, TERRAIN_SIZE);
 
-    il_brush.clear();
-    il_brush.resize(BRUSH_GRID * BRUSH_GRID);
-    gm_brush.Init(&il_brush[0], BRUSH_GRID, BRUSH_SIZE);
+    ilBrush.clear();
+    ilBrush.resize(BRUSH_GRID * BRUSH_GRID);
+    gmBrush.Init(&ilBrush[0], BRUSH_GRID, BRUSH_SIZE);
 
 }
 
@@ -223,25 +222,25 @@ void SceneGenerate() {
 void SceneTexturePurge() {
 
     SceneClear();
-    il_grass.clear();
-    il_grass.resize(GRASS_GRID * GRASS_GRID);
-    gm_grass.Init(&il_grass[0], GRASS_GRID, GRASS_SIZE);
+    ilGrass.clear();
+    ilGrass.resize(GRASS_GRID * GRASS_GRID);
+    gmGrass.Init(&ilGrass[0], GRASS_GRID, GRASS_SIZE);
 
-    il_forest.clear();
-    il_forest.resize(FOREST_GRID * FOREST_GRID);
-    gm_forest.Init(&il_forest[0], FOREST_GRID, FOREST_SIZE);
+    ilForest.clear();
+    ilForest.resize(FOREST_GRID * FOREST_GRID);
+    gmForest.Init(&ilForest[0], FOREST_GRID, FOREST_SIZE);
 
-    il_terrain.clear();
-    il_terrain.resize(TERRAIN_GRID * TERRAIN_GRID);
-    gm_terrain.Init(&il_terrain[0], TERRAIN_GRID, TERRAIN_SIZE);
+    ilTerrain.clear();
+    ilTerrain.resize(TERRAIN_GRID * TERRAIN_GRID);
+    gmTerrain.Init(&ilTerrain[0], TERRAIN_GRID, TERRAIN_SIZE);
 
-    il_brush.clear();
-    il_brush.resize(BRUSH_GRID * BRUSH_GRID);
-    gm_brush.Init(&il_brush[0], BRUSH_GRID, BRUSH_SIZE);
+    ilBrush.clear();
+    ilBrush.resize(BRUSH_GRID * BRUSH_GRID);
+    gmBrush.Init(&ilBrush[0], BRUSH_GRID, BRUSH_SIZE);
 
-    il_particle.clear();
-    il_particle.resize(PARTICLE_GRID * PARTICLE_GRID);
-    gm_particle.Init(&il_particle[0], PARTICLE_GRID, PARTICLE_AREA_SIZE);
+    ilParticle.clear();
+    ilParticle.resize(PARTICLE_GRID * PARTICLE_GRID);
+    gm_particle.Init(&ilParticle[0], PARTICLE_GRID, PARTICLE_AREA_SIZE);
 
 }
 
@@ -250,10 +249,10 @@ CTerrain* SceneTerrainGet(int x, int y) {
     uint i;
     GLcoord gp;
 
-    for (i = 0; i < il_terrain.size(); i++) {
-        gp = il_terrain[i].GridPosition();
+    for (i = 0; i < ilTerrain.size(); i++) {
+        gp = ilTerrain[i].GridPosition();
         if (gp.x == x && gp.y == y)
-            return &il_terrain[i];
+            return &ilTerrain[i];
     }
     return NULL;
 
@@ -263,15 +262,15 @@ CTerrain* SceneTerrainGet(int x, int y) {
 //we need to pass over them again so they can do their stitching.
 void SceneRestartProgress() {
 
-    gm_terrain.RestartProgress();
+    gmTerrain.RestartProgress();
 
 }
 
 
 void SceneProgress(uint* ready, uint* total) {
 
-    *ready = gm_terrain.ItemsReady();
-    *total = min(gm_terrain.ItemsViewable(), 3);
+    *ready = gmTerrain.ItemsReady();
+    *total = min(gmTerrain.ItemsViewable(), 3);
 
 }
 */

@@ -13,7 +13,7 @@
 
         public void Init() {
             Log.Trace("Init");
-            IsOpen = false;
+            this.IsOpen = false;
         }
 
         public void ProcessKey(KeyboardKeyEventArgs e) {

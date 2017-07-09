@@ -37,30 +37,30 @@
 
         internal ParticlesProperties() {
             try {
-                base.AddProperty(new Property<string>(TEXTURE, ""));
-                base.AddProperty(new Property<Vector3>(ACCELERARTION, Vector3.Zero));
-                base.AddProperty(new Property<int>(BLEND, 0));
-                base.AddProperty(new Property<int>(EMITTER_LIFESPAN, 0));
-                base.AddProperty(new Property<int>(EMIT_COUNT, 0));
-                base.AddProperty(new Property<int>(EMIT_INTERVAL, 0));
-                base.AddProperty(new Property<int>(FADE_IN, 0));
-                base.AddProperty(new Property<int>(FADE_OUT, 0));
-                base.AddProperty(new Property<int>(INTERPOLATE, 0));
-                base.AddProperty(new Property<int>(PARTICLE_LIFESPAN, 0));
-                base.AddProperty(new Property<Vector3>(ORIGIN, Vector3.Zero));
-                base.AddProperty(new Property<int>(PANEL_TYPE, 0));
-                base.AddProperty(new Property<Vector3>(ROTATION, Vector3.Zero));
-                base.AddProperty(new Property<Vector3>(SIZE_MIN, Vector3.Zero));
-                base.AddProperty(new Property<Vector3>(SIZE_MAX, Vector3.Zero));
-                base.AddProperty(new Property<Vector3>(SPEED_MIN, Vector3.Zero));
-                base.AddProperty(new Property<Vector3>(SPEED_MAX, Vector3.Zero));
-                base.AddProperty(new Property<Vector3>(SPIN, Vector3.Zero));
-                base.AddProperty(new Property<Vector3>(VOLUME_MIN, Vector3.Zero));
-                base.AddProperty(new Property<Vector3>(VOLUME_MAX, Vector3.Zero));
-                base.AddProperty(new Property<bool>(WIND, false));
-                base.AddProperty(new Property<bool>(GRAVITY, false));
-                base.AddProperty(new Property<bool>(Z_BUFFER, false));
-                base.AddProperty(new Property<string>(CURRENT_PARTICLE, ""));
+                AddProperty(new Property<string>(TEXTURE, ""));
+                AddProperty(new Property<Vector3>(ACCELERARTION, Vector3.Zero));
+                AddProperty(new Property<int>(BLEND, 0));
+                AddProperty(new Property<int>(EMITTER_LIFESPAN, 0));
+                AddProperty(new Property<int>(EMIT_COUNT, 0));
+                AddProperty(new Property<int>(EMIT_INTERVAL, 0));
+                AddProperty(new Property<int>(FADE_IN, 0));
+                AddProperty(new Property<int>(FADE_OUT, 0));
+                AddProperty(new Property<int>(INTERPOLATE, 0));
+                AddProperty(new Property<int>(PARTICLE_LIFESPAN, 0));
+                AddProperty(new Property<Vector3>(ORIGIN, Vector3.Zero));
+                AddProperty(new Property<int>(PANEL_TYPE, 0));
+                AddProperty(new Property<Vector3>(ROTATION, Vector3.Zero));
+                AddProperty(new Property<Vector3>(SIZE_MIN, Vector3.Zero));
+                AddProperty(new Property<Vector3>(SIZE_MAX, Vector3.Zero));
+                AddProperty(new Property<Vector3>(SPEED_MIN, Vector3.Zero));
+                AddProperty(new Property<Vector3>(SPEED_MAX, Vector3.Zero));
+                AddProperty(new Property<Vector3>(SPIN, Vector3.Zero));
+                AddProperty(new Property<Vector3>(VOLUME_MIN, Vector3.Zero));
+                AddProperty(new Property<Vector3>(VOLUME_MAX, Vector3.Zero));
+                AddProperty(new Property<bool>(WIND, false));
+                AddProperty(new Property<bool>(GRAVITY, false));
+                AddProperty(new Property<bool>(Z_BUFFER, false));
+                AddProperty(new Property<string>(CURRENT_PARTICLE, ""));
             } catch (PropertyException e) {
                 Log.Error(e.Message);
             }

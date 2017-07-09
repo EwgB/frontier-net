@@ -1,4 +1,4 @@
-﻿namespace FrontierSharp.Texture {
+﻿namespace FrontierSharp.Textures {
     using System;
     using System.Drawing;
 
@@ -10,7 +10,7 @@
 
     /// <summary>This loads in textures.Nothin' fancy.</summary>
     public class TexturesImpl : ITextures {
-        private const int max_STRING = 128;
+        private const int MAX_STRING = 128;
 
         // TODO: Textures are currently stored as a homemade linked list. Evaluate whether to change to
         // a generic linked list implementation, or store them in a hash map
@@ -19,15 +19,15 @@
         public uint TextureIdFromName(string name) {
             Texture t = TextureFromName(name);
             if (null != t)
-                return t.id;
+                return t.Id;
             return 0;
         }
 
         public Texture TextureFromName(string name) {
             Texture t;
 
-            for (t = headTexture; null != t; t = t.next) {
-                if (string.Equals(name, t.name, StringComparison.OrdinalIgnoreCase)) {
+            for (t = this.headTexture; null != t; t = t.Next) {
+                if (string.Equals(name, t.Name, StringComparison.OrdinalIgnoreCase)) {
                     return t;
                 }
             }
@@ -62,22 +62,22 @@
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
 
             var t = new Texture() {
-                name = name,
-                id = id,
-                next = headTexture,
-                width = size.X,
-                height = size.Y
+                Name = name,
+                Id = id,
+                Next = this.headTexture,
+                Width = size.X,
+                Height = size.Y
             };
-            headTexture = t;
+            this.headTexture = t;
 
             return t;
         }
 
         private void TexturePurge() {
-            while (null != headTexture) {
-                Texture t = headTexture;
-                GL.DeleteTextures(1, new uint[] { t.id });
-                headTexture = t.next;
+            while (null != this.headTexture) {
+                Texture t = this.headTexture;
+                GL.DeleteTextures(1, new uint[] { t.Id });
+                this.headTexture = t.Next;
             }
         }
 

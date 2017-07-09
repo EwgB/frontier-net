@@ -5,8 +5,8 @@
         public int Y { get; }
 
         public Coord(int x, int y) {
-            X = x;
-            Y = y;
+            this.X = x;
+            this.Y = y;
         }
 
         /// <summary>
@@ -41,13 +41,11 @@
         }
 
         public bool Equals(Coord other) {
-            return
-                this.X == other.X &&
-                this.Y == other.Y;
+            return this.X == other.X && this.Y == other.Y;
         }
 
         public override int GetHashCode() {
-            return X.GetHashCode() ^ Y.GetHashCode();
+            return this.X.GetHashCode() ^ this.Y.GetHashCode();
         }
 
         #region Operators

@@ -6,7 +6,7 @@
     public interface IParticles : IModule, IHasProperties, IRenderable {
         IParticlesProperties ParticlesProperties { get; }
 
-        void LoadParticles(string filename, ParticleSet particleSet);
+        ParticleSet LoadParticles(string filename);
         void SaveParticles(string filename, ParticleSet particleSet);
         uint AddParticles (ParticleSet particleSet, Vector3 position);
     }

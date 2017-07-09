@@ -79,15 +79,15 @@
         protected override void OnLoad(EventArgs e) {
             base.OnLoad(e);
             Log.Trace("OnLoad");
-            this.Init();
+            Init();
         }
 
         protected override void OnResize(EventArgs e) {
             base.OnResize(e);
             Log.Trace("OnResize");
 
-            GL.Viewport(ClientRectangle.X, ClientRectangle.Y, ClientRectangle.Width, ClientRectangle.Height);
-            var projection = Matrix4.CreatePerspectiveFieldOfView((float) Math.PI / 4, Width / (float) Height, 1.0f, 64.0f);
+            GL.Viewport(this.ClientRectangle.X, this.ClientRectangle.Y, this.ClientRectangle.Width, this.ClientRectangle.Height);
+            var projection = Matrix4.CreatePerspectiveFieldOfView((float) Math.PI / 4, this.Width / (float) this.Height, 1.0f, 64.0f);
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadMatrix(ref projection);
         }
@@ -106,7 +106,7 @@
             Log.Trace("OnUpdateFrame");
 
             this.console.Update();
-            this.Update();
+            Update();
             this.game.Update();
             this.avatar.Update();
             this.player.Update();
@@ -133,7 +133,7 @@
             } else {
                 switch (e.Key) {
                     case Key.Escape:
-                        this.Close();
+                        Close();
                         break;
                     case Key.Tab:
                         this.renderer.ToggleShowMap();
@@ -145,11 +145,11 @@
         public void Init() {
             Log.Info("Init start...");
 
-            base.Title = "Frontier";
+            this.Title = "Frontier";
             //Icon = new Icon("Resources/icon.bmp");
-            base.Size = new Size(1400, 800);
+            this.Size = new Size(1400, 800);
 
-            base.Keyboard.KeyRepeat = true;
+            this.Keyboard.KeyRepeat = true;
 
             this.console.Init();
             this.particles.Init();

@@ -9,9 +9,9 @@
         public Property(string name, T initialValue) : this(name, initialValue, "") { }
 
         public Property(string name, T initialValue, string description) {
-            Name = name;
-            Description = description;
-            Value = initialValue;
+            this.Name = name;
+            this.Description = description;
+            this.Value = initialValue;
         }
     }
 }

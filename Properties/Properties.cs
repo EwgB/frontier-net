@@ -21,7 +21,7 @@
                 if (null != property) {
                     return property;
                 } else {
-                    throw new PropertyTypeException(properties[name].GetType(), typeof(T));
+                    throw new PropertyTypeException(this.properties[name].GetType(), typeof(T));
                 }
             } else {
                 throw new PropertyNotFoundException(name);

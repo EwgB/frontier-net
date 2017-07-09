@@ -7,10 +7,10 @@
     public static class FileUtils {
         private const int DEFAULT_SIZE = 8;
 
-        private static int default_counter = 0;
+        private static int defaultCounter;
 
         private static Bitmap LoadDefaultImage(out Coord size) {
-            var color = ColorUtils.UniqueColor(default_counter++);
+            var color = ColorUtils.UniqueColor(defaultCounter++);
             var bcolor = new byte[] {
                 (byte)(color.R * 255.0f),
                 (byte)(color.G * 255.0f),
@@ -41,7 +41,7 @@
 
         public static Bitmap FileImageLoad(string filename, out Coord sizeOut) {
             try {
-                Bitmap bitmap = new Bitmap(filename);
+                var bitmap = new Bitmap(filename);
                 sizeOut = new Coord(bitmap.Width, bitmap.Height);
                 return bitmap;
             } catch (FileNotFoundException e) {

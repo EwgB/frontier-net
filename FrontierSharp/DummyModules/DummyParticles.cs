@@ -5,9 +5,8 @@
     using OpenTK;
 
     class DummyParticles : IParticles {
-        private IParticlesProperties properties;
-        public IProperties Properties { get { return this.properties; } }
-        public IParticlesProperties ParticlesProperties { get { return this.properties; } }
+        public IParticlesProperties ParticlesProperties { get; }
+        public IProperties Properties => this.ParticlesProperties;
 
         public void Init() {
             // Do nothing
@@ -25,8 +24,8 @@
             return 0;
         }
 
-        public void LoadParticles(string filename, ParticleSet particleSet) {
-            // Do nothing
+        public ParticleSet LoadParticles(string filename) {
+            return new ParticleSet();
         }
 
         public void SaveParticles(string filename, ParticleSet particleSet) {

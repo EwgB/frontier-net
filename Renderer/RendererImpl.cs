@@ -83,7 +83,7 @@
 
             GL.Enable(EnableCap.Light1);
             GL.Enable(EnableCap.Lighting);
-            currentAmbient = Color3.Black;
+            this.currentAmbient = Color3.Black;
             GL.Light(LightName.Light1, LightParameter.Ambient, envData.Color[ColorTypes.Ambient].R);
             Color3 c = envData.Color[ColorTypes.Light];
             //c *= 20.0f;
@@ -129,7 +129,7 @@
             //if (this.properties.ShowPages)
             //    CacheRenderDebug();
             //TextRender();
-            if (showMap) {
+            if (this.showMap) {
                 RenderTexture(this.world.MapId);
             }
             //ConsoleRender();
@@ -140,7 +140,7 @@
             GL.MatrixMode(MatrixMode.Projection);
             GL.PushMatrix();
             GL.LoadIdentity();
-            GL.Ortho(0, viewWidth, viewHeight, 0, 0.1f, 2048);
+            GL.Ortho(0, this.viewWidth, this.viewHeight, 0, 0.1f, 2048);
             GL.MatrixMode(MatrixMode.Modelview);
             GL.PushMatrix();
             GL.LoadIdentity();
@@ -166,27 +166,27 @@
             GL.Begin(PrimitiveType.Quads);
 
             GL.TexCoord2(0, 0);
-            GL.Vertex3(0, viewHeight, 0);
+            GL.Vertex3(0, this.viewHeight, 0);
 
             GL.TexCoord2(0, 1);
-            GL.Vertex3(0, viewHeight - MAP_SIZE, 0);
+            GL.Vertex3(0, this.viewHeight - MAP_SIZE, 0);
 
             GL.TexCoord2(1, 1);
-            GL.Vertex3(MAP_SIZE, viewHeight - MAP_SIZE, 0);
+            GL.Vertex3(MAP_SIZE, this.viewHeight - MAP_SIZE, 0);
 
             GL.TexCoord2(1, 0);
-            GL.Vertex3(MAP_SIZE, viewHeight, 0);
+            GL.Vertex3(MAP_SIZE, this.viewHeight, 0);
             GL.End();
 
             {
-                r++;
-                Color3 c = ColorUtils.UniqueColor(r);
+                this.r++;
+                Color3 c = ColorUtils.UniqueColor(this.r);
                 GL.BindTexture(TextureTarget.Texture2D, 0);
                 Vector3 pos = this.avatar.CameraPosition;
                 pos /= (WorldUtils.WORLD_GRID * WorldUtils.REGION_SIZE);
                 //pos.Y /= (WorldUtil.WORLD_GRID * WorldUtil.REGION_SIZE);
                 pos *= MAP_SIZE;
-                pos.Y += viewHeight - MAP_SIZE;
+                pos.Y += this.viewHeight - MAP_SIZE;
                 GL.Color3((Color) c);
                 GL.Begin(PrimitiveType.Quads);
                 GL.Vertex3(pos.X, pos.Y, 0);
@@ -212,7 +212,7 @@
         }
 
         public void ToggleShowMap() {
-            showMap = !showMap;
+            this.showMap = !this.showMap;
         }
     }
 }

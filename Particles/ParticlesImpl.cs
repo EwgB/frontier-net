@@ -15,7 +15,7 @@
         public IProperties Properties { get { return this.properties; } }
         public IParticlesProperties ParticlesProperties { get { return this.properties; } }
 
-        private readonly List<IEmitter> EmitterList = new List<IEmitter>();
+        private readonly List<IEmitter> emitterList = new List<IEmitter>();
 
         public void Init() { }
 
@@ -41,8 +41,8 @@
             GL.Enable(EnableCap.Texture2D);
             GL.Disable(EnableCap.Lighting);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-            for (var i = 0; i < EmitterList.Count; i++) {
-                EmitterList[i].Render();
+            for (var i = 0; i < this.emitterList.Count; i++) {
+                this.emitterList[i].Render();
             }
         }
 
@@ -62,7 +62,8 @@
             //return e.Id();
         }
 
-        public void LoadParticles(string filename, ParticleSet particleSet) {
+        public ParticleSet LoadParticles(string filename) {
+            return new ParticleSet();
             // TODO
             //  string            filename;
             //  vector<string>    sub_group;
