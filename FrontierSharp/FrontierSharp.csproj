@@ -147,6 +147,10 @@
       <Project>{f340b706-735d-42a1-8725-77c9d3ecddd0}</Project>
       <Name>Renderer</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Textures\Textures.csproj">
+      <Project>{7506EC32-6C01-46D1-A5F5-9D7632ED9150}</Project>
+      <Name>Textures</Name>
+    </ProjectReference>
     <ProjectReference Include="..\World\World.csproj">
       <Project>{312819a2-8006-477f-8c01-110e0f0ba40d}</Project>
       <Name>World</Name>

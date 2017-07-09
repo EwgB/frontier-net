@@ -7,21 +7,18 @@
     using Common.Region;
 
     class DummyAvatar : IAvatar {
+        public IProperties Properties => this.AvatarProperties;
+        public IAvatarProperties AvatarProperties { get; }
 
-        private IAvatarProperties properties;
-        public IProperties Properties { get { return this.properties; } }
-        public IAvatarProperties AvatarProperties { get { return this.properties; } }
+        public Vector3 CameraPosition => new Vector3(1, 1, 0);
 
-        public Vector3 CameraPosition { get { return new Vector3(1, 1, 0); } }
+        public Vector3 CameraAngle => Vector3.UnitX;
 
-        public Vector3 CameraAngle { get { return Vector3.UnitX; } }
-
-        private readonly IRegion region = new DummyRegion();
-        public IRegion Region { get { return this.region; } }
+        public IRegion Region { get; } = new DummyRegion();
 
         public Vector3 Position { get; set; }
 
-        public AnimTypes AnimationType { get { return AnimTypes.Idle; } }
+        public AnimTypes AnimationType => AnimTypes.Idle;
 
         public void Init() {
             // Do nothing

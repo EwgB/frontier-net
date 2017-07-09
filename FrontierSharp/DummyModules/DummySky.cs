@@ -1,5 +1,4 @@
 ﻿namespace FrontierSharp.DummyModules {
-    using System;
     using Common;
 
     internal class DummySky : ISky {

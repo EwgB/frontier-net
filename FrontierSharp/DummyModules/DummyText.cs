@@ -1,5 +1,4 @@
 ﻿namespace FrontierSharp.DummyModules {
-    using System;
     using NLog;
 
     using Common;
@@ -13,7 +12,7 @@
         }
 
         public void Print(string format, params object[] args) {
-            Log.Info(string.Format(format, args));
+            Log.Info(format, args);
         }
 
         public void Render() {

@@ -16,6 +16,7 @@
     using DummyModules;
     using Environment;
     using Renderer;
+    using Textures;
 
     internal class Program {
         private static void Main(string[] args) {
@@ -35,7 +36,7 @@
                 kernel.Bind<IShaders>().To<DummyShaders>().InSingletonScope();
                 kernel.Bind<ISky>().To<DummySky>().InSingletonScope();
                 kernel.Bind<IText>().To<DummyText>().InSingletonScope();
-                kernel.Bind<ITextures>().To<DummyTextures>().InSingletonScope();
+                kernel.Bind<ITextures>().To<TexturesImpl>().InSingletonScope();
                 kernel.Bind<IWorld>().To<DummyWorld>().InSingletonScope();
 
                 // Other dependencies

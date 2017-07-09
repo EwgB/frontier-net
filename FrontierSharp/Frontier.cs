@@ -1,6 +1,6 @@
 ﻿namespace FrontierSharp {
     using System;
-    using System.ComponentModel;
+    using System.Diagnostics.CodeAnalysis;
     using System.Drawing;
 
     using NLog;
@@ -19,6 +19,7 @@
     using Common.Textures;
     using Common.World;
 
+    [SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
     internal class Frontier : GameWindow, IModule {
 
         #region Constants

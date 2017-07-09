@@ -1164,27 +1164,27 @@
         /// </returns>
         /// <param name="rgb">Color value to convert.</param>
         public static Vector4 ToHsv(Color3 rgb) {
-            var M = Math.Max(rgb.R, Math.Max(rgb.G, rgb.B));
-            var m = Math.Min(rgb.R, Math.Min(rgb.G, rgb.B));
-            var c = M - m;
+            var max = Math.Max(rgb.R, Math.Max(rgb.G, rgb.B));
+            var min = Math.Min(rgb.R, Math.Min(rgb.G, rgb.B));
+            var c = max - min;
 
             float h = 0.0f;
-            if (M == rgb.R) {
+            if (max == rgb.R) {
                 h = ((rgb.G - rgb.B) / c) % 6.0f;
-            } else if (M == rgb.G) {
+            } else if (max == rgb.G) {
                 h = ((rgb.B - rgb.R) / c) + 2.0f;
-            } else if (M == rgb.B) {
+            } else if (max == rgb.B) {
                 h = ((rgb.R - rgb.G) / c) + 4.0f;
             }
 
             var hue = (h * 60.0f) / 360.0f;
 
             var saturation = 0.0f;
-            if (0.0f != M) {
-                saturation = c / M;
+            if (0.0f != max) {
+                saturation = c / max;
             }
 
-            return new Vector4(hue, saturation, M, 1);
+            return new Vector4(hue, saturation, max, 1);
         }
 
         #endregion
@@ -1338,16 +1338,16 @@
         /// </returns>
         /// <param name="rgb">Color value to convert.</param>
         public static Vector4 ToHcy(Color3 rgb) {
-            var M = Math.Max(rgb.R, Math.Max(rgb.G, rgb.B));
-            var m = Math.Min(rgb.R, Math.Min(rgb.G, rgb.B));
-            var c = M - m;
+            var max = Math.Max(rgb.R, Math.Max(rgb.G, rgb.B));
+            var min = Math.Min(rgb.R, Math.Min(rgb.G, rgb.B));
+            var c = max - min;
 
-            float h = 0.0f;
-            if (M == rgb.R) {
+            var h = 0.0f;
+            if (max == rgb.R) {
                 h = ((rgb.G - rgb.B) / c) % 6.0f;
-            } else if (M == rgb.G) {
+            } else if (max == rgb.G) {
                 h = ((rgb.B - rgb.R) / c) + 2.0f;
-            } else if (M == rgb.B) {
+            } else if (max == rgb.B) {
                 h = ((rgb.R - rgb.G) / c) + 4.0f;
             }
 

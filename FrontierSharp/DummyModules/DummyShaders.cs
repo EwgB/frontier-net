@@ -1,5 +1,4 @@
 ﻿namespace FrontierSharp.DummyModules {
-    using System;
     using Common.Shaders;
 
     internal class DummyShaders : IShaders {

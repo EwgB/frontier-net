@@ -1,7 +1,7 @@
 ﻿namespace FrontierSharp.DummyModules {
-    using System;
-    using Common.Animation;
     using OpenTK;
+
+    using Common.Animation;
 
     class DummyFigure : IFigure {
         public Vector3 Position { get; set; }

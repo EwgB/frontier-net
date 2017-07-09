@@ -4,13 +4,11 @@
     using Common.Property;
     using Common.Region;
     using Common.World;
-    using System;
 
     internal class DummyWorld : IWorld {
-        private IProperties properties;
-        public IProperties Properties { get { return this.properties; } }
+        public IProperties Properties { get; }
 
-        public uint MapId { get { return 0; } }
+        public uint MapId => 0;
 
         public void Init() {
             // Do nothing

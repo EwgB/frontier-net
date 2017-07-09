@@ -1,8 +1,8 @@
 ﻿namespace FrontierSharp.DummyModules {
-    using System;
+    using OpenTK;
+
     using Common.Particles;
     using Common.Property;
-    using OpenTK;
 
     class DummyParticles : IParticles {
         public IParticlesProperties ParticlesProperties { get; }

@@ -8,9 +8,8 @@
     using Common.Property;
 
     class DummyScene : IScene {
-        private ISceneProperties properties;
-        public IProperties Properties { get { return this.properties; } }
-        public ISceneProperties SceneProperties { get { return this.properties; } }
+        public IProperties Properties => this.SceneProperties;
+        public ISceneProperties SceneProperties { get; }
 
         public float VisibleRange { get { return 576; } }
 
