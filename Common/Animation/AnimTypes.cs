@@ -12,7 +12,7 @@
     }
 
     public class AnimationTypeArray {
-        private IAnimation[] elements = new IAnimation[(int)AnimTypes.Max];
+        private readonly IAnimation[] elements = new IAnimation[(int)AnimTypes.Max];
         public IAnimation this[AnimTypes index] {
             get { return elements[(int)index]; }
             set { elements[(int)index] = value; }

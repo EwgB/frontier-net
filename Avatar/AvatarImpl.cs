@@ -35,16 +35,16 @@
 
         #region Modules
 
-        private ICache cache;
-        private IGame game;
-        private GameWindow gameWindow;
-        private IInput input;
-        private IParticles particles;
-        private IText text;
-        private ITextures textures;
-        private IWorld world;
+        private readonly ICache cache;
+        private readonly IGame game;
+        private readonly GameWindow gameWindow;
+        private readonly IInput input;
+        private readonly IParticles particles;
+        private readonly IText text;
+        private readonly ITextures textures;
+        private readonly IWorld world;
 
-        private IFigure avatar;
+        private readonly IFigure avatar;
 
         #endregion
 
@@ -70,7 +70,7 @@
         public Vector3 CameraPosition { get; private set; }
         public AnimTypes AnimationType { get; private set; }
 
-        private IAvatarProperties properties = new AvatarProperties();
+        private readonly IAvatarProperties properties = new AvatarProperties();
         public IProperties Properties { get { return this.properties; } }
         public IAvatarProperties AvatarProperties { get { return this.properties; } }
 
@@ -88,7 +88,7 @@
         private bool swimming;
         private bool sprinting;
         private uint lastUpdate;
-        private AnimationTypeArray anim = new AnimationTypeArray();
+        private readonly AnimationTypeArray anim = new AnimationTypeArray();
         private AnimTypes animType;
         private float distanceWalked;
         private float lastTime;

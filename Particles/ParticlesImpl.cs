@@ -11,7 +11,7 @@
     ///<summary>Manages the list of active particle emitters.</summary>
     public class ParticlesImpl : IParticles {
 
-        private IParticlesProperties properties = new ParticlesProperties();
+        private readonly IParticlesProperties properties = new ParticlesProperties();
         public IProperties Properties { get { return this.properties; } }
         public IParticlesProperties ParticlesProperties { get { return this.properties; } }
 

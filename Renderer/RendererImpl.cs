@@ -32,7 +32,7 @@
         private int viewHeight;
         private Range<float> fog;
 
-        private IRendererProperties properties = new RendererProperties();
+        private readonly IRendererProperties properties = new RendererProperties();
         public IProperties Properties { get { return this.properties; } }
         public IRendererProperties RendererProperties { get { return this.properties; } }
 

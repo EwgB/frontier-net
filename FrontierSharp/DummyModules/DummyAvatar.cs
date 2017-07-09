@@ -16,7 +16,7 @@
 
         public Vector3 CameraAngle { get { return Vector3.UnitX; } }
 
-        private IRegion region = new DummyRegion();
+        private readonly IRegion region = new DummyRegion();
         public IRegion Region { get { return this.region; } }
 
         public Vector3 Position { get; set; }

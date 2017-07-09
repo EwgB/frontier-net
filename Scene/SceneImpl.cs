@@ -25,20 +25,20 @@
 
         #region Modules
 
-        private IAvatar avatar;
-        private IGame game;
-        private IParticles particles;
-        private IShaders shaders;
-        private ISky sky;
-        private IText text;
-        private ITextures textures;
-        private IWater water;
+        private readonly IAvatar avatar;
+        private readonly IGame game;
+        private readonly IParticles particles;
+        private readonly IShaders shaders;
+        private readonly ISky sky;
+        private readonly IText text;
+        private readonly ITextures textures;
+        private readonly IWater water;
 
         #endregion
 
         #region Properties
 
-        private ISceneProperties properties = new SceneProperties();
+        private readonly ISceneProperties properties = new SceneProperties();
         public IProperties Properties { get { return this.properties; } }
         public ISceneProperties SceneProperties { get { return this.properties; } }
 

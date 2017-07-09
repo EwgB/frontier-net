@@ -11,7 +11,7 @@
     }
 
     public class ColorTypeArray {
-        private Color3[] elements = new Color3[(int)ColorTypes.Max];
+        private readonly Color3[] elements = new Color3[(int)ColorTypes.Max];
         public Color3 this[ColorTypes index] {
             get { return elements[(int)index]; }
             set { elements[(int)index] = value; }

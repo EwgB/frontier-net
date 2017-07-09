@@ -57,7 +57,7 @@
         // Logger
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        private EnvironmentProperties properties = new EnvironmentProperties();
+        private readonly EnvironmentProperties properties = new EnvironmentProperties();
         public IProperties Properties { get { return this.properties; } }
 
         public EnvironmentData Current { get; private set; }

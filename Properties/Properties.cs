@@ -5,7 +5,7 @@
     using Common.Property;
 
     public class Properties :  IProperties {
-        private Dictionary<string, IProperty> properties = new Dictionary<string, IProperty>();
+        private readonly Dictionary<string, IProperty> properties = new Dictionary<string, IProperty>();
 
         public void AddProperty(IProperty property) {
             try {
