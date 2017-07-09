@@ -278,7 +278,7 @@
         public void Look(int x, int y) {
             if (this.AvatarProperties.InvertMouse)
                 x = -x;
-            float mouseSensitivity = this.AvatarProperties.MouseSensitivity;
+            var mouseSensitivity = this.AvatarProperties.MouseSensitivity;
             this.angle.X -= MathHelper.Clamp(x * mouseSensitivity, 0, 180);
             this.angle.Z += y * mouseSensitivity;
             this.angle.Z %= 360;
@@ -338,8 +338,6 @@
         }
 
         private void DoMove(Vector3 delta) {
-            // TODO
-
             if (this.AvatarProperties.Flying) {
                 var forward = Math.Sin(this.angle.X * MathUtils.DEGREES_TO_RADIANS);
                 var movement = new Vector3(

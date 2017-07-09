@@ -15,7 +15,9 @@
     using Avatar;
     using DummyModules;
     using Environment;
+    using Game;
     using Renderer;
+    using Scene;
     using Textures;
 
     internal class Program {
@@ -28,11 +30,11 @@
                 kernel.Bind<IAvatar>().To<AvatarImpl>().InSingletonScope();
                 kernel.Bind<IConsole>().To<DummyConsole>().InSingletonScope();
                 kernel.Bind<IEnvironment>().To<EnvironmentImpl>().InSingletonScope();
-                kernel.Bind<IGame>().To<DummyGame>().InSingletonScope();
+                kernel.Bind<IGame>().To<GameImpl>().InSingletonScope();
                 kernel.Bind<IParticles>().To<DummyParticles>().InSingletonScope();
                 kernel.Bind<IPlayer>().To<DummyPlayer>().InSingletonScope();
                 kernel.Bind<IRenderer>().To<RendererImpl>().InSingletonScope();
-                kernel.Bind<IScene>().To<DummyScene>().InSingletonScope();
+                kernel.Bind<IScene>().To<SceneImpl>().InSingletonScope();
                 kernel.Bind<IShaders>().To<DummyShaders>().InSingletonScope();
                 kernel.Bind<ISky>().To<DummySky>().InSingletonScope();
                 kernel.Bind<IText>().To<DummyText>().InSingletonScope();

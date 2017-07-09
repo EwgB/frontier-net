@@ -7,11 +7,11 @@
         bool IsRunning { get; }
         
         void Quit();
-        
+        void New(uint seed);
+
         /* From Game.h
         bool GameCmd(vector<string>* args);
         char* GameDirectory();
-        void GameNew(unsigned seed_in);
         */
     }
 }

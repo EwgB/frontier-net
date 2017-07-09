@@ -10,12 +10,14 @@
             this.IsRunning = true;
         }
 
-        public void Update() { /*Do nothing*/ }
-
         public void Quit() {
             this.IsRunning = false;
         }
 
-        public void Dispose() { /*Do nothing*/ }
+        public void Update() { /* Do nothing */ }
+
+        public void New(uint seed) { /* Do nothing */ }
+
+        public void Dispose() { /* Do nothing */ }
     }
 }

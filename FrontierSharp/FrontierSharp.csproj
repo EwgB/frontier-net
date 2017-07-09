@@ -135,6 +135,10 @@
       <Project>{e7e8aca7-7647-4cdb-8167-7f88951e0d1f}</Project>
       <Name>Environment</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Game\Game.csproj">
+      <Project>{c9fefb99-9f98-4936-8a87-80fdfb21d97b}</Project>
+      <Name>Game</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Particles\Particles.csproj">
       <Project>{7dd75da0-f018-42d6-bf27-344cfb8deb85}</Project>
       <Name>Particles</Name>
@@ -146,6 +150,10 @@
     <ProjectReference Include="..\Renderer\Renderer.csproj">
       <Project>{f340b706-735d-42a1-8725-77c9d3ecddd0}</Project>
       <Name>Renderer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Scene\Scene.csproj">
+      <Project>{3fbb802c-4bb1-43ce-aa2a-aa4ac993312b}</Project>
+      <Name>Scene</Name>
     </ProjectReference>
     <ProjectReference Include="..\Textures\Textures.csproj">
       <Project>{7506EC32-6C01-46D1-A5F5-9D7632ED9150}</Project>
