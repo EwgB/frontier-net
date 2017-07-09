@@ -1,19 +1,17 @@
 ﻿namespace FrontierSharp.Particles {
     using System.Collections.Generic;
 
+    using OpenTK;
     using OpenTK.Graphics.OpenGL;
 
     using Common.Particles;
     using Common.Property;
-    using System;
-    using OpenTK;
 
     ///<summary>Manages the list of active particle emitters.</summary>
     public class ParticlesImpl : IParticles {
 
-        private readonly IParticlesProperties properties = new ParticlesProperties();
-        public IProperties Properties { get { return this.properties; } }
-        public IParticlesProperties ParticlesProperties { get { return this.properties; } }
+        public IProperties Properties => this.ParticlesProperties;
+        public IParticlesProperties ParticlesProperties { get; } = new ParticlesProperties();
 
         private readonly List<IEmitter> emitterList = new List<IEmitter>();
 

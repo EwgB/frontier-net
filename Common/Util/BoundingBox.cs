@@ -10,8 +10,8 @@
         private Vector3 min;
         private Vector3 max;
 
-        Vector3 Center { get { return (this.min + this.max) / 2.0f; } }
-        Vector3 Size { get { return this.max - this.min; } }
+        public Vector3 Center => (this.min + this.max) / 2.0f;
+        public Vector3 Size => this.max - this.min;
 
         public void ContainPoint(Vector3 point) {
             this.min.X = Math.Min(this.min.X, point.X);

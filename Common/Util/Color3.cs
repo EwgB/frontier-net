@@ -106,7 +106,7 @@
         /// </summary>
         /// <returns>A System.String that describes this Color3 structure.</returns>
         public override string ToString() {
-            return String.Format("{{(R, G, B) = ({0}, {1}, {2})}}", this.R.ToString(), this.G.ToString(), this.B.ToString());
+            return $"{{(R, G, B) = ({this.R}, {this.G}, {this.B})}}";
         }
 
         /// <summary>
@@ -1064,16 +1064,16 @@
         /// </returns>
         /// <param name="rgb">Color value to convert.</param>
         public static Vector4 ToHsl(Color3 rgb) {
-            var M = Math.Max(rgb.R, Math.Max(rgb.G, rgb.B));
-            var m = Math.Min(rgb.R, Math.Min(rgb.G, rgb.B));
-            var c = M - m;
+            var max = Math.Max(rgb.R, Math.Max(rgb.G, rgb.B));
+            var min = Math.Min(rgb.R, Math.Min(rgb.G, rgb.B));
+            var c = max - min;
 
             float h = 0.0f;
-            if (M == rgb.R) {
+            if (max == rgb.R) {
                 h = ((rgb.G - rgb.B) / c);
-            } else if (M == rgb.G) {
+            } else if (max == rgb.G) {
                 h = ((rgb.B - rgb.R) / c) + 2.0f;
-            } else if (M == rgb.B) {
+            } else if (max == rgb.B) {
                 h = ((rgb.R - rgb.G) / c) + 4.0f;
             }
 
@@ -1082,7 +1082,7 @@
                 hue += 1.0f;
             }
 
-            var lightness = (M + m) / 2.0f;
+            var lightness = (max + min) / 2.0f;
 
             var saturation = 0.0f;
             if (0.0f != lightness && lightness != 1.0f) {

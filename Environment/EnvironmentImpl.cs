@@ -14,14 +14,11 @@
 
     public class EnvironmentImpl : IEnvironment {
         #region Constants
-        /// <summary>How many milliseconds per in-game minute</summary>
-        private const int TIME_SCALE = 300;
         //private const int MAX_DISTANCE = 900;
         //private const float NIGHT_FOG = (MAX_DISTANCE / 5);
         private const float ENV_TRANSITION = 0.02f;
         /// <summary>In milliseconds</summary>
         //private const float UPDATE_INTERVAL = 50;
-        private const float SECONDS_TO_DECIMAL = (1.0f / 60.0f);
 
         private const float TIME_DAWN = 5.5f;       // 5:30am
         private const float TIME_DAY = 6.5f;        // 6:30am

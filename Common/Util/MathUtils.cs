@@ -15,9 +15,9 @@
 
         public static Vector3 Interpolate(Vector3 v1, Vector3 v2, float scalar) {
             return new Vector3(
-                MathUtils.Interpolate(v1.X, v2.X, scalar),
-                MathUtils.Interpolate(v1.Y, v2.Y, scalar),
-                MathUtils.Interpolate(v1.Z, v2.Z, scalar));
+                Interpolate(v1.X, v2.X, scalar),
+                Interpolate(v1.Y, v2.Y, scalar),
+                Interpolate(v1.Z, v2.Z, scalar));
         }
 
         /// <summary>
@@ -38,10 +38,7 @@
             var zDelta = (y1 - y2);
             var xDelta = (x1 - x2);
             if (xDelta == 0) {
-                if (zDelta > 0)
-                    return 0;
-                else
-                    return 180;
+                return zDelta > 0 ? 0 : 180;
             }
 
             float angle;
@@ -63,7 +60,7 @@
         /// <summary>Difference between two angles</summary>
         public static float AngleDifference(float a1, float a2) {
 
-            float result = (a1 - a2) % 360;
+            var result = (a1 - a2) % 360;
             if (result > 180)
                 return result - 360;
             if (result < -180)

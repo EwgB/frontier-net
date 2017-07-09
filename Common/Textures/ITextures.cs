@@ -1,5 +1,7 @@
 ﻿namespace FrontierSharp.Common.Textures {
-    public interface ITextures : IModule {
+    using System;
+
+    public interface ITextures : IModule, IDisposable {
         uint TextureIdFromName(string name);
     }
 }

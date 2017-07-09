@@ -10,29 +10,23 @@
 
     /// <summary>This loads in textures.Nothin' fancy.</summary>
     public class TexturesImpl : ITextures {
-        private const int MAX_STRING = 128;
 
         // TODO: Textures are currently stored as a homemade linked list. Evaluate whether to change to
         // a generic linked list implementation, or store them in a hash map
         private Texture headTexture;
 
         public uint TextureIdFromName(string name) {
-            Texture t = TextureFromName(name);
-            if (null != t)
-                return t.Id;
-            return 0;
+            var t = TextureFromName(name);
+            return t?.Id ?? 0;
         }
 
         public Texture TextureFromName(string name) {
-            Texture t;
-
-            for (t = this.headTexture; null != t; t = t.Next) {
+            for (var t = this.headTexture; null != t; t = t.Next) {
                 if (string.Equals(name, t.Name, StringComparison.OrdinalIgnoreCase)) {
                     return t;
                 }
             }
-            t = LoadTexture(name);
-            return t;
+            return LoadTexture(name);
         }
 
         private Texture LoadTexture(string name) {
@@ -41,9 +35,9 @@
 
             GL.BindTexture(TextureTarget.Texture2D, id);
 
-            string filename = string.Format("textures/{0}", name);
+            var filename = $"textures/{name}";
             Coord size;
-            Bitmap bitmap = FileUtils.FileImageLoad(filename, out size);
+            var bitmap = FileUtils.FileImageLoad(filename, out size);
             BitmapData data = null;
 
             try {
@@ -61,7 +55,7 @@
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
 
-            var t = new Texture() {
+            var t = new Texture {
                 Name = name,
                 Id = id,
                 Next = this.headTexture,
@@ -73,14 +67,6 @@
             return t;
         }
 
-        private void TexturePurge() {
-            while (null != this.headTexture) {
-                Texture t = this.headTexture;
-                GL.DeleteTextures(1, new uint[] { t.Id });
-                this.headTexture = t.Next;
-            }
-        }
-
         public void Init() {
             // Do nothing
         }
@@ -88,5 +74,26 @@
         public void Update() {
             // Do nothing
         }
+
+        #region Dispose pattern
+
+        private void ReleaseUnmanagedResources() {
+            while (null != this.headTexture) {
+                var t = this.headTexture;
+                GL.DeleteTextures(1, new[] { t.Id });
+                this.headTexture = t.Next;
+            }
+        }
+
+        public void Dispose() {
+            ReleaseUnmanagedResources();
+            GC.SuppressFinalize(this);
+        }
+
+        ~TexturesImpl() {
+            ReleaseUnmanagedResources();
+        }
+
+        #endregion
     }
 }

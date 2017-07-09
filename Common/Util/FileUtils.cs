@@ -4,10 +4,15 @@
     using System.IO;
     using System.Runtime.InteropServices;
 
+    using NLog;
+
     public static class FileUtils {
         private const int DEFAULT_SIZE = 8;
 
         private static int defaultCounter;
+
+        // Logger
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         private static Bitmap LoadDefaultImage(out Coord size) {
             var color = ColorUtils.UniqueColor(defaultCounter++);
@@ -45,6 +50,7 @@
                 sizeOut = new Coord(bitmap.Width, bitmap.Height);
                 return bitmap;
             } catch (FileNotFoundException e) {
+                Log.Error(e, "Image file {0} not found, loading default image.", filename);
                 return LoadDefaultImage(out sizeOut);
             }
         }

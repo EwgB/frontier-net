@@ -7,7 +7,7 @@
             get { return this.min; }
             set {
                 if (value.CompareTo(this.max) > 0)
-                    throw new ArgumentOutOfRangeException("Min can't be larger than Max");
+                    throw new ArgumentOutOfRangeException(nameof(value), "Min can't be larger than Max");
                 this.min = value;
             }
         }
@@ -17,7 +17,7 @@
             get { return this.max; }
             set {
                 if (value.CompareTo(this.min) < 0)
-                    throw new ArgumentOutOfRangeException("Max can't be smaller than Min");
+                    throw new ArgumentOutOfRangeException(nameof(value), "Max can't be smaller than Min");
                 this.max = value;
             }
         }

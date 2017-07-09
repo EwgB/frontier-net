@@ -2,7 +2,6 @@
     using OpenTK;
 
     using Common.Animation;
-    using System;
 
     public class Figure : IFigure {
         public Vector3 Position { get; set; }
@@ -23,7 +22,7 @@
             */
         }
 
-        void Animate(IAnimation animation, float delta) {
+        public void Animate(IAnimation animation, float delta) {
             // TODO
             //AnimJoint aj;
 
@@ -94,10 +93,6 @@
             //            RotateHierarchy(b._children[c], b._position, m);
             //    }
             //}
-        }
-
-        void IFigure.Animate(IAnimation animation, float delta) {
-            throw new NotImplementedException();
         }
     }
 }

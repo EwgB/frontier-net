@@ -37,11 +37,10 @@
 
         #region Properties
 
-        private readonly ISceneProperties properties = new SceneProperties();
-        public IProperties Properties { get { return this.properties; } }
-        public ISceneProperties SceneProperties { get { return this.properties; } }
+        public IProperties Properties => this.SceneProperties;
+        public ISceneProperties SceneProperties { get; } = new SceneProperties();
 
-        public float VisibleRange { get { return (TERRAIN_GRID / 2f) * GridUtils.TERRAIN_SIZE; } }
+        public float VisibleRange => (TERRAIN_GRID / 2f) * GridUtils.TERRAIN_SIZE;
 
         #endregion
 
@@ -86,7 +85,7 @@
         public void Render() {
             if (!this.game.IsRunning)
                 return;
-            if (!this.properties.RenderTextured)
+            if (!this.SceneProperties.RenderTextured)
                 GL.Disable(EnableCap.Texture2D);
             else
                 GL.Enable(EnableCap.Texture2D);
@@ -136,7 +135,7 @@
             this.water.Render();
         }
 
-        private byte updateType = 0;
+        private byte updateType;
         public void Update(double stopAt) {
             if (!this.game.IsRunning)
                 return;
@@ -162,7 +161,7 @@
             this.gmGrass.Update(stopAt);
             this.gmForest.Update(stopAt);
             this.gmBrush.Update(stopAt);
-            this.text.Print(string.Format( "Scene: {0} of {0} terrains ready", this.gmTerrain.ItemsReadyCount, this.gmTerrain.ItemsViewableCount));
+            this.text.Print($"Scene: {this.gmTerrain.ItemsReadyCount} of {this.gmTerrain.ItemsViewableCount} terrains ready");
         }
     }
 }

@@ -1,7 +1,9 @@
 ﻿namespace FrontierSharp.Common.Region {
     using System;
+    using System.Diagnostics.CodeAnalysis;
 
     [Flags]
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     public enum RegionFlag {
         Test = 0x0001,
         Mesas = 0x0002,

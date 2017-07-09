@@ -17,7 +17,7 @@
         }
 
         public void ProcessKey(KeyboardKeyEventArgs e) {
-            Log.Info("Key " + e.Key.ToString() + " sent to console.");
+            Log.Info("Key {0} sent to console.", e.Key);
         }
 
         public void ToggleConsole() {

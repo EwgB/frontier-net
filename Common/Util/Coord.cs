@@ -27,6 +27,7 @@
                 if (y >= size) {
                     y = 0;
                     rolledOver = true;
+                    return new Coord(x, y);
                 }
             }
             rolledOver = false;

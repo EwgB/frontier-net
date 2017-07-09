@@ -23,18 +23,12 @@
         private readonly IEnvironment environment;
         private readonly IScene scene;
 
-        private Color3 currentAmbient = Color3.Black;
-        private Color3 currentDiffuse = Color3.White;
-        private Color3 currentFog = Color3.White;
-
         private bool showMap;
         private int viewWidth;
         private int viewHeight;
-        private Range<float> fog;
 
-        private readonly IRendererProperties properties = new RendererProperties();
-        public IProperties Properties { get { return this.properties; } }
-        public IRendererProperties RendererProperties { get { return this.properties; } }
+        public IProperties Properties => this.RendererProperties;
+        public IRendererProperties RendererProperties { get; } = new RendererProperties();
 
         public RendererImpl(IAvatar avatar, IWorld world, IEnvironment environment, IScene scene) {
             // Set dependencies
@@ -49,9 +43,9 @@
         }
 
         public void Render() {
-            EnvironmentData envData = this.environment.Current;
-            Vector3 pos = this.avatar.CameraPosition;
-            float waterLevel = Math.Max(this.world.GetWaterLevel(new Vector2(pos.X, pos.Y)), 0);
+            var envData = this.environment.Current;
+            var pos = this.avatar.CameraPosition;
+            var waterLevel = Math.Max(this.world.GetWaterLevel(new Vector2(pos.X, pos.Y)), 0);
 
             if (pos.Z >= waterLevel) {
                 //currentFog = (currentDiffuse + Color3.Blue) / 2;
@@ -74,18 +68,17 @@
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             //GL.Clear (ClearBufferMask.DepthBufferBit);
 
-            float[] light = new float[4];
-
-            light[0] = -envData.Light.X;
-            light[1] = -envData.Light.Y;
-            light[2] = -envData.Light.Z;
-            light[3] = 0.0f;
+            var light = new[] {
+                -envData.Light.X,
+                -envData.Light.Y,
+                -envData.Light.Z,
+                0
+            };
 
             GL.Enable(EnableCap.Light1);
             GL.Enable(EnableCap.Lighting);
-            this.currentAmbient = Color3.Black;
             GL.Light(LightName.Light1, LightParameter.Ambient, envData.Color[ColorTypes.Ambient].R);
-            Color3 c = envData.Color[ColorTypes.Light];
+            var c = envData.Color[ColorTypes.Light];
             //c *= 20.0f;
             GL.Light(LightName.Light1, LightParameter.Diffuse, c.R);
             GL.Light(LightName.Light1, LightParameter.Position, light);
@@ -111,7 +104,7 @@
             //Move into our unique coordanate system
             GL.LoadIdentity();
             GL.Scale(1, -1, 1);
-            Vector3 angle = this.avatar.CameraAngle;
+            var angle = this.avatar.CameraAngle;
             GL.Rotate(angle.X, Vector3.UnitX);
             GL.Rotate(angle.Y, Vector3.UnitY);
             GL.Rotate(angle.Z, Vector3.UnitZ);
@@ -123,7 +116,7 @@
             //    CgUpdate();
             this.scene.Render();
             //CgShaderSelect(VSHADER_NONE);
-            if (this.properties.RenderWireframe) {
+            if (this.RendererProperties.RenderWireframe) {
                 this.scene.RenderDebug();
             }
             //if (this.properties.ShowPages)
@@ -135,7 +128,7 @@
             //ConsoleRender();
         }
 
-        private int r = 0;
+        private int r;
         private void RenderTexture(uint id) {
             GL.MatrixMode(MatrixMode.Projection);
             GL.PushMatrix();
@@ -180,9 +173,9 @@
 
             {
                 this.r++;
-                Color3 c = ColorUtils.UniqueColor(this.r);
+                var c = ColorUtils.UniqueColor(this.r);
                 GL.BindTexture(TextureTarget.Texture2D, 0);
-                Vector3 pos = this.avatar.CameraPosition;
+                var pos = this.avatar.CameraPosition;
                 pos /= (WorldUtils.WORLD_GRID * WorldUtils.REGION_SIZE);
                 //pos.Y /= (WorldUtil.WORLD_GRID * WorldUtil.REGION_SIZE);
                 pos *= MAP_SIZE;
@@ -203,12 +196,7 @@
         }
 
         public void Update() {
-            var envData = this.environment.Current;
-
-            this.currentDiffuse = envData.Color[ColorTypes.Light];
-            this.currentAmbient = envData.Color[ColorTypes.Ambient];
-            this.currentFog = envData.Color[ColorTypes.Fog];
-            this.fog = envData.Fog;
+            // Do nothing
         }
 
         public void ToggleShowMap() {
@@ -339,18 +327,6 @@
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glMatrixMode(GL_MODELVIEW);
             glPopMatrix();
-
-        }
-
-        void RenderInit(void)
-        {
-
-            currentAmbient = glRgba(0.0f);
-            currentDiffuse = glRgba(1.0f);
-            currentFog = glRgba(1.0f);
-            fogMax = 1000;
-            fogMin = 1;
-            CgInit();
 
         }
 

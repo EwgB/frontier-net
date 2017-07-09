@@ -1,5 +1,6 @@
 ﻿namespace FrontierSharp {
     using System;
+    using System.ComponentModel;
     using System.Drawing;
 
     using NLog;
@@ -22,8 +23,7 @@
 
         #region Constants
 
-        private const float MOUSE_SCALING = 0.01f;
-        private const double UPDATE_INTERVAL = 15 / 1000;
+        private const double UPDATE_INTERVAL = 15 / 1000f;
         
         #endregion
 
@@ -33,6 +33,7 @@
         #region Modules
 
         private readonly IAvatar avatar;
+        private readonly ICache cache;
         private readonly IConsole console;
         private readonly IEnvironment environment;
         private readonly IGame game;
@@ -48,7 +49,9 @@
 
         #endregion
 
-        public Frontier(IAvatar avatar,
+        public Frontier(
+                        IAvatar avatar,
+                        ICache cache,
                         IConsole console,
                         IEnvironment environment,
                         IGame game,
@@ -62,6 +65,7 @@
                         ITextures texture,
                         IWorld world) {
             this.avatar = avatar;
+            this.cache = cache;
             this.console = console;
             this.environment = environment;
             this.game = game;
@@ -80,6 +84,13 @@
             base.OnLoad(e);
             Log.Trace("OnLoad");
             Init();
+        }
+
+        protected override void OnDisposed(EventArgs e) {
+            base.OnDisposed(e);
+
+            this.game.Dispose();
+            this.texture.Dispose();
         }
 
         protected override void OnResize(EventArgs e) {
@@ -113,7 +124,7 @@
             this.environment.Update();
             this.sky.Update();
             this.scene.Update(UPDATE_INTERVAL);
-            //this.cache.Update(UPDATE_INTERVAL);
+            this.cache.Update(UPDATE_INTERVAL);
             this.particles.Update();
             this.renderer.Update();
         }
@@ -122,7 +133,7 @@
             base.OnKeyDown(e);
             Log.Trace("OnKeyDown");
 
-            Log.Info("Button " + e.Key.ToString() + " pushed.");
+            Log.Info("Button {0} pushed.", e.Key);
 
             // Process the key to toggle the console first, so that, if the console is open,
             // we can pass all other input to it
