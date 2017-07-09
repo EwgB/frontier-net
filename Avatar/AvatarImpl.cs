@@ -8,6 +8,7 @@
     using Common;
     using Common.Animation;
     using Common.Avatar;
+    using Common.Game;
     using Common.Particles;
     using Common.Property;
     using Common.Region;

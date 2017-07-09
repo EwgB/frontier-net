@@ -1,7 +1,11 @@
 ﻿namespace FrontierSharp.Game {
     using Common;
+    using Common.Game;
+    using Common.Property;
 
     public class GameImpl : IGame {
+        public IGameProperties GameProperties { get; } = new GameProperties();
+        public IProperties Properties => this.GameProperties;
 
         public float Time { get; }
         public bool IsRunning { get; }

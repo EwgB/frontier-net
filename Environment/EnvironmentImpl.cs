@@ -7,6 +7,7 @@
     using Common;
     using Common.Avatar;
     using Common.Environment;
+    using Common.Game;
     using Common.Property;
     using Common.Region;
     using Common.Scene;

@@ -5,6 +5,7 @@
 
     using Common;
     using Common.Avatar;
+    using Common.Game;
     using Common.Grid;
     using Common.Particles;
     using Common.Property;

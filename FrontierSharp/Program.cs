@@ -5,6 +5,7 @@
     using Common.Animation;
     using Common.Avatar;
     using Common.Environment;
+    using Common.Game;
     using Common.Particles;
     using Common.Renderer;
     using Common.Scene;

@@ -55,6 +55,7 @@
     <Compile Include="Avatar\IAvatarProperties.cs" />
     <Compile Include="Environment\ColorTypes.cs" />
     <Compile Include="Environment\EnvironmentData.cs" />
+    <Compile Include="Game\IGameProperties.cs" />
     <Compile Include="Grid\IGridData.cs" />
     <Compile Include="Grid\IGridManager.cs" />
     <Compile Include="Grid\IGrass.cs" />
@@ -78,7 +79,7 @@
     <Compile Include="IText.cs" />
     <Compile Include="Shaders\ShaderTypes.cs" />
     <Compile Include="Textures\ITextures.cs" />
-    <Compile Include="IGame.cs" />
+    <Compile Include="Game\IGame.cs" />
     <Compile Include="IConsole.cs" />
     <Compile Include="IModule.cs" />
     <Compile Include="Shaders\IShaders.cs" />
