@@ -3,6 +3,7 @@
 
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
+    using OpenTK.Input;
 
     using Common;
     using Common.Animation;
@@ -36,6 +37,8 @@
 
         private ICache cache;
         private IGame game;
+        private GameWindow gameWindow;
+        private IInput input;
         private IParticles particles;
         private IText text;
         private ITextures textures;
@@ -101,6 +104,8 @@
                 IFigure avatar,
                 ICache cache,
                 IGame game,
+                GameWindow gameWindow,
+                IInput input,
                 IParticles particles,
                 IText text,
                 ITextures textures,
@@ -108,6 +113,8 @@
             this.avatar = avatar;
             this.cache = cache;
             this.game = game;
+            this.gameWindow = gameWindow;
+            this.input = input;
             this.particles = particles;
             this.text = text;
             this.textures = textures;
@@ -133,35 +140,35 @@
             if (!this.game.IsRunning)
                 return;
 
-            if (InputKeyState(SDLK_LCTRL))
+            if (this.input.KeyState(Key.ControlLeft))
                 this.Look(0, 1);
 
-            float elapsed = Math.Min(SdlElapsedSeconds(), 0.25f);
+            float elapsed = (float)Math.Min(this.gameWindow.UpdateTime, 0.25f);
             Vector3 old = position;
             this.desiredMovement = Vector2.Zero;
-            if (InputKeyPressed(SDLK_SPACE) && this.onGround) {
+            if (this.input.KeyPressed(Key.Space) && this.onGround) {
                 this.velocity = JUMP_SPEED;
                 this.onGround = false;
             }
-            if (InputKeyPressed(SDLK_F2))
+            if (this.input.KeyPressed(Key.F2))
                 this.properties.Flying ^= true; // Invert Flying
             //Joystick movement
-            this.Look((int)(InputJoystickGet(3) * 5.0f), (int)(InputJoystickGet(4) * -5.0f));
-            DoMove(new Vector3(InputJoystickGet(0), InputJoystickGet(1), 0));
-            if (InputMouselook()) {
-                if (InputKeyPressed(INPUT_MWHEEL_UP))
+            this.Look((int)(this.input.JoystickGet(3) * 5.0f), (int)(this.input.JoystickGet(4) * -5.0f));
+            DoMove(new Vector3(this.input.JoystickGet(0), this.input.JoystickGet(1), 0));
+            if (this.input.Mouselook) {
+                if (this.input.MouseWheelUp)
                     this.desiredCamDistance -= 1;
-                if (InputKeyPressed(INPUT_MWHEEL_DOWN))
+                if (this.input.MouseWheelDown)
                     this.desiredCamDistance += 1;
-                if (InputKeyState(SDLK_w))
+                if (this.input.KeyState(Key.W))
                     DoMove(-Vector3.UnitY);
-                if (InputKeyState(SDLK_s))
+                if (this.input.KeyState(Key.S))
                     DoMove(Vector3.UnitY);
-                if (InputKeyState(SDLK_a))
+                if (this.input.KeyState(Key.A))
                     DoMove(-Vector3.UnitX);
-                if (InputKeyState(SDLK_d))
+                if (this.input.KeyState(Key.D))
                     DoMove(Vector3.UnitX);
-                DoMove(new Vector3(InputJoystickGet(0), InputJoystickGet(1), 0));
+                DoMove(new Vector3(this.input.JoystickGet(0), this.input.JoystickGet(1), 0));
             }
             //Figure out our   speed
             float maxSpeed = MOVE_SPEED;
@@ -169,7 +176,7 @@
             bool moving = this.desiredMovement.Length > 0;//"moving" means, "trying to move". (Pressing buttons.)
             if (moving)
                 minSpeed = MOVE_SPEED * 0.33f;
-            if (InputKeyState(SDLK_LSHIFT)) {
+            if (this.input.KeyState(Key.ShiftLeft)) {
                 this.sprinting = true;
                 maxSpeed = SPRINT_SPEED;
             } else {
