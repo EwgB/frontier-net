@@ -130,18 +130,6 @@
         }
 
         public void Update() {
-            float ground;
-            float water;
-            float movement_animation;
-            float time_passed;
-            bool moving;
-            float max_speed;
-            float min_speed;
-            float desired_angle;
-            float lean_angle;
-            float angle_adjust;
-            float step_tracking;
-
             if (!this.game.IsRunning)
                 return;
 
@@ -176,36 +164,37 @@
                 DoMove(new Vector3(InputJoystickGet(0), InputJoystickGet(1), 0));
             }
             //Figure out our   speed
-            max_speed = MOVE_SPEED;
-            min_speed = 0;
-            moving = this.desiredMovement.Length > 0;//"moving" means, "trying to move". (Pressing buttons.)
+            float maxSpeed = MOVE_SPEED;
+            float minSpeed = 0;
+            bool moving = this.desiredMovement.Length > 0;//"moving" means, "trying to move". (Pressing buttons.)
             if (moving)
-                min_speed = MOVE_SPEED * 0.33f;
+                minSpeed = MOVE_SPEED * 0.33f;
             if (InputKeyState(SDLK_LSHIFT)) {
                 this.sprinting = true;
-                max_speed = SPRINT_SPEED;
-            } else
+                maxSpeed = SPRINT_SPEED;
+            } else {
                 this.sprinting = false;
-            desired_angle = this.currentAngle;
+            }
+            float desiredAngle = this.currentAngle;
             if (moving) {//We're trying to accelerate
-                desired_angle = MathUtils.Angle(0, 0, this.desiredMovement.X, this.desiredMovement.Y);
+                desiredAngle = MathUtils.Angle(0, 0, this.desiredMovement.X, this.desiredMovement.Y);
                 this.currentSpeed += elapsed * MOVE_SPEED * ACCEL;
             } else //We've stopped pushing forward
                 this.currentSpeed -= elapsed * MOVE_SPEED * DECEL;
-            this.currentSpeed = MathHelper.Clamp(this.currentSpeed, min_speed, max_speed);
+            this.currentSpeed = MathHelper.Clamp(this.currentSpeed, minSpeed, maxSpeed);
             //Now figure out the angle of movement
-            angle_adjust = MathUtils.AngleDifference(this.currentAngle, desired_angle);
+            float angleAdjust = MathUtils.AngleDifference(this.currentAngle, desiredAngle);
             //if we're trying to reverse direction, don't do a huge, arcing turn.  Just slow and double back
-            lean_angle = 0;
-            if (Math.Abs(angle_adjust) > 135)
+            float leanAngle = 0;
+            if (Math.Abs(angleAdjust) > 135)
                 this.currentSpeed = SLOW_SPEED;
-            if (Math.Abs(angle_adjust) < 1 || this.currentSpeed <= SLOW_SPEED) {
-                this.currentAngle = desired_angle;
-                angle_adjust = 0;
+            if (Math.Abs(angleAdjust) < 1 || this.currentSpeed <= SLOW_SPEED) {
+                this.currentAngle = desiredAngle;
+                angleAdjust = 0;
             } else {
-                if (Math.Abs(angle_adjust) < 135) {
-                    this.currentAngle -= angle_adjust * elapsed * 2.0f;
-                    lean_angle = MathHelper.Clamp(angle_adjust / 4.0f, -15, 15);
+                if (Math.Abs(angleAdjust) < 135) {
+                    this.currentAngle -= angleAdjust * elapsed * 2.0f;
+                    leanAngle = MathHelper.Clamp(angleAdjust / 4.0f, -15, 15);
                 }
             }
             this.currentMovement.X = (float)-Math.Sin(this.currentAngle * MathUtils.DEGREES_TO_RADIANS);
@@ -216,9 +205,9 @@
             position.Y += this.currentMovement.Y;
             this.desiredCamDistance = MathHelper.Clamp(this.desiredCamDistance, CAM_MIN, CAM_MAX);
             this.camDistance = MathUtils.Interpolate(this.camDistance, this.desiredCamDistance, elapsed);
-            ground = this.cache.GetElevation(position.X, position.Y);
-            water = this.world.GetWaterLevel(position.X, position.Y);
-            this.avatarFacing.Y = MathUtils.Interpolate(this.avatarFacing.Y, lean_angle, elapsed);
+            float ground = this.cache.GetElevation(position.X, position.Y);
+            float water = this.world.GetWaterLevel(position.X, position.Y);
+            this.avatarFacing.Y = MathUtils.Interpolate(this.avatarFacing.Y, leanAngle, elapsed);
             if (!this.properties.Flying) {
                 this.velocity -= WorldUtils.GRAVITY * elapsed;
                 position.Z += this.velocity * elapsed;
@@ -234,7 +223,7 @@
                     this.velocity = 0;
                 }
             }
-            movement_animation = this.distanceWalked / 4.0f;
+            float movementAnimation = this.distanceWalked / 4.0f;
             if (this.onGround)
                 this.distanceWalked += this.currentSpeed * elapsed;
             if (this.currentMovement.X != 0 && this.currentMovement.Y != 0)
@@ -257,13 +246,13 @@
                 this.animType = AnimTypes.Sprint;
             else
                 this.animType = AnimTypes.Run;
-            this.avatar.Animate(anim[this.animType], movement_animation);
+            this.avatar.Animate(anim[this.animType], movementAnimation);
             this.avatar.Position = position;
             this.avatar.Rotation = this.avatarFacing;
             this.avatar.Update();
-            step_tracking = movement_animation % 1;
+            float stepTracking = movementAnimation % 1;
             if (this.animType == AnimTypes.Run || this.animType == AnimTypes.Sprint) {
-                if (step_tracking < this.lastStepTracking || (step_tracking > 0.5f && this.lastStepTracking < 0.5f)) {
+                if (stepTracking < this.lastStepTracking || (stepTracking > 0.5f && this.lastStepTracking < 0.5f)) {
                     this.dustParticle.colors.Clear();
                     if (position.Z < 0)
                         this.dustParticle.colors.Add(new Color3(0.4f, 0.7f, 1));
@@ -272,8 +261,7 @@
                     this.particles.AddParticles(this.dustParticle, position);
                 }
             }
-            this.lastStepTracking = step_tracking;
-            time_passed = this.game.Time - this.lastTime;
+            this.lastStepTracking = stepTracking;
             this.lastTime = this.game.Time;
             this.text.Print("{0} elapsed: {1}", this.animType.ToString(), elapsed);
             this.Region = this.world.GetRegion(
