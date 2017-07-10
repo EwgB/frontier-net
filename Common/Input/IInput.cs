@@ -1,4 +1,4 @@
-﻿namespace FrontierSharp.Common {
+﻿namespace FrontierSharp.Common.Input {
     using OpenTK.Input;
 
     public interface IInput {
@@ -11,7 +11,6 @@
         bool MouseWheelUp { get; set; }
         bool MouseWheelDown { get; set; }
 
-        void JoystickSet(int axis, int value);
-        float JoystickGet(int axis);
+        JoystickAxisCollection Joystick { get; }
     }
 }

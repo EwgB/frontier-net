@@ -66,7 +66,7 @@
     <Compile Include="Grid\SurfaceTypes.cs" />
     <Compile Include="IBaseModule.cs" />
     <Compile Include="ICache.cs" />
-    <Compile Include="IInput.cs" />
+    <Compile Include="Input\IInput.cs" />
     <Compile Include="IPlayer.cs" />
     <Compile Include="IRenderable.cs" />
     <Compile Include="ITimeCapped.cs" />

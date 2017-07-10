@@ -9,6 +9,7 @@
     using Common.Animation;
     using Common.Avatar;
     using Common.Game;
+    using Common.Input;
     using Common.Particles;
     using Common.Property;
     using Common.Region;
@@ -149,8 +150,8 @@
             if (this.input.KeyPressed(Key.F2))
                 this.AvatarProperties.Flying ^= true; // Invert Flying
             //Joystick movement
-            Look((int)(this.input.JoystickGet(3) * 5.0f), (int)(this.input.JoystickGet(4) * -5.0f));
-            DoMove(new Vector3(this.input.JoystickGet(0), this.input.JoystickGet(1), 0));
+            Look((int)(this.input.Joystick[3] * 5.0f), (int)(this.input.Joystick[4] * -5.0f));
+            DoMove(new Vector3(this.input.Joystick[0], this.input.Joystick[1], 0));
             if (this.input.Mouselook) {
                 if (this.input.MouseWheelUp)
                     this.desiredCamDistance -= 1;
@@ -164,7 +165,7 @@
                     DoMove(-Vector3.UnitX);
                 if (this.input.KeyState(Key.D))
                     DoMove(Vector3.UnitX);
-                DoMove(new Vector3(this.input.JoystickGet(0), this.input.JoystickGet(1), 0));
+                DoMove(new Vector3(this.input.Joystick[0], this.input.Joystick[1], 0));
             }
             //Figure out our   speed
             var maxSpeed = MOVE_SPEED;

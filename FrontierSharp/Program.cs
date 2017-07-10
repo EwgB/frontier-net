@@ -6,6 +6,7 @@
     using Common.Avatar;
     using Common.Environment;
     using Common.Game;
+    using Common.Input;
     using Common.Particles;
     using Common.Renderer;
     using Common.Scene;
@@ -17,6 +18,7 @@
     using DummyModules;
     using Environment;
     using Game;
+    using Particles;
     using Renderer;
     using Scene;
     using Textures;
@@ -29,10 +31,12 @@
 
                 // Modules
                 kernel.Bind<IAvatar>().To<AvatarImpl>().InSingletonScope();
+                kernel.Bind<ICache>().To<DummyCache>().InSingletonScope();
                 kernel.Bind<IConsole>().To<DummyConsole>().InSingletonScope();
                 kernel.Bind<IEnvironment>().To<EnvironmentImpl>().InSingletonScope();
                 kernel.Bind<IGame>().To<GameImpl>().InSingletonScope();
-                kernel.Bind<IParticles>().To<DummyParticles>().InSingletonScope();
+                kernel.Bind<IInput>().To<DummyInput>().InSingletonScope();
+                kernel.Bind<IParticles>().To<ParticlesImpl>().InSingletonScope();
                 kernel.Bind<IPlayer>().To<DummyPlayer>().InSingletonScope();
                 kernel.Bind<IRenderer>().To<RendererImpl>().InSingletonScope();
                 kernel.Bind<IScene>().To<SceneImpl>().InSingletonScope();
@@ -40,6 +44,7 @@
                 kernel.Bind<ISky>().To<DummySky>().InSingletonScope();
                 kernel.Bind<IText>().To<DummyText>().InSingletonScope();
                 kernel.Bind<ITextures>().To<TexturesImpl>().InSingletonScope();
+                kernel.Bind<IWater>().To<DummyWater>().InSingletonScope();
                 kernel.Bind<IWorld>().To<DummyWorld>().InSingletonScope();
 
                 // Other dependencies

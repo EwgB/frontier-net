@@ -61,8 +61,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DummyModules\DummyAvatar.cs" />
+    <Compile Include="DummyModules\DummyCache.cs" />
     <Compile Include="DummyModules\DummyEnvironment.cs" />
     <Compile Include="DummyModules\DummyFigure.cs" />
+    <Compile Include="DummyModules\DummyInput.cs" />
     <Compile Include="DummyModules\DummyParticles.cs" />
     <Compile Include="DummyModules\DummyRegion.cs" />
     <Compile Include="DummyModules\DummyRenderer.cs" />
@@ -73,6 +75,7 @@
     <Compile Include="DummyModules\DummyPlayer.cs" />
     <Compile Include="DummyModules\DummyConsole.cs" />
     <Compile Include="DummyModules\DummyGame.cs" />
+    <Compile Include="DummyModules\DummyWater.cs" />
     <Compile Include="DummyModules\DummyWorld.cs" />
     <Compile Include="DummyModules\DummyShaders.cs" />
     <Compile Include="Frontier.cs" />
