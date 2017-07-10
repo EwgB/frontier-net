@@ -1,43 +1,86 @@
 ﻿namespace FrontierSharp.Game {
+    using System;
+    using System.Collections.Generic;
+
+    using NLog;
+    using OpenTK;
+    using OpenTK.Input;
+
     using Common;
     using Common.Game;
+    using Common.Input;
     using Common.Property;
 
     public class GameImpl : IGame {
+
+        #region Constants
+
+        private const bool AUTO_LOAD = true;
+        private const int TIME_SCALE = 1000;  //how many milliseconds per in-game minute
+
+        #endregion
+
+        #region Modules
+
+        private readonly IConsole console;
+        private readonly GameWindow gameWindow;
+        private readonly IInput input;
+        private readonly IText text;
+
+        #endregion
+
+        #region Properties
+
         public IGameProperties GameProperties { get; } = new GameProperties();
         public IProperties Properties => this.GameProperties;
 
-        public float Time { get; }
-        public bool IsRunning { get; }
+        public bool IsRunning { get; private set; }
 
-        public void Init() {
-            /* TODO
-            CVarUtils::AttachCVar("game.days", &days, "");
-            CVarUtils::AttachCVar("game.hours", &hours, "");
-            CVarUtils::AttachCVar("game.minutes", &minutes, "");
-            seconds = 0;
-             */
+        #endregion
+
+        #region Private members
+
+        // Logger
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+
+        private uint seed;
+        private bool loadedPrevious;
+
+        #endregion
+
+        public GameImpl(IConsole console, GameWindow gameWindow, IInput input, IText text) {
+            this.console = console;
+            this.gameWindow = gameWindow;
+            this.input = input;
+            this.text = text;
         }
 
+        public void Init() { /* Do nothing */ }
+
         public void Update() {
-            /* TODO
-            if (!loaded_previous && AUTO_LOAD) {
-                loaded_previous = true;
-                seed = CVarUtils::GetCVar<int>("last_played");
-                if (seed)
-                    GameLoad(seed);
-                CVarUtils::SetCVar("last_played", seed);
+            if (!this.loadedPrevious && AUTO_LOAD) {
+                this.loadedPrevious = true;
+                this.seed = this.GameProperties.LastPlayed;
+                if (this.seed != 0)
+                    Load(this.seed);
+                this.GameProperties.LastPlayed = this.seed;
             }
-            if (!running)
+            if (!this.IsRunning) {
                 return;
-            if (InputKeyPressed(SDLK_RIGHTBRACKET))
-                hours++;
-            if (InputKeyPressed(SDLK_LEFTBRACKET)) {
-                hours--;
-                if (hours < 0)
-                    hours += 24;
             }
-            seconds += SdlElapsed();
+
+            var days = this.GameProperties.GameTime.Days;
+            var hours = this.GameProperties.GameTime.Hours;
+            var minutes = this.GameProperties.GameTime.Minutes;
+            var seconds = this.GameProperties.GameTime.Seconds;
+            
+            if (this.input.KeyPressed(Key.BracketRight)) {
+                hours++;
+            } else if (this.input.KeyPressed(Key.BracketLeft)) {
+                hours--;
+            }
+
+            seconds += (int)Math.Round(this.gameWindow.UpdateTime * TIME_SCALE);
             if (seconds >= TIME_SCALE) {
                 seconds -= TIME_SCALE;
                 minutes++;
@@ -46,42 +89,41 @@
                 minutes -= 60;
                 hours++;
             }
-            if (hours >= 24) {
+            if (hours < 0) {
+                hours += 24;
+            } else if (hours >= 24) {
                 hours -= 24;
                 days++;
             }
-            decimal_time = (float) days * 24.0f + (float) hours + (float) minutes * SECONDS_TO_DECIMAL;
-            TextPrint("Day %d: %02d:%02d", days + 1, hours, minutes);
-            */
+            this.GameProperties.GameTime = new TimeSpan(days, hours, minutes, seconds);
+
+            this.text.Print("Day {0}: {1}:{2}", days + 1, hours, minutes);
         }
 
-        public void New(uint seed) {
+        public void New(uint seedIn) {
+            if (seedIn == 0) {
+                Quit();
+                return;
+            }
+
+            this.GameProperties.GameTime = new TimeSpan(days: 0, hours: 6, minutes: 30, seconds: 0);
+            this.IsRunning = true;
+            if (this.console.IsOpen) {
+                this.console.ToggleConsole();
+            }
+            this.seed = seedIn;
+            Log.Info("Beginning new game with seed {0}.", this.seed);
             /* TODO
-            int x;
-            World* w;
+            IWorld w;
             int start, end, step;
             int region_x;
-            Region region;
-            Region region_neighbor;
-            GLvector av_pos;
-            GLcoord world_pos;
+            IRegion region;
+            IRegion region_neighbor;
+            Vector3 av_pos;
+            Coord world_pos;
             float elevation;
             int points_checked;
 
-            if (seed_in == 0) {
-                GameQuit();
-                return;
-            }
-            days = 0;
-            hours = 6;
-            minutes = 30;
-            seconds = 0;
-            decimal_time = (float) days * 24.0f + (float) hours + (float) minutes * SECONDS_TO_DECIMAL;
-            running = true;
-            if (ConsoleIsOpen())
-                ConsoleToggle();
-            seed = seed_in;
-            ConsoleLog("Beginning new game with seed %d.", seed);
             FileMakeDirectory(GameDirectory());
             SceneClear();
             CachePurge();
@@ -100,7 +142,7 @@
                 step = 1;
             }
             region_x = WORLD_GRID_CENTER;
-            for (x = start; x != end; x += step) {
+            for (var x = start; x != end; x += step) {
                 region = WorldRegionGet(x, WORLD_GRID_CENTER);
                 region_neighbor = WorldRegionGet(x + step, WORLD_GRID_CENTER);
                 if (region.climate == CLIMATE_COAST && region_neighbor.climate == CLIMATE_OCEAN) {
@@ -120,7 +162,7 @@
             step *= -1;//Now scan inward, towards the landmass
             points_checked = 0;
             while (points_checked < REGION_SIZE * 4 && !MainIsQuit()) {
-                TextPrint("Scanning %d", world_pos.x);
+                this.text.Print("Scanning %d", world_pos.x);
                 loading(0.02f);
                 if (!CachePointAvailable(world_pos.x, world_pos.y)) {
                     CacheUpdatePage(world_pos.x, world_pos.y, SDL_GetTicks() + 20);
@@ -129,7 +171,7 @@
                 points_checked++;
                 elevation = CacheElevation(world_pos.x, world_pos.y);
                 if (elevation > 0.0f) {
-                    av_pos = glVector((float) world_pos.x, (float) world_pos.y, elevation);
+                    av_pos = Vector3((float) world_pos.x, (float) world_pos.y, elevation);
                     break;
                 }
                 world_pos.x += step;
@@ -143,9 +185,63 @@
             */
         }
 
+        public void Load(uint seedIn) {
+            if (seedIn == 0) {
+                Log.Error("Load: Can't load a game without a valid seed.");
+                return;
+            }
+            if (this.IsRunning) {
+                Log.Error("Load: Can't load while a game is in progress.");
+                return;
+            }
+            this.seed = seedIn;
+            /* TODO
+            string filename;
+            List<string> sub_group;
+
+            filename = GameDirectory();
+            filename += "game.sav";
+            if (!FileExists(filename.c_str())) {
+                seed = 0;
+                ConsoleLog("GameLoad: Error: File %s not found.", filename.c_str());
+                return;
+            }
+            if (ConsoleIsOpen())
+                ConsoleToggle();
+            CVarUtils::SetCVar("last_played", seed);
+            this.IsRunning = true;
+            sub_group.push_back("game");
+            sub_group.push_back("player");
+            CVarUtils::Load(filename, sub_group);
+            AvatarPositionSet(PlayerPositionGet());
+            WorldLoad(seed);
+            WorldSave();
+            seconds = 0;
+            GameUpdate();
+            precache();
+            */
+        }
+
+        public void Save() {
+            /* TODO
+            string filename;
+            vector<string> sub_group;
+
+            if (seed == 0) {
+                ConsoleLog("GameSave: Error: No valid game to save.");
+                return;
+            }
+            filename = GameDirectory();
+            filename += "game.sav";
+            sub_group.push_back("game");
+            sub_group.push_back("player");
+            CVarUtils::Save(filename, sub_group);
+            */
+        }
+
         public void Dispose() {
             /* TODO
-            if (running && seed)
+            if (this.IsRunning && seed)
                 GameSave();
             */
         }
@@ -158,27 +254,13 @@
             CachePurge();
             GameSave();
             seed = 0;
-            running = false;
+            this.IsRunning = false;
             */
         }
-
     }
 }
 
 /* From Game.cpp
-
-#define AUTO_LOAD           1
-#define TIME_SCALE          1000  //how many milliseconds per in-game minute
-#define SECONDS_TO_DECIMAL  (1.0f / 60.0f)
-
-static unsigned     seed;
-static bool         running;
-static long         seconds;
-static long         minutes;
-static long         hours;
-static long         days;
-static float        decimal_time;
-static bool         loaded_previous;
 
 static void loading(float progress) {
     SdlUpdate();
@@ -186,7 +268,7 @@ static void loading(float progress) {
 }
 
 static void precache() {
-    unsigned ready, total;
+    uint ready, total;
 
     SceneGenerate();
     PlayerUpdate();
@@ -203,63 +285,8 @@ static void precache() {
     } while (ready < total && !MainIsQuit());
 }
 
-void GameLoad(unsigned seed_in) {
-    string filename;
-    vector<string> sub_group;
-
-    if (!seed_in) {
-        ConsoleLog("GameLoad: Error: Can't load a game without a valid seed.");
-        return;
-    }
-    if (running) {
-        ConsoleLog("GameLoad: Error: Can't load while a game is in progress.");
-        return;
-    }
-    seed = seed_in;
-    filename = GameDirectory();
-    filename += "game.sav";
-    if (!FileExists(filename.c_str())) {
-        seed = 0;
-        ConsoleLog("GameLoad: Error: File %s not found.", filename.c_str());
-        return;
-    }
-    if (ConsoleIsOpen())
-        ConsoleToggle();
-    CVarUtils::SetCVar("last_played", seed);
-    running = true;
-    sub_group.push_back("game");
-    sub_group.push_back("player");
-    CVarUtils::Load(filename, sub_group);
-    AvatarPositionSet(PlayerPositionGet());
-    WorldLoad(seed);
-    WorldSave();
-    seconds = 0;
-    GameUpdate();
-    precache();
-}
-
-void GameSave() {
-    string filename;
-    vector<string> sub_group;
-
-    if (seed == 0) {
-        ConsoleLog("GameSave: Error: No valid game to save.");
-        return;
-    }
-    filename = GameDirectory();
-    filename += "game.sav";
-    sub_group.push_back("game");
-    sub_group.push_back("player");
-    CVarUtils::Save(filename, sub_group);
-}
-
-bool GameRunning() {
-    return running;
-}
-
-
 bool GameCmd(vector<string>* args) {
-    unsigned new_seed;
+    uint new_seed;
 
     if (args->empty()) {
         ConsoleLog(CVarUtils::GetHelp("game").data());
@@ -293,9 +320,5 @@ char* GameDirectory() {
     sprintf(dir, "saves//seed%d//", seed);
     return dir;
 
-}
-
-float GameTime() {
-    return decimal_time;
 }
  */

@@ -4,7 +4,6 @@
 
     using OpenTK;
 
-    using Common;
     using Common.Avatar;
     using Common.Environment;
     using Common.Game;
@@ -56,13 +55,13 @@
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         private readonly EnvironmentProperties properties = new EnvironmentProperties();
-        public IProperties Properties { get { return this.properties; } }
+        public IProperties Properties => this.properties;
 
         public EnvironmentData Current { get; private set; }
 
         private EnvironmentData Desired { get; set; }
 
-        private float lastDecimalTime;
+        private double lastDecimalTime;
 
         #endregion
 
@@ -94,9 +93,9 @@
         private void DoTime(float delta) {
             //Convert out hours and minutes into a decimal number. (100 "minutes" per hour.)
             this.Desired.Light = new Vector3(-0.5f, 0.0f, -0.5f);
-            if (this.game.Time != this.lastDecimalTime)
+            if (this.game.GameProperties.GameTime.TotalHours != this.lastDecimalTime)
                 DoCycle();
-            this.lastDecimalTime = this.game.Time;
+            this.lastDecimalTime = this.game.GameProperties.GameTime.TotalHours;
             for (var colorType = ColorTypes.Horizon; colorType < ColorTypes.Max; colorType++) {
                 this.Current.Color[colorType] = ColorUtils.Interpolate(this.Current.Color[colorType], this.Desired.Color[colorType], delta);
             }
@@ -128,9 +127,9 @@
         }
 
         private void DoCycle() {
-            float maxDistance = this.scene.VisibleRange;
-            float nightFog = maxDistance / 5;
-            IRegion region = this.avatar.Region;
+            var maxDistance = this.scene.VisibleRange;
+            var nightFog = maxDistance / 5;
+            var region = this.avatar.Region;
             //atmosphere = region.ColorAtmosphere;
             var humidFog = new Range<float>(
                 MathUtils.Interpolate(maxDistance * 0.85f, maxDistance * 0.25f, region.Moisture),
@@ -142,8 +141,13 @@
             this.Desired.CloudCover = MathHelper.Clamp(region.Moisture, 0.20f, 0.6f);
             this.Desired.SunriseFade = this.Desired.SunsetFade = 0.0f;
 
-            float decimalTime = this.game.Time % 24;
-            var inParams = new CycleInParameters() { DecimalTime = decimalTime, MaxDistance = maxDistance, NightFog = nightFog, Region = region };
+            var decimalTime = (float)this.game.GameProperties.GameTime.TotalHours;
+            var inParams = new CycleInParameters {
+                DecimalTime = decimalTime,
+                MaxDistance = maxDistance,
+                NightFog = nightFog,
+                Region = region
+            };
             CycleOutParameters outParams;
             if (decimalTime >= TIME_DAWN && decimalTime < TIME_DAY) {
                 ProcessSunrise(inParams, out outParams);
@@ -162,7 +166,7 @@
             for (var colorType = ColorTypes.Horizon; colorType < ColorTypes.Max; colorType++) {
                 if (colorType == ColorTypes.Light || colorType == ColorTypes.Ambient)
                     continue;
-                Color3 average = outParams.BaseColor * outParams.Atmosphere;
+                var average = outParams.BaseColor * outParams.Atmosphere;
                 //average = average.Normalize() / 3;
                 this.Desired.Color[colorType] = average;
                 if (colorType == ColorTypes.Sky)
@@ -176,14 +180,14 @@
         }
 
         private void ProcessSunrise(CycleInParameters inParams, out CycleOutParameters outParams) {
-            float fade = (inParams.DecimalTime - TIME_DAWN) / (TIME_DAY - TIME_DAWN);
-            float lateFade = Math.Max((fade - 0.5f) * 2.0f, 0);
+            var fade = (inParams.DecimalTime - TIME_DAWN) / (TIME_DAY - TIME_DAWN);
+            var lateFade = Math.Max((fade - 0.5f) * 2.0f, 0);
             this.Desired.Color[ColorTypes.Light] = new Color3(0.5f, 0.7f, 1.0f);
             outParams.BaseColor = ColorUtils.Interpolate(NightColor, DayColor, lateFade);
             outParams.Atmosphere = ColorUtils.Interpolate(Color3.Black, Color3.White, lateFade);
-            var timeFog = new Range<float>();
-            timeFog.Max = MathUtils.Interpolate(inParams.NightFog, inParams.MaxDistance, fade);
-            timeFog.Min = timeFog.Max / 2.0f;
+            var max = MathUtils.Interpolate(inParams.NightFog, inParams.MaxDistance, fade);
+            var min = max / 2.0f;
+            var timeFog = new Range<float>(min, max);
             outParams.TimeFog = timeFog;
             this.Desired.StarFade = Math.Max(1.0f - fade * 2.0f, 0.0f);
             // Sunrise fades in, then back out
@@ -202,11 +206,11 @@
 
         private void ProcessDay(CycleInParameters inParams, out CycleOutParameters outParams) {
             outParams.Atmosphere = Color3.White;
-            float fade = (inParams.DecimalTime - TIME_DAY) / (TIME_SUNSET - TIME_DAY);
+            var fade = (inParams.DecimalTime - TIME_DAY) / (TIME_SUNSET - TIME_DAY);
             outParams.BaseColor = DayColor;
-            var timeFog = new Range<float>();
-            timeFog.Max = inParams.MaxDistance;
-            timeFog.Min = timeFog.Max / 2.0f;
+            var max = inParams.MaxDistance;
+            var min = max / 2.0f;
+            var timeFog = new Range<float>(min, max);
             outParams.TimeFog = timeFog;
             this.Desired.StarFade = 0.0f;
             outParams.ColorScaling = DayScaling;
@@ -219,11 +223,11 @@
         }
 
         private void ProcessSunset(CycleInParameters inParams, out CycleOutParameters outParams) {
-            float fade = (inParams.DecimalTime - TIME_SUNSET) / (TIME_DUSK - TIME_SUNSET);
+            var fade = (inParams.DecimalTime - TIME_SUNSET) / (TIME_DUSK - TIME_SUNSET);
             outParams.BaseColor = ColorUtils.Interpolate(DayColor, NightColor, fade);
-            var timeFog = new Range<float>();
-            timeFog.Max = MathUtils.Interpolate(inParams.MaxDistance, inParams.NightFog, fade);
-            timeFog.Min = timeFog.Max / 2.0f;
+            var max = MathUtils.Interpolate(inParams.MaxDistance, inParams.NightFog, fade);
+            var min = max / 2.0f;
+            var timeFog = new Range<float>(min, max);
             outParams.TimeFog = timeFog;
             if (fade > 0.5f)
                 this.Desired.StarFade = (fade - 0.5f) * 2.0f;

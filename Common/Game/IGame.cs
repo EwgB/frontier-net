@@ -6,11 +6,12 @@
     public interface IGame : IModule, IDisposable, IHasProperties {
         IGameProperties GameProperties { get; }
 
-        float Time { get; }
         bool IsRunning { get; }
         
+        void New(uint seedIn);
+        void Load(uint seedIn);
+        void Save();
         void Quit();
-        void New(uint seed);
 
         /* From Game.h
         bool GameCmd(vector<string>* args);
