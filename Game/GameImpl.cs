@@ -1,6 +1,7 @@
 ﻿namespace FrontierSharp.Game {
     using System;
     using System.Collections.Generic;
+    using System.IO;
 
     using NLog;
     using OpenTK;
@@ -10,6 +11,9 @@
     using Common.Game;
     using Common.Input;
     using Common.Property;
+    using Common.Region;
+    using Common.Scene;
+    using Common.World;
 
     public class GameImpl : IGame {
 
@@ -22,10 +26,13 @@
 
         #region Modules
 
+        private readonly ICache cache;
         private readonly IConsole console;
         private readonly GameWindow gameWindow;
         private readonly IInput input;
+        private readonly IScene scene;
         private readonly IText text;
+        private readonly IWorld world;
 
         #endregion
 
@@ -36,6 +43,9 @@
 
         public bool IsRunning { get; private set; }
 
+        public string GameDirectory => Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "FrontierSharp", "saves", "seed", this.seed.ToString());
         #endregion
 
         #region Private members
@@ -48,11 +58,21 @@
 
         #endregion
 
-        public GameImpl(IConsole console, GameWindow gameWindow, IInput input, IText text) {
+        public GameImpl(
+                ICache cache,
+                IConsole console,
+                GameWindow gameWindow,
+                IInput input,
+                IScene scene,
+                IText text,
+                IWorld world) {
+            this.cache = cache;
             this.console = console;
             this.gameWindow = gameWindow;
             this.input = input;
+            this.scene = scene;
             this.text = text;
+            this.world = world;
         }
 
         public void Init() { /* Do nothing */ }
@@ -113,48 +133,48 @@
             }
             this.seed = seedIn;
             Log.Info("Beginning new game with seed {0}.", this.seed);
+
+            Directory.CreateDirectory(this.GameDirectory);
+            this.scene.Clear();
+            this.cache.Purge();
+            this.world.Generate(seed);
+            this.world.Save();
+
+            //Now the world is ready.  Look for a good starting point.
+            
+            //Start in the center
+            var start = WorldUtils.WORLD_GRID_CENTER;
+            int end, step;
+            if (this.world.WindFromWest) {
+                end = 1;
+                step = -1;
+            } else {
+                end = WorldUtils.WORLD_GRID - 1;
+                step = 1;
+            }
+
+            // Look for coast
+            var region_x = WorldUtils.WORLD_GRID_CENTER;
+            for (var x = start; x != end; x += step) {
+                var region = this.world.GetRegion(x, WorldUtils.WORLD_GRID_CENTER);
+                var regionNeighbor = this.world.GetRegion(x + step, WorldUtils.WORLD_GRID_CENTER);
+                if (region.Climate == Climate.Coast && regionNeighbor.Climate == Climate.Ocean) {
+                    region_x = x;
+                    break;
+                }
+            }
+
             /* TODO
-            IWorld w;
-            int start, end, step;
-            int region_x;
-            IRegion region;
-            IRegion region_neighbor;
             Vector3 av_pos;
             Coord world_pos;
             float elevation;
             int points_checked;
 
-            FileMakeDirectory(GameDirectory());
-            SceneClear();
-            CachePurge();
-            WorldGenerate(seed);
-            WorldSave();
-            //Now the world is ready.  Look for a good starting point.
-            //Start in the center
-            w = WorldPtr();
-            if (w->wind_from_west) {
-                start = WORLD_GRID_CENTER;
-                end = 1;
-                step = -1;
-            } else {
-                start = WORLD_GRID_CENTER;
-                end = WORLD_GRID - 1;
-                step = 1;
-            }
-            region_x = WORLD_GRID_CENTER;
-            for (var x = start; x != end; x += step) {
-                region = WorldRegionGet(x, WORLD_GRID_CENTER);
-                region_neighbor = WorldRegionGet(x + step, WORLD_GRID_CENTER);
-                if (region.climate == CLIMATE_COAST && region_neighbor.climate == CLIMATE_OCEAN) {
-                    region_x = x;
-                    break;
-                }
-            }
             //now we've found our starting coastal region. Push the player 1 more regain outward,
             //then begin scanning inward for dry land.
             world_pos.x = REGION_HALF + region_x * REGION_SIZE + step * REGION_SIZE;
             world_pos.x = clamp(world_pos.x, 0, WORLD_GRID * REGION_SIZE);
-            world_pos.y = WORLD_GRID_CENTER * REGION_SIZE;
+            world_pos.y = WorldUtils.WORLD_GRID_CENTER * REGION_SIZE;
             //Set these values now just in case something goes wrong
             av_pos.x = (float) world_pos.x;
             av_pos.y = (float) world_pos.y;
@@ -257,6 +277,7 @@
             this.IsRunning = false;
             */
         }
+
     }
 }
 
@@ -288,37 +309,29 @@ static void precache() {
 bool GameCmd(vector<string>* args) {
     uint new_seed;
 
-    if (args->empty()) {
+    if (args.empty()) {
         ConsoleLog(CVarUtils::GetHelp("game").data());
         return true;
     }
-    if (!args->data()[0].compare("new")) {
-        if (args->size() < 2)
+    if (!args.data()[0].compare("new")) {
+        if (args.size() < 2)
             new_seed = SDL_GetTicks();
         else
-            new_seed = atoi(args->data()[1].c_str());
+            new_seed = atoi(args.data()[1].c_str());
         GameNew(new_seed);
         return true;
     }
-    if (!args->data()[0].compare("load")) {
-        if (args->size() > 1)
-            new_seed = atoi(args->data()[1].c_str());
+    if (!args.data()[0].compare("load")) {
+        if (args.size() > 1)
+            new_seed = atoi(args.data()[1].c_str());
         GameLoad(new_seed);
         return true;
     }
-    if (!args->data()[0].compare("quit")) {
+    if (!args.data()[0].compare("quit")) {
         GameQuit();
         return true;
     }
     ConsoleLog(CVarUtils::GetHelp("game").data());
     return true;
-}
-
-char* GameDirectory() {
-    static char dir[32];
-
-    sprintf(dir, "saves//seed%d//", seed);
-    return dir;
-
 }
  */

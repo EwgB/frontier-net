@@ -7,6 +7,7 @@
         IGameProperties GameProperties { get; }
 
         bool IsRunning { get; }
+        string GameDirectory { get; }
         
         void New(uint seedIn);
         void Load(uint seedIn);
