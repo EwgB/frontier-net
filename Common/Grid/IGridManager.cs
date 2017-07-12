@@ -8,9 +8,9 @@
         uint ItemsViewableCount { get; }
 
         void Init(IGridData items, uint gridSize, uint itemSize);
+        void Clear();
         /* From Grid.h
-          void                  Clear ();
-          void                  RestartProgress () { _list_pos = 0; };
-         */
+        void RestartProgress () { _list_pos = 0; };
+        */
     }
 }

@@ -29,7 +29,7 @@
             throw new NotImplementedException();
         }
 
-        public bool GetPointAvailable(int worldX, int worldY) {
+        public bool IsPointAvailable(int worldX, int worldY) {
             throw new NotImplementedException();
         }
 
@@ -59,6 +59,6 @@
 
         public void Update(double stopAt) { /* Do nothing */ }
 
-        public void UpdatePage(int worldX, int worldY, long stopAt) { /* Do nothing */ }
+        public void UpdatePage(int worldX, int worldY, double stopAt) { /* Do nothing */ }
     }
 }

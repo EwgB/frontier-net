@@ -1,8 +1,8 @@
 ﻿namespace FrontierSharp.DummyModules {
+    using System.Drawing;
+
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
-
-    using System.Drawing;
 
     using Common.Scene;
     using Common.Property;
@@ -13,13 +13,11 @@
 
         public float VisibleRange { get { return 576; } }
 
-        public void Init() {
-            // Do nothing
-        }
+        public void Init() { /* Do nothing */ }
 
-        public void Update(double stopAt) {
-            // Do nothing
-        }
+        public void Update(double stopAt) { /* Do nothing */ }
+
+        public void Clear() { /* Do nothing */ }
 
         public void Render() {
             var modelview = Matrix4.LookAt(Vector3.Zero, Vector3.UnitZ, Vector3.UnitY);
@@ -58,5 +56,6 @@
             }
             GL.End();
         }
+
     }
 }

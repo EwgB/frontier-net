@@ -12,6 +12,7 @@
     using Common.Scene;
     using Common.Shaders;
     using Common.Textures;
+    using System;
 
     public class SceneImpl : IScene {
 
@@ -164,6 +165,17 @@
             this.gmBrush.Update(stopAt);
             this.text.Print($"Scene: {this.gmTerrain.ItemsReadyCount} of {this.gmTerrain.ItemsViewableCount} terrains ready");
         }
+
+        public void Clear() {
+            ilGrass.Clear();
+            ilBrush.Clear();
+            ilForest.Clear();
+            ilTerrain.Clear();
+            gmGrass.Clear();
+            gmBrush.Clear();
+            gmForest.Clear();
+            gmTerrain.Clear();
+        }
     }
 }
 
@@ -174,21 +186,6 @@ static int              texture_bytes;
 static int              texture_bytes_counter;
 static int              polygons;
 static int              polygons_counter;
-
-
-
-void SceneClear() {
-
-    ilGrass.clear();
-    ilBrush.clear();
-    ilForest.clear();
-    ilTerrain.clear();
-    gmGrass.Clear();
-    gmBrush.Clear();
-    gmForest.Clear();
-    gmTerrain.Clear();
-
-}
 
 void SceneGenerate() {
 

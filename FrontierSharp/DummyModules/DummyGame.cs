@@ -1,4 +1,7 @@
 ﻿namespace FrontierSharp.DummyModules {
+    using System;
+    using System.IO;
+
     using Common.Game;
     using Common.Property;
 
@@ -7,6 +10,10 @@
         public IProperties Properties => this.GameProperties;
 
         public bool IsRunning { get; private set; }
+
+        public string GameDirectory => Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "FrontierSharp", "saves");
 
         public void Init() { this.IsRunning = true; }
         public void Quit() { this.IsRunning = false; }

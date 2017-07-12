@@ -12,7 +12,9 @@
     using Common.Input;
     using Common.Property;
     using Common.Region;
+    using Common.Renderer;
     using Common.Scene;
+    using Common.Util;
     using Common.World;
 
     public class GameImpl : IGame {
@@ -30,6 +32,8 @@
         private readonly IConsole console;
         private readonly GameWindow gameWindow;
         private readonly IInput input;
+        private readonly IPlayer player;
+        private readonly IRenderer renderer;
         private readonly IScene scene;
         private readonly IText text;
         private readonly IWorld world;
@@ -63,6 +67,7 @@
                 IConsole console,
                 GameWindow gameWindow,
                 IInput input,
+                IRenderer renderer,
                 IScene scene,
                 IText text,
                 IWorld world) {
@@ -70,6 +75,7 @@
             this.console = console;
             this.gameWindow = gameWindow;
             this.input = input;
+            this.renderer = renderer;
             this.scene = scene;
             this.text = text;
             this.world = world;
@@ -121,6 +127,7 @@
         }
 
         public void New(uint seedIn) {
+            // TODO: This might take some time, move to worker thread
             if (seedIn == 0) {
                 Quit();
                 return;
@@ -140,9 +147,9 @@
             this.world.Generate(seed);
             this.world.Save();
 
-            //Now the world is ready.  Look for a good starting point.
-            
-            //Start in the center
+            // Now the world is ready.  Look for a good starting point.
+
+            // Start in the center
             var start = WorldUtils.WORLD_GRID_CENTER;
             int end, step;
             if (this.world.WindFromWest) {
@@ -153,56 +160,35 @@
                 step = 1;
             }
 
-            // Look for coast
-            var region_x = WorldUtils.WORLD_GRID_CENTER;
-            for (var x = start; x != end; x += step) {
-                var region = this.world.GetRegion(x, WorldUtils.WORLD_GRID_CENTER);
-                var regionNeighbor = this.world.GetRegion(x + step, WorldUtils.WORLD_GRID_CENTER);
-                if (region.Climate == Climate.Coast && regionNeighbor.Climate == Climate.Ocean) {
-                    region_x = x;
-                    break;
-                }
-            }
+            // Find starting coastal region, then begin scanning inward for dry land.
+            var worldPosition = FindCoast(start, end, step);
 
-            /* TODO
-            Vector3 av_pos;
-            Coord world_pos;
-            float elevation;
-            int points_checked;
-
-            //now we've found our starting coastal region. Push the player 1 more regain outward,
-            //then begin scanning inward for dry land.
-            world_pos.x = REGION_HALF + region_x * REGION_SIZE + step * REGION_SIZE;
-            world_pos.x = clamp(world_pos.x, 0, WORLD_GRID * REGION_SIZE);
-            world_pos.y = WorldUtils.WORLD_GRID_CENTER * REGION_SIZE;
-            //Set these values now just in case something goes wrong
-            av_pos.x = (float) world_pos.x;
-            av_pos.y = (float) world_pos.y;
-            av_pos.z = 0.0f;
-            step *= -1;//Now scan inward, towards the landmass
-            points_checked = 0;
-            while (points_checked < REGION_SIZE * 4 && !MainIsQuit()) {
-                this.text.Print("Scanning %d", world_pos.x);
-                loading(0.02f);
-                if (!CachePointAvailable(world_pos.x, world_pos.y)) {
-                    CacheUpdatePage(world_pos.x, world_pos.y, SDL_GetTicks() + 20);
+            // Set these values now just in case something goes wrong
+            var avatarPosition = new Vector3(worldPosition.X, worldPosition.Y, 0);
+            step *= -1; // Now scan inward, towards the landmass
+            var pointsChecked = 0;
+            while (pointsChecked < WorldUtils.REGION_SIZE * 4) {
+                this.text.Print("Scanning {0}", worldPosition.X);
+                this.renderer.RenderLoadingScreen(0.02f);
+                if (!this.cache.IsPointAvailable(worldPosition.X, worldPosition.Y)) {
+                    this.cache.UpdatePage(worldPosition.X, worldPosition.Y, this.gameWindow.UpdateTime + 20);
                     continue;
                 }
-                points_checked++;
-                elevation = CacheElevation(world_pos.x, world_pos.y);
-                if (elevation > 0.0f) {
-                    av_pos = Vector3((float) world_pos.x, (float) world_pos.y, elevation);
+                pointsChecked++;
+                var elevation = this.cache.GetElevation(worldPosition.X, worldPosition.Y);
+                if (elevation > 0) {
+                    avatarPosition = new Vector3(worldPosition.X, worldPosition.Y, elevation);
                     break;
                 }
-                world_pos.x += step;
+                worldPosition = new Coord(worldPosition.X + step, worldPosition.Y);
             }
-            ConsoleLog("GameNew: Found beach in %d moves.", points_checked);
-            CVarUtils::SetCVar("last_played", seed);
-            PlayerReset();
-            PlayerPositionSet(av_pos);
-            GameUpdate();
-            precache();
-            */
+
+            Log.Info("GameNew: Found beach in {0} moves.", pointsChecked);
+            this.GameProperties.LastPlayed = seed;
+            this.player.Reset();
+            this.player.Position = avatarPosition;
+            Update();
+            Precache();
         }
 
         public void Load(uint seedIn) {
@@ -238,7 +224,7 @@
             WorldSave();
             seconds = 0;
             GameUpdate();
-            precache();
+            Precache();
             */
         }
 
@@ -278,33 +264,49 @@
             */
         }
 
+        private Coord FindCoast(int start, int end, int step) {
+            // Look for coast
+            var regionX = WorldUtils.WORLD_GRID_CENTER;
+            for (var x = start; x != end; x += step) {
+                var region = this.world.GetRegion(x, WorldUtils.WORLD_GRID_CENTER);
+                var regionNeighbor = this.world.GetRegion(x + step, WorldUtils.WORLD_GRID_CENTER);
+                if (region.Climate == Climate.Coast && regionNeighbor.Climate == Climate.Ocean) {
+                    regionX = x;
+                    break;
+                }
+            }
+
+            // Now we've found our starting coastal region. Push the player 1 more region outward
+            return new Coord(
+                MathHelper.Clamp(WorldUtils.REGION_HALF + regionX * WorldUtils.REGION_SIZE + step * WorldUtils.REGION_SIZE,
+                                 0, WorldUtils.WORLD_GRID * WorldUtils.REGION_SIZE),
+                WorldUtils.WORLD_GRID_CENTER * WorldUtils.REGION_SIZE);
+        }
+
+        private void Precache() {
+            /* TODO
+            uint ready, total;
+
+            SceneGenerate();
+            PlayerUpdate();
+            do {
+                SceneProgress(&ready, &total);
+                SceneUpdate(SDL_GetTicks() + 20);
+                loading(((float)ready / (float)total) * 0.5f);
+            } while (ready < total && !MainIsQuit());
+            SceneRestartProgress();
+            do {
+                SceneProgress(&ready, &total);
+                SceneUpdate(SDL_GetTicks() + 20);
+                loading(0.5f + ((float)ready / (float)total) * 0.5f);
+            } while (ready < total && !MainIsQuit());
+            */
+        }
+
     }
 }
 
 /* From Game.cpp
-
-static void loading(float progress) {
-    SdlUpdate();
-    RenderLoadingScreen(progress);
-}
-
-static void precache() {
-    uint ready, total;
-
-    SceneGenerate();
-    PlayerUpdate();
-    do {
-        SceneProgress(&ready, &total);
-        SceneUpdate(SDL_GetTicks() + 20);
-        loading(((float) ready / (float) total) * 0.5f);
-    } while (ready < total && !MainIsQuit());
-    SceneRestartProgress();
-    do {
-        SceneProgress(&ready, &total);
-        SceneUpdate(SDL_GetTicks() + 20);
-        loading(0.5f + ((float) ready / (float) total) * 0.5f);
-    } while (ready < total && !MainIsQuit());
-}
 
 bool GameCmd(vector<string>* args) {
     uint new_seed;

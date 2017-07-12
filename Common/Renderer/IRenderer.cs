@@ -5,5 +5,6 @@
         IRendererProperties RendererProperties { get; }
 
         void ToggleShowMap();
+        void RenderLoadingScreen(float progress);
     }
 }

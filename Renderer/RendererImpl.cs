@@ -202,6 +202,28 @@
         public void ToggleShowMap() {
             this.showMap = !this.showMap;
         }
+
+        public void RenderLoadingScreen(float progress) {
+            /* TODO
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glColor3f(1.0f - progress, progress, 0.0f);
+            glLineWidth(10.0f);
+            glDisable(GL_LIGHTING);
+            glDisable(GL_TEXTURE_2D);
+            glDisable(GL_BLEND);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            RenderCanvasBegin(-20, 120, 0, 100, 0);
+            glBegin(GL_LINES);
+            glVertex2f(0, 50);
+            glVertex2f(progress * 100, 50);
+            glEnd();
+            RenderCanvasEnd();
+            TextRender();
+            ConsoleRender();
+            SDL_GL_SwapBuffers();
+            */
+        }
     }
 }
 
@@ -386,69 +408,4 @@
         }
 
         static float spin;
-
-        void RenderLoadingScreen(float progress)
-        {
-
-            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glColor3f(1.0f - progress, progress, 0.0f);
-            glLineWidth(10.0f);
-            glDisable(GL_LIGHTING);
-            glDisable(GL_TEXTURE_2D);
-            glDisable(GL_BLEND);
-            glBindTexture(GL_TEXTURE_2D, 0);
-            RenderCanvasBegin(-20, 120, 0, 100, 0);
-            glBegin(GL_LINES);
-            glVertex2f(0, 50);
-            glVertex2f(progress * 100, 50);
-            glEnd();
-            RenderCanvasEnd();
-            TextRender();
-            ConsoleRender();
-            SDL_GL_SwapBuffers();
-
-        }
-
-        //if (0) { //water reflection effect.  Needs stencil buffer to work right
-        //  glDisable (GL_FOG);
-        //  glPushMatrix ();
-        //  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("water4.bmp"));
-        //  glColorMask (false, false, false, true);
-        //  draw_water (256);
-        //  glColorMask (true, true, true, false);
-        //  glLoadIdentity();
-        //  pos = CameraPosition ();
-        //  glScalef (1, -1, -1);
-        //  //pos *= -1;
-        //  angle = CameraAngle ();
-        //  glRotatef (angle.x, -1.0f, 0.0f, 0.0f);
-        //  glRotatef (angle.y, 0.0f, 1.0f, 0.0f);
-        //  glRotatef (angle.z, 0.0f, 0.0f, 1.0f);
-        //  glTranslate (-pos.x, -pos.y, pos.z);
-        //  glDepthFunc (GL_GREATER);
-        // // glScalef (1, -1, 1);
-        //  glFrontFace (GL_CW);
-        //  glPolygonMode(GL_BACK, GL_FILL);
-        //  //glPolygonMode(GL_FRONT, GL_POINT);
-        //  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        //  glDisable (GL_CULL_FACE);
-        //  SceneRender ();
-        //  glDepthFunc (GL_LEQUAL);
-        //  glPopMatrix ();
-        //  glFrontFace (GL_CCW);
-        //  //glEnable (GL_BLEND);
-        //  //glBlendFunc (GL_ONE, GL_ONE);
-        //  //glDisable (GL_LIGHTING);
-        //  //glColor4f (1.0f, 1.0f, 1.0f, 0.5f);
-        //  glBindTexture (GL_TEXTURE_2D, TextureIdFromName ("water4.bmp"));
-        //  glColorMask (false, false, false, false);
-        //  draw_water (256);
-        //  glColorMask (true, true, true, false);
-        //  //draw_water (256);
-        //  glEnable (GL_LIGHTING);
-        //  glPolygonMode(GL_FRONT, GL_FILL);
-        //  glPolygonMode(GL_BACK, GL_LINE);
-
-        //}
   */

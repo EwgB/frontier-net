@@ -15,9 +15,7 @@
             GL.ClearColor(Color.CornflowerBlue);
         }
 
-        public void Update() {
-            // Do nothing
-        }
+        public void Update() { /* Do nothing */ }
 
         public void Render() {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -40,8 +38,9 @@
             GL.End();
         }
 
-        public void ToggleShowMap() {
-            // Do nothing
-        }
+        public void RenderLoadingScreen(float progress) { /* Do nothing */ }
+
+        public void ToggleShowMap() { /* Do nothing */ }
+
     }
 }

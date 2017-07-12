@@ -1,13 +1,13 @@
 ﻿namespace FrontierSharp.DummyModules {
+    using OpenTK;
+
     using Common;
 
     internal class DummyPlayer : IPlayer {
-        public void Init() {
-            // Do nothing
-        }
+        public Vector3 Position { get; set; }
 
-        public void Update() {
-            // Do nothing
-        }
+        public void Init() { /* Do nothing */ }
+        public void Update() { /* Do nothing */ }
+        public void Reset() { /* Do nothing */ }
     }
 }
