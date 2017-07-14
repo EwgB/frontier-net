@@ -41,7 +41,7 @@
             return Equals((Coord)obj);
         }
 
-        public bool Equals(Coord other) {
+        private bool Equals(Coord other) {
             return this.X == other.X && this.Y == other.Y;
         }
 

@@ -291,8 +291,8 @@
             this.scene.Generate();
             this.player.Update();
 
-            uint ready;
-            uint total;
+            int ready;
+            int total;
             do {
                 this.scene.Progress(out ready, out total);
                 this.scene.Update(this.gameWindow.UpdateTime / 1000 + 20);

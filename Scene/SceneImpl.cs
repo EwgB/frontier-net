@@ -48,16 +48,16 @@
 
         #region Memeber variables
 
-        private IGridManager gmTerrain;
-        private List<ITerrain> ilTerrain;
-        private IGridManager gmForest;
-        private List<IForest> ilForest;
-        private IGridManager gmGrass;
-        private List<IGrass> ilGrass;
-        private IGridManager gmBrush;
-        private List<IBrush> ilBrush;
-        private IGridManager gmParticle;
-        private List<IParticleArea> ilParticle;
+        private readonly GridManager gmTerrain;
+        private readonly List<ITerrain> ilTerrain = new List<ITerrain>();
+        private readonly GridManager gmForest;
+        private readonly List<IForest> ilForest = new List<IForest>();
+        private readonly GridManager gmGrass;
+        private readonly List<IGrass> ilGrass;
+        private readonly GridManager gmBrush;
+        private readonly List<IBrush> ilBrush = new List<IBrush>();
+        private readonly GridManager gmParticle;
+        private readonly List<IParticleArea> ilParticle = new List<IParticleArea>();
 
         #endregion
 
@@ -78,6 +78,12 @@
             this.text = text;
             this.textures = textures;
             this.water = water;
+
+            this.gmTerrain = new GridManager(avatar);
+            this.gmForest = new GridManager(avatar);
+            this.gmGrass = new GridManager(avatar);
+            this.gmBrush = new GridManager(avatar);
+            this.gmParticle = new GridManager(avatar);
         }
 
         public void Init() {
@@ -205,7 +211,7 @@
             */
         }
 
-        public void Progress(out uint ready, out uint total) {
+        public void Progress(out int ready, out int total) {
             ready = this.gmTerrain.ItemsReadyCount;
             total = Math.Min(this.gmTerrain.ItemsViewableCount, 3);
         }

@@ -57,7 +57,7 @@
             GL.End();
         }
 
-        public void Progress(out uint ready, out uint total) {
+        public void Progress(out int ready, out int total) {
             ready = total = 0;
         }
 

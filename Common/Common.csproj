@@ -57,7 +57,7 @@
     <Compile Include="Environment\EnvironmentData.cs" />
     <Compile Include="Game\IGameProperties.cs" />
     <Compile Include="Grid\IGridData.cs" />
-    <Compile Include="Grid\IGridManager.cs" />
+    <Compile Include="Grid\GridManager.cs" />
     <Compile Include="Grid\IGrass.cs" />
     <Compile Include="Grid\IBrush.cs" />
     <Compile Include="Grid\IParticleArea.cs" />

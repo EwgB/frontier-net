@@ -16,7 +16,7 @@
 
         void Clear();
         void Generate();
-        void Progress(out uint ready, out uint total);
+        void Progress(out int ready, out int total);
 
         /// <summary>
         /// This is called to restart the terrain grid manager. After the terrains are built,
