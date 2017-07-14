@@ -15,6 +15,14 @@
         void RenderDebug();
 
         void Clear();
+        void Generate();
+        void Progress(out uint ready, out uint total);
+
+        /// <summary>
+        /// This is called to restart the terrain grid manager. After the terrains are built,
+        /// we need to pass over them again so they can do their stitching.
+        /// </summary>
+        void RestartProgress();
     }
 }
 

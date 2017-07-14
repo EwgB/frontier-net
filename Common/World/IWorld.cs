@@ -21,6 +21,7 @@
         IRegion GetRegion(int x, int y);
 
         void Generate(uint seed);
+        void Load(uint seed);
         void Save();
     }
 }
@@ -46,8 +47,6 @@ float WorldWaterLevel(int world_x, int world_y);
 uint WorldCanopyTree();
 char* WorldDirectionFromAngle(float angle);
 //char*         WorldDirectory ();
-void WorldInit();
-void WorldLoad(uint seed);
 uint WorldMap();
 uint WorldNoisei(int index);
 float WorldNoisef(int index);

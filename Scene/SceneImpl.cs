@@ -176,6 +176,44 @@
             gmForest.Clear();
             gmTerrain.Clear();
         }
+
+        public void Generate() {
+            /* TODO
+            Vector3 camera;
+            Coord current;
+
+            SceneClear();
+            WaterBuild();
+            camera = AvatarPosition();
+            current.x = (int)(camera.x) / GRASS_SIZE;
+
+            ilGrass.clear();
+            ilGrass.resize(GRASS_GRID * GRASS_GRID);
+            gmGrass.Init(ilGrass[0], GRASS_GRID, GRASS_SIZE);
+
+            ilForest.clear();
+            ilForest.resize(FOREST_GRID * FOREST_GRID);
+            gmForest.Init(ilForest[0], FOREST_GRID, FOREST_SIZE);
+
+            ilTerrain.clear();
+            ilTerrain.resize(TERRAIN_GRID * TERRAIN_GRID);
+            gmTerrain.Init(ilTerrain[0], TERRAIN_GRID, TERRAIN_SIZE);
+
+            ilBrush.clear();
+            ilBrush.resize(BRUSH_GRID * BRUSH_GRID);
+            gmBrush.Init(ilBrush[0], BRUSH_GRID, BRUSH_SIZE);
+            */
+        }
+
+        public void Progress(out uint ready, out uint total) {
+            ready = gmTerrain.ItemsReadyCount;
+            total = Math.Min(gmTerrain.ItemsViewableCount, 3);
+        }
+
+        public void RestartProgress() {
+            // TODO
+            //gmTerrain.RestartProgress();
+        }
     }
 }
 
@@ -186,34 +224,6 @@ static int              texture_bytes;
 static int              texture_bytes_counter;
 static int              polygons;
 static int              polygons_counter;
-
-void SceneGenerate() {
-
-    GLvector camera;
-    GLcoord current;
-
-    SceneClear();
-    WaterBuild();
-    camera = AvatarPosition();
-    current.x = (int)(camera.x) / GRASS_SIZE;
-
-    ilGrass.clear();
-    ilGrass.resize(GRASS_GRID * GRASS_GRID);
-    gmGrass.Init(&ilGrass[0], GRASS_GRID, GRASS_SIZE);
-
-    ilForest.clear();
-    ilForest.resize(FOREST_GRID * FOREST_GRID);
-    gmForest.Init(&ilForest[0], FOREST_GRID, FOREST_SIZE);
-
-    ilTerrain.clear();
-    ilTerrain.resize(TERRAIN_GRID * TERRAIN_GRID);
-    gmTerrain.Init(&ilTerrain[0], TERRAIN_GRID, TERRAIN_SIZE);
-
-    ilBrush.clear();
-    ilBrush.resize(BRUSH_GRID * BRUSH_GRID);
-    gmBrush.Init(&ilBrush[0], BRUSH_GRID, BRUSH_SIZE);
-
-}
 
 
 void SceneTexturePurge() {
@@ -244,7 +254,7 @@ void SceneTexturePurge() {
 CTerrain* SceneTerrainGet(int x, int y) {
 
     uint i;
-    GLcoord gp;
+    Coord gp;
 
     for (i = 0; i < ilTerrain.size(); i++) {
         gp = ilTerrain[i].GridPosition();
@@ -252,22 +262,6 @@ CTerrain* SceneTerrainGet(int x, int y) {
             return &ilTerrain[i];
     }
     return NULL;
-
-}
-
-//This is called to restart the terrain grid manager. After the terrains are built,
-//we need to pass over them again so they can do their stitching.
-void SceneRestartProgress() {
-
-    gmTerrain.RestartProgress();
-
-}
-
-
-void SceneProgress(uint* ready, uint* total) {
-
-    *ready = gmTerrain.ItemsReady();
-    *total = min(gmTerrain.ItemsViewable(), 3);
 
 }
 */

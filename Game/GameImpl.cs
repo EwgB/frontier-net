@@ -8,6 +8,7 @@
     using OpenTK.Input;
 
     using Common;
+    using Common.Avatar;
     using Common.Game;
     using Common.Input;
     using Common.Property;
@@ -28,8 +29,10 @@
 
         #region Modules
 
+        private readonly IAvatar avatar;
         private readonly ICache cache;
         private readonly IConsole console;
+        private readonly IGame game;
         private readonly GameWindow gameWindow;
         private readonly IInput input;
         private readonly IPlayer player;
@@ -63,18 +66,24 @@
         #endregion
 
         public GameImpl(
+                IAvatar avatar,
                 ICache cache,
                 IConsole console,
+                IGame game,
                 GameWindow gameWindow,
                 IInput input,
+                IPlayer player,
                 IRenderer renderer,
                 IScene scene,
                 IText text,
                 IWorld world) {
+            this.avatar = avatar;
             this.cache = cache;
             this.console = console;
+            this.game = game;
             this.gameWindow = gameWindow;
             this.input = input;
+            this.player = player;
             this.renderer = renderer;
             this.scene = scene;
             this.text = text;
@@ -171,7 +180,7 @@
                 this.text.Print("Scanning {0}", worldPosition.X);
                 this.renderer.RenderLoadingScreen(0.02f);
                 if (!this.cache.IsPointAvailable(worldPosition.X, worldPosition.Y)) {
-                    this.cache.UpdatePage(worldPosition.X, worldPosition.Y, this.gameWindow.UpdateTime + 20);
+                    this.cache.UpdatePage(worldPosition.X, worldPosition.Y, this.gameWindow.UpdateTime / 1000 + 20);
                     continue;
                 }
                 pointsChecked++;
@@ -200,68 +209,63 @@
                 Log.Error("Load: Can't load while a game is in progress.");
                 return;
             }
-            this.seed = seedIn;
-            /* TODO
-            string filename;
-            List<string> sub_group;
 
-            filename = GameDirectory();
-            filename += "game.sav";
-            if (!FileExists(filename.c_str())) {
+            this.seed = seedIn;
+            var filename = Path.Combine(this.GameDirectory, "game.sav");
+            if (File.Exists(filename)) {
                 seed = 0;
-                ConsoleLog("GameLoad: Error: File %s not found.", filename.c_str());
+                Log.Error("Load: File {0} not found.", filename);
                 return;
             }
-            if (ConsoleIsOpen())
-                ConsoleToggle();
-            CVarUtils::SetCVar("last_played", seed);
+            if (this.console.IsOpen)
+                this.console.ToggleConsole();
+
+            this.GameProperties.LastPlayed = seed;
             this.IsRunning = true;
-            sub_group.push_back("game");
-            sub_group.push_back("player");
-            CVarUtils::Load(filename, sub_group);
-            AvatarPositionSet(PlayerPositionGet());
-            WorldLoad(seed);
-            WorldSave();
-            seconds = 0;
-            GameUpdate();
-            Precache();
+
+            /* TODO: Load game and player properties
+            var subGroup = new List<string>();
+            subGroup.Add("game");
+            subGroup.Add("player");
+            CVarUtils::Load(filename, subGroup);
             */
+            this.avatar.Position = this.player.Position;
+            this.world.Load(seed);
+            this.world.Save();
+            // Set seconds to 0
+            var time = this.GameProperties.GameTime;
+            this.GameProperties.GameTime = new TimeSpan(time.Days, time.Hours, time.Minutes, 0);
+            this.game.Update();
+            Precache();
         }
 
         public void Save() {
-            /* TODO
-            string filename;
-            vector<string> sub_group;
-
             if (seed == 0) {
-                ConsoleLog("GameSave: Error: No valid game to save.");
+                Log.Error("GameSave: Error: No valid game to save.");
                 return;
             }
-            filename = GameDirectory();
-            filename += "game.sav";
-            sub_group.push_back("game");
-            sub_group.push_back("player");
-            CVarUtils::Save(filename, sub_group);
+            /* TODO: Save game and player properties
+            var filename = Path.Combine(this.GameDirectory, "game.sav");
+            var subGroup = new List<string>();
+            subGroup.Add("game");
+            subGroup.Add("player");
+            CVarUtils::Save(filename, subGroup);
             */
         }
 
         public void Dispose() {
-            /* TODO
-            if (this.IsRunning && seed)
-                GameSave();
-            */
+            if (this.IsRunning && seed != 0)
+                Save();
         }
 
         public void Quit() {
-            /* TODO
-            ConsoleLog("Quit Game");
-            WorldSave();
-            SceneClear();
-            CachePurge();
-            GameSave();
+            Log.Info("Quit Game");
+            this.world.Save();
+            this.scene.Clear();
+            this.cache.Purge();
+            Save();
             seed = 0;
             this.IsRunning = false;
-            */
         }
 
         private Coord FindCoast(int start, int end, int step) {
@@ -284,25 +288,24 @@
         }
 
         private void Precache() {
-            /* TODO
-            uint ready, total;
+            // TODO: Put in separate thread and add cancellation
+            this.scene.Generate();
+            this.player.Update();
 
-            SceneGenerate();
-            PlayerUpdate();
+            uint ready;
+            uint total;
             do {
-                SceneProgress(&ready, &total);
-                SceneUpdate(SDL_GetTicks() + 20);
-                loading(((float)ready / (float)total) * 0.5f);
-            } while (ready < total && !MainIsQuit());
-            SceneRestartProgress();
+                this.scene.Progress(out ready, out total);
+                this.scene.Update(this.gameWindow.UpdateTime / 1000 + 20);
+                this.renderer.RenderLoadingScreen((ready / (float)total) * 0.5f);
+            } while (ready < total);
+            this.scene.RestartProgress();
             do {
-                SceneProgress(&ready, &total);
-                SceneUpdate(SDL_GetTicks() + 20);
-                loading(0.5f + ((float)ready / (float)total) * 0.5f);
-            } while (ready < total && !MainIsQuit());
-            */
+                this.scene.Progress(out ready, out total);
+                this.scene.Update(this.gameWindow.UpdateTime / 1000 + 20);
+                this.renderer.RenderLoadingScreen(0.5f + (ready / (float)total) * 0.5f);
+            } while (ready < total);
         }
-
     }
 }
 
