@@ -1,4 +1,5 @@
 ﻿namespace FrontierSharp.Scene {
+    using System;
     using System.Collections.Generic;
 
     using OpenTK.Graphics.OpenGL;
@@ -12,7 +13,6 @@
     using Common.Scene;
     using Common.Shaders;
     using Common.Textures;
-    using System;
 
     public class SceneImpl : IScene {
 
@@ -49,13 +49,13 @@
         #region Memeber variables
 
         private readonly GridManager gmTerrain;
-        private readonly List<ITerrain> ilTerrain = new List<ITerrain>();
+        private readonly List<IGridData> ilTerrain = new List<IGridData>();
         private readonly GridManager gmForest;
-        private readonly List<IForest> ilForest = new List<IForest>();
+        private readonly List<IGridData> ilForest = new List<IGridData>();
         private readonly GridManager gmGrass;
-        private readonly List<IGrass> ilGrass;
+        private readonly List<IGridData> ilGrass = new List<IGridData>();
         private readonly GridManager gmBrush;
-        private readonly List<IBrush> ilBrush = new List<IBrush>();
+        private readonly List<IGridData> ilBrush = new List<IGridData>();
         private readonly GridManager gmParticle;
         private readonly List<IParticleArea> ilParticle = new List<IParticleArea>();
 
@@ -86,9 +86,7 @@
             this.gmParticle = new GridManager(avatar);
         }
 
-        public void Init() {
-            // Do nothing
-        }
+        public void Init() { /* Do nothing */ }
 
         public void Render() {
             if (!this.game.IsRunning)
@@ -147,7 +145,7 @@
         public void Update(double stopAt) {
             if (!this.game.IsRunning)
                 return;
-            //We don't want any grid to starve the others, so we rotate the order of priority.
+            // We don't want any grid to starve the others, so we rotate the order of priority.
             this.updateType = (byte)((this.updateType + 1) % 4);
             switch (this.updateType) {
                 case 0:
@@ -184,31 +182,26 @@
         }
 
         public void Generate() {
-            /* TODO
-            Vector3 camera;
-            Coord current;
+            Clear();
+            this.water.Build();
+            //var camera = this.avatar.Position;
+            //var current = new Coord((int)(camera.X / GridUtils.GRASS_SIZE), 0);
 
-            SceneClear();
-            WaterBuild();
-            camera = AvatarPosition();
-            current.x = (int)(camera.x) / GRASS_SIZE;
+            this.ilGrass.Clear();
+            this.ilGrass.Capacity = GRASS_GRID * GRASS_GRID;
+            this.gmGrass.Init(this.ilGrass, GRASS_GRID, GridUtils.GRASS_SIZE);
 
-            ilGrass.clear();
-            ilGrass.resize(GRASS_GRID * GRASS_GRID);
-            gmGrass.Init(ilGrass[0], GRASS_GRID, GRASS_SIZE);
+            this.ilForest.Clear();
+            this.ilForest.Capacity = FOREST_GRID * FOREST_GRID;
+            this.gmForest.Init(this.ilForest, FOREST_GRID, GridUtils.FOREST_SIZE);
 
-            ilForest.clear();
-            ilForest.resize(FOREST_GRID * FOREST_GRID);
-            gmForest.Init(ilForest[0], FOREST_GRID, FOREST_SIZE);
+            this.ilTerrain.Clear();
+            this.ilTerrain.Capacity = TERRAIN_GRID * TERRAIN_GRID;
+            this.gmTerrain.Init(this.ilTerrain, TERRAIN_GRID, GridUtils.TERRAIN_SIZE);
 
-            ilTerrain.clear();
-            ilTerrain.resize(TERRAIN_GRID * TERRAIN_GRID);
-            gmTerrain.Init(ilTerrain[0], TERRAIN_GRID, TERRAIN_SIZE);
-
-            ilBrush.clear();
-            ilBrush.resize(BRUSH_GRID * BRUSH_GRID);
-            gmBrush.Init(ilBrush[0], BRUSH_GRID, BRUSH_SIZE);
-            */
+            this.ilBrush.Clear();
+            this.ilBrush.Capacity = BRUSH_GRID * BRUSH_GRID;
+            this.gmBrush.Init(this.ilBrush, BRUSH_GRID, GridUtils.BRUSH_SIZE);
         }
 
         public void Progress(out int ready, out int total) {
@@ -217,8 +210,7 @@
         }
 
         public void RestartProgress() {
-            // TODO
-            //gmTerrain.RestartProgress();
+            this.gmTerrain.RestartProgress();
         }
     }
 }
@@ -235,24 +227,24 @@ static int              polygons_counter;
 void SceneTexturePurge() {
 
     SceneClear();
-    ilGrass.clear();
-    ilGrass.resize(GRASS_GRID * GRASS_GRID);
+    ilGrass.Clear();
+    ilGrass.Resize(GRASS_GRID * GRASS_GRID);
     gmGrass.Init(&ilGrass[0], GRASS_GRID, GRASS_SIZE);
 
-    ilForest.clear();
-    ilForest.resize(FOREST_GRID * FOREST_GRID);
+    ilForest.Clear();
+    ilForest.Resize(FOREST_GRID * FOREST_GRID);
     gmForest.Init(&ilForest[0], FOREST_GRID, FOREST_SIZE);
 
-    ilTerrain.clear();
-    ilTerrain.resize(TERRAIN_GRID * TERRAIN_GRID);
+    ilTerrain.Clear();
+    ilTerrain.Resize(TERRAIN_GRID * TERRAIN_GRID);
     gmTerrain.Init(&ilTerrain[0], TERRAIN_GRID, TERRAIN_SIZE);
 
-    ilBrush.clear();
-    ilBrush.resize(BRUSH_GRID * BRUSH_GRID);
+    ilBrush.Clear();
+    ilBrush.Resize(BRUSH_GRID * BRUSH_GRID);
     gmBrush.Init(&ilBrush[0], BRUSH_GRID, BRUSH_SIZE);
 
-    ilParticle.clear();
-    ilParticle.resize(PARTICLE_GRID * PARTICLE_GRID);
+    ilParticle.Clear();
+    ilParticle.Resize(PARTICLE_GRID * PARTICLE_GRID);
     gm_particle.Init(&ilParticle[0], PARTICLE_GRID, PARTICLE_AREA_SIZE);
 
 }
