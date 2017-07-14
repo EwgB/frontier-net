@@ -6,7 +6,6 @@
 
     using Common.Scene;
     using Common.Property;
-    using System;
 
     class DummyScene : IScene {
         public IProperties Properties => this.SceneProperties;

@@ -4,7 +4,6 @@
     using Common.Property;
     using Common.Region;
     using Common.World;
-    using System;
 
     internal class DummyWorld : IWorld {
         public IProperties Properties { get; }

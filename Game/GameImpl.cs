@@ -1,6 +1,5 @@
 ﻿namespace FrontierSharp.Game {
     using System;
-    using System.Collections.Generic;
     using System.IO;
 
     using NLog;
@@ -153,7 +152,7 @@
             Directory.CreateDirectory(this.GameDirectory);
             this.scene.Clear();
             this.cache.Purge();
-            this.world.Generate(seed);
+            this.world.Generate(this.seed);
             this.world.Save();
 
             // Now the world is ready.  Look for a good starting point.
@@ -193,7 +192,7 @@
             }
 
             Log.Info("GameNew: Found beach in {0} moves.", pointsChecked);
-            this.GameProperties.LastPlayed = seed;
+            this.GameProperties.LastPlayed = this.seed;
             this.player.Reset();
             this.player.Position = avatarPosition;
             Update();
@@ -213,14 +212,14 @@
             this.seed = seedIn;
             var filename = Path.Combine(this.GameDirectory, "game.sav");
             if (File.Exists(filename)) {
-                seed = 0;
+                this.seed = 0;
                 Log.Error("Load: File {0} not found.", filename);
                 return;
             }
             if (this.console.IsOpen)
                 this.console.ToggleConsole();
 
-            this.GameProperties.LastPlayed = seed;
+            this.GameProperties.LastPlayed = this.seed;
             this.IsRunning = true;
 
             /* TODO: Load game and player properties
@@ -230,7 +229,7 @@
             CVarUtils::Load(filename, subGroup);
             */
             this.avatar.Position = this.player.Position;
-            this.world.Load(seed);
+            this.world.Load(this.seed);
             this.world.Save();
             // Set seconds to 0
             var time = this.GameProperties.GameTime;
@@ -240,7 +239,7 @@
         }
 
         public void Save() {
-            if (seed == 0) {
+            if (this.seed == 0) {
                 Log.Error("GameSave: Error: No valid game to save.");
                 return;
             }
@@ -254,7 +253,7 @@
         }
 
         public void Dispose() {
-            if (this.IsRunning && seed != 0)
+            if (this.IsRunning && this.seed != 0)
                 Save();
         }
 
@@ -264,7 +263,7 @@
             this.scene.Clear();
             this.cache.Purge();
             Save();
-            seed = 0;
+            this.seed = 0;
             this.IsRunning = false;
         }
 

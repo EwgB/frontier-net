@@ -167,14 +167,14 @@
         }
 
         public void Clear() {
-            ilGrass.Clear();
-            ilBrush.Clear();
-            ilForest.Clear();
-            ilTerrain.Clear();
-            gmGrass.Clear();
-            gmBrush.Clear();
-            gmForest.Clear();
-            gmTerrain.Clear();
+            this.ilGrass.Clear();
+            this.ilBrush.Clear();
+            this.ilForest.Clear();
+            this.ilTerrain.Clear();
+            this.gmGrass.Clear();
+            this.gmBrush.Clear();
+            this.gmForest.Clear();
+            this.gmTerrain.Clear();
         }
 
         public void Generate() {
@@ -206,8 +206,8 @@
         }
 
         public void Progress(out uint ready, out uint total) {
-            ready = gmTerrain.ItemsReadyCount;
-            total = Math.Min(gmTerrain.ItemsViewableCount, 3);
+            ready = this.gmTerrain.ItemsReadyCount;
+            total = Math.Min(this.gmTerrain.ItemsViewableCount, 3);
         }
 
         public void RestartProgress() {
