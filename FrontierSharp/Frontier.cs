@@ -121,14 +121,16 @@
             this.console.Update();
             Update();
             this.game.Update();
-            this.avatar.Update();
-            this.player.Update();
-            this.environment.Update();
-            this.sky.Update();
-            this.scene.Update(UPDATE_INTERVAL);
-            this.cache.Update(UPDATE_INTERVAL);
-            this.particles.Update();
-            this.renderer.Update();
+            if (this.game.IsRunning) {
+                this.avatar.Update();
+                this.player.Update();
+                this.environment.Update();
+                this.sky.Update();
+                this.scene.Update(UPDATE_INTERVAL);
+                this.cache.Update(UPDATE_INTERVAL);
+                this.particles.Update();
+                this.renderer.Update();
+            }
         }
 
         protected override void OnKeyDown(KeyboardKeyEventArgs e) {

@@ -37,7 +37,6 @@
         #region Modules
 
         private readonly ICache cache;
-        private readonly IGame game;
         private readonly GameWindow gameWindow;
         private readonly IInput input;
         private readonly IParticles particles;
@@ -100,7 +99,6 @@
         public AvatarImpl(
                 IFigure avatar,
                 ICache cache,
-                IGame game,
                 GameWindow gameWindow,
                 IInput input,
                 IParticles particles,
@@ -109,7 +107,6 @@
                 IWorld world) {
             this.avatar = avatar;
             this.cache = cache;
-            this.game = game;
             this.gameWindow = gameWindow;
             this.input = input;
             this.particles = particles;
@@ -135,9 +132,6 @@
         }
 
         public void Update() {
-            if (!this.game.IsRunning)
-                return;
-
             if (this.input.KeyState(Key.ControlLeft))
                 Look(0, 1);
 

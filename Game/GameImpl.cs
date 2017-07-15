@@ -31,7 +31,6 @@
         private readonly IAvatar avatar;
         private readonly ICache cache;
         private readonly IConsole console;
-        private readonly IGame game;
         private readonly GameWindow gameWindow;
         private readonly IInput input;
         private readonly IPlayer player;
@@ -68,7 +67,6 @@
                 IAvatar avatar,
                 ICache cache,
                 IConsole console,
-                IGame game,
                 GameWindow gameWindow,
                 IInput input,
                 IPlayer player,
@@ -79,7 +77,6 @@
             this.avatar = avatar;
             this.cache = cache;
             this.console = console;
-            this.game = game;
             this.gameWindow = gameWindow;
             this.input = input;
             this.player = player;
@@ -234,7 +231,7 @@
             // Set seconds to 0
             var time = this.GameProperties.GameTime;
             this.GameProperties.GameTime = new TimeSpan(time.Days, time.Hours, time.Minutes, 0);
-            this.game.Update();
+            Update();
             Precache();
         }
 
