@@ -8,7 +8,6 @@
     using Common;
     using Common.Animation;
     using Common.Avatar;
-    using Common.Game;
     using Common.Input;
     using Common.Particles;
     using Common.Property;
@@ -202,8 +201,8 @@
             this.position.Y += this.currentMovement.Y;
             this.desiredCamDistance = MathHelper.Clamp(this.desiredCamDistance, CAM_MIN, CAM_MAX);
             this.camDistance = MathUtils.Interpolate(this.camDistance, this.desiredCamDistance, elapsed);
-            float ground = this.cache.GetElevation(this.position.X, this.position.Y);
-            float water = this.world.GetWaterLevel(this.position.X, this.position.Y);
+            var ground = this.cache.GetElevation(this.position.X, this.position.Y);
+            var water = this.world.GetWaterLevel(this.position.X, this.position.Y);
             this.avatarFacing.Y = MathUtils.Interpolate(this.avatarFacing.Y, leanAngle, elapsed);
             if (!this.AvatarProperties.Flying) {
                 this.velocity -= WorldUtils.GRAVITY * elapsed;
@@ -220,7 +219,7 @@
                     this.velocity = 0;
                 }
             }
-            float movementAnimation = this.distanceWalked / 4.0f;
+            var movementAnimation = this.distanceWalked / 4.0f;
             if (this.onGround)
                 this.distanceWalked += this.currentSpeed * elapsed;
             if (this.currentMovement.X != 0 && this.currentMovement.Y != 0)
@@ -242,7 +241,7 @@
             this.avatar.Position = this.position;
             this.avatar.Rotation = this.avatarFacing;
             this.avatar.Update();
-            float stepTracking = movementAnimation % 1;
+            var stepTracking = movementAnimation % 1;
             if (this.animType == AnimTypes.Run || this.animType == AnimTypes.Sprint) {
                 if (stepTracking < this.lastStepTracking || (stepTracking > 0.5f && this.lastStepTracking < 0.5f)) {
                     this.dustParticle.Colors.Clear();
