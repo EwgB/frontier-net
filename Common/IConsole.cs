@@ -1,6 +1,7 @@
-﻿using OpenTK.Input;
+﻿namespace FrontierSharp.Common {
+    using OpenTK.Input;
 
-namespace FrontierSharp.Common {
+    /// <summary>Runs a "quake-like" console.</summary>
     public interface IConsole : IModule {
         bool IsOpen { get; }
 

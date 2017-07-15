@@ -6,6 +6,7 @@
     using Grid;
     using Util;
 
+    /// <summary>Generates, stores, and fetches the pages of terrain data.</summary>
     public interface ICache : ITimeCapped {
         void Purge();
         void RenderDebug();

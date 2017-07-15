@@ -1,6 +1,7 @@
 ﻿namespace FrontierSharp.Common.Input {
     using OpenTK.Input;
 
+    /// <summary>Tracks state of keyboard keys and mouse.</summary>
     public interface IInput {
         void KeyDown(Key key);
         void KeyUp(Key key);

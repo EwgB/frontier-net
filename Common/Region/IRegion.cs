@@ -3,6 +3,14 @@
 
     using Util;
 
+    /// <summary>
+    /// Holds the region grid, which is the main table of information from
+    /// which ALL OTHER GEOGRAPHICAL DATA is generated or derived.  Note that
+    /// the resulting data is not STORED here. Regions are sets of rules and
+    /// properties. You crank numbers through them, and it creates the world.
+    /// 
+    /// This output data is stored and managed elsewhere. (See IPage.cs) TODO
+    /// </summary>
     public interface IRegion {
         string Title { get; }
         uint TreeType { get; }

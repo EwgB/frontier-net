@@ -1,4 +1,5 @@
 ﻿namespace FrontierSharp.Common.Animation {
+    /// <summary>Loads animations and applies them to models.</summary>
     public interface IAnimation {
     }
 }

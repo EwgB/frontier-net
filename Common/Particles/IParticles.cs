@@ -3,6 +3,7 @@
 
     using Property;
 
+    /// <summary>Manages the list of active particle emitters.</summary>
     public interface IParticles : IModule, IHasProperties, IRenderable {
         IParticlesProperties ParticlesProperties { get; }
 
