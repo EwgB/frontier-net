@@ -1,4 +1,4 @@
-﻿namespace FrontierSharp.DummyModules {
+﻿namespace FrontierSharp.Renderer {
     using System.Drawing;
 
     using OpenTK;
@@ -7,7 +7,7 @@
     using Common.Property;
     using Common.Renderer;
 
-    public class DummyRenderer : IRenderer {
+    internal class DummyRenderer : IRenderer {
         public IProperties Properties => this.RendererProperties;
         public IRendererProperties RendererProperties { get; }
 
@@ -39,7 +39,6 @@
         }
 
         public void RenderLoadingScreen(float progress) { /* Do nothing */ }
-
         public void ToggleShowMap() { /* Do nothing */ }
 
     }

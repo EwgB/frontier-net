@@ -1,4 +1,4 @@
-﻿namespace FrontierSharp.DummyModules {
+﻿namespace FrontierSharp.Scene {
     using System.Drawing;
 
     using OpenTK;
@@ -7,7 +7,7 @@
     using Common.Scene;
     using Common.Property;
 
-    class DummyScene : IScene {
+    internal class DummyScene : IScene {
         public IProperties Properties => this.SceneProperties;
         public ISceneProperties SceneProperties { get; }
 

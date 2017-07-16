@@ -16,7 +16,7 @@
     using Common.World;
     using Common.Util;
 
-    public class AvatarImpl : IAvatar {
+    internal class AvatarImpl : IAvatar {
 
         #region Constants
 

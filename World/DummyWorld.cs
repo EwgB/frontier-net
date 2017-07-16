@@ -1,4 +1,4 @@
-﻿namespace FrontierSharp.DummyModules {
+﻿namespace FrontierSharp.World {
     using OpenTK;
 
     using Common.Property;
@@ -7,9 +7,14 @@
 
     internal class DummyWorld : IWorld {
         public IProperties Properties { get; }
+
         public bool WindFromWest { get; set; }
 
         public uint MapId => 0;
+
+        public DummyWorld(IRegion region) {
+            this.region = region;
+        }
 
         public void Init() { /* Do nothing */ }
         public void Update() { /* Do nothing */ }
@@ -19,6 +24,8 @@
 
         public float GetWaterLevel(Vector2 coord) => 0;
         public float GetWaterLevel(float x, float y) => 0;
-        public IRegion GetRegion(int x, int y) => new DummyRegion();
+
+        private readonly IRegion region;
+        public IRegion GetRegion(int x, int y) => this.region;
     }
 }

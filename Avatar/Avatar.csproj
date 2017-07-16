@@ -30,6 +30,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Ninject, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ninject.3.2.2.0\lib\net45-full\Ninject.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.4.4.11\lib\net45\NLog.dll</HintPath>
       <Private>True</Private>
@@ -49,7 +53,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AvatarImpl.cs" />
+    <Compile Include="AvatarModule.cs" />
     <Compile Include="AvatarProperties.cs" />
+    <Compile Include="DummyAvatar.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -68,6 +74,10 @@
     <ProjectReference Include="..\Properties\Properties.csproj">
       <Project>{0d73456a-0969-4ff6-96a2-9435074b9eb8}</Project>
       <Name>Properties</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Region\Region.csproj">
+      <Project>{F111EC33-2056-4692-A51B-75A6D61036BB}</Project>
+      <Name>Region</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -2,53 +2,50 @@
     using Ninject;
 
     using Common;
-    using Common.Animation;
-    using Common.Avatar;
     using Common.Environment;
     using Common.Game;
     using Common.Input;
-    using Common.Particles;
-    using Common.Renderer;
-    using Common.Scene;
     using Common.Shaders;
-    using Common.Textures;
-    using Common.World;
 
+    using Animation;
     using Avatar;
     using DummyModules;
     using Environment;
     using Game;
+    using Ninject.Modules;
     using Particles;
     using Renderer;
     using Scene;
     using Textures;
+    using World;
 
     internal class Program {
-        private static void Main(string[] args) {
-            using (IKernel kernel = new StandardKernel()) {
+        private static void Main() {
+            var modules = new INinjectModule[] {
+                new AnimationModule(),
+                new AvatarModule(true),
+                new ParticlesModule(true), 
+                new RendererModule(true), 
+                new SceneModule(true), 
+                new TexturesModule(true),
+                new WorldModule()
+            };
+
+            using (IKernel kernel = new StandardKernel(modules)) {
 
                 // Set up dependecies
 
                 // Modules
-                kernel.Bind<IAvatar>().To<AvatarImpl>().InSingletonScope();
                 kernel.Bind<ICache>().To<DummyCache>().InSingletonScope();
                 kernel.Bind<IConsole>().To<DummyConsole>().InSingletonScope();
                 kernel.Bind<IEnvironment>().To<EnvironmentImpl>().InSingletonScope();
                 kernel.Bind<IGame>().To<GameImpl>().InSingletonScope();
                 kernel.Bind<IInput>().To<DummyInput>().InSingletonScope();
-                kernel.Bind<IParticles>().To<ParticlesImpl>().InSingletonScope();
                 kernel.Bind<IPlayer>().To<DummyPlayer>().InSingletonScope();
-                kernel.Bind<IRenderer>().To<RendererImpl>().InSingletonScope();
-                kernel.Bind<IScene>().To<SceneImpl>().InSingletonScope();
                 kernel.Bind<IShaders>().To<DummyShaders>().InSingletonScope();
                 kernel.Bind<ISky>().To<DummySky>().InSingletonScope();
                 kernel.Bind<IText>().To<DummyText>().InSingletonScope();
-                kernel.Bind<ITextures>().To<TexturesImpl>().InSingletonScope();
                 kernel.Bind<IWater>().To<DummyWater>().InSingletonScope();
-                kernel.Bind<IWorld>().To<DummyWorld>().InSingletonScope();
-
-                // Other dependencies
-                kernel.Bind<IFigure>().To<DummyFigure>();
 
                 using (var frontier = kernel.Get<Frontier>()) {
                     frontier.Run(30.0);

@@ -14,7 +14,7 @@
     using Common.Shaders;
     using Common.Textures;
 
-    public class SceneImpl : IScene {
+    internal class SceneImpl : IScene {
 
         #region Constants
         private const int BRUSH_GRID = 7;

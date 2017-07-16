@@ -13,7 +13,7 @@
     using Common.Util;
     using Common.World;
 
-    public class RendererImpl : IRenderer {
+    internal class RendererImpl : IRenderer {
         // Constants
         private const int MAP_SIZE = 512;
 

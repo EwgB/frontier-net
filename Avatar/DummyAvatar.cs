@@ -1,4 +1,4 @@
-﻿namespace FrontierSharp.DummyModules {
+﻿namespace FrontierSharp.Avatar {
     using OpenTK;
 
     using Common.Animation;
@@ -6,7 +6,7 @@
     using Common.Property;
     using Common.Region;
 
-    class DummyAvatar : IAvatar {
+    internal class DummyAvatar : IAvatar {
         public IProperties Properties => this.AvatarProperties;
         public IAvatarProperties AvatarProperties { get; }
 
@@ -14,26 +14,19 @@
 
         public Vector3 CameraAngle => Vector3.UnitX;
 
-        public IRegion Region { get; } = new DummyRegion();
+        public IRegion Region { get; }
 
         public Vector3 Position { get; set; }
 
         public AnimTypes AnimationType => AnimTypes.Idle;
 
-        public void Init() {
-            // Do nothing
+        public DummyAvatar(IRegion region) {
+            this.Region = region;
         }
 
-        public void Update() {
-            // Do nothing
-        }
-
-        public void Render() {
-            // Do nothing
-        }
-
-        public void Look(int x, int y) {
-            // Do nothing
-        }
+        public void Init() { /* Do nothing */ }
+        public void Update() { /* Do nothing */ }
+        public void Render() { /* Do nothing */ }
+        public void Look(int x, int y) { /* Do nothing */ }
     }
 }
