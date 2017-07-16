@@ -1,4 +1,6 @@
 ﻿namespace FrontierSharp.Common.Input {
+    using System.Collections.Generic;
+
     using OpenTK.Input;
 
     /// <summary>Tracks state of keyboard keys and mouse.</summary>
@@ -12,6 +14,8 @@
         bool MouseWheelUp { get; set; }
         bool MouseWheelDown { get; set; }
 
-        JoystickAxisCollection Joystick { get; }
+        // TODO: find something better, like a custom type wrapping a dictionary
+        //JoystickAxisCollection Joystick { get; }
+        IReadOnlyDictionary<int, float> Joystick { get; }
     }
 }

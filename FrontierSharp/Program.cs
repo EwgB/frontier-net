@@ -23,8 +23,8 @@
     internal class Program {
         private static void Main() {
             var modules = new INinjectModule[] {
-                new AnimationModule(true),
-                new AvatarModule(true),
+                new AnimationModule(false),
+                new AvatarModule(false),
                 new CacheModule(),
                 new ConsoleModule(),
                 new EnvironmentModule(true), 
