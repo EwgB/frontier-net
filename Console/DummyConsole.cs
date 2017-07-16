@@ -1,4 +1,4 @@
-﻿namespace FrontierSharp.DummyModules {
+﻿namespace FrontierSharp.Console {
     using NLog;
 
     using OpenTK.Input;
@@ -32,8 +32,6 @@
             }
         }
 
-        public void Update() {
-            // Do nothing
-        }
+        public void Update() { /* Do nothing */ }
     }
 }

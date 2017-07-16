@@ -1,5 +1,6 @@
-﻿namespace FrontierSharp.DummyModules {
+﻿namespace FrontierSharp.Input {
     using Common.Input;
+
     using OpenTK.Input;
 
     internal class DummyInput : IInput {

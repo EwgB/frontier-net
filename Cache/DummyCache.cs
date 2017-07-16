@@ -1,4 +1,4 @@
-﻿namespace FrontierSharp.DummyModules {
+﻿namespace FrontierSharp.Cache {
     using System;
     using System.Collections.Generic;
 
@@ -54,11 +54,8 @@
         }
 
         public void Purge() { /* Do nothing */ }
-
         public void RenderDebug() { /* Do nothing */ }
-
         public void Update(double stopAt) { /* Do nothing */ }
-
         public void UpdatePage(int worldX, int worldY, double stopAt) { /* Do nothing */ }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace FrontierSharp.DummyModules {
+﻿namespace FrontierSharp.Water {
     using Common;
 
     class DummyWater : IWater {

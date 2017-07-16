@@ -1,4 +1,4 @@
-﻿namespace FrontierSharp.DummyModules {
+﻿namespace FrontierSharp.Player {
     using OpenTK;
 
     using Common;

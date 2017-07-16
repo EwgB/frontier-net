@@ -1,20 +1,23 @@
 ﻿namespace FrontierSharp {
     using Ninject;
 
-    using Common;
-    using Common.Input;
-    using Common.Shaders;
-
     using Animation;
     using Avatar;
-    using DummyModules;
+    using Cache;
+    using Console;
     using Environment;
     using Game;
+    using Input;
     using Ninject.Modules;
     using Particles;
+    using Player;
     using Renderer;
     using Scene;
+    using Shaders;
+    using Sky;
+    using Text;
     using Textures;
+    using Water;
     using World;
 
     internal class Program {
@@ -22,29 +25,24 @@
             var modules = new INinjectModule[] {
                 new AnimationModule(true),
                 new AvatarModule(true),
+                new CacheModule(),
+                new ConsoleModule(),
                 new EnvironmentModule(true), 
-                new GameModule(true), 
-                new ParticlesModule(true), 
+                new GameModule(true),
+                new InputModule(),
+                new ParticlesModule(true),
+                new PlayerModule(),
                 new RendererModule(true), 
-                new SceneModule(true), 
+                new SceneModule(true),
+                new ShadersModule(),
+                new SkyModule(),
+                new TextModule(),
                 new TexturesModule(true),
+                new WaterModule(),
                 new WorldModule()
             };
 
             using (IKernel kernel = new StandardKernel(modules)) {
-
-                // Set up dependecies
-
-                // Modules
-                kernel.Bind<ICache>().To<DummyCache>().InSingletonScope();
-                kernel.Bind<IConsole>().To<DummyConsole>().InSingletonScope();
-                kernel.Bind<IInput>().To<DummyInput>().InSingletonScope();
-                kernel.Bind<IPlayer>().To<DummyPlayer>().InSingletonScope();
-                kernel.Bind<IShaders>().To<DummyShaders>().InSingletonScope();
-                kernel.Bind<ISky>().To<DummySky>().InSingletonScope();
-                kernel.Bind<IText>().To<DummyText>().InSingletonScope();
-                kernel.Bind<IWater>().To<DummyWater>().InSingletonScope();
-
                 using (var frontier = kernel.Get<Frontier>()) {
                     frontier.Run(30.0);
                 }
