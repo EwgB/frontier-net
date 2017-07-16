@@ -17,7 +17,7 @@
     using Common.Util;
     using Common.World;
 
-    public class GameImpl : IGame {
+    internal class GameImpl : IGame {
 
         #region Constants
 

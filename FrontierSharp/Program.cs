@@ -2,8 +2,6 @@
     using Ninject;
 
     using Common;
-    using Common.Environment;
-    using Common.Game;
     using Common.Input;
     using Common.Shaders;
 
@@ -22,8 +20,10 @@
     internal class Program {
         private static void Main() {
             var modules = new INinjectModule[] {
-                new AnimationModule(),
+                new AnimationModule(true),
                 new AvatarModule(true),
+                new EnvironmentModule(true), 
+                new GameModule(true), 
                 new ParticlesModule(true), 
                 new RendererModule(true), 
                 new SceneModule(true), 
@@ -38,8 +38,6 @@
                 // Modules
                 kernel.Bind<ICache>().To<DummyCache>().InSingletonScope();
                 kernel.Bind<IConsole>().To<DummyConsole>().InSingletonScope();
-                kernel.Bind<IEnvironment>().To<EnvironmentImpl>().InSingletonScope();
-                kernel.Bind<IGame>().To<GameImpl>().InSingletonScope();
                 kernel.Bind<IInput>().To<DummyInput>().InSingletonScope();
                 kernel.Bind<IPlayer>().To<DummyPlayer>().InSingletonScope();
                 kernel.Bind<IShaders>().To<DummyShaders>().InSingletonScope();

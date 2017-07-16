@@ -12,8 +12,10 @@
     using Common.Scene;
     using Common.Util;
 
-    public class EnvironmentImpl : IEnvironment {
+    internal class EnvironmentImpl : IEnvironment {
+
         #region Constants
+
         //private const int MAX_DISTANCE = 900;
         //private const float NIGHT_FOG = (MAX_DISTANCE / 5);
         private const float ENV_TRANSITION = 0.02f;
@@ -41,12 +43,15 @@
         private const int SUN_ANGLE_MORNING = 15;
         private const int SUN_ANGLE_AFTERNOON = 165;
         private const int SUN_ANGLE_SUNSET = 190;
+
         #endregion
 
         #region Modules
+
         private readonly IAvatar avatar;
         private readonly IGame game;
         private readonly IScene scene;
+
         #endregion
 
         #region Properties and variables

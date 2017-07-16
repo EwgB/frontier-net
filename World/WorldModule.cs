@@ -16,7 +16,9 @@
             if (kernel == null) {
                 Log.Error("Kernel should not be null.");
             } else {
-                kernel.Load(new RegionModule(true));
+                if (!kernel.HasModule("FrontierSharp.Region.RegionModule")) {
+                    kernel.Load(new RegionModule(true));
+                }
                 var region = kernel.Get<IRegion>();
                 Bind<IWorld>().To<DummyWorld>()
                     .InSingletonScope()

@@ -4,8 +4,18 @@
     using Common.Animation;
 
     public class AnimationModule : NinjectModule {
+        private readonly bool useDummy;
+
+        public AnimationModule(bool useDummy) {
+            this.useDummy = useDummy;
+        }
+
         public override void Load() {
-            Bind<IFigure>().To<DummyFigure>();
+            if (this.useDummy) {
+                Bind<IFigure>().To<DummyFigure>();
+            } else {
+                Bind<IFigure>().To<Figure>();
+            }
         }
     }
 }

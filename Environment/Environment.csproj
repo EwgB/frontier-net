@@ -52,7 +52,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DummyEnvironment.cs" />
     <Compile Include="EnvironmentImpl.cs" />
+    <Compile Include="EnvironmentModule.cs" />
     <Compile Include="EnvironmentProperties.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

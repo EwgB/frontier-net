@@ -1,4 +1,4 @@
-﻿namespace FrontierSharp.DummyModules {
+﻿namespace FrontierSharp.Environment {
     using OpenTK;
 
     using Common.Environment;
@@ -26,12 +26,7 @@
             SunAngle = 45
         };
 
-        public void Init() {
-            // Do nothing
-        }
-
-        public void Update() {
-            // Do nothing
-        }
+        public void Init() { /* Do nothing */ }
+        public void Update() { /* Do nothing */ }
     }
 }

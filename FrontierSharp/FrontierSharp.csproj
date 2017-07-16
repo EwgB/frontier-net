@@ -61,13 +61,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DummyModules\DummyCache.cs" />
-    <Compile Include="DummyModules\DummyEnvironment.cs" />
     <Compile Include="DummyModules\DummyInput.cs" />
     <Compile Include="DummyModules\DummyText.cs" />
     <Compile Include="DummyModules\DummySky.cs" />
     <Compile Include="DummyModules\DummyPlayer.cs" />
     <Compile Include="DummyModules\DummyConsole.cs" />
-    <Compile Include="DummyModules\DummyGame.cs" />
     <Compile Include="DummyModules\DummyWater.cs" />
     <Compile Include="DummyModules\DummyShaders.cs" />
     <Compile Include="Frontier.cs" />

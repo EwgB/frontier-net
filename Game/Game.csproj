@@ -52,7 +52,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DummyGame.cs" />
     <Compile Include="GameImpl.cs" />
+    <Compile Include="GameModule.cs" />
     <Compile Include="GameProperties.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
