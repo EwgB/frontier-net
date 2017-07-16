@@ -27,17 +27,17 @@
                 new AvatarModule(false),
                 new CacheModule(),
                 new ConsoleModule(),
-                new EnvironmentModule(true), 
-                new GameModule(true),
+                new EnvironmentModule(false), 
+                new GameModule(false),
                 new InputModule(),
-                new ParticlesModule(true),
+                new ParticlesModule(false),
                 new PlayerModule(),
-                new RendererModule(true), 
-                new SceneModule(true),
+                new RendererModule(true), // Circular reference
+                new SceneModule(true), // Circular reference
                 new ShadersModule(),
                 new SkyModule(),
                 new TextModule(),
-                new TexturesModule(true),
+                new TexturesModule(false),
                 new WaterModule(),
                 new WorldModule()
             };

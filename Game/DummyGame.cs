@@ -6,7 +6,7 @@
     using Common.Property;
 
     internal class DummyGame : IGame {
-        public IGameProperties GameProperties { get; }
+        public IGameProperties GameProperties => new GameProperties();
         public IProperties Properties => this.GameProperties;
 
         public bool IsRunning { get; private set; }
