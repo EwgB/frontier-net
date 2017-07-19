@@ -12,9 +12,9 @@
 
         public override void Load() {
             if (this.useDummy) {
-                Bind<IParticles>().To<DummyParticles>();
+                Bind<IParticles>().To<DummyParticles>().InSingletonScope();
             } else {
-                Bind<IParticles>().To<ParticlesImpl>();
+                Bind<IParticles>().To<ParticlesImpl>().InSingletonScope();
             }
         }
     }

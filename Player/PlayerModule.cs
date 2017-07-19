@@ -5,7 +5,7 @@
 
     public class PlayerModule : NinjectModule {
         public override void Load() {
-            Bind<IPlayer>().To<DummyPlayer>();
+            Bind<IPlayer>().To<DummyPlayer>().InSingletonScope();
         }
     }
 }

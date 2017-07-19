@@ -5,7 +5,7 @@
 
     public class CacheModule : NinjectModule {
         public override void Load() {
-            Bind<ICache>().To<DummyCache>();
+            Bind<ICache>().To<DummyCache>().InSingletonScope();
         }
     }
 }

@@ -5,7 +5,7 @@
 
     public class SkyModule : NinjectModule {
         public override void Load() {
-            Bind<ISky>().To<DummySky>();
+            Bind<ISky>().To<DummySky>().InSingletonScope();
         }
     }
 }

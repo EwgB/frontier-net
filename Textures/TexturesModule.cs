@@ -12,9 +12,9 @@
 
         public override void Load() {
             if (this.useDummy) {
-                Bind<ITextures>().To<DummyTextures>();
+                Bind<ITextures>().To<DummyTextures>().InSingletonScope();
             } else {
-                Bind<ITextures>().To<TexturesImpl>();
+                Bind<ITextures>().To<TexturesImpl>().InSingletonScope();
             }
         }
     }

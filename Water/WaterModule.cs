@@ -5,7 +5,7 @@
 
     public class WaterModule : NinjectModule {
         public override void Load() {
-            Bind<IWater>().To<DummyWater>();
+            Bind<IWater>().To<DummyWater>().InSingletonScope();
         }
     }
 }

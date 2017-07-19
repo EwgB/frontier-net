@@ -12,9 +12,9 @@
 
         public override void Load() {
             if (this.useDummy) {
-                Bind<IGame>().To<DummyGame>();
+                Bind<IGame>().To<DummyGame>().InSingletonScope();
             } else {
-                Bind<IGame>().To<GameImpl>();
+                Bind<IGame>().To<GameImpl>().InSingletonScope();
             }
         }
     }

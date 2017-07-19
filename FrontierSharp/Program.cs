@@ -43,6 +43,8 @@
             };
 
             using (IKernel kernel = new StandardKernel(modules)) {
+                kernel.Bind<IKernel>().ToConstant(kernel).InSingletonScope();
+
                 using (var frontier = kernel.Get<Frontier>()) {
                     frontier.Run(30.0);
                 }

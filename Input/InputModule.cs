@@ -5,7 +5,7 @@
 
     public class InputModule : NinjectModule {
         public override void Load() {
-            Bind<IInput>().To<DummyInput>();
+            Bind<IInput>().To<DummyInput>().InSingletonScope();
         }
     }
 }

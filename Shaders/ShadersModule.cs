@@ -5,7 +5,7 @@
 
     public class ShadersModule : NinjectModule {
         public override void Load() {
-            Bind<IShaders>().To<DummyShaders>();
+            Bind<IShaders>().To<DummyShaders>().InSingletonScope();
         }
     }
 }

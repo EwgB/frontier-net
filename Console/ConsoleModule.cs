@@ -5,7 +5,7 @@
 
     public class ConsoleModule : NinjectModule {
         public override void Load() {
-            Bind<IConsole>().To<DummyConsole>();
+            Bind<IConsole>().To<DummyConsole>().InSingletonScope();
         }
     }
 }

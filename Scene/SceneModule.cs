@@ -12,9 +12,9 @@
 
         public override void Load() {
             if (this.useDummy) {
-                Bind<IScene>().To<DummyScene>();
+                Bind<IScene>().To<DummyScene>().InSingletonScope();
             } else {
-                Bind<IScene>().To<SceneImpl>();
+                Bind<IScene>().To<SceneImpl>().InSingletonScope();
             }
         }
     }

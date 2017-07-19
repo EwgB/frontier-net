@@ -12,9 +12,9 @@
 
         public override void Load() {
             if (this.useDummy) {
-                Bind<IRenderer>().To<DummyRenderer>();
+                Bind<IRenderer>().To<DummyRenderer>().InSingletonScope();
             } else {
-                Bind<IRenderer>().To<RendererImpl>();
+                Bind<IRenderer>().To<RendererImpl>().InSingletonScope();
             }
         }
     }

@@ -5,7 +5,7 @@
 
     public class TextModule : NinjectModule {
         public override void Load() {
-            Bind<IText>().To<DummyText>();
+            Bind<IText>().To<DummyText>().InSingletonScope();
         }
     }
 }

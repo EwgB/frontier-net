@@ -12,9 +12,9 @@
 
         public override void Load() {
             if (this.useDummy) {
-                Bind<IEnvironment>().To<DummyEnvironment>();
+                Bind<IEnvironment>().To<DummyEnvironment>().InSingletonScope();
             } else {
-                Bind<IEnvironment>().To<EnvironmentImpl>();
+                Bind<IEnvironment>().To<EnvironmentImpl>().InSingletonScope();
             }
         }
     }
