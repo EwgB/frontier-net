@@ -32,8 +32,8 @@
                 new InputModule(),
                 new ParticlesModule(false),
                 new PlayerModule(),
-                new RendererModule(true), // Circular reference
-                new SceneModule(true), // Circular reference
+                new RendererModule(false),
+                new SceneModule(false),
                 new ShadersModule(),
                 new SkyModule(),
                 new TextModule(),
@@ -43,8 +43,6 @@
             };
 
             using (IKernel kernel = new StandardKernel(modules)) {
-                kernel.Bind<IKernel>().ToConstant(kernel).InSingletonScope();
-
                 using (var frontier = kernel.Get<Frontier>()) {
                     frontier.Run(30.0);
                 }
