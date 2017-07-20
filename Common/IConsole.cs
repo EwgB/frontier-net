@@ -7,5 +7,6 @@
 
         void ToggleConsole();
         void ProcessKey(KeyboardKeyEventArgs e);
+        void Render();
     }
 }

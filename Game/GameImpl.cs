@@ -177,7 +177,7 @@
             var pointsChecked = 0;
             while (pointsChecked < WorldUtils.REGION_SIZE * 4) {
                 this.Text.Print("Scanning {0}", worldPosition.X);
-                this.Renderer.RenderLoadingScreen(0.02f);
+                this.Renderer.RequestLoadingScreen(0.02f);
                 if (!this.Cache.IsPointAvailable(worldPosition.X, worldPosition.Y)) {
                     this.Cache.UpdatePage(worldPosition.X, worldPosition.Y, this.GameWindow.UpdateTime / 1000 + 20);
                     continue;
@@ -296,13 +296,13 @@
             do {
                 this.Scene.Progress(out ready, out total);
                 this.Scene.Update(this.GameWindow.UpdateTime / 1000 + 20);
-                this.Renderer.RenderLoadingScreen((ready / (float)total) * 0.5f);
+                this.Renderer.RequestLoadingScreen((ready / (float)total) * 0.5f);
             } while (ready < total);
             this.Scene.RestartProgress();
             do {
                 this.Scene.Progress(out ready, out total);
                 this.Scene.Update(this.GameWindow.UpdateTime / 1000 + 20);
-                this.Renderer.RenderLoadingScreen(0.5f + (ready / (float)total) * 0.5f);
+                this.Renderer.RequestLoadingScreen(0.5f + (ready / (float)total) * 0.5f);
             } while (ready < total);
         }
     }

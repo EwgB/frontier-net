@@ -6,11 +6,13 @@
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
 
+    using Common;
     using Common.Avatar;
     using Common.Environment;
     using Common.Property;
     using Common.Renderer;
     using Common.Scene;
+    using Common.Shaders;
     using Common.Util;
     using Common.World;
 
@@ -28,11 +30,23 @@
         private IAvatar avatar;
         private IAvatar Avatar => this.avatar ?? (this.avatar = this.kernel.Get<IAvatar>());
 
+        private ICache cache;
+        private ICache Cache => this.cache ?? (this.cache = this.kernel.Get<ICache>());
+
+        private IConsole console;
+        private IConsole Console => this.console ?? (this.console = this.kernel.Get<IConsole>());
+
         private IEnvironment environment;
         private IEnvironment Environment => this.environment ?? (this.environment = this.kernel.Get<IEnvironment>());
 
         private IScene scene;
         private IScene Scene => this.scene ?? (this.scene = this.kernel.Get<IScene>());
+
+        private IShaders shaders;
+        private IShaders Shaders => this.shaders ?? (this.shaders = this.kernel.Get<IShaders>());
+
+        private IText text;
+        private IText Text => this.text ?? (this.text = this.kernel.Get<IText>());
 
         private IWorld world;
         private IWorld World => this.world ?? (this.world = this.kernel.Get<IWorld>());
@@ -63,92 +77,101 @@
         }
 
         public void Render() {
-            var envData = this.Environment.Current;
-            var pos = this.Avatar.CameraPosition;
-            var waterLevel = Math.Max(this.World.GetWaterLevel(new Vector2(pos.X, pos.Y)), 0);
-
-            if (pos.Z >= waterLevel) {
-                //currentFog = (currentDiffuse + Color3.Blue) / 2;
-                //GL.Fog(FogParameter.FogStart, RENDER_DISTANCE / 2);   // Fog Start Depth
-                //GL.Fog(FogParameter.FogEnd, RENDER_DISTANCE);			// Fog End Depth
-                GL.Fog(FogParameter.FogStart, envData.Fog.Min);         // Fog Start Depth
-                GL.Fog(FogParameter.FogEnd, envData.Fog.Max);           // Fog End Depth
-            } else {
-                //cfog = new Color3(0.0f, 0.5f, 0.8f);
-                GL.Fog(FogParameter.FogStart, 1);               // Fog Start Depth
-                GL.Fog(FogParameter.FogEnd, 32);				// Fog End Depth
+            if (this.renderLoadingScreen) {
+                RenderLoadingScreen();
+                this.renderLoadingScreen = false;
             }
+            else {
 
-            GL.Enable(EnableCap.Fog);
-            GL.Fog(FogParameter.FogMode, (int)FogMode.Linear);
-            //GL.Fog (FogParameter.FogMode, (int) FogMode.Exp);
-            GL.Fog(FogParameter.FogColor, envData.Color[ColorTypes.Fog].R);
-            GL.ClearColor((Color) envData.Color[ColorTypes.Fog]);
-            //GL.ClearColor (0, 0, 0, 1.0f);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            //GL.Clear (ClearBufferMask.DepthBufferBit);
+                var envData = this.Environment.Current;
+                var pos = this.Avatar.CameraPosition;
+                var waterLevel = Math.Max(this.World.GetWaterLevel(new Vector2(pos.X, pos.Y)), 0);
 
-            var light = new[] {
-                -envData.Light.X,
-                -envData.Light.Y,
-                -envData.Light.Z,
-                0
-            };
+                if (pos.Z >= waterLevel) {
+                    //currentFog = (currentDiffuse + Color3.Blue) / 2;
+                    //GL.Fog(FogParameter.FogStart, RENDER_DISTANCE / 2);   // Fog Start Depth
+                    //GL.Fog(FogParameter.FogEnd, RENDER_DISTANCE);			// Fog End Depth
+                    GL.Fog(FogParameter.FogStart, envData.Fog.Min); // Fog Start Depth
+                    GL.Fog(FogParameter.FogEnd, envData.Fog.Max); // Fog End Depth
+                }
+                else {
+                    //cfog = new Color3(0.0f, 0.5f, 0.8f);
+                    GL.Fog(FogParameter.FogStart, 1); // Fog Start Depth
+                    GL.Fog(FogParameter.FogEnd, 32); // Fog End Depth
+                }
 
-            GL.Enable(EnableCap.Light1);
-            GL.Enable(EnableCap.Lighting);
-            GL.Light(LightName.Light1, LightParameter.Ambient, envData.Color[ColorTypes.Ambient].R);
-            var c = envData.Color[ColorTypes.Light];
-            //c *= 20.0f;
-            GL.Light(LightName.Light1, LightParameter.Diffuse, c.R);
-            GL.Light(LightName.Light1, LightParameter.Position, light);
+                GL.Enable(EnableCap.Fog);
+                GL.Fog(FogParameter.FogMode, (int) FogMode.Linear);
+                //GL.Fog (FogParameter.FogMode, (int) FogMode.Exp);
+                GL.Fog(FogParameter.FogColor, envData.Color[ColorTypes.Fog].R);
+                GL.ClearColor((Color) envData.Color[ColorTypes.Fog]);
+                //GL.ClearColor (0, 0, 0, 1.0f);
+                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+                //GL.Clear (ClearBufferMask.DepthBufferBit);
 
-            GL.DepthFunc(DepthFunction.Lequal);
-            GL.Enable(EnableCap.DepthTest);
-            
-            //Culling and shading
-            GL.ShadeModel(ShadingModel.Smooth);
-            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-            GL.Enable(EnableCap.CullFace);
-            GL.CullFace(CullFaceMode.Back);
-            
-            //Alpha blending  
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-            GL.Enable(EnableCap.AlphaTest);
-            GL.AlphaFunc(AlphaFunction.Greater, 0);
+                var light = new[] {
+                    -envData.Light.X,
+                    -envData.Light.Y,
+                    -envData.Light.Z,
+                    0
+                };
 
-            GL.LineWidth(2.0f);
-            //GL.MatrixMode (GL_MODELVIEW);
+                GL.Enable(EnableCap.Light1);
+                GL.Enable(EnableCap.Lighting);
+                GL.Light(LightName.Light1, LightParameter.Ambient, envData.Color[ColorTypes.Ambient].R);
+                var c = envData.Color[ColorTypes.Light];
+                //c *= 20.0f;
+                GL.Light(LightName.Light1, LightParameter.Diffuse, c.R);
+                GL.Light(LightName.Light1, LightParameter.Position, light);
 
-            //Move into our unique coordanate system
-            GL.LoadIdentity();
-            GL.Scale(1, -1, 1);
-            var angle = this.Avatar.CameraAngle;
-            GL.Rotate(angle.X, Vector3.UnitX);
-            GL.Rotate(angle.Y, Vector3.UnitY);
-            GL.Rotate(angle.Z, Vector3.UnitZ);
-            GL.Translate(-pos.X, -pos.Y, -pos.Z);
+                GL.DepthFunc(DepthFunction.Lequal);
+                GL.Enable(EnableCap.DepthTest);
 
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+                //Culling and shading
+                GL.ShadeModel(ShadingModel.Smooth);
+                GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+                GL.Enable(EnableCap.CullFace);
+                GL.CullFace(CullFaceMode.Back);
 
-            //if (this.properties.RenderShaders)
-            //    CgUpdate();
-            this.Scene.Render();
-            //CgShaderSelect(VSHADER_NONE);
-            if (this.RendererProperties.RenderWireframe) {
-                this.Scene.RenderDebug();
+                //Alpha blending  
+                GL.Enable(EnableCap.Blend);
+                GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+                GL.Enable(EnableCap.AlphaTest);
+                GL.AlphaFunc(AlphaFunction.Greater, 0);
+
+                GL.LineWidth(2.0f);
+                //GL.MatrixMode (GL_MODELVIEW);
+
+                //Move into our unique coordanate system
+                GL.LoadIdentity();
+                GL.Scale(1, -1, 1);
+                var angle = this.Avatar.CameraAngle;
+                GL.Rotate(angle.X, Vector3.UnitX);
+                GL.Rotate(angle.Y, Vector3.UnitY);
+                GL.Rotate(angle.Z, Vector3.UnitZ);
+                GL.Translate(-pos.X, -pos.Y, -pos.Z);
+
+                GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+
+                if (this.RendererProperties.RenderShaders)
+                    this.Shaders.Update();
+                this.Scene.Render();
+                this.Shaders.SelectShader(VShaderTypes.None);
+                if (this.RendererProperties.RenderWireframe) {
+                    this.Scene.RenderDebug();
+                }
+                if (this.RendererProperties.ShowPages)
+                    this.Cache.RenderDebug();
+                this.Text.Render();
+                if (this.showMap) {
+                    RenderTexture(this.World.MapId);
+                }
+                this.Console.Render();
             }
-            //if (this.properties.ShowPages)
-            //    CacheRenderDebug();
-            //TextRender();
-            if (this.showMap) {
-                RenderTexture(this.World.MapId);
-            }
-            //ConsoleRender();
         }
 
         private int r;
+
         private void RenderTexture(uint id) {
             GL.MatrixMode(MatrixMode.Projection);
             GL.PushMatrix();
@@ -215,35 +238,76 @@
             GL.MatrixMode(MatrixMode.Modelview);
         }
 
-        public void Update() {
-            // Do nothing
-        }
+        public void Update() { /* Do nothing */ }
 
         public void ToggleShowMap() {
             this.showMap = !this.showMap;
         }
 
-        public void RenderLoadingScreen(float progress) {
-            /* TODO
-            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glColor3f(1.0f - progress, progress, 0.0f);
-            glLineWidth(10.0f);
-            glDisable(GL_LIGHTING);
-            glDisable(GL_TEXTURE_2D);
-            glDisable(GL_BLEND);
-            glBindTexture(GL_TEXTURE_2D, 0);
-            RenderCanvasBegin(-20, 120, 0, 100, 0);
-            glBegin(GL_LINES);
-            glVertex2f(0, 50);
-            glVertex2f(progress * 100, 50);
-            glEnd();
-            RenderCanvasEnd();
-            TextRender();
-            ConsoleRender();
-            SDL_GL_SwapBuffers();
-            */
+        private bool renderLoadingScreen;
+        private float loadingScreenProgress;
+
+        public void RequestLoadingScreen(float progress) {
+            this.renderLoadingScreen = true;
+            this.loadingScreenProgress = progress;
         }
+
+        private void RenderLoadingScreen() {
+            GL.ClearColor(Color.Black);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GL.Color3(1 - this.loadingScreenProgress, this.loadingScreenProgress, 0);
+            GL.LineWidth(10.0f);
+            GL.Disable(EnableCap.Lighting);
+            GL.Disable(EnableCap.Texture2D);
+            GL.Disable(EnableCap.Blend);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            CanvasBegin(-20, 120, 0, 100, 0);
+            GL.Begin(PrimitiveType.Lines);
+            GL.Vertex2(0, 50);
+            GL.Vertex2(this.loadingScreenProgress * 100, 50);
+            GL.End();
+            CanvasEnd();
+            this.Text.Render();
+            this.Console.Render();
+        }
+
+        private void CanvasBegin(int left, int right, int bottom, int top, int size) {
+            GL.Disable(EnableCap.CullFace);
+            GL.Disable(EnableCap.Fog);
+            GL.Disable(EnableCap.DepthTest);
+            GL.Disable(EnableCap.Lighting);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.Enable(EnableCap.Texture2D);
+            if (size != 0) {
+                GL.Viewport(0, 0, size, size);
+            } else {
+                GL.Viewport(0, 0, this.viewWidth, this.viewHeight);
+            }
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.PushMatrix();
+            GL.LoadIdentity();
+            GL.Ortho(left, right, bottom, top, 0.1f, 2048);
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.PushMatrix();
+            GL.LoadIdentity();
+            GL.Translate(0, 0, -10);
+        }
+
+        private void CanvasEnd() {
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.PopMatrix();
+            GL.TexParameter(TextureTarget.Texture2D,
+                TextureParameterName.TextureMinFilter,
+                (int) TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D,
+                TextureParameterName.TextureMagFilter,
+                (int) TextureMagFilter.Nearest);
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.PopMatrix();
+        }
+
     }
 }
 
@@ -331,44 +395,6 @@
             p.y *= WorldUtil.WORLD_GRID * WorldUtil.REGION_SIZE;
             p.z = WorldUtil.REGION_SIZE;
             AvatarPositionSet(p);
-
-        }
-
-        void RenderCanvasBegin(int left, int right, int bottom, int top, int size)
-        {
-
-            glDisable(GL_CULL_FACE);
-            glDisable(GL_FOG);
-            glDisable(GL_DEPTH_TEST);
-            glDisable(GL_LIGHTING);
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glEnable(GL_TEXTURE_2D);
-            if (size)
-                glViewport(0, 0, size, size);
-            else
-                glViewport(0, 0, viewWidth, viewHeight);
-            glMatrixMode(GL_PROJECTION);
-            glPushMatrix();
-            glLoadIdentity();
-            glOrtho(left, right, bottom, top, 0.1f, 2048);
-            glMatrixMode(GL_MODELVIEW);
-            glPushMatrix();
-            glLoadIdentity();
-            glTranslate(0, 0, -10.0f);
-
-        }
-
-        void RenderCanvasEnd()
-        {
-
-            glMatrixMode(GL_PROJECTION);
-            glPopMatrix();
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glMatrixMode(GL_MODELVIEW);
-            glPopMatrix();
 
         }
 

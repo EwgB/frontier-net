@@ -33,5 +33,6 @@
         }
 
         public void Update() { /* Do nothing */ }
+        public void Render() { /* Do nothing */ }
     }
 }

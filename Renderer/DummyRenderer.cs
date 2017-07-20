@@ -38,7 +38,7 @@
             GL.End();
         }
 
-        public void RenderLoadingScreen(float progress) { /* Do nothing */ }
+        public void RequestLoadingScreen(float progress) { /* Do nothing */ }
         public void ToggleShowMap() { /* Do nothing */ }
 
     }
