@@ -32,34 +32,34 @@
         private readonly IKernel kernel;
 
         private IAvatar avatar;
-        private IAvatar Avatar { get { return this.avatar ?? (this.avatar = this.kernel.Get<IAvatar>()); } }
+        private IAvatar Avatar => this.avatar ?? (this.avatar = this.kernel.Get<IAvatar>());
 
         private ICache cache;
-        private ICache Cache { get { return this.cache ?? (this.cache = this.kernel.Get<ICache>()); } }
+        private ICache Cache => this.cache ?? (this.cache = this.kernel.Get<ICache>());
 
         private IConsole console;
-        private IConsole Console { get { return this.console ?? (this.console = this.kernel.Get<IConsole>()); } }
+        private IConsole Console => this.console ?? (this.console = this.kernel.Get<IConsole>());
 
         private GameWindow gameWindow;
-        private GameWindow GameWindow { get { return this.gameWindow ?? (this.gameWindow = this.kernel.Get<GameWindow>()); } }
+        private GameWindow GameWindow => this.gameWindow ?? (this.gameWindow = this.kernel.Get<GameWindow>());
 
         private IInput input;
-        private IInput Input { get { return this.input ?? (this.input = this.kernel.Get<IInput>()); } }
+        private IInput Input => this.input ?? (this.input = this.kernel.Get<IInput>());
 
         private IPlayer player;
-        private IPlayer Player { get { return this.player ?? (this.player = this.kernel.Get<IPlayer>()); } }
+        private IPlayer Player => this.player ?? (this.player = this.kernel.Get<IPlayer>());
 
         private IRenderer renderer;
-        private IRenderer Renderer { get { return this.renderer ?? (this.renderer = this.kernel.Get<IRenderer>()); } }
+        private IRenderer Renderer => this.renderer ?? (this.renderer = this.kernel.Get<IRenderer>());
 
         private IScene scene;
-        private IScene Scene { get { return this.scene ?? (this.scene = this.kernel.Get<IScene>()); } }
+        private IScene Scene => this.scene ?? (this.scene = this.kernel.Get<IScene>());
 
         private IText text;
-        private IText Text { get { return this.text ?? (this.text = this.kernel.Get<IText>()); } }
+        private IText Text => this.text ?? (this.text = this.kernel.Get<IText>());
 
         private IWorld world;
-        private IWorld World { get { return this.world ?? (this.world = this.kernel.Get<IWorld>()); } }
+        private IWorld World => this.world ?? (this.world = this.kernel.Get<IWorld>());
 
         #endregion
 

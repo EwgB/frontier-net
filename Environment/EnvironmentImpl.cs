@@ -52,13 +52,13 @@
         private readonly IKernel kernel;
 
         private IAvatar avatar;
-        private IAvatar Avatar { get { return this.avatar ?? (this.avatar = this.kernel.Get<IAvatar>()); } }
+        private IAvatar Avatar => this.avatar ?? (this.avatar = this.kernel.Get<IAvatar>());
 
         private IGame game;
-        private IGame Game { get { return this.game ?? (this.game = this.kernel.Get<IGame>()); } }
+        private IGame Game => this.game ?? (this.game = this.kernel.Get<IGame>());
 
         private IScene scene;
-        private IScene Scene { get { return this.scene ?? (this.scene = this.kernel.Get<IScene>()); } }
+        private IScene Scene => this.scene ?? (this.scene = this.kernel.Get<IScene>());
 
         #endregion
 

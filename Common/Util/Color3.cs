@@ -223,702 +223,702 @@
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (240, 248, 255).
         /// </summary>
-        public static Color3 AliceBlue { get { return new Color3(240, 248, 255); } }
+        public static Color3 AliceBlue => new Color3(240, 248, 255);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (250, 235, 215).
         /// </summary>
-        public static Color3 AntiqueWhite { get { return new Color3(250, 235, 215); } }
+        public static Color3 AntiqueWhite => new Color3(250, 235, 215);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (0, 255, 255).
         /// </summary>
-        public static Color3 Aqua { get { return new Color3(0, 255, 255); } }
+        public static Color3 Aqua => new Color3(0, 255, 255);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (127, 255, 212).
         /// </summary>
-        public static Color3 Aquamarine { get { return new Color3(127, 255, 212); } }
+        public static Color3 Aquamarine => new Color3(127, 255, 212);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (240, 255, 255).
         /// </summary>
-        public static Color3 Azure { get { return new Color3(240, 255, 255); } }
+        public static Color3 Azure => new Color3(240, 255, 255);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (245, 245, 220).
         /// </summary>
-        public static Color3 Beige { get { return new Color3(245, 245, 220); } }
+        public static Color3 Beige => new Color3(245, 245, 220);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 228, 196).
         /// </summary>
-        public static Color3 Bisque { get { return new Color3(255, 228, 196); } }
+        public static Color3 Bisque => new Color3(255, 228, 196);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (0, 0, 0).
         /// </summary>
-        public static Color3 Black { get { return new Color3(0, 0, 0); } }
+        public static Color3 Black => new Color3(0, 0, 0);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 235, 205).
         /// </summary>
-        public static Color3 BlanchedAlmond { get { return new Color3(255, 235, 205); } }
+        public static Color3 BlanchedAlmond => new Color3(255, 235, 205);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (0, 0, 255).
         /// </summary>
-        public static Color3 Blue { get { return new Color3(0, 0, 255); } }
+        public static Color3 Blue => new Color3(0, 0, 255);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (138, 43, 226).
         /// </summary>
-        public static Color3 BlueViolet { get { return new Color3(138, 43, 226); } }
+        public static Color3 BlueViolet => new Color3(138, 43, 226);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (165, 42, 42).
         /// </summary>
-        public static Color3 Brown { get { return new Color3(165, 42, 42); } }
+        public static Color3 Brown => new Color3(165, 42, 42);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (222, 184, 135).
         /// </summary>
-        public static Color3 BurlyWood { get { return new Color3(222, 184, 135); } }
+        public static Color3 BurlyWood => new Color3(222, 184, 135);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (95, 158, 160).
         /// </summary>
-        public static Color3 CadetBlue { get { return new Color3(95, 158, 160); } }
+        public static Color3 CadetBlue => new Color3(95, 158, 160);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (127, 255, 0).
         /// </summary>
-        public static Color3 Chartreuse { get { return new Color3(127, 255, 0); } }
+        public static Color3 Chartreuse => new Color3(127, 255, 0);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (210, 105, 30).
         /// </summary>
-        public static Color3 Chocolate { get { return new Color3(210, 105, 30); } }
+        public static Color3 Chocolate => new Color3(210, 105, 30);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 127, 80).
         /// </summary>
-        public static Color3 Coral { get { return new Color3(255, 127, 80); } }
+        public static Color3 Coral => new Color3(255, 127, 80);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (100, 149, 237).
         /// </summary>
-        public static Color3 CornflowerBlue { get { return new Color3(100, 149, 237); } }
+        public static Color3 CornflowerBlue => new Color3(100, 149, 237);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 248, 220).
         /// </summary>
-        public static Color3 Cornsilk { get { return new Color3(255, 248, 220); } }
+        public static Color3 Cornsilk => new Color3(255, 248, 220);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (220, 20, 60).
         /// </summary>
-        public static Color3 Crimson { get { return new Color3(220, 20, 60); } }
+        public static Color3 Crimson => new Color3(220, 20, 60);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (0, 255, 255).
         /// </summary>
-        public static Color3 Cyan { get { return new Color3(0, 255, 255); } }
+        public static Color3 Cyan => new Color3(0, 255, 255);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (0, 0, 139).
         /// </summary>
-        public static Color3 DarkBlue { get { return new Color3(0, 0, 139); } }
+        public static Color3 DarkBlue => new Color3(0, 0, 139);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (0, 139, 139).
         /// </summary>
-        public static Color3 DarkCyan { get { return new Color3(0, 139, 139); } }
+        public static Color3 DarkCyan => new Color3(0, 139, 139);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (184, 134, 11).
         /// </summary>
-        public static Color3 DarkGoldenrod { get { return new Color3(184, 134, 11); } }
+        public static Color3 DarkGoldenrod => new Color3(184, 134, 11);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (169, 169, 169).
         /// </summary>
-        public static Color3 DarkGray { get { return new Color3(169, 169, 169); } }
+        public static Color3 DarkGray => new Color3(169, 169, 169);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (0, 100, 0).
         /// </summary>
-        public static Color3 DarkGreen { get { return new Color3(0, 100, 0); } }
+        public static Color3 DarkGreen => new Color3(0, 100, 0);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (189, 183, 107).
         /// </summary>
-        public static Color3 DarkKhaki { get { return new Color3(189, 183, 107); } }
+        public static Color3 DarkKhaki => new Color3(189, 183, 107);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (139, 0, 139).
         /// </summary>
-        public static Color3 DarkMagenta { get { return new Color3(139, 0, 139); } }
+        public static Color3 DarkMagenta => new Color3(139, 0, 139);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (85, 107, 47).
         /// </summary>
-        public static Color3 DarkOliveGreen { get { return new Color3(85, 107, 47); } }
+        public static Color3 DarkOliveGreen => new Color3(85, 107, 47);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 140, 0).
         /// </summary>
-        public static Color3 DarkOrange { get { return new Color3(255, 140, 0); } }
+        public static Color3 DarkOrange => new Color3(255, 140, 0);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (153, 50, 204).
         /// </summary>
-        public static Color3 DarkOrchid { get { return new Color3(153, 50, 204); } }
+        public static Color3 DarkOrchid => new Color3(153, 50, 204);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (139, 0, 0).
         /// </summary>
-        public static Color3 DarkRed { get { return new Color3(139, 0, 0); } }
+        public static Color3 DarkRed => new Color3(139, 0, 0);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (233, 150, 122).
         /// </summary>
-        public static Color3 DarkSalmon { get { return new Color3(233, 150, 122); } }
+        public static Color3 DarkSalmon => new Color3(233, 150, 122);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (143, 188, 139).
         /// </summary>
-        public static Color3 DarkSeaGreen { get { return new Color3(143, 188, 139); } }
+        public static Color3 DarkSeaGreen => new Color3(143, 188, 139);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (72, 61, 139).
         /// </summary>
-        public static Color3 DarkSlateBlue { get { return new Color3(72, 61, 139); } }
+        public static Color3 DarkSlateBlue => new Color3(72, 61, 139);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (47, 79, 79).
         /// </summary>
-        public static Color3 DarkSlateGray { get { return new Color3(47, 79, 79); } }
+        public static Color3 DarkSlateGray => new Color3(47, 79, 79);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (0, 206, 209).
         /// </summary>
-        public static Color3 DarkTurquoise { get { return new Color3(0, 206, 209); } }
+        public static Color3 DarkTurquoise => new Color3(0, 206, 209);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (148, 0, 211).
         /// </summary>
-        public static Color3 DarkViolet { get { return new Color3(148, 0, 211); } }
+        public static Color3 DarkViolet => new Color3(148, 0, 211);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 20, 147).
         /// </summary>
-        public static Color3 DeepPink { get { return new Color3(255, 20, 147); } }
+        public static Color3 DeepPink => new Color3(255, 20, 147);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (0, 191, 255).
         /// </summary>
-        public static Color3 DeepSkyBlue { get { return new Color3(0, 191, 255); } }
+        public static Color3 DeepSkyBlue => new Color3(0, 191, 255);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (105, 105, 105).
         /// </summary>
-        public static Color3 DimGray { get { return new Color3(105, 105, 105); } }
+        public static Color3 DimGray => new Color3(105, 105, 105);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (30, 144, 255).
         /// </summary>
-        public static Color3 DodgerBlue { get { return new Color3(30, 144, 255); } }
+        public static Color3 DodgerBlue => new Color3(30, 144, 255);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (178, 34, 34).
         /// </summary>
-        public static Color3 Firebrick { get { return new Color3(178, 34, 34); } }
+        public static Color3 Firebrick => new Color3(178, 34, 34);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 250, 240).
         /// </summary>
-        public static Color3 FloralWhite { get { return new Color3(255, 250, 240); } }
+        public static Color3 FloralWhite => new Color3(255, 250, 240);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (34, 139, 34).
         /// </summary>
-        public static Color3 ForestGreen { get { return new Color3(34, 139, 34); } }
+        public static Color3 ForestGreen => new Color3(34, 139, 34);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 0, 255).
         /// </summary>
-        public static Color3 Fuchsia { get { return new Color3(255, 0, 255); } }
+        public static Color3 Fuchsia => new Color3(255, 0, 255);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (220, 220, 220).
         /// </summary>
-        public static Color3 Gainsboro { get { return new Color3(220, 220, 220); } }
+        public static Color3 Gainsboro => new Color3(220, 220, 220);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (248, 248, 255).
         /// </summary>
-        public static Color3 GhostWhite { get { return new Color3(248, 248, 255); } }
+        public static Color3 GhostWhite => new Color3(248, 248, 255);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 215, 0).
         /// </summary>
-        public static Color3 Gold { get { return new Color3(255, 215, 0); } }
+        public static Color3 Gold => new Color3(255, 215, 0);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (218, 165, 32).
         /// </summary>
-        public static Color3 Goldenrod { get { return new Color3(218, 165, 32); } }
+        public static Color3 Goldenrod => new Color3(218, 165, 32);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (128, 128, 128).
         /// </summary>
-        public static Color3 Gray { get { return new Color3(128, 128, 128); } }
+        public static Color3 Gray => new Color3(128, 128, 128);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (0, 128, 0).
         /// </summary>
-        public static Color3 Green { get { return new Color3(0, 128, 0); } }
+        public static Color3 Green => new Color3(0, 128, 0);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (173, 255, 47).
         /// </summary>
-        public static Color3 GreenYellow { get { return new Color3(173, 255, 47); } }
+        public static Color3 GreenYellow => new Color3(173, 255, 47);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (240, 255, 240).
         /// </summary>
-        public static Color3 Honeydew { get { return new Color3(240, 255, 240); } }
+        public static Color3 Honeydew => new Color3(240, 255, 240);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 105, 180).
         /// </summary>
-        public static Color3 HotPink { get { return new Color3(255, 105, 180); } }
+        public static Color3 HotPink => new Color3(255, 105, 180);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (205, 92, 92).
         /// </summary>
-        public static Color3 IndianRed { get { return new Color3(205, 92, 92); } }
+        public static Color3 IndianRed => new Color3(205, 92, 92);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (75, 0, 130).
         /// </summary>
-        public static Color3 Indigo { get { return new Color3(75, 0, 130); } }
+        public static Color3 Indigo => new Color3(75, 0, 130);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 255, 240).
         /// </summary>
-        public static Color3 Ivory { get { return new Color3(255, 255, 240); } }
+        public static Color3 Ivory => new Color3(255, 255, 240);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (240, 230, 140).
         /// </summary>
-        public static Color3 Khaki { get { return new Color3(240, 230, 140); } }
+        public static Color3 Khaki => new Color3(240, 230, 140);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (230, 230, 250).
         /// </summary>
-        public static Color3 Lavender { get { return new Color3(230, 230, 250); } }
+        public static Color3 Lavender => new Color3(230, 230, 250);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 240, 245).
         /// </summary>
-        public static Color3 LavenderBlush { get { return new Color3(255, 240, 245); } }
+        public static Color3 LavenderBlush => new Color3(255, 240, 245);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (124, 252, 0).
         /// </summary>
-        public static Color3 LawnGreen { get { return new Color3(124, 252, 0); } }
+        public static Color3 LawnGreen => new Color3(124, 252, 0);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 250, 205).
         /// </summary>
-        public static Color3 LemonChiffon { get { return new Color3(255, 250, 205); } }
+        public static Color3 LemonChiffon => new Color3(255, 250, 205);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (173, 216, 230).
         /// </summary>
-        public static Color3 LightBlue { get { return new Color3(173, 216, 230); } }
+        public static Color3 LightBlue => new Color3(173, 216, 230);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (240, 128, 128).
         /// </summary>
-        public static Color3 LightCoral { get { return new Color3(240, 128, 128); } }
+        public static Color3 LightCoral => new Color3(240, 128, 128);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (224, 255, 255).
         /// </summary>
-        public static Color3 LightCyan { get { return new Color3(224, 255, 255); } }
+        public static Color3 LightCyan => new Color3(224, 255, 255);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (250, 250, 210).
         /// </summary>
-        public static Color3 LightGoldenrodYellow { get { return new Color3(250, 250, 210); } }
+        public static Color3 LightGoldenrodYellow => new Color3(250, 250, 210);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (144, 238, 144).
         /// </summary>
-        public static Color3 LightGreen { get { return new Color3(144, 238, 144); } }
+        public static Color3 LightGreen => new Color3(144, 238, 144);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (211, 211, 211).
         /// </summary>
-        public static Color3 LightGray { get { return new Color3(211, 211, 211); } }
+        public static Color3 LightGray => new Color3(211, 211, 211);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 182, 193).
         /// </summary>
-        public static Color3 LightPink { get { return new Color3(255, 182, 193); } }
+        public static Color3 LightPink => new Color3(255, 182, 193);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 160, 122).
         /// </summary>
-        public static Color3 LightSalmon { get { return new Color3(255, 160, 122); } }
+        public static Color3 LightSalmon => new Color3(255, 160, 122);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (32, 178, 170).
         /// </summary>
-        public static Color3 LightSeaGreen { get { return new Color3(32, 178, 170); } }
+        public static Color3 LightSeaGreen => new Color3(32, 178, 170);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (135, 206, 250).
         /// </summary>
-        public static Color3 LightSkyBlue { get { return new Color3(135, 206, 250); } }
+        public static Color3 LightSkyBlue => new Color3(135, 206, 250);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (119, 136, 153).
         /// </summary>
-        public static Color3 LightSlateGray { get { return new Color3(119, 136, 153); } }
+        public static Color3 LightSlateGray => new Color3(119, 136, 153);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (176, 196, 222).
         /// </summary>
-        public static Color3 LightSteelBlue { get { return new Color3(176, 196, 222); } }
+        public static Color3 LightSteelBlue => new Color3(176, 196, 222);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 255, 224).
         /// </summary>
-        public static Color3 LightYellow { get { return new Color3(255, 255, 224); } }
+        public static Color3 LightYellow => new Color3(255, 255, 224);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (0, 255, 0).
         /// </summary>
-        public static Color3 Lime { get { return new Color3(0, 255, 0); } }
+        public static Color3 Lime => new Color3(0, 255, 0);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (50, 205, 50).
         /// </summary>
-        public static Color3 LimeGreen { get { return new Color3(50, 205, 50); } }
+        public static Color3 LimeGreen => new Color3(50, 205, 50);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (250, 240, 230).
         /// </summary>
-        public static Color3 Linen { get { return new Color3(250, 240, 230); } }
+        public static Color3 Linen => new Color3(250, 240, 230);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 0, 255).
         /// </summary>
-        public static Color3 Magenta { get { return new Color3(255, 0, 255); } }
+        public static Color3 Magenta => new Color3(255, 0, 255);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (128, 0, 0).
         /// </summary>
-        public static Color3 Maroon { get { return new Color3(128, 0, 0); } }
+        public static Color3 Maroon => new Color3(128, 0, 0);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (102, 205, 170).
         /// </summary>
-        public static Color3 MediumAquamarine { get { return new Color3(102, 205, 170); } }
+        public static Color3 MediumAquamarine => new Color3(102, 205, 170);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (0, 0, 205).
         /// </summary>
-        public static Color3 MediumBlue { get { return new Color3(0, 0, 205); } }
+        public static Color3 MediumBlue => new Color3(0, 0, 205);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (186, 85, 211).
         /// </summary>
-        public static Color3 MediumOrchid { get { return new Color3(186, 85, 211); } }
+        public static Color3 MediumOrchid => new Color3(186, 85, 211);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (147, 112, 219).
         /// </summary>
-        public static Color3 MediumPurple { get { return new Color3(147, 112, 219); } }
+        public static Color3 MediumPurple => new Color3(147, 112, 219);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (60, 179, 113).
         /// </summary>
-        public static Color3 MediumSeaGreen { get { return new Color3(60, 179, 113); } }
+        public static Color3 MediumSeaGreen => new Color3(60, 179, 113);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (123, 104, 238).
         /// </summary>
-        public static Color3 MediumSlateBlue { get { return new Color3(123, 104, 238); } }
+        public static Color3 MediumSlateBlue => new Color3(123, 104, 238);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (0, 250, 154).
         /// </summary>
-        public static Color3 MediumSpringGreen { get { return new Color3(0, 250, 154); } }
+        public static Color3 MediumSpringGreen => new Color3(0, 250, 154);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (72, 209, 204).
         /// </summary>
-        public static Color3 MediumTurquoise { get { return new Color3(72, 209, 204); } }
+        public static Color3 MediumTurquoise => new Color3(72, 209, 204);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (199, 21, 133).
         /// </summary>
-        public static Color3 MediumVioletRed { get { return new Color3(199, 21, 133); } }
+        public static Color3 MediumVioletRed => new Color3(199, 21, 133);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (25, 25, 112).
         /// </summary>
-        public static Color3 MidnightBlue { get { return new Color3(25, 25, 112); } }
+        public static Color3 MidnightBlue => new Color3(25, 25, 112);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (245, 255, 250).
         /// </summary>
-        public static Color3 MintCream { get { return new Color3(245, 255, 250); } }
+        public static Color3 MintCream => new Color3(245, 255, 250);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 228, 225).
         /// </summary>
-        public static Color3 MistyRose { get { return new Color3(255, 228, 225); } }
+        public static Color3 MistyRose => new Color3(255, 228, 225);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 228, 181).
         /// </summary>
-        public static Color3 Moccasin { get { return new Color3(255, 228, 181); } }
+        public static Color3 Moccasin => new Color3(255, 228, 181);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 222, 173).
         /// </summary>
-        public static Color3 NavajoWhite { get { return new Color3(255, 222, 173); } }
+        public static Color3 NavajoWhite => new Color3(255, 222, 173);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (0, 0, 128).
         /// </summary>
-        public static Color3 Navy { get { return new Color3(0, 0, 128); } }
+        public static Color3 Navy => new Color3(0, 0, 128);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (253, 245, 230).
         /// </summary>
-        public static Color3 OldLace { get { return new Color3(253, 245, 230); } }
+        public static Color3 OldLace => new Color3(253, 245, 230);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (128, 128, 0).
         /// </summary>
-        public static Color3 Olive { get { return new Color3(128, 128, 0); } }
+        public static Color3 Olive => new Color3(128, 128, 0);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (107, 142, 35).
         /// </summary>
-        public static Color3 OliveDrab { get { return new Color3(107, 142, 35); } }
+        public static Color3 OliveDrab => new Color3(107, 142, 35);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 165, 0).
         /// </summary>
-        public static Color3 Orange { get { return new Color3(255, 165, 0); } }
+        public static Color3 Orange => new Color3(255, 165, 0);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 69, 0).
         /// </summary>
-        public static Color3 OrangeRed { get { return new Color3(255, 69, 0); } }
+        public static Color3 OrangeRed => new Color3(255, 69, 0);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (218, 112, 214).
         /// </summary>
-        public static Color3 Orchid { get { return new Color3(218, 112, 214); } }
+        public static Color3 Orchid => new Color3(218, 112, 214);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (238, 232, 170).
         /// </summary>
-        public static Color3 PaleGoldenrod { get { return new Color3(238, 232, 170); } }
+        public static Color3 PaleGoldenrod => new Color3(238, 232, 170);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (152, 251, 152).
         /// </summary>
-        public static Color3 PaleGreen { get { return new Color3(152, 251, 152); } }
+        public static Color3 PaleGreen => new Color3(152, 251, 152);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (175, 238, 238).
         /// </summary>
-        public static Color3 PaleTurquoise { get { return new Color3(175, 238, 238); } }
+        public static Color3 PaleTurquoise => new Color3(175, 238, 238);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (219, 112, 147).
         /// </summary>
-        public static Color3 PaleVioletRed { get { return new Color3(219, 112, 147); } }
+        public static Color3 PaleVioletRed => new Color3(219, 112, 147);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 239, 213).
         /// </summary>
-        public static Color3 PapayaWhip { get { return new Color3(255, 239, 213); } }
+        public static Color3 PapayaWhip => new Color3(255, 239, 213);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 218, 185).
         /// </summary>
-        public static Color3 PeachPuff { get { return new Color3(255, 218, 185); } }
+        public static Color3 PeachPuff => new Color3(255, 218, 185);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (205, 133, 63).
         /// </summary>
-        public static Color3 Peru { get { return new Color3(205, 133, 63); } }
+        public static Color3 Peru => new Color3(205, 133, 63);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 192, 203).
         /// </summary>
-        public static Color3 Pink { get { return new Color3(255, 192, 203); } }
+        public static Color3 Pink => new Color3(255, 192, 203);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (221, 160, 221).
         /// </summary>
-        public static Color3 Plum { get { return new Color3(221, 160, 221); } }
+        public static Color3 Plum => new Color3(221, 160, 221);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (176, 224, 230).
         /// </summary>
-        public static Color3 PowderBlue { get { return new Color3(176, 224, 230); } }
+        public static Color3 PowderBlue => new Color3(176, 224, 230);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (128, 0, 128).
         /// </summary>
-        public static Color3 Purple { get { return new Color3(128, 0, 128); } }
+        public static Color3 Purple => new Color3(128, 0, 128);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 0, 0).
         /// </summary>
-        public static Color3 Red { get { return new Color3(255, 0, 0); } }
+        public static Color3 Red => new Color3(255, 0, 0);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (188, 143, 143).
         /// </summary>
-        public static Color3 RosyBrown { get { return new Color3(188, 143, 143); } }
+        public static Color3 RosyBrown => new Color3(188, 143, 143);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (65, 105, 225).
         /// </summary>
-        public static Color3 RoyalBlue { get { return new Color3(65, 105, 225); } }
+        public static Color3 RoyalBlue => new Color3(65, 105, 225);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (139, 69, 19).
         /// </summary>
-        public static Color3 SaddleBrown { get { return new Color3(139, 69, 19); } }
+        public static Color3 SaddleBrown => new Color3(139, 69, 19);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (250, 128, 114).
         /// </summary>
-        public static Color3 Salmon { get { return new Color3(250, 128, 114); } }
+        public static Color3 Salmon => new Color3(250, 128, 114);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (244, 164, 96).
         /// </summary>
-        public static Color3 SandyBrown { get { return new Color3(244, 164, 96); } }
+        public static Color3 SandyBrown => new Color3(244, 164, 96);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (46, 139, 87).
         /// </summary>
-        public static Color3 SeaGreen { get { return new Color3(46, 139, 87); } }
+        public static Color3 SeaGreen => new Color3(46, 139, 87);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 245, 238).
         /// </summary>
-        public static Color3 SeaShell { get { return new Color3(255, 245, 238); } }
+        public static Color3 SeaShell => new Color3(255, 245, 238);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (160, 82, 45).
         /// </summary>
-        public static Color3 Sienna { get { return new Color3(160, 82, 45); } }
+        public static Color3 Sienna => new Color3(160, 82, 45);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (192, 192, 192).
         /// </summary>
-        public static Color3 Silver { get { return new Color3(192, 192, 192); } }
+        public static Color3 Silver => new Color3(192, 192, 192);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (135, 206, 235).
         /// </summary>
-        public static Color3 SkyBlue { get { return new Color3(135, 206, 235); } }
+        public static Color3 SkyBlue => new Color3(135, 206, 235);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (106, 90, 205).
         /// </summary>
-        public static Color3 SlateBlue { get { return new Color3(106, 90, 205); } }
+        public static Color3 SlateBlue => new Color3(106, 90, 205);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (112, 128, 144).
         /// </summary>
-        public static Color3 SlateGray { get { return new Color3(112, 128, 144); } }
+        public static Color3 SlateGray => new Color3(112, 128, 144);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 250, 250).
         /// </summary>
-        public static Color3 Snow { get { return new Color3(255, 250, 250); } }
+        public static Color3 Snow => new Color3(255, 250, 250);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (0, 255, 127).
         /// </summary>
-        public static Color3 SpringGreen { get { return new Color3(0, 255, 127); } }
+        public static Color3 SpringGreen => new Color3(0, 255, 127);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (70, 130, 180).
         /// </summary>
-        public static Color3 SteelBlue { get { return new Color3(70, 130, 180); } }
+        public static Color3 SteelBlue => new Color3(70, 130, 180);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (210, 180, 140).
         /// </summary>
-        public static Color3 Tan { get { return new Color3(210, 180, 140); } }
+        public static Color3 Tan => new Color3(210, 180, 140);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (0, 128, 128).
         /// </summary>
-        public static Color3 Teal { get { return new Color3(0, 128, 128); } }
+        public static Color3 Teal => new Color3(0, 128, 128);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (216, 191, 216).
         /// </summary>
-        public static Color3 Thistle { get { return new Color3(216, 191, 216); } }
+        public static Color3 Thistle => new Color3(216, 191, 216);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 99, 71).
         /// </summary>
-        public static Color3 Tomato { get { return new Color3(255, 99, 71); } }
+        public static Color3 Tomato => new Color3(255, 99, 71);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (64, 224, 208).
         /// </summary>
-        public static Color3 Turquoise { get { return new Color3(64, 224, 208); } }
+        public static Color3 Turquoise => new Color3(64, 224, 208);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (238, 130, 238).
         /// </summary>
-        public static Color3 Violet { get { return new Color3(238, 130, 238); } }
+        public static Color3 Violet => new Color3(238, 130, 238);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (245, 222, 179).
         /// </summary>
-        public static Color3 Wheat { get { return new Color3(245, 222, 179); } }
+        public static Color3 Wheat => new Color3(245, 222, 179);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 255, 255).
         /// </summary>
-        public static Color3 White { get { return new Color3(255, 255, 255); } }
+        public static Color3 White => new Color3(255, 255, 255);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (245, 245, 245).
         /// </summary>
-        public static Color3 WhiteSmoke { get { return new Color3(245, 245, 245); } }
+        public static Color3 WhiteSmoke => new Color3(245, 245, 245);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (255, 255, 0).
         /// </summary>
-        public static Color3 Yellow { get { return new Color3(255, 255, 0); } }
+        public static Color3 Yellow => new Color3(255, 255, 0);
 
         /// <summary>
         /// Gets the system color with (R, G, B, A) = (154, 205, 50).
         /// </summary>
-        public static Color3 YellowGreen { get { return new Color3(154, 205, 50); } }
+        public static Color3 YellowGreen => new Color3(154, 205, 50);
 
         #endregion
 

@@ -39,28 +39,28 @@
         private readonly IKernel kernel;
 
         private ICache cache;
-        private ICache Cache { get { return this.cache ?? (this.cache = this.kernel.Get<ICache>()); } }
+        private ICache Cache => this.cache ?? (this.cache = this.kernel.Get<ICache>());
 
         private GameWindow gameWindow;
-        private GameWindow GameWindow { get { return this.gameWindow ?? (this.gameWindow = this.kernel.Get<GameWindow>()); } }
+        private GameWindow GameWindow => this.gameWindow ?? (this.gameWindow = this.kernel.Get<GameWindow>());
 
         private IInput input;
-        private IInput Input { get { return this.input ?? (this.input = this.kernel.Get<IInput>()); } }
+        private IInput Input => this.input ?? (this.input = this.kernel.Get<IInput>());
 
         private IParticles particles;
-        private IParticles Particles { get { return this.particles ?? (this.particles = this.kernel.Get<IParticles>()); } }
+        private IParticles Particles => this.particles ?? (this.particles = this.kernel.Get<IParticles>());
 
         private IText text;
-        private IText Text { get { return this.text ?? (this.text = this.kernel.Get<IText>()); } }
+        private IText Text => this.text ?? (this.text = this.kernel.Get<IText>());
 
         private ITextures textures;
-        private ITextures Textures { get { return this.textures ?? (this.textures = this.kernel.Get<ITextures>()); } }
+        private ITextures Textures => this.textures ?? (this.textures = this.kernel.Get<ITextures>());
 
         private IWorld world;
-        private IWorld World { get { return this.world ?? (this.world = this.kernel.Get<IWorld>()); } }
+        private IWorld World => this.world ?? (this.world = this.kernel.Get<IWorld>());
 
         private IFigure figure;
-        private IFigure Figure { get { return this.figure ?? (this.figure = this.kernel.Get<IFigure>()); } }
+        private IFigure Figure => this.figure ?? (this.figure = this.kernel.Get<IFigure>());
 
         #endregion
 

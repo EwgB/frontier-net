@@ -32,25 +32,25 @@
         private readonly IAvatar avatar;
 
         private IGame game;
-        private IGame Game { get { return this.game ?? (this.game = this.kernel.Get<IGame>()); } }
+        private IGame Game => this.game ?? (this.game = this.kernel.Get<IGame>());
 
         private IParticles particles;
-        private IParticles Particles { get { return this.particles ?? (this.particles = this.kernel.Get<IParticles>()); } }
+        private IParticles Particles => this.particles ?? (this.particles = this.kernel.Get<IParticles>());
 
         private IShaders shaders;
-        private IShaders Shaders { get { return this.shaders ?? (this.shaders = this.kernel.Get<IShaders>()); } }
+        private IShaders Shaders => this.shaders ?? (this.shaders = this.kernel.Get<IShaders>());
 
         private ISky sky;
-        private ISky Sky { get { return this.sky ?? (this.sky = this.kernel.Get<ISky>()); } }
+        private ISky Sky => this.sky ?? (this.sky = this.kernel.Get<ISky>());
 
         private IText text;
-        private IText Text { get { return this.text ?? (this.text = this.kernel.Get<IText>()); } }
+        private IText Text => this.text ?? (this.text = this.kernel.Get<IText>());
 
         private ITextures textures;
-        private ITextures Textures { get { return this.textures ?? (this.textures = this.kernel.Get<ITextures>()); } }
+        private ITextures Textures => this.textures ?? (this.textures = this.kernel.Get<ITextures>());
 
         private IWater water;
-        private IWater Water { get { return this.water ?? (this.water = this.kernel.Get<IWater>()); } }
+        private IWater Water => this.water ?? (this.water = this.kernel.Get<IWater>());
 
         #endregion
 

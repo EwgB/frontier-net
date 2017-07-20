@@ -26,16 +26,16 @@
         private readonly IKernel kernel;
 
         private IAvatar avatar;
-        private IAvatar Avatar { get { return this.avatar ?? (this.avatar = this.kernel.Get<IAvatar>()); } }
+        private IAvatar Avatar => this.avatar ?? (this.avatar = this.kernel.Get<IAvatar>());
 
         private IEnvironment environment;
-        private IEnvironment Environment { get { return this.environment ?? (this.environment = this.kernel.Get<IEnvironment>()); } }
+        private IEnvironment Environment => this.environment ?? (this.environment = this.kernel.Get<IEnvironment>());
 
         private IScene scene;
-        private IScene Scene { get { return this.scene ?? (this.scene = this.kernel.Get<IScene>()); } }
+        private IScene Scene => this.scene ?? (this.scene = this.kernel.Get<IScene>());
 
         private IWorld world;
-        private IWorld World { get { return this.world ?? (this.world = this.kernel.Get<IWorld>()); } }
+        private IWorld World => this.world ?? (this.world = this.kernel.Get<IWorld>());
 
         #endregion
 
