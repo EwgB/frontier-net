@@ -1,7 +1,8 @@
 ﻿namespace FrontierSharp.Environment {
     using System;
-    using NLog;
 
+    using Ninject;
+    using NLog;
     using OpenTK;
 
     using Common.Avatar;
@@ -12,8 +13,10 @@
     using Common.Scene;
     using Common.Util;
 
-    public class EnvironmentImpl : IEnvironment {
+    internal class EnvironmentImpl : IEnvironment {
+
         #region Constants
+
         //private const int MAX_DISTANCE = 900;
         //private const float NIGHT_FOG = (MAX_DISTANCE / 5);
         private const float ENV_TRANSITION = 0.02f;
@@ -41,12 +44,22 @@
         private const int SUN_ANGLE_MORNING = 15;
         private const int SUN_ANGLE_AFTERNOON = 165;
         private const int SUN_ANGLE_SUNSET = 190;
+
         #endregion
 
         #region Modules
-        private readonly IAvatar avatar;
-        private readonly IGame game;
-        private readonly IScene scene;
+
+        private readonly IKernel kernel;
+
+        private IAvatar avatar;
+        private IAvatar Avatar { get { return this.avatar ?? (this.avatar = this.kernel.Get<IAvatar>()); } }
+
+        private IGame game;
+        private IGame Game { get { return this.game ?? (this.game = this.kernel.Get<IGame>()); } }
+
+        private IScene scene;
+        private IScene Scene { get { return this.scene ?? (this.scene = this.kernel.Get<IScene>()); } }
+
         #endregion
 
         #region Properties and variables
@@ -65,10 +78,8 @@
 
         #endregion
 
-        public EnvironmentImpl(IAvatar avatar, IGame game, IScene scene) {
-            this.avatar = avatar;
-            this.game = game;
-            this.scene = scene;
+        public EnvironmentImpl(IKernel kernel) {
+            this.kernel = kernel;
 
             this.Current = new EnvironmentData();
             this.Desired = new EnvironmentData();
@@ -93,9 +104,9 @@
         private void DoTime(float delta) {
             //Convert out hours and minutes into a decimal number. (100 "minutes" per hour.)
             this.Desired.Light = new Vector3(-0.5f, 0.0f, -0.5f);
-            if (this.game.GameProperties.GameTime.TotalHours != this.lastDecimalTime)
+            if (this.Game.GameProperties.GameTime.TotalHours != this.lastDecimalTime)
                 DoCycle();
-            this.lastDecimalTime = this.game.GameProperties.GameTime.TotalHours;
+            this.lastDecimalTime = this.Game.GameProperties.GameTime.TotalHours;
             for (var colorType = ColorTypes.Horizon; colorType < ColorTypes.Max; colorType++) {
                 this.Current.Color[colorType] = ColorUtils.Interpolate(this.Current.Color[colorType], this.Desired.Color[colorType], delta);
             }
@@ -127,9 +138,9 @@
         }
 
         private void DoCycle() {
-            var maxDistance = this.scene.VisibleRange;
+            var maxDistance = this.Scene.VisibleRange;
             var nightFog = maxDistance / 5;
-            var region = this.avatar.Region;
+            var region = this.Avatar.Region;
             //atmosphere = region.ColorAtmosphere;
             var humidFog = new Range<float>(
                 MathUtils.Interpolate(maxDistance * 0.85f, maxDistance * 0.25f, region.Moisture),
@@ -141,7 +152,7 @@
             this.Desired.CloudCover = MathHelper.Clamp(region.Moisture, 0.20f, 0.6f);
             this.Desired.SunriseFade = this.Desired.SunsetFade = 0.0f;
 
-            var decimalTime = (float)this.game.GameProperties.GameTime.TotalHours;
+            var decimalTime = (float)this.Game.GameProperties.GameTime.TotalHours;
             var inParams = new CycleInParameters {
                 DecimalTime = decimalTime,
                 MaxDistance = maxDistance,

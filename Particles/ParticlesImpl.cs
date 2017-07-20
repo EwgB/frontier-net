@@ -8,7 +8,7 @@
     using Common.Property;
 
     ///<summary>Manages the list of active particle emitters.</summary>
-    public class ParticlesImpl : IParticles {
+    internal class ParticlesImpl : IParticles {
 
         public IProperties Properties => this.ParticlesProperties;
         public IParticlesProperties ParticlesProperties { get; } = new ParticlesProperties();

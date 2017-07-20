@@ -1,6 +1,7 @@
 ﻿namespace FrontierSharp.Avatar {
     using System;
 
+    using Ninject;
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
     using OpenTK.Input;
@@ -16,7 +17,7 @@
     using Common.World;
     using Common.Util;
 
-    public class AvatarImpl : IAvatar {
+    internal class AvatarImpl : IAvatar {
 
         #region Constants
 
@@ -35,15 +36,31 @@
 
         #region Modules
 
-        private readonly ICache cache;
-        private readonly GameWindow gameWindow;
-        private readonly IInput input;
-        private readonly IParticles particles;
-        private readonly IText text;
-        private readonly ITextures textures;
-        private readonly IWorld world;
+        private readonly IKernel kernel;
 
-        private readonly IFigure avatar;
+        private ICache cache;
+        private ICache Cache { get { return this.cache ?? (this.cache = this.kernel.Get<ICache>()); } }
+
+        private GameWindow gameWindow;
+        private GameWindow GameWindow { get { return this.gameWindow ?? (this.gameWindow = this.kernel.Get<GameWindow>()); } }
+
+        private IInput input;
+        private IInput Input { get { return this.input ?? (this.input = this.kernel.Get<IInput>()); } }
+
+        private IParticles particles;
+        private IParticles Particles { get { return this.particles ?? (this.particles = this.kernel.Get<IParticles>()); } }
+
+        private IText text;
+        private IText Text { get { return this.text ?? (this.text = this.kernel.Get<IText>()); } }
+
+        private ITextures textures;
+        private ITextures Textures { get { return this.textures ?? (this.textures = this.kernel.Get<ITextures>()); } }
+
+        private IWorld world;
+        private IWorld World { get { return this.world ?? (this.world = this.kernel.Get<IWorld>()); } }
+
+        private IFigure figure;
+        private IFigure Figure { get { return this.figure ?? (this.figure = this.kernel.Get<IFigure>()); } }
 
         #endregion
 
@@ -59,7 +76,6 @@
                 this.CameraPosition = this.position;
                 this.angle = this.CameraAngle = new Vector3(90, 0, 0);
                 DoModel();
-
             }
         }
 
@@ -95,26 +111,11 @@
 
         #endregion
 
-        public AvatarImpl(
-                IFigure avatar,
-                ICache cache,
-                GameWindow gameWindow,
-                IInput input,
-                IParticles particles,
-                IText text,
-                ITextures textures,
-                IWorld world) {
-            this.avatar = avatar;
-            this.cache = cache;
-            this.gameWindow = gameWindow;
-            this.input = input;
-            this.particles = particles;
-            this.text = text;
-            this.textures = textures;
-            this.world = world;
+        public AvatarImpl(IKernel kernel) {
+            this.kernel = kernel;
 
             // TODO: Is this the desired behaviour? Where should this be initialised?
-            this.Region = this.world.GetRegion(0, 0);
+            this.Region = this.World.GetRegion(0, 0);
         }
 
         public void Init() {
@@ -127,38 +128,38 @@
                     IniStringSet("Animations", AnimTypes.names[i], IniString("Animations", AnimTypes.names[i]));
                 */
             }
-            this.dustParticle = this.particles.LoadParticles("step");
+            this.dustParticle = this.Particles.LoadParticles("step");
         }
 
         public void Update() {
-            if (this.input.KeyState(Key.ControlLeft))
+            if (this.Input.KeyState(Key.ControlLeft))
                 Look(0, 1);
 
-            var elapsed = (float)Math.Min(this.gameWindow.UpdateTime, 0.25f);
+            var elapsed = (float)Math.Min(this.GameWindow.UpdateTime, 0.25f);
             this.desiredMovement = Vector2.Zero;
-            if (this.input.KeyPressed(Key.Space) && this.onGround) {
+            if (this.Input.KeyPressed(Key.Space) && this.onGround) {
                 this.velocity = JUMP_SPEED;
                 this.onGround = false;
             }
-            if (this.input.KeyPressed(Key.F2))
+            if (this.Input.KeyPressed(Key.F2))
                 this.AvatarProperties.Flying ^= true; // Invert Flying
             //Joystick movement
-            Look((int)(this.input.Joystick[3] * 5.0f), (int)(this.input.Joystick[4] * -5.0f));
-            DoMove(new Vector3(this.input.Joystick[0], this.input.Joystick[1], 0));
-            if (this.input.Mouselook) {
-                if (this.input.MouseWheelUp)
+            Look((int)(this.Input.Joystick[3] * 5.0f), (int)(this.Input.Joystick[4] * -5.0f));
+            DoMove(new Vector3(this.Input.Joystick[0], this.Input.Joystick[1], 0));
+            if (this.Input.Mouselook) {
+                if (this.Input.MouseWheelUp)
                     this.desiredCamDistance -= 1;
-                if (this.input.MouseWheelDown)
+                if (this.Input.MouseWheelDown)
                     this.desiredCamDistance += 1;
-                if (this.input.KeyState(Key.W))
+                if (this.Input.KeyState(Key.W))
                     DoMove(-Vector3.UnitY);
-                if (this.input.KeyState(Key.S))
+                if (this.Input.KeyState(Key.S))
                     DoMove(Vector3.UnitY);
-                if (this.input.KeyState(Key.A))
+                if (this.Input.KeyState(Key.A))
                     DoMove(-Vector3.UnitX);
-                if (this.input.KeyState(Key.D))
+                if (this.Input.KeyState(Key.D))
                     DoMove(Vector3.UnitX);
-                DoMove(new Vector3(this.input.Joystick[0], this.input.Joystick[1], 0));
+                DoMove(new Vector3(this.Input.Joystick[0], this.Input.Joystick[1], 0));
             }
             //Figure out our   speed
             var maxSpeed = MOVE_SPEED;
@@ -166,7 +167,7 @@
             var moving = this.desiredMovement.Length > 0;//"moving" means, "trying to move". (Pressing buttons.)
             if (moving)
                 minSpeed = MOVE_SPEED * 0.33f;
-            if (this.input.KeyState(Key.ShiftLeft)) {
+            if (this.Input.KeyState(Key.ShiftLeft)) {
                 this.sprinting = true;
                 maxSpeed = SPRINT_SPEED;
             } else {
@@ -201,8 +202,8 @@
             this.position.Y += this.currentMovement.Y;
             this.desiredCamDistance = MathHelper.Clamp(this.desiredCamDistance, CAM_MIN, CAM_MAX);
             this.camDistance = MathUtils.Interpolate(this.camDistance, this.desiredCamDistance, elapsed);
-            var ground = this.cache.GetElevation(this.position.X, this.position.Y);
-            var water = this.world.GetWaterLevel(this.position.X, this.position.Y);
+            var ground = this.Cache.GetElevation(this.position.X, this.position.Y);
+            var water = this.World.GetWaterLevel(this.position.X, this.position.Y);
             this.avatarFacing.Y = MathUtils.Interpolate(this.avatarFacing.Y, leanAngle, elapsed);
             if (!this.AvatarProperties.Flying) {
                 this.velocity -= WorldUtils.GRAVITY * elapsed;
@@ -237,10 +238,10 @@
                 this.animType = AnimTypes.Sprint;
             else
                 this.animType = AnimTypes.Run;
-            this.avatar.Animate(this.anim[this.animType], movementAnimation);
-            this.avatar.Position = this.position;
-            this.avatar.Rotation = this.avatarFacing;
-            this.avatar.Update();
+            this.Figure.Animate(this.anim[this.animType], movementAnimation);
+            this.Figure.Position = this.position;
+            this.Figure.Rotation = this.avatarFacing;
+            this.Figure.Update();
             var stepTracking = movementAnimation % 1;
             if (this.animType == AnimTypes.Run || this.animType == AnimTypes.Sprint) {
                 if (stepTracking < this.lastStepTracking || (stepTracking > 0.5f && this.lastStepTracking < 0.5f)) {
@@ -248,13 +249,13 @@
                     if (this.position.Z < 0)
                         this.dustParticle.Colors.Add(new Color3(0.4f, 0.7f, 1));
                     else
-                        this.dustParticle.Colors.Add(this.cache.GetSurfaceColor((int) this.position.X, (int) this.position.Y));
-                    this.particles.AddParticles(this.dustParticle, this.position);
+                        this.dustParticle.Colors.Add(this.Cache.GetSurfaceColor((int) this.position.X, (int) this.position.Y));
+                    this.Particles.AddParticles(this.dustParticle, this.position);
                 }
             }
             this.lastStepTracking = stepTracking;
-            this.text.Print("{0} elapsed: {1}", this.animType.ToString(), elapsed);
-            this.Region = this.world.GetRegion(
+            this.Text.Print("{0} elapsed: {1}", this.animType.ToString(), elapsed);
+            this.Region = this.World.GetRegion(
                 (int)(this.position.X + WorldUtils.REGION_HALF) / WorldUtils.REGION_SIZE,
                 (int)(this.position.Y + WorldUtils.REGION_HALF) / WorldUtils.REGION_SIZE);
             DoCamera();
@@ -262,11 +263,11 @@
         }
 
         public void Render() {
-            GL.BindTexture(TextureTarget.Texture2D, this.textures.TextureIdFromName("avatar.png"));
+            GL.BindTexture(TextureTarget.Texture2D, this.Textures.TextureIdFromName("avatar.png"));
             GL.BindTexture(TextureTarget.Texture2D, 0);
-            this.avatar.Render();
+            this.Figure.Render();
             if (this.AvatarProperties.ShowSkeleton) {
-                this.avatar.RenderSkeleton();
+                this.Figure.RenderSkeleton();
             }
         }
 
@@ -284,14 +285,14 @@
 
         private void DoModel() {
             // TODO
-            //this.avatar.LoadX("models//male.X");
+            //this.Figure.LoadX("models//male.X");
             if (this.AvatarProperties.ExpandAvatar) {
-                //    this.avatar.BoneInflate(BONE_PELVIS, 0.02f, true);
-                //    this.avatar.BoneInflate(BONE_HEAD, 0.025f, true);
-                //    this.avatar.BoneInflate(BONE_LWRIST, 0.03f, true);
-                //    this.avatar.BoneInflate(BONE_RWRIST, 0.03f, true);
-                //    this.avatar.BoneInflate(BONE_RANKLE, 0.05f, true);
-                //    this.avatar.BoneInflate(BONE_LANKLE, 0.05f, true);
+                //    this.Figure.BoneInflate(BONE_PELVIS, 0.02f, true);
+                //    this.Figure.BoneInflate(BONE_HEAD, 0.025f, true);
+                //    this.Figure.BoneInflate(BONE_LWRIST, 0.03f, true);
+                //    this.Figure.BoneInflate(BONE_RWRIST, 0.03f, true);
+                //    this.Figure.BoneInflate(BONE_RANKLE, 0.05f, true);
+                //    this.Figure.BoneInflate(BONE_LANKLE, 0.05f, true);
             }
         }
 

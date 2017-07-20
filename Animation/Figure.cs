@@ -3,7 +3,7 @@
 
     using Common.Animation;
 
-    public class Figure : IFigure {
+    internal class Figure : IFigure {
         public Vector3 Position { get; set; }
         public Vector3 Rotation { get; set; }
 

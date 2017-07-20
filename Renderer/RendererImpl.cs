@@ -1,9 +1,10 @@
 ﻿namespace FrontierSharp.Renderer {
-    using OpenTK;
-    using OpenTK.Graphics.OpenGL;
-
     using System;
     using System.Drawing;
+
+    using Ninject;
+    using OpenTK;
+    using OpenTK.Graphics.OpenGL;
 
     using Common.Avatar;
     using Common.Environment;
@@ -13,29 +14,48 @@
     using Common.Util;
     using Common.World;
 
-    public class RendererImpl : IRenderer {
-        // Constants
+    internal class RendererImpl : IRenderer {
+        #region Constants
+
         private const int MAP_SIZE = 512;
 
-        // Dependencies (injected via Ninject)
-        private readonly IAvatar avatar;
-        private readonly IWorld world;
-        private readonly IEnvironment environment;
-        private readonly IScene scene;
+        #endregion
+
+        #region Modules
+
+        private readonly IKernel kernel;
+
+        private IAvatar avatar;
+        private IAvatar Avatar { get { return this.avatar ?? (this.avatar = this.kernel.Get<IAvatar>()); } }
+
+        private IEnvironment environment;
+        private IEnvironment Environment { get { return this.environment ?? (this.environment = this.kernel.Get<IEnvironment>()); } }
+
+        private IScene scene;
+        private IScene Scene { get { return this.scene ?? (this.scene = this.kernel.Get<IScene>()); } }
+
+        private IWorld world;
+        private IWorld World { get { return this.world ?? (this.world = this.kernel.Get<IWorld>()); } }
+
+        #endregion
+
+        #region Public properties
+
+        public IProperties Properties => this.RendererProperties;
+        public IRendererProperties RendererProperties { get; } = new RendererProperties();
+
+        #endregion
+
+        #region Private properties
 
         private bool showMap;
         private int viewWidth;
         private int viewHeight;
 
-        public IProperties Properties => this.RendererProperties;
-        public IRendererProperties RendererProperties { get; } = new RendererProperties();
+        #endregion
 
-        public RendererImpl(IAvatar avatar, IWorld world, IEnvironment environment, IScene scene) {
-            // Set dependencies
-            this.avatar = avatar;
-            this.world = world;
-            this.environment = environment;
-            this.scene = scene;
+        public RendererImpl(IKernel kernel) {
+            this.kernel = kernel;
         }
 
         public void Init() {
@@ -43,9 +63,9 @@
         }
 
         public void Render() {
-            var envData = this.environment.Current;
-            var pos = this.avatar.CameraPosition;
-            var waterLevel = Math.Max(this.world.GetWaterLevel(new Vector2(pos.X, pos.Y)), 0);
+            var envData = this.Environment.Current;
+            var pos = this.Avatar.CameraPosition;
+            var waterLevel = Math.Max(this.World.GetWaterLevel(new Vector2(pos.X, pos.Y)), 0);
 
             if (pos.Z >= waterLevel) {
                 //currentFog = (currentDiffuse + Color3.Blue) / 2;
@@ -104,7 +124,7 @@
             //Move into our unique coordanate system
             GL.LoadIdentity();
             GL.Scale(1, -1, 1);
-            var angle = this.avatar.CameraAngle;
+            var angle = this.Avatar.CameraAngle;
             GL.Rotate(angle.X, Vector3.UnitX);
             GL.Rotate(angle.Y, Vector3.UnitY);
             GL.Rotate(angle.Z, Vector3.UnitZ);
@@ -114,16 +134,16 @@
 
             //if (this.properties.RenderShaders)
             //    CgUpdate();
-            this.scene.Render();
+            this.Scene.Render();
             //CgShaderSelect(VSHADER_NONE);
             if (this.RendererProperties.RenderWireframe) {
-                this.scene.RenderDebug();
+                this.Scene.RenderDebug();
             }
             //if (this.properties.ShowPages)
             //    CacheRenderDebug();
             //TextRender();
             if (this.showMap) {
-                RenderTexture(this.world.MapId);
+                RenderTexture(this.World.MapId);
             }
             //ConsoleRender();
         }
@@ -175,7 +195,7 @@
                 this.r++;
                 var c = ColorUtils.UniqueColor(this.r);
                 GL.BindTexture(TextureTarget.Texture2D, 0);
-                var pos = this.avatar.CameraPosition;
+                var pos = this.Avatar.CameraPosition;
                 pos /= (WorldUtils.WORLD_GRID * WorldUtils.REGION_SIZE);
                 //pos.Y /= (WorldUtil.WORLD_GRID * WorldUtil.REGION_SIZE);
                 pos *= MAP_SIZE;

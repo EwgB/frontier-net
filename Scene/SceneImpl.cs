@@ -2,6 +2,7 @@
     using System;
     using System.Collections.Generic;
 
+    using Ninject;
     using OpenTK.Graphics.OpenGL;
 
     using Common;
@@ -14,7 +15,7 @@
     using Common.Shaders;
     using Common.Textures;
 
-    public class SceneImpl : IScene {
+    internal class SceneImpl : IScene {
 
         #region Constants
         private const int BRUSH_GRID = 7;
@@ -26,18 +27,34 @@
 
         #region Modules
 
+        private readonly IKernel kernel;
+
         private readonly IAvatar avatar;
-        private readonly IGame game;
-        private readonly IParticles particles;
-        private readonly IShaders shaders;
-        private readonly ISky sky;
-        private readonly IText text;
-        private readonly ITextures textures;
-        private readonly IWater water;
+
+        private IGame game;
+        private IGame Game { get { return this.game ?? (this.game = this.kernel.Get<IGame>()); } }
+
+        private IParticles particles;
+        private IParticles Particles { get { return this.particles ?? (this.particles = this.kernel.Get<IParticles>()); } }
+
+        private IShaders shaders;
+        private IShaders Shaders { get { return this.shaders ?? (this.shaders = this.kernel.Get<IShaders>()); } }
+
+        private ISky sky;
+        private ISky Sky { get { return this.sky ?? (this.sky = this.kernel.Get<ISky>()); } }
+
+        private IText text;
+        private IText Text { get { return this.text ?? (this.text = this.kernel.Get<IText>()); } }
+
+        private ITextures textures;
+        private ITextures Textures { get { return this.textures ?? (this.textures = this.kernel.Get<ITextures>()); } }
+
+        private IWater water;
+        private IWater Water { get { return this.water ?? (this.water = this.kernel.Get<IWater>()); } }
 
         #endregion
 
-        #region Properties
+        #region Public properties
 
         public IProperties Properties => this.SceneProperties;
         public ISceneProperties SceneProperties { get; } = new SceneProperties();
@@ -46,7 +63,7 @@
 
         #endregion
 
-        #region Memeber variables
+        #region Private properties
 
         private readonly GridManager gmTerrain;
         private readonly List<IGridData> ilTerrain = new List<IGridData>();
@@ -61,23 +78,9 @@
 
         #endregion
 
-        public SceneImpl(
-                IAvatar avatar,
-                IGame game,
-                IParticles particles,
-                IShaders shaders,
-                ISky sky,
-                IText text,
-                ITextures textures,
-                IWater water) {
+        public SceneImpl(IKernel kernel, IAvatar avatar) {
             this.avatar = avatar;
-            this.game = game;
-            this.particles = particles;
-            this.shaders = shaders;
-            this.sky = sky;
-            this.text = text;
-            this.textures = textures;
-            this.water = water;
+            this.kernel = kernel;
 
             this.gmTerrain = new GridManager(avatar);
             this.gmForest = new GridManager(avatar);
@@ -89,26 +92,26 @@
         public void Init() { /* Do nothing */ }
 
         public void Render() {
-            if (!this.game.IsRunning)
+            if (!this.Game.IsRunning)
                 return;
             if (!this.SceneProperties.RenderTextured)
                 GL.Disable(EnableCap.Texture2D);
             else
                 GL.Enable(EnableCap.Texture2D);
-            this.sky.Render();
+            this.Sky.Render();
             GL.Disable(EnableCap.CullFace);
-            this.shaders.SelectShader(VShaderTypes.Trees);
-            this.shaders.SelectShader(FShaderTypes.Green);
+            this.Shaders.SelectShader(VShaderTypes.Trees);
+            this.Shaders.SelectShader(FShaderTypes.Green);
             GL.Color3(1, 1, 1);
             GL.Disable(EnableCap.Texture2D);
             this.gmForest.Render();
             GL.Enable(EnableCap.CullFace);
-            this.shaders.SelectShader(VShaderTypes.Normal);
+            this.Shaders.SelectShader(VShaderTypes.Normal);
             GL.Color3(1, 1, 1);
             this.gmTerrain.Render();
-            this.water.Render();
-            GL.BindTexture(TextureTarget.Texture2D, this.textures.TextureIdFromName("grass3.png"));
-            this.shaders.SelectShader(VShaderTypes.Grass);
+            this.Water.Render();
+            GL.BindTexture(TextureTarget.Texture2D, this.Textures.TextureIdFromName("grass3.png"));
+            this.Shaders.SelectShader(VShaderTypes.Grass);
             GL.ColorMask(false, false, false, false);
             this.gmGrass.Render();
             this.gmBrush.Render();
@@ -117,11 +120,11 @@
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
             this.gmGrass.Render();
             this.gmBrush.Render();
-            this.shaders.SelectShader(VShaderTypes.Normal);
+            this.Shaders.SelectShader(VShaderTypes.Normal);
             this.avatar.Render();
-            this.shaders.SelectShader(FShaderTypes.None);
-            this.shaders.SelectShader(VShaderTypes.None);
-            this.particles.Render();
+            this.Shaders.SelectShader(FShaderTypes.None);
+            this.Shaders.SelectShader(VShaderTypes.None);
+            this.Particles.Render();
             this.gmParticle.Render();
         }
 
@@ -138,12 +141,12 @@
             this.gmBrush.Render();
             GL.Color3(1, 1, 1);
             this.avatar.Render();
-            this.water.Render();
+            this.Water.Render();
         }
 
         private byte updateType;
         public void Update(double stopAt) {
-            if (!this.game.IsRunning)
+            if (!this.Game.IsRunning)
                 return;
             // We don't want any grid to starve the others, so we rotate the order of priority.
             this.updateType = (byte)((this.updateType + 1) % 4);
@@ -167,7 +170,7 @@
             this.gmGrass.Update(stopAt);
             this.gmForest.Update(stopAt);
             this.gmBrush.Update(stopAt);
-            this.text.Print($"Scene: {this.gmTerrain.ItemsReadyCount} of {this.gmTerrain.ItemsViewableCount} terrains ready");
+            this.Text.Print($"Scene: {this.gmTerrain.ItemsReadyCount} of {this.gmTerrain.ItemsViewableCount} terrains ready");
         }
 
         public void Clear() {
@@ -183,7 +186,7 @@
 
         public void Generate() {
             Clear();
-            this.water.Build();
+            this.Water.Build();
             //var camera = this.avatar.Position;
             //var current = new Coord((int)(camera.X / GridUtils.GRASS_SIZE), 0);
 

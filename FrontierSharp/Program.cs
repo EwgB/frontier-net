@@ -1,55 +1,48 @@
 ﻿namespace FrontierSharp {
     using Ninject;
 
-    using Common;
-    using Common.Animation;
-    using Common.Avatar;
-    using Common.Environment;
-    using Common.Game;
-    using Common.Input;
-    using Common.Particles;
-    using Common.Renderer;
-    using Common.Scene;
-    using Common.Shaders;
-    using Common.Textures;
-    using Common.World;
-
+    using Animation;
     using Avatar;
-    using DummyModules;
+    using Cache;
+    using Console;
     using Environment;
     using Game;
+    using Input;
+    using Ninject.Modules;
     using Particles;
+    using Player;
     using Renderer;
     using Scene;
+    using Shaders;
+    using Sky;
+    using Text;
     using Textures;
+    using Water;
+    using World;
 
     internal class Program {
-        private static void Main(string[] args) {
-            using (IKernel kernel = new StandardKernel()) {
+        private static void Main() {
+            var modules = new INinjectModule[] {
+                new AnimationModule(false),
+                new AvatarModule(false),
+                new CacheModule(),
+                new ConsoleModule(),
+                new EnvironmentModule(false), 
+                new GameModule(false),
+                new InputModule(),
+                new ParticlesModule(false),
+                new PlayerModule(),
+                new RendererModule(false),
+                new SceneModule(false),
+                new ShadersModule(),
+                new SkyModule(),
+                new TextModule(),
+                new TexturesModule(false),
+                new WaterModule(),
+                new WorldModule()
+            };
 
-                // Set up dependecies
-
-                // Modules
-                kernel.Bind<IAvatar>().To<AvatarImpl>().InSingletonScope();
-                kernel.Bind<ICache>().To<DummyCache>().InSingletonScope();
-                kernel.Bind<IConsole>().To<DummyConsole>().InSingletonScope();
-                kernel.Bind<IEnvironment>().To<EnvironmentImpl>().InSingletonScope();
-                kernel.Bind<IGame>().To<GameImpl>().InSingletonScope();
-                kernel.Bind<IInput>().To<DummyInput>().InSingletonScope();
-                kernel.Bind<IParticles>().To<ParticlesImpl>().InSingletonScope();
-                kernel.Bind<IPlayer>().To<DummyPlayer>().InSingletonScope();
-                kernel.Bind<IRenderer>().To<RendererImpl>().InSingletonScope();
-                kernel.Bind<IScene>().To<SceneImpl>().InSingletonScope();
-                kernel.Bind<IShaders>().To<DummyShaders>().InSingletonScope();
-                kernel.Bind<ISky>().To<DummySky>().InSingletonScope();
-                kernel.Bind<IText>().To<DummyText>().InSingletonScope();
-                kernel.Bind<ITextures>().To<TexturesImpl>().InSingletonScope();
-                kernel.Bind<IWater>().To<DummyWater>().InSingletonScope();
-                kernel.Bind<IWorld>().To<DummyWorld>().InSingletonScope();
-
-                // Other dependencies
-                kernel.Bind<IFigure>().To<DummyFigure>();
-
+            using (IKernel kernel = new StandardKernel(modules)) {
                 using (var frontier = kernel.Get<Frontier>()) {
                     frontier.Run(30.0);
                 }

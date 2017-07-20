@@ -2,6 +2,7 @@
     using System;
     using System.IO;
 
+    using Ninject;
     using NLog;
     using OpenTK;
     using OpenTK.Input;
@@ -17,7 +18,7 @@
     using Common.Util;
     using Common.World;
 
-    public class GameImpl : IGame {
+    internal class GameImpl : IGame {
 
         #region Constants
 
@@ -28,16 +29,37 @@
 
         #region Modules
 
-        private readonly IAvatar avatar;
-        private readonly ICache cache;
-        private readonly IConsole console;
-        private readonly GameWindow gameWindow;
-        private readonly IInput input;
-        private readonly IPlayer player;
-        private readonly IRenderer renderer;
-        private readonly IScene scene;
-        private readonly IText text;
-        private readonly IWorld world;
+        private readonly IKernel kernel;
+
+        private IAvatar avatar;
+        private IAvatar Avatar { get { return this.avatar ?? (this.avatar = this.kernel.Get<IAvatar>()); } }
+
+        private ICache cache;
+        private ICache Cache { get { return this.cache ?? (this.cache = this.kernel.Get<ICache>()); } }
+
+        private IConsole console;
+        private IConsole Console { get { return this.console ?? (this.console = this.kernel.Get<IConsole>()); } }
+
+        private GameWindow gameWindow;
+        private GameWindow GameWindow { get { return this.gameWindow ?? (this.gameWindow = this.kernel.Get<GameWindow>()); } }
+
+        private IInput input;
+        private IInput Input { get { return this.input ?? (this.input = this.kernel.Get<IInput>()); } }
+
+        private IPlayer player;
+        private IPlayer Player { get { return this.player ?? (this.player = this.kernel.Get<IPlayer>()); } }
+
+        private IRenderer renderer;
+        private IRenderer Renderer { get { return this.renderer ?? (this.renderer = this.kernel.Get<IRenderer>()); } }
+
+        private IScene scene;
+        private IScene Scene { get { return this.scene ?? (this.scene = this.kernel.Get<IScene>()); } }
+
+        private IText text;
+        private IText Text { get { return this.text ?? (this.text = this.kernel.Get<IText>()); } }
+
+        private IWorld world;
+        private IWorld World { get { return this.world ?? (this.world = this.kernel.Get<IWorld>()); } }
 
         #endregion
 
@@ -63,27 +85,8 @@
 
         #endregion
 
-        public GameImpl(
-                IAvatar avatar,
-                ICache cache,
-                IConsole console,
-                GameWindow gameWindow,
-                IInput input,
-                IPlayer player,
-                IRenderer renderer,
-                IScene scene,
-                IText text,
-                IWorld world) {
-            this.avatar = avatar;
-            this.cache = cache;
-            this.console = console;
-            this.gameWindow = gameWindow;
-            this.input = input;
-            this.player = player;
-            this.renderer = renderer;
-            this.scene = scene;
-            this.text = text;
-            this.world = world;
+        public GameImpl(IKernel kernel) {
+            this.kernel = kernel;
         }
 
         public void Init() { /* Do nothing */ }
@@ -105,13 +108,13 @@
             var minutes = this.GameProperties.GameTime.Minutes;
             var seconds = this.GameProperties.GameTime.Seconds;
             
-            if (this.input.KeyPressed(Key.BracketRight)) {
+            if (this.Input.KeyPressed(Key.BracketRight)) {
                 hours++;
-            } else if (this.input.KeyPressed(Key.BracketLeft)) {
+            } else if (this.Input.KeyPressed(Key.BracketLeft)) {
                 hours--;
             }
 
-            seconds += (int)Math.Round(this.gameWindow.UpdateTime * TIME_SCALE);
+            seconds += (int)Math.Round(this.GameWindow.UpdateTime * TIME_SCALE);
             if (seconds >= TIME_SCALE) {
                 seconds -= TIME_SCALE;
                 minutes++;
@@ -128,7 +131,7 @@
             }
             this.GameProperties.GameTime = new TimeSpan(days, hours, minutes, seconds);
 
-            this.text.Print("Day {0}: {1}:{2}", days + 1, hours, minutes);
+            this.Text.Print("Day {0}: {1}:{2}", days + 1, hours, minutes);
         }
 
         public void New(uint seedIn) {
@@ -140,24 +143,24 @@
 
             this.GameProperties.GameTime = new TimeSpan(days: 0, hours: 6, minutes: 30, seconds: 0);
             this.IsRunning = true;
-            if (this.console.IsOpen) {
-                this.console.ToggleConsole();
+            if (this.Console.IsOpen) {
+                this.Console.ToggleConsole();
             }
             this.seed = seedIn;
             Log.Info("Beginning new game with seed {0}.", this.seed);
 
             Directory.CreateDirectory(this.GameDirectory);
-            this.scene.Clear();
-            this.cache.Purge();
-            this.world.Generate(this.seed);
-            this.world.Save();
+            this.Scene.Clear();
+            this.Cache.Purge();
+            this.World.Generate(this.seed);
+            this.World.Save();
 
             // Now the world is ready.  Look for a good starting point.
 
             // Start in the center
             var start = WorldUtils.WORLD_GRID_CENTER;
             int end, step;
-            if (this.world.WindFromWest) {
+            if (this.World.WindFromWest) {
                 end = 1;
                 step = -1;
             } else {
@@ -173,14 +176,14 @@
             step *= -1; // Now scan inward, towards the landmass
             var pointsChecked = 0;
             while (pointsChecked < WorldUtils.REGION_SIZE * 4) {
-                this.text.Print("Scanning {0}", worldPosition.X);
-                this.renderer.RenderLoadingScreen(0.02f);
-                if (!this.cache.IsPointAvailable(worldPosition.X, worldPosition.Y)) {
-                    this.cache.UpdatePage(worldPosition.X, worldPosition.Y, this.gameWindow.UpdateTime / 1000 + 20);
+                this.Text.Print("Scanning {0}", worldPosition.X);
+                this.Renderer.RenderLoadingScreen(0.02f);
+                if (!this.Cache.IsPointAvailable(worldPosition.X, worldPosition.Y)) {
+                    this.Cache.UpdatePage(worldPosition.X, worldPosition.Y, this.GameWindow.UpdateTime / 1000 + 20);
                     continue;
                 }
                 pointsChecked++;
-                var elevation = this.cache.GetElevation(worldPosition.X, worldPosition.Y);
+                var elevation = this.Cache.GetElevation(worldPosition.X, worldPosition.Y);
                 if (elevation > 0) {
                     avatarPosition = new Vector3(worldPosition.X, worldPosition.Y, elevation);
                     break;
@@ -190,8 +193,8 @@
 
             Log.Info("GameNew: Found beach in {0} moves.", pointsChecked);
             this.GameProperties.LastPlayed = this.seed;
-            this.player.Reset();
-            this.player.Position = avatarPosition;
+            this.Player.Reset();
+            this.Player.Position = avatarPosition;
             Update();
             Precache();
         }
@@ -213,8 +216,8 @@
                 Log.Error("Load: File {0} not found.", filename);
                 return;
             }
-            if (this.console.IsOpen)
-                this.console.ToggleConsole();
+            if (this.Console.IsOpen)
+                this.Console.ToggleConsole();
 
             this.GameProperties.LastPlayed = this.seed;
             this.IsRunning = true;
@@ -225,9 +228,9 @@
             subGroup.Add("player");
             CVarUtils::Load(filename, subGroup);
             */
-            this.avatar.Position = this.player.Position;
-            this.world.Load(this.seed);
-            this.world.Save();
+            this.Avatar.Position = this.Player.Position;
+            this.World.Load(this.seed);
+            this.World.Save();
             // Set seconds to 0
             var time = this.GameProperties.GameTime;
             this.GameProperties.GameTime = new TimeSpan(time.Days, time.Hours, time.Minutes, 0);
@@ -256,9 +259,9 @@
 
         public void Quit() {
             Log.Info("Quit Game");
-            this.world.Save();
-            this.scene.Clear();
-            this.cache.Purge();
+            this.World.Save();
+            this.Scene.Clear();
+            this.Cache.Purge();
             Save();
             this.seed = 0;
             this.IsRunning = false;
@@ -268,8 +271,8 @@
             // Look for coast
             var regionX = WorldUtils.WORLD_GRID_CENTER;
             for (var x = start; x != end; x += step) {
-                var region = this.world.GetRegion(x, WorldUtils.WORLD_GRID_CENTER);
-                var regionNeighbor = this.world.GetRegion(x + step, WorldUtils.WORLD_GRID_CENTER);
+                var region = this.World.GetRegion(x, WorldUtils.WORLD_GRID_CENTER);
+                var regionNeighbor = this.World.GetRegion(x + step, WorldUtils.WORLD_GRID_CENTER);
                 if (region.Climate == Climate.Coast && regionNeighbor.Climate == Climate.Ocean) {
                     regionX = x;
                     break;
@@ -285,21 +288,21 @@
 
         private void Precache() {
             // TODO: Put in separate thread and add cancellation
-            this.scene.Generate();
-            this.player.Update();
+            this.Scene.Generate();
+            this.Player.Update();
 
             int ready;
             int total;
             do {
-                this.scene.Progress(out ready, out total);
-                this.scene.Update(this.gameWindow.UpdateTime / 1000 + 20);
-                this.renderer.RenderLoadingScreen((ready / (float)total) * 0.5f);
+                this.Scene.Progress(out ready, out total);
+                this.Scene.Update(this.GameWindow.UpdateTime / 1000 + 20);
+                this.Renderer.RenderLoadingScreen((ready / (float)total) * 0.5f);
             } while (ready < total);
-            this.scene.RestartProgress();
+            this.Scene.RestartProgress();
             do {
-                this.scene.Progress(out ready, out total);
-                this.scene.Update(this.gameWindow.UpdateTime / 1000 + 20);
-                this.renderer.RenderLoadingScreen(0.5f + (ready / (float)total) * 0.5f);
+                this.Scene.Progress(out ready, out total);
+                this.Scene.Update(this.GameWindow.UpdateTime / 1000 + 20);
+                this.Renderer.RenderLoadingScreen(0.5f + (ready / (float)total) * 0.5f);
             } while (ready < total);
         }
     }

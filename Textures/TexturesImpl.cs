@@ -9,7 +9,7 @@
     using System.Drawing.Imaging;
 
     /// <summary>This loads in textures.Nothin' fancy.</summary>
-    public class TexturesImpl : ITextures {
+    internal class TexturesImpl : ITextures {
 
         // TODO: Textures are currently stored as a homemade linked list. Evaluate whether to change to
         // a generic linked list implementation, or store them in a hash map
@@ -20,7 +20,7 @@
             return t?.Id ?? 0;
         }
 
-        public Texture TextureFromName(string name) {
+        private Texture TextureFromName(string name) {
             for (var t = this.headTexture; null != t; t = t.Next) {
                 if (string.Equals(name, t.Name, StringComparison.OrdinalIgnoreCase)) {
                     return t;
@@ -67,13 +67,8 @@
             return t;
         }
 
-        public void Init() {
-            // Do nothing
-        }
-
-        public void Update() {
-            // Do nothing
-        }
+        public void Init() { /* Do nothing */ }
+        public void Update() { /* Do nothing */ }
 
         #region Dispose pattern
 
