@@ -1,5 +1,4 @@
 ﻿namespace FrontierSharp.Cache {
-    using System;
     using System.Collections.Generic;
 
     using OpenTK;
