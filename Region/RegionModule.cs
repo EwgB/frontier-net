@@ -14,8 +14,7 @@
             if (this.useDummy) {
                 Bind<IRegion>().To<DummyRegion>().InSingletonScope();
             } else {
-                // TODO: Replace with RegionImpl
-                Bind<IRegion>().To<DummyRegion>().InSingletonScope();
+                Bind<IRegion>().To<RegionImpl>().InSingletonScope();
             }
         }
     }
