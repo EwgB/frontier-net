@@ -76,67 +76,67 @@ The following functions are used when generating elevation data
 //For things that should not be mimicked by neighbors. (Like rivers.)
 static float do_height_noblend(float val, Region r, GLvector2 offset, float bias) {
 
-//return val;
-if (r.flags_shape & REGION_FLAG_RIVER_ANY) {
-GLvector2 cen;
-float strength;
-float delta;
+    //return val;
+    if (r.flags_shape & REGION_FLAG_RIVER_ANY) {
+    GLvector2 cen;
+    float strength;
+    float delta;
 
-    //if this river is strictly north / south
-    if (r.flags_shape & REGION_FLAG_RIVERNS && !(r.flags_shape & REGION_FLAG_RIVEREW)) {
-    //This makes the river bend side-to-side
-    switch ((r.grid_pos.x + r.grid_pos.y) % 4) {
-        case 0:
-            offset.x += abs(sin(offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;
-            break;
-        case 1:
-            offset.x -= abs(sin(offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;
-            break;
-        case 2:
-            offset.x += abs(sin(offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.1f;
-            break;
-        case 3:
-            offset.x -= abs(sin(offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.1f;
-            break;
+        //if this river is strictly north / south
+        if (r.flags_shape & REGION_FLAG_RIVERNS && !(r.flags_shape & REGION_FLAG_RIVEREW)) {
+            //This makes the river bend side-to-side
+            switch ((r.grid_pos.x + r.grid_pos.y) % 4) {
+                case 0:
+                    offset.x += abs(sin(offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;
+                    break;
+                case 1:
+                    offset.x -= abs(sin(offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;
+                    break;
+                case 2:
+                    offset.x += abs(sin(offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.1f;
+                    break;
+                case 3:
+                    offset.x -= abs(sin(offset.y * 180.0f * DEGREES_TO_RADIANS)) * 0.1f;
+                    break;
+                }
+            }
+            //if this river is strictly east / west
+            if (r.flags_shape & REGION_FLAG_RIVEREW && !(r.flags_shape & REGION_FLAG_RIVERNS)) {
+                //This makes the river bend side-to-side
+                switch ((r.grid_pos.x + r.grid_pos.y) % 4) {
+                    case 0:
+                        offset.y -= abs(sin(offset.x * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;
+                        break;
+                    case 1:
+                        offset.y += abs(sin(offset.x * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;
+                        break;
+                    case 2:
+                        offset.y -= abs(sin(offset.x * 180.0f * DEGREES_TO_RADIANS)) * 0.10f;
+                        break;
+                    case 3:
+                        offset.y += abs(sin(offset.x * 180.0f * DEGREES_TO_RADIANS)) * 0.10f;
+                        break;
+                }
+            }
+
+            cen.x = abs((offset.x - 0.5f) * 2.0f);
+            cen.y = abs((offset.y - 0.5f) * 2.0f);
+            strength = glVectorLength(cen);
+            if (r.flags_shape & REGION_FLAG_RIVERN && offset.y < 0.5f)
+                strength = min(strength, cen.x);
+            if (r.flags_shape & REGION_FLAG_RIVERS && offset.y >= 0.5f)
+                strength = min(strength, cen.x);
+            if (r.flags_shape & REGION_FLAG_RIVERW && offset.x < 0.5f)
+                strength = min(strength, cen.y);
+            if (r.flags_shape & REGION_FLAG_RIVERE && offset.x >= 0.5f)
+                strength = min(strength, cen.y);
+            if (strength < (r.river_width / 2)) {
+                strength *= 1.0f / (r.river_width / 2);
+            delta = (val - bias) + 4.0f * r.river_width;
+            val -= (delta) * (1.0f - strength);
+        }
     }
-}
-//if this river is strictly east / west
-if (r.flags_shape & REGION_FLAG_RIVEREW && !(r.flags_shape & REGION_FLAG_RIVERNS)) {
-//This makes the river bend side-to-side
-switch ((r.grid_pos.x + r.grid_pos.y) % 4) {
-case 0:
-offset.y -= abs(sin(offset.x * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;
-break;
-case 1:
-offset.y += abs(sin(offset.x * 180.0f * DEGREES_TO_RADIANS)) * 0.25f;
-break;
-case 2:
-offset.y -= abs(sin(offset.x * 180.0f * DEGREES_TO_RADIANS)) * 0.10f;
-break;
-case 3:
-offset.y += abs(sin(offset.x * 180.0f * DEGREES_TO_RADIANS)) * 0.10f;
-break;
-}
-}
-
-cen.x = abs((offset.x - 0.5f) * 2.0f);
-cen.y = abs((offset.y - 0.5f) * 2.0f);
-strength = glVectorLength(cen);
-if (r.flags_shape & REGION_FLAG_RIVERN && offset.y < 0.5f)
-strength = min(strength, cen.x);
-if (r.flags_shape & REGION_FLAG_RIVERS && offset.y >= 0.5f)
-strength = min(strength, cen.x);
-if (r.flags_shape & REGION_FLAG_RIVERW && offset.x < 0.5f)
-strength = min(strength, cen.y);
-if (r.flags_shape & REGION_FLAG_RIVERE && offset.x >= 0.5f)
-strength = min(strength, cen.y);
-if (strength < (r.river_width / 2)) {
-strength *= 1.0f / (r.river_width / 2);
-delta = (val - bias) + 4.0f * r.river_width;
-val -= (delta) * (1.0f - strength);
-}
-}
-return val;
+    return val;
 
 }
 
@@ -144,79 +144,78 @@ return val;
 //according to the local region rules.
 static float do_height(Region r, GLvector2 offset, float bias, float esmall, float elarge) {
 
-float val;
+    float val;
 
-//Modify the detail values before they are applied
-if (r.flags_shape & REGION_FLAG_CRATER) {
-if (esmall > 0.5f)
-esmall = 0.5f;
-}
-if (r.flags_shape & REGION_FLAG_TIERED) {
-if (esmall < 0.2f)
-esmall += 0.2f;
-else
-if (esmall < 0.5f)
-esmall -= 0.2f;
-}
-if (r.flags_shape & REGION_FLAG_CRACK) {
-if (esmall > 0.2f && esmall < 0.3f)
-esmall = 0.0f;
-}
-if (r.flags_shape & REGION_FLAG_SINKHOLE) {
-float x = abs(offset.x - 0.5f);
-float y = abs(offset.y - 0.5f);
-if (esmall > max(x, y))
-esmall /= 4.0f;
-}
-//Soften up the banks of a river 
-if (r.flags_shape & REGION_FLAG_RIVER_ANY) {
-GLvector2 cen;
-float strength;
+    //Modify the detail values before they are applied
+    if (r.flags_shape & REGION_FLAG_CRATER) {
+        if (esmall > 0.5f)
+            esmall = 0.5f;
+    }
+    if (r.flags_shape & REGION_FLAG_TIERED) {
+        if (esmall < 0.2f)
+            esmall += 0.2f;
+        else if (esmall < 0.5f)
+            esmall -= 0.2f;
+    }
+    if (r.flags_shape & REGION_FLAG_CRACK) {
+        if (esmall > 0.2f && esmall < 0.3f)
+            esmall = 0.0f;
+    }
+    if (r.flags_shape & REGION_FLAG_SINKHOLE) {
+        float x = abs(offset.x - 0.5f);
+        float y = abs(offset.y - 0.5f);
+        if (esmall > max(x, y))
+            esmall /= 4.0f;
+    }
+    //Soften up the banks of a river 
+    if (r.flags_shape & REGION_FLAG_RIVER_ANY) {
+    GLvector2 cen;
+    float strength;
 
-cen.x = abs((offset.x - 0.5f) * 2.0f);
-cen.y = abs((offset.y - 0.5f) * 2.0f);
-strength = min(cen.x, cen.y);
-strength = max(strength, 0.2f);
-esmall *= strength;
-}
+    cen.x = abs((offset.x - 0.5f) * 2.0f);
+    cen.y = abs((offset.y - 0.5f) * 2.0f);
+    strength = min(cen.x, cen.y);
+    strength = max(strength, 0.2f);
+    esmall *= strength;
+    }
 
-elarge *= r.geo_large;
-//Apply the values!
-val = esmall * r.geo_detail + elarge * LARGE_STRENGTH;
-val += bias;
-if (r.climate == CLIMATE_SWAMP) {
-val -= r.geo_detail / 2.0f;
-val = max(val, r.geo_water - 0.5f);
-}
-//Modify the final value.
-if (r.flags_shape & REGION_FLAG_MESAS) {
-float x = abs(offset.x - 0.5f) / 5;
-float y = abs(offset.y - 0.5f) / 5;
-if ((esmall + 0.01f) < (x + y)) {
-val += 5;
-}
-}
-if (r.flags_shape & REGION_FLAG_CANYON_NS) {
-float x = abs(offset.x - 0.5f) * 2.0f;
-;
+    elarge *= r.geo_large;
+    //Apply the values!
+    val = esmall * r.geo_detail + elarge * LARGE_STRENGTH;
+    val += bias;
+    if (r.climate == CLIMATE_SWAMP) {
+    val -= r.geo_detail / 2.0f;
+    val = max(val, r.geo_water - 0.5f);
+    }
+    //Modify the final value.
+    if (r.flags_shape & REGION_FLAG_MESAS) {
+    float x = abs(offset.x - 0.5f) / 5;
+    float y = abs(offset.y - 0.5f) / 5;
+    if ((esmall + 0.01f) < (x + y)) {
+    val += 5;
+    }
+    }
+    if (r.flags_shape & REGION_FLAG_CANYON_NS) {
+    float x = abs(offset.x - 0.5f) * 2.0f;
+    ;
 
-if (x + esmall < 0.5f)
-val = bias + (val - bias) / 2.0f;
-else
-val += r.geo_water;
-}
-if ((r.flags_shape & REGION_FLAG_BEACH) && val < r.beach_threshold && val > 0.0f) {
-val /= r.beach_threshold;
-val = 1 - val;
-val *= val * val;
-val = 1 - val;
-val *= r.beach_threshold;
-val -= 0.2f;
-}
-if ((r.flags_shape & REGION_FLAG_BEACH_CLIFF) && val < r.beach_threshold && val > -0.1f) {
-val -= r.beach_threshold;
-}
-return val;
+    if (x + esmall < 0.5f)
+    val = bias + (val - bias) / 2.0f;
+    else
+    val += r.geo_water;
+    }
+    if ((r.flags_shape & REGION_FLAG_BEACH) && val < r.beach_threshold && val > 0.0f) {
+    val /= r.beach_threshold;
+    val = 1 - val;
+    val *= val * val;
+    val = 1 - val;
+    val *= r.beach_threshold;
+    val -= 0.2f;
+    }
+    if ((r.flags_shape & REGION_FLAG_BEACH_CLIFF) && val < r.beach_threshold && val > -0.1f) {
+    val -= r.beach_threshold;
+    }
+    return val;
 
 }
 

@@ -68,7 +68,7 @@
 
         private Vector3 position;
         public Vector3 Position {
-            get { return this.position; }
+            get => this.position;
             set {
                 this.position.Z = MathHelper.Clamp(value.Z, -25, 2048);
                 this.position.X = MathHelper.Clamp(value.X, 0, WorldUtils.REGION_SIZE * WorldUtils.WORLD_GRID);

@@ -25,7 +25,7 @@
             var modules = new INinjectModule[] {
                 new AnimationModule(false),
                 new AvatarModule(false),
-                new CacheModule(),
+                new CacheModule(false),
                 new ConsoleModule(),
                 new EnvironmentModule(false), 
                 new GameModule(false),
