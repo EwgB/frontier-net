@@ -11,7 +11,7 @@
     public interface IWorld : IHasProperties, IModule {
 
         uint MapId { get; }
-        bool WindFromWest { get; set; }
+        bool WindFromWest { get; }
 
         // TODO: Look into using Array or ImmutableArray for this data
         float GetWaterLevel(Vector2 coord);

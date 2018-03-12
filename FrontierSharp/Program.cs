@@ -1,5 +1,6 @@
 ﻿namespace FrontierSharp {
     using Ninject;
+    using Ninject.Modules;
 
     using Animation;
     using Avatar;
@@ -8,7 +9,6 @@
     using Environment;
     using Game;
     using Input;
-    using Ninject.Modules;
     using Particles;
     using Player;
     using Renderer;
@@ -39,7 +39,7 @@
                 new TextModule(),
                 new TexturesModule(false),
                 new WaterModule(),
-                new WorldModule()
+                new WorldModule(true)
             };
 
             using (IKernel kernel = new StandardKernel(modules)) {

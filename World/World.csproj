@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="DummyWorld.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WorldImpl.cs" />
     <Compile Include="WorldModule.cs" />
   </ItemGroup>
   <ItemGroup>
