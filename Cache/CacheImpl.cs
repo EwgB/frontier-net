@@ -1,331 +1,221 @@
 ﻿namespace FrontierSharp.Cache {
-    using System.Collections.Generic;
+    using System;
+    using System.IO;
+    using System.Linq;
+
+    using Ninject;
+
+    using NLog;
 
     using OpenTK;
 
     using Common;
+    using Common.Game;
     using Common.Grid;
     using Common.Util;
+    using Common.World;
+
+    using Ninject.Infrastructure.Language;
 
     internal class CacheImpl : ICache {
-        public float GetDetail(int worldX, int worldY) => 0;
-        public bool GetDump(List<string> args) => false;
-        public float GetElevation(float x, float y) => 0;
-        public float GetElevation(int worldX, int worldY) => 0;
-        public Vector3 GetNormal(int worldX, int worldY) => Vector3.UnitY;
-        public bool IsPointAvailable(int worldX, int worldY) => false;
-        public Vector3 GetPosition(int worldX, int worldY) => Vector3.Zero;
-        public bool GetSize(List<string> args) => false;
-        public SurfaceTypes GetSurface(int worldX, int worldY) => SurfaceTypes.Grass;
-        public Color3 GetSurfaceColor(int worldX, int worldY) => Color3.Aquamarine;
-        public uint GetTree(int worldX, int worldY) => 0;
+        #region Constants
 
-        public void Purge() { /* Do nothing */ }
-        public void RenderDebug() { /* Do nothing */ }
-        public void Update(double stopAt) { /* Do nothing */ }
-        public void UpdatePage(int worldX, int worldY, double stopAt) { /* Do nothing */ }
+        private const int PAGE_GRID = (WorldUtils.WORLD_SIZE_METERS / CachePage.PAGE_SIZE);
+
+        #endregion
+
+
+        #region Private members
+
+        // Logger
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+
+        private readonly CachePageFactory cachePageFactory;
+
+        private readonly CachePage[,] cachePages = new CachePage[PAGE_GRID, PAGE_GRID];
+        private int pageCount;
+        private Coord walk = new Coord(0, 0);
+
+        #endregion
+
+
+        #region Modules
+
+        private IGame Game { get; }
+
+        #endregion
+
+
+        public CacheImpl(IGame game, CachePageFactory cachePageFactory) {
+            this.Game = game;
+            this.cachePageFactory = cachePageFactory;
+        }
+
+
+        #region Private functions
+
+        private CachePage LookupPage(int worldX, int worldY) {
+            if (worldX < 0 || worldY < 0)
+                return null;
+            var pageX = PageFromPos(worldX);
+            var pageY = PageFromPos(worldY);
+            if (pageX < 0 || pageX >= PAGE_GRID || pageY < 0 || pageY >= PAGE_GRID)
+                return null;
+            return this.cachePages[pageX, pageY];
+        }
+
+        private static int PageFromPos(int cell) => cell / CachePage.PAGE_SIZE;
+
+        #endregion
+
+
+        #region Getters
+
+        public float GetDetail(int worldX, int worldY) {
+            var p = LookupPage(worldX, worldY);
+            return p?.GetDetail(worldX % CachePage.PAGE_SIZE, worldY % CachePage.PAGE_SIZE) ?? 0;
+        }
+
+        public float GetElevation(int worldX, int worldY) {
+            var p = LookupPage(worldX, worldY);
+            return p?.GetElevation(worldX % CachePage.PAGE_SIZE, worldY % CachePage.PAGE_SIZE) ?? -99;
+        }
+
+        public float GetElevation(float x, float y) {
+            var cellX = (int) x;
+            var cellY = (int) y;
+            var dX = x - cellX;
+            var dY = y - cellY;
+            var y0 = GetElevation(cellX, cellY);
+            var y1 = GetElevation(cellX + 1, cellY);
+            var y2 = GetElevation(cellX, cellY + 1);
+            var y3 = GetElevation(cellX + 1, cellY + 1);
+
+            float a, b, c;
+            if (dX < dY) {
+                c = y2 - y0;
+                b = y3 - y2;
+                a = y0;
+            } else {
+                c = y3 - y1;
+                b = y1 - y0;
+                a = y0;
+            }
+
+            return (a + b * dX + c * dY);
+        }
+
+        public Vector3 GetNormal(int worldX, int worldY) {
+            var p = LookupPage(worldX, worldY);
+            return p?.GetNormal(worldX % CachePage.PAGE_SIZE, worldY % CachePage.PAGE_SIZE) ?? Vector3.UnitZ;
+        }
+
+        public bool IsPointAvailable(int worldX, int worldY) {
+            worldX = Math.Max(0, worldX);
+            worldY = Math.Max(0, worldY);
+            var pageX = PageFromPos(worldX);
+            var pageY = PageFromPos(worldY);
+            if (pageX < 0 || pageX >= PAGE_GRID || pageY < 0 || pageY >= PAGE_GRID)
+                return false;
+            var p = this.cachePages[pageX, pageY];
+            if (p == null) {
+                p = this.cachePageFactory.LoadCachePage(pageX, pageY);
+                this.cachePages[pageX, pageY] = p;
+                this.pageCount++;
+            }
+
+            return p.IsReady();
+        }
+
+        public Vector3 GetPosition(int worldX, int worldY) {
+            var p = LookupPage(worldX, worldY);
+            return p?.GetPosition(worldX % CachePage.PAGE_SIZE, worldY % CachePage.PAGE_SIZE) ??
+                   new Vector3(worldX, worldY, 0);
+        }
+
+        public SurfaceTypes GetSurface(int worldX, int worldY) {
+            var p = LookupPage(worldX, worldY);
+            return p?.GetSurface(worldX % CachePage.PAGE_SIZE, worldY % CachePage.PAGE_SIZE) ?? SurfaceTypes.Null;
+        }
+
+        public uint GetTree(int worldX, int worldY) {
+            var p = LookupPage(worldX, worldY);
+            return p?.GetTree(worldX % CachePage.PAGE_SIZE, worldY % CachePage.PAGE_SIZE) ?? 0;
+        }
+
+        public Color3 GetSurfaceColor(int worldX, int worldY) {
+            var p = LookupPage(worldX, worldY);
+            return p?.GetColor(worldX % CachePage.PAGE_SIZE, worldY % CachePage.PAGE_SIZE) ??
+                   Color3.Magenta; /* So we notice */
+        }
+
+        public void PrintSize() {
+            var files = Directory
+                .EnumerateFiles(this.Game.GameDirectory, "*.pag", SearchOption.TopDirectoryOnly)
+                .Select(file => new FileInfo(file))
+                .Select(fileInfo => fileInfo.Length)
+                .ToList();
+
+            Log.Info("Cache contains {0} files, {1} bytes used.", files.Count, files.Sum());
+        }
+
+        #endregion
+
+
+        public void Purge() {
+            for (var y = 0; y < PAGE_GRID; y++) {
+                for (var x = 0; x < PAGE_GRID; x++) {
+                    if (this.cachePages[x, y] != null) {
+                        this.pageCount--;
+                        this.cachePageFactory.SaveCachePage(this.cachePages[x, y]);
+                        this.cachePages[x, y] = null;
+                    }
+                }
+            }
+        }
+
+        public void Dump() {
+            Purge();
+
+            Directory
+                .EnumerateFiles(this.Game.GameDirectory, "*.pag", SearchOption.TopDirectoryOnly)
+                .Select(file => new FileInfo(file))
+                .Map(file => {
+                    Log.Info("Deleting file {0}...", file.Name);
+                    file.Delete();
+                });
+        }
+
+        public void RenderDebug() {
+            for (var y = 0; y < PAGE_GRID; y++) {
+                for (var x = 0; x < PAGE_GRID; x++) {
+                    this.cachePages[x, y]?.Render();
+                }
+            }
+        }
+
+        public void Update(double stopAt) {
+            //TextPrint ("%d cachePages. (%s)", this.pageCount, TextBytes (sizeof (CachePage) * this.pageCount));
+            var count = 0;
+            //Pass over the table a bit at a time and do garbage collection
+            while (count < (PAGE_GRID / 4) && this.Game.GameProperties.GameTime.TotalMilliseconds < stopAt) {
+                var page = this.cachePages[this.walk.X, this.walk.Y];
+                if (page != null && page.IsExpired) {
+                    this.cachePageFactory.SaveCachePage(page);
+                    this.cachePages[this.walk.X, this.walk.Y] = null;
+                    this.pageCount--;
+                }
+
+                count++;
+                this.walk.Walk(PAGE_GRID, out var _);
+            }
+        }
+
+        public void UpdatePage(int worldX, int worldY, double stopAt) {
+            var p = LookupPage(worldX, worldY);
+            if (p == null)
+                return;
+            p.Build(stopAt);
+        }
     }
 }
-
-//#define PAGE_GRID   (WORLD_SIZE_METERS / PAGE_SIZE)
-
-//static CPage*       page[PAGE_GRID][PAGE_GRID];
-//static int          page_count;
-//static GLcoord      walk;
-
-///* Static Functions *************************************************************/
-
-//inline int CPageFromPos (int cell)
-//{
-
-//  return cell / PAGE_SIZE;
-
-//}
-
-//static CPage* page_lookup (int world_x, int world_y) 
-//{
-
-//  int     page_x, page_y;
-  
-//  if (world_x < 0 || world_y < 0)
-//    return NULL;
-//  page_x = CPageFromPos (world_x);
-//  page_y = CPageFromPos (world_y);
-//  if (page_x < 0 || page_x >= PAGE_GRID || page_y < 0 || page_y >= PAGE_GRID)
-//    return NULL;
-//  return page[page_x][page_y];
-
-
-//}
-
-///* Various lookup functions **************************************************/
-
-
-//float CacheDetail (int world_x, int world_y)
-//{
-
-//  CPage*   p;
-  
-//  p = page_lookup (world_x, world_y);
-//  if (!p) 
-//    return 0;
-//  return p->Detail (world_x % PAGE_SIZE, world_y % PAGE_SIZE);
-
-//}
-
-//float CacheElevation (int world_x, int world_y)
-//{
-  
-//  CPage*   p;
-  
-//  p = page_lookup (world_x, world_y);
-//  if (!p) 
-//    return -99;
-//  return p->Elevation (world_x % PAGE_SIZE, world_y % PAGE_SIZE);
-
-//}
-
-//float CacheElevation (float x, float y)
-//{
-
-//  int     cell_x;
-//  int     cell_y;
-//  float   a;
-//  float   b;
-//  float   c;
-//  float   y0, y1, y2, y3;
-//  float   dx;
-//  float   dy;
-
-//  cell_x = (int)x;
-//  cell_y = (int)y;
-//  dx = (x - (float)cell_x);
-//  dy = (y - (float)cell_y);
-//  y0 = CacheElevation (cell_x, cell_y);
-//  y1 = CacheElevation (cell_x + 1, cell_y);
-//  y2 = CacheElevation (cell_x, cell_y + 1);
-//  y3 = CacheElevation (cell_x + 1, cell_y + 1);
-//  if (dx < dy) {
-//    c = y2 - y0; 
-//    b = y3 - y2; 
-//    a = y0;
-//  } else {
-//    c = y3 - y1; 
-//    b = y1 - y0; 
-//    a = y0;
-//  }
-//  return (a + b * dx + c * dy);
-
-//}
-
-//GLvector CacheNormal (int world_x, int world_y)
-//{
-  
-//  CPage*   p;
-  
-//  p = page_lookup (world_x, world_y);
-//  if (!p) 
-//    return glVector (0.0f, 0.0f, 1.0f);
-//  return p->Normal (world_x % PAGE_SIZE, world_y % PAGE_SIZE);
-
-//}
-
-
-//bool CachePointAvailable (int world_x, int world_y)
-//{
-
-//  int     page_x, page_y;
-//  CPage*  p;
-
-//  world_x = max (0, world_x);
-//  world_y = max (0, world_y);
-//  page_x = CPageFromPos (world_x);
-//  page_y = CPageFromPos (world_y);
-//  if (page_x < 0 || page_x >= PAGE_GRID || page_y < 0 || page_y >= PAGE_GRID)
-//    return false;
-//  p = page[page_x][page_y];
-//  if (!p) {
-//    p = new CPage;
-//    p->Cache (page_x, page_y);
-//    page[page_x][page_y] = p;
-//    page_count++;
-//  }
-//  return p->Ready ();
-
-//}
-
-//GLvector CachePosition (int world_x, int world_y)
-//{
-  
-//  CPage*   p;
-  
-//  p = page_lookup (world_x, world_y);
-//  if (!p) 
-//    return glVector ((float)world_x, (float)world_y, 0.0f);
-//  return p->Position (world_x % PAGE_SIZE, world_y % PAGE_SIZE);
-
-//}
-
-//SurfaceType CacheSurface (int world_x, int world_y)
-//{
-
-//  CPage*   p;
-
-//  p = page_lookup (world_x, world_y);
-//  if (!p) 
-//    return SURFACE_NULL;
-//  return p->Surface(world_x % PAGE_SIZE, world_y % PAGE_SIZE);
-
-//}
-
-
-
-//unsigned CacheTree (int world_x, int world_y)
-//{
-
-//  CPage*   p;
-
-//  p = page_lookup (world_x, world_y);
-//  if (!p) 
-//    return 0;
-//  return p->Tree (world_x % PAGE_SIZE, world_y % PAGE_SIZE);
-
-//}
-
-//GLrgba CacheSurfaceColor (int world_x, int world_y)
-//{
-
-//  CPage*   p;
-
-//  p = page_lookup (world_x, world_y);
-//  if (!p) 
-//    return glRgba (1.0f, 0.0f, 1.0f); //Pink, so we notice
-//  return p->Color (world_x % PAGE_SIZE, world_y % PAGE_SIZE);
-
-//}
-
-///* Module functions ******************************************************/
-
-//void CachePurge ()
-//{
-
-//  int     x, y;
-
-//  for (y = 0; y < PAGE_GRID; y++) {
-//    for (x = 0; x < PAGE_GRID; x++) {
-//      if (page[x][y]) {
-//        page_count--;
-//        page[x][y]->Save ();
-//        delete page[x][y];
-//      }
-//      page[x][y] = NULL;
-//    }
-//  }
-
-//}
-
-//bool CacheSize (vector<string> *args)
-//{
-
-//  char          filespec[256];
-//  _finddata32_t fd;
-//  long          handle;
-//  bool          more;
-//  int           bytes;
-//  int           files;
-
-//  sprintf (filespec, "%s*.pag", GameDirectory ());
-//  more = true;
-//  bytes = 0;
-//  files = 0;
-//  handle = _findfirst (filespec, &fd);
-//  while (handle && more) {
-//    bytes += fd.size;  
-//    files++;
-//    if (_findnext (handle, &fd) != 0)
-//      more = false;
-//  }
-//  _findclose(handle);
-//  ConsoleLog ("Cache contains %d files, %d bytes used.", files, bytes);
-//  return true;
-
-//}
-
-//bool CacheDump (vector<string> *args)
-//{
-
-//  char          filespec[256];
-//  char          file[256];
-//  _finddata32_t fd;
-//  long          handle;
-//  bool          more;
-
-//  CachePurge ();
-//  sprintf (filespec, "%s*.pag", GameDirectory ());
-//  more = true;
-//  handle = _findfirst (filespec, &fd);
-//  while (handle && more) {
-//    sprintf (file, "%s%s", GameDirectory (), fd.name);
-//    _unlink (file);
-//    ConsoleLog (file);
-//    if (_findnext (handle, &fd) != 0)
-//      more = false;
-//  }
-//  _findclose(handle);
-//  return true;
-
-//}
-
-
-//void CacheRenderDebug ()
-//{
-
-//  int     x, y;
-
-//  for (y = 0; y < PAGE_GRID; y++) {
-//    for (x = 0; x < PAGE_GRID; x++) {
-//      if (page[x][y])
-//        page[x][y]->Render ();
-//    }
-//  }
-
-//}
-
-//void CacheUpdate (long stop)
-//{
-
-//  int   count;
-
-//  //TextPrint ("%d pages. (%s)", page_count, TextBytes (sizeof (CPage) * page_count));
-//  count = 0;
-//  //Pass over the table a bit at a time and do garbage collection
-//  while (count < (PAGE_GRID / 4) && SdlTick () < stop) {
-//    if (page[walk.x][walk.y] && page[walk.x][walk.y]->Expired ()) {
-//      page[walk.x][walk.y]->Save ();
-//      delete page[walk.x][walk.y];
-//      page[walk.x][walk.y] = NULL;
-//      page_count--;
-//    }
-//    count++;
-//    walk.Walk (PAGE_GRID);
-//  }  
-
-//}
-
-
-///*-----------------------------------------------------------------------------
-//  Request an update to a specific zone.  This can be called by Terrains, 
-//  which are waiting for the zone.
-//-----------------------------------------------------------------------------*/
-
-//void CacheUpdatePage (int world_x, int world_y, long stop)
-//{
-
-//  CPage*   p;
-  
-//  p = page_lookup (world_x, world_y);
-//  if (!p) 
-//    return;
-//  p->Build (stop);
-
-//}

@@ -13,9 +13,9 @@
     /// </summary>
     public interface IRegion {
         string Title { get; }
-        uint TreeType { get; }
+        ushort TreeType { get; }
         RegionFlag ShapeFlags { get; }
-        Climate Climate { get; }
+        ClimateTypes Climate { get; }
         Vector2 GridPosition { get; }
         int MountainHeight { get; }
         int RiverId { get; }

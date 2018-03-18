@@ -1,8 +1,10 @@
 ﻿namespace FrontierSharp.Common.World {
-    using Region;
     using OpenTK;
 
+    using Grid;
     using Property;
+    using Region;
+    using Util;
 
     ///<summary>
     /// Only one of these is ever instantiated.  This is everything that goes into a "save file".
@@ -19,6 +21,11 @@
 
         // TODO: Look into using ImmutableArray for this data
         IRegion GetRegion(int x, int y);
+        IRegion GetRegionFromPosition(int worldX, int worldY);
+
+        Cell GetCell(int worldX, int worldY);
+        Color3 GetColor(int worldX, int worldY, SurfaceColors c);
+        Tree GetTree(uint id);
 
         void Generate(uint seed);
         void Load(uint seed);
@@ -37,11 +44,7 @@
   Region        map[WORLD_GRID][WORLD_GRID];
 };
 
-Cell WorldCell(int world_x, int world_y);
-GLrgba WorldColorGet(int world_x, int world_y, SurfaceColor c);
 char* WorldLocationName(int world_x, int world_y);
-Region WorldRegionFromPosition(int world_x, int world_y);
-Region WorldRegionFromPosition(int world_x, int world_y);
 float WorldWaterLevel(int world_x, int world_y);
 
 uint WorldCanopyTree();
@@ -54,6 +57,5 @@ World* WorldPtr();
 Region WorldRegionGet(int index_x, int index_y);
 void WorldRegionSet(int index_x, int index_y, Region val);
 uint WorldTreeType(float moisture, float temperature);
-class CTree* WorldTree(uint id);
 void WorldTexturePurge();
 */

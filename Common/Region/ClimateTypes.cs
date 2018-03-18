@@ -1,5 +1,5 @@
 ﻿namespace FrontierSharp.Common.Region {
-    public enum Climate {
+    public enum ClimateTypes {
         Invalid,
         Ocean,
         Coast,

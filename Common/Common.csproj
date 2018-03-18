@@ -56,6 +56,7 @@
     <Compile Include="Environment\ColorTypes.cs" />
     <Compile Include="Environment\EnvironmentData.cs" />
     <Compile Include="Game\IGameProperties.cs" />
+    <Compile Include="Grid\Cell.cs" />
     <Compile Include="Grid\IGridData.cs" />
     <Compile Include="Grid\GridManager.cs" />
     <Compile Include="Grid\IGrass.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="Grid\IParticleArea.cs" />
     <Compile Include="Grid\IForest.cs" />
     <Compile Include="Grid\ITerrain.cs" />
+    <Compile Include="Grid\SurfaceColor.cs" />
     <Compile Include="Grid\SurfaceTypes.cs" />
     <Compile Include="IBaseModule.cs" />
     <Compile Include="ICache.cs" />
@@ -73,7 +75,7 @@
     <Compile Include="IWater.cs" />
     <Compile Include="Particles\IEmitter.cs" />
     <Compile Include="Particles\ParticleTypes.cs" />
-    <Compile Include="Region\Climate.cs" />
+    <Compile Include="Region\ClimateTypes.cs" />
     <Compile Include="Region\IRegion.cs" />
     <Compile Include="ISky.cs" />
     <Compile Include="IText.cs" />

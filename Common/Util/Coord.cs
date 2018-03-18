@@ -35,10 +35,7 @@
         }
 
         public override bool Equals(object obj) {
-            if (!(obj is Coord))
-                return false;
-
-            return Equals((Coord)obj);
+            return obj is Coord coord && Equals(coord);
         }
 
         private bool Equals(Coord other) {

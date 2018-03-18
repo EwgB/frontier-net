@@ -8,7 +8,7 @@
         public string Title { get; }
         public uint TreeType { get; }
         public RegionFlag ShapeFlags { get; }
-        public Climate Climate { get; }
+        public ClimateTypes Climate { get; }
         public Vector2 GridPosition { get; }
         public int MountainHeight { get; }
         public int RiverId { get; }
@@ -467,7 +467,7 @@ return MathInterpolateQuad(rul.geo_water, rur.geo_water, rbl.geo_water, rbr.geo_
 
 }
 
-Cell WorldCell(int world_x, int world_y) {
+GetCell WorldCell(int world_x, int world_y) {
 
 float esmall, elarge;
 Region rul, rur, rbl, rbr;//Four corners: upper left, upper right, etc.
@@ -478,7 +478,7 @@ GLcoord origin;
 GLcoord ul, br; //Upper left and bottom-right corners
 GLvector2 blend;
 bool left;
-Cell result;
+GetCell result;
 
 esmall = Entropy(world_x, world_y);
 elarge = Entropy((float) world_x / LARGE_SCALE, (float) world_y / LARGE_SCALE);

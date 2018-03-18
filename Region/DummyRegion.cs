@@ -16,7 +16,7 @@
         public float GeoWater => 0;
         public Color3 ColorAtmosphere => Color3.Blue;
         public Color3 ColorMap => Color3.Black;
-        public Climate Climate => Climate.Invalid;
+        public ClimateTypes Climate => ClimateTypes.Invalid;
         public float CliffThreshold => 0;
         public Color3 ColorDirt => Color3.Brown;
         public Color3[] ColorFlowers => new[] { Color3.Red, Color3.Green, Color3.Blue };

@@ -17,8 +17,7 @@
 
         public IProperty<T> GetProperty<T>(string name) {
             if (this.properties.ContainsKey(name)) {
-                var property = this.properties[name] as IProperty<T>;
-                if (null != property) {
+                if (this.properties[name] is IProperty<T> property) {
                     return property;
                 } else {
                     throw new PropertyTypeException(this.properties[name].GetType(), typeof(T));
