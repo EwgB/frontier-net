@@ -92,6 +92,7 @@
     <Compile Include="Particles\IParticles.cs" />
     <Compile Include="Region\RegionFlag.cs" />
     <Compile Include="Scene\IScene.cs" />
+    <Compile Include="Tree\ITree.cs" />
     <Compile Include="World\IWorld.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Property\IProperties.cs" />

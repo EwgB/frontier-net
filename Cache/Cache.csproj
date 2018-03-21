@@ -54,7 +54,6 @@
   <ItemGroup>
     <Compile Include="CacheImpl.cs" />
     <Compile Include="CacheModule.cs" />
-    <Compile Include="CachePageFactory.cs" />
     <Compile Include="DummyCache.cs" />
     <Compile Include="CachePage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

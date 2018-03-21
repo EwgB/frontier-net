@@ -4,6 +4,7 @@
     using Grid;
     using Property;
     using Region;
+    using Tree;
     using Util;
 
     ///<summary>
@@ -25,7 +26,7 @@
 
         Cell GetCell(int worldX, int worldY);
         Color3 GetColor(int worldX, int worldY, SurfaceColors c);
-        Tree GetTree(uint id);
+        ITree GetTree(uint id);
 
         void Generate(uint seed);
         void Load(uint seed);

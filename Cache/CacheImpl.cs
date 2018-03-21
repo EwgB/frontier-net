@@ -4,9 +4,8 @@
     using System.Linq;
 
     using Ninject;
-
+    using Ninject.Infrastructure.Language;
     using NLog;
-
     using OpenTK;
 
     using Common;
@@ -15,9 +14,9 @@
     using Common.Util;
     using Common.World;
 
-    using Ninject.Infrastructure.Language;
 
     internal class CacheImpl : ICache {
+
         #region Constants
 
         private const int PAGE_GRID = (WorldUtils.WORLD_SIZE_METERS / CachePage.PAGE_SIZE);
@@ -30,25 +29,25 @@
         // Logger
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        private readonly CachePageFactory cachePageFactory;
-
         private readonly CachePage[,] cachePages = new CachePage[PAGE_GRID, PAGE_GRID];
         private int pageCount;
-        private Coord walk = new Coord(0, 0);
+        private Coord walk;
 
         #endregion
 
 
         #region Modules
 
+        private readonly IKernel kernel;
+
         private IGame Game { get; }
 
         #endregion
 
 
-        public CacheImpl(IGame game, CachePageFactory cachePageFactory) {
+        public CacheImpl(IGame game, IKernel kernel) {
             this.Game = game;
-            this.cachePageFactory = cachePageFactory;
+            this.kernel = kernel;
         }
 
 
@@ -111,20 +110,20 @@
         }
 
         public bool IsPointAvailable(int worldX, int worldY) {
-            worldX = Math.Max(0, worldX);
-            worldY = Math.Max(0, worldY);
-            var pageX = PageFromPos(worldX);
-            var pageY = PageFromPos(worldY);
+            var pageX = PageFromPos(Math.Max(0, worldX));
+            var pageY = PageFromPos(Math.Max(0, worldY));
             if (pageX < 0 || pageX >= PAGE_GRID || pageY < 0 || pageY >= PAGE_GRID)
                 return false;
-            var p = this.cachePages[pageX, pageY];
-            if (p == null) {
-                p = this.cachePageFactory.LoadCachePage(pageX, pageY);
-                this.cachePages[pageX, pageY] = p;
+
+            var page = this.cachePages[pageX, pageY];
+            if (page == null) {
+                page = this.kernel.Get<CachePage>();
+                page.Load(pageX, pageY);
+                this.cachePages[pageX, pageY] = page;
                 this.pageCount++;
             }
 
-            return p.IsReady();
+            return page.IsReady();
         }
 
         public Vector3 GetPosition(int worldX, int worldY) {
@@ -167,7 +166,7 @@
                 for (var x = 0; x < PAGE_GRID; x++) {
                     if (this.cachePages[x, y] != null) {
                         this.pageCount--;
-                        this.cachePageFactory.SaveCachePage(this.cachePages[x, y]);
+                        this.cachePages[x, y].Save();
                         this.cachePages[x, y] = null;
                     }
                 }
@@ -195,27 +194,25 @@
         }
 
         public void Update(double stopAt) {
-            //TextPrint ("%d cachePages. (%s)", this.pageCount, TextBytes (sizeof (CachePage) * this.pageCount));
+            Log.Debug("{0} cachePages.", this.pageCount);
             var count = 0;
             //Pass over the table a bit at a time and do garbage collection
             while (count < (PAGE_GRID / 4) && this.Game.GameProperties.GameTime.TotalMilliseconds < stopAt) {
                 var page = this.cachePages[this.walk.X, this.walk.Y];
                 if (page != null && page.IsExpired) {
-                    this.cachePageFactory.SaveCachePage(page);
+                    page.Save();
                     this.cachePages[this.walk.X, this.walk.Y] = null;
                     this.pageCount--;
                 }
 
                 count++;
-                this.walk.Walk(PAGE_GRID, out var _);
+                this.walk = this.walk.Walk(PAGE_GRID, out var _);
             }
         }
 
         public void UpdatePage(int worldX, int worldY, double stopAt) {
             var p = LookupPage(worldX, worldY);
-            if (p == null)
-                return;
-            p.Build(stopAt);
+            p?.Build(stopAt);
         }
     }
 }

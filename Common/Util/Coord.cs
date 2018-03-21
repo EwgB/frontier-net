@@ -4,7 +4,7 @@
         public int X { get; }
         public int Y { get; }
 
-        public Coord(int x, int y) {
+        public Coord(int x = 0, int y = 0) {
             this.X = x;
             this.Y = y;
         }

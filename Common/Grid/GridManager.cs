@@ -64,7 +64,7 @@
             this.lastViewer = GetViewPosition(this.avatar.Position);
             this.listPos = 0;
 
-            var walk = new Coord(0, 0);
+            var walk = new Coord();
             this.ItemsViewableCount = 0;
             for (var i = 0; i < this.distanceList.Count; i++) {
                 if (this.distanceList[i].DistanceInt <= this.gridHalf)
@@ -75,8 +75,8 @@
 
             bool rollover;
             do {
-                var gd = GetItem(walk);
-                gd.Invalidate();
+                var gridData = GetItem(walk);
+                gridData.Invalidate();
                 //gd.Set (0, 0, 0);
                 //gd.Set ( this.lastViewer.X + walk.X - this.gridHalf,  this.lastViewer.Y + walk.Y - this.gridHalf, 0);
                 //gd.Set (viewer.X + walk.X - this.gridHalf, viewer.Y + walk.Y - this.gridHalf, 0);
@@ -89,7 +89,7 @@
             this.gridSize = 0;
             this.gridHalf = 0;
             this.itemSize = 0;
-            this.lastViewer = new Coord(0, 0);
+            this.lastViewer = new Coord();
             this.listPos = 0;
         }
 

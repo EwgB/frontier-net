@@ -11,7 +11,6 @@
         }
 
         public override void Load() {
-            Bind<CachePageFactory>().To<CachePageFactory>();
             if (this.useDummy) {
                 Bind<ICache>().To<DummyCache>().InSingletonScope();
             }

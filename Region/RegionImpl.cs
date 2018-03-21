@@ -6,7 +6,7 @@
 
     internal class RegionImpl : IRegion {
         public string Title { get; }
-        public uint TreeType { get; }
+        public ushort TreeType { get; }
         public RegionFlag ShapeFlags { get; }
         public ClimateTypes Climate { get; }
         public Vector2 GridPosition { get; }

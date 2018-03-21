@@ -30,6 +30,6 @@
         public int RiverSegment => 1;
         public float RiverWidth => 1;
         public float Temperature => (this.GridPosition.Y - WorldUtils.WORLD_GRID / 4f) / WorldUtils.WORLD_GRID_CENTER;
-        public uint TreeType => 3;
+        public ushort TreeType => 3;
     }
 }
