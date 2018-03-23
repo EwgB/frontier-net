@@ -1,5 +1,6 @@
 ﻿namespace FrontierSharp.Cache {
     using Ninject.Modules;
+    using Ninject.Extensions.Factory;
 
     using Common;
 
@@ -17,6 +18,8 @@
             else {
                 Bind<ICache>().To<CacheImpl>().InSingletonScope();
             }
+
+            Bind<ICachePageFactory>().ToFactory();
         }
     }
 }

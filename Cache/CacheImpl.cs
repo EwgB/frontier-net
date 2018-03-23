@@ -3,7 +3,6 @@
     using System.IO;
     using System.Linq;
 
-    using Ninject;
     using Ninject.Infrastructure.Language;
     using NLog;
     using OpenTK;
@@ -29,7 +28,7 @@
         // Logger
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        private readonly CachePage[,] cachePages = new CachePage[PAGE_GRID, PAGE_GRID];
+        private readonly ICachePage[,] cachePages = new ICachePage[PAGE_GRID, PAGE_GRID];
         private int pageCount;
         private Coord walk;
 
@@ -38,22 +37,21 @@
 
         #region Modules
 
-        private readonly IKernel kernel;
-
         private IGame Game { get; }
+        private ICachePageFactory CachePageFactory { get; }
 
         #endregion
 
 
-        public CacheImpl(IGame game, IKernel kernel) {
+        public CacheImpl(IGame game, ICachePageFactory cachePageFactory) {
             this.Game = game;
-            this.kernel = kernel;
+            this.CachePageFactory = cachePageFactory;
         }
 
 
         #region Private functions
 
-        private CachePage LookupPage(int worldX, int worldY) {
+        private ICachePage LookupPage(int worldX, int worldY) {
             if (worldX < 0 || worldY < 0)
                 return null;
             var pageX = PageFromPos(worldX);
@@ -117,7 +115,7 @@
 
             var page = this.cachePages[pageX, pageY];
             if (page == null) {
-                page = this.kernel.Get<CachePage>();
+                page = this.CachePageFactory.CreateCachePage();
                 page.Load(pageX, pageY);
                 this.cachePages[pageX, pageY] = page;
                 this.pageCount++;

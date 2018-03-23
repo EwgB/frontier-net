@@ -21,9 +21,9 @@
     ///   formations) and then is used to generate the table of surface data, which
     ///   describes how to paint the textures for the given area.
     /// </summary>
-    internal sealed class CachePage {
+    internal sealed class CachePage : ICachePage {
 
-        public enum Stages {
+        private enum Stages {
             Begin,
             Position,
             Normal,
