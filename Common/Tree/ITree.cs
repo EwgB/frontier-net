@@ -1,6 +1,16 @@
 ﻿namespace FrontierSharp.Common.Tree {
     public interface ITree {
         bool GrowsHigh { get; }
+
+        void Create(bool canopy, float moisture, float temperature, int seed);
+
+        //public:
+        //  unsigned          _texture;
+        //  void              Render (GLvector pos, unsigned alt, LOD lod);
+        //  unsigned          Texture () { return _texture; };
+        //  void              TexturePurge ();
+        //  GLmesh*           Mesh (unsigned alt, LOD lod);
+        //  void              Info ();
     }
 }
 
@@ -116,14 +126,6 @@
 //  void              DoTexture ();
 //  GLvector          TrunkPosition (float delta, float* radius);
 //  void              Build ();
-//public:
-//  unsigned          _texture;
-//  void              Create (bool canopy, float moisture, float temperature, int seed);
-//  void              Render (GLvector pos, unsigned alt, LOD lod);
-//  unsigned          Texture () { return _texture; };
-//  void              TexturePurge ();
-//  GLmesh*           Mesh (unsigned alt, LOD lod);
-//  void              Info ();
 
 
 //};
