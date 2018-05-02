@@ -79,6 +79,7 @@
     <Compile Include="ISky.cs" />
     <Compile Include="IText.cs" />
     <Compile Include="Shaders\ShaderTypes.cs" />
+    <Compile Include="Terraform\ITerraform.cs" />
     <Compile Include="Textures\ITextures.cs" />
     <Compile Include="Game\IGame.cs" />
     <Compile Include="IConsole.cs" />

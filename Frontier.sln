@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Frontier", "Terrain\Terrain.vcxproj", "{A1163D2D-59A7-4B3E-9DBE-5DFE09E0A7F2}"
 EndProject
@@ -48,6 +48,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Text", "Text\Text.csproj", "{BCE07ACC-EBD2-4F04-A0AC-8D0E29338F82}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Water", "Water\Water.csproj", "{D1F12656-4A28-4126-B389-A9F7007B9A13}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Terraform", "Terraform\Terraform.csproj", "{CBF2E277-3264-4B0A-964A-03930767AA3D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -141,6 +143,10 @@ Global
 		{D1F12656-4A28-4126-B389-A9F7007B9A13}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1F12656-4A28-4126-B389-A9F7007B9A13}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1F12656-4A28-4126-B389-A9F7007B9A13}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBF2E277-3264-4B0A-964A-03930767AA3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBF2E277-3264-4B0A-964A-03930767AA3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBF2E277-3264-4B0A-964A-03930767AA3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBF2E277-3264-4B0A-964A-03930767AA3D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -167,5 +173,9 @@ Global
 		{90ABA0C6-8DE5-4B7D-A07B-2FA4D76D6F74} = {54C77D01-626C-4E5D-ABDE-D5C235E8C051}
 		{BCE07ACC-EBD2-4F04-A0AC-8D0E29338F82} = {54C77D01-626C-4E5D-ABDE-D5C235E8C051}
 		{D1F12656-4A28-4126-B389-A9F7007B9A13} = {54C77D01-626C-4E5D-ABDE-D5C235E8C051}
+		{CBF2E277-3264-4B0A-964A-03930767AA3D} = {54C77D01-626C-4E5D-ABDE-D5C235E8C051}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {08808509-49B1-43FB-BA2C-A64408BB2996}
 	EndGlobalSection
 EndGlobal
