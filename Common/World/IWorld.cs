@@ -23,8 +23,8 @@
     /// </summary>
     public interface IWorld : IHasProperties, IModule {
 
-        int MapId { get; }
-        int Seed { get; }
+        uint MapId { get; }
+        uint Seed { get; }
         bool WindFromWest { get; }
 
         // TODO: Look into using Array or ImmutableArray for this data
@@ -39,8 +39,8 @@
         Color3 GetColor(int worldX, int worldY, SurfaceColors c);
         ITree GetTree(uint id);
 
-        void Generate(int seed);
-        void Load(int seed);
+        void Generate(uint seed);
+        void Load(uint seed);
         void Save();
     }
 }
