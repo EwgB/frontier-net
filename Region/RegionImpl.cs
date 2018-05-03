@@ -424,9 +424,9 @@ c2 = r2.color_rock;
 c3 = r3.color_rock;
 break;
 }
-result.red = MathInterpolateQuad(c0.red, c1.red, c2.red, c3.red, offset);
-result.green = MathInterpolateQuad(c0.green, c1.green, c2.green, c3.green, offset);
-result.blue = MathInterpolateQuad(c0.blue, c1.blue, c2.blue, c3.blue, offset);
+result.red = MathUtils.InterpolateQuad(c0.red, c1.red, c2.red, c3.red, offset);
+result.green = MathUtils.InterpolateQuad(c0.green, c1.green, c2.green, c3.green, offset);
+result.blue = MathUtils.InterpolateQuad(c0.blue, c1.blue, c2.blue, c3.blue, offset);
 return result;
 
 }
@@ -463,7 +463,7 @@ rul = region(origin.x, origin.y);
 rur = region(origin.x + 1, origin.y);
 rbl = region(origin.x, origin.y + 1);
 rbr = region(origin.x + 1, origin.y + 1);
-return MathInterpolateQuad(rul.geo_water, rur.geo_water, rbl.geo_water, rbr.geo_water, offset, ((origin.x + origin.y) % 2) == 0);
+return MathUtils.InterpolateQuad(rul.geo_water, rur.geo_water, rbl.geo_water, rbr.geo_water, offset, ((origin.x + origin.y) % 2) == 0);
 
 }
 
@@ -516,7 +516,7 @@ eul = do_height(rul, offset, bias, esmall, elarge);
 eur = do_height(rur, offset, bias, esmall, elarge);
 ebl = do_height(rbl, offset, bias, esmall, elarge);
 ebr = do_height(rbr, offset, bias, esmall, elarge);
-result.elevation = MathInterpolateQuad(eul, eur, ebl, ebr, blend, left);
+result.elevation = MathUtils.InterpolateQuad(eul, eur, ebl, ebr, blend, left);
 result.elevation = do_height_noblend(result.elevation, rul, offset, bias);
 return result;
 

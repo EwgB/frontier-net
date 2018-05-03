@@ -401,7 +401,7 @@
                 r = WorldRegionGet(walk.x, walk.y);
                 r.tree_type = WorldTreeType(r.moisture, r.temperature);
                 if (r.climate == CLIMATE_FOREST)
-                    r.tree_type = WorldCanopyTree();
+                    r.tree_type = this.World.TreeCanopy;
                 WorldRegionSet(walk.x, walk.y, r);
             } while (!walk.Walk(WORLD_GRID));
             */

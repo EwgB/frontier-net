@@ -9,6 +9,8 @@
             this.Y = y;
         }
 
+        public Coord(Coord other) : this(other.X, other.Y) { }
+
         /// <summary>
         /// Walks succesively over all points on a square grid. Increases first on x axis, then on y axis.
         /// Returns new point, rolledOver signifies when the coordinate rolles over the whole grid.

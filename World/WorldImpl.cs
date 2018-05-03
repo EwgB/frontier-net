@@ -32,6 +32,12 @@
         /// </summary>
         private const uint TREE_TYPES = 6;
 
+        //The dither map scatters surface data so that grass colorings end up in adjacent regions.
+        private const int DITHER_SIZE = (WorldUtils.REGION_SIZE / 2);
+        
+        //How much space in a region is spent interpolating between itself and its neighbors.
+        private const int BLEND_DISTANCE = (WorldUtils.REGION_SIZE / 4);
+        
         #endregion
 
 
@@ -51,6 +57,7 @@
         public uint MapId { get; private set; }
         public uint Seed { get; private set; }
         public bool WindFromWest { get; private set; }
+        public uint TreeCanopy { get; private set; }
 
         #endregion
 
@@ -62,14 +69,15 @@
         private bool northernHemisphere;
         private int riverCount;
         private int lakeCount;
-        private uint canopy;
 
-        private IRegion[,] map = new IRegion[WorldUtils.WORLD_GRID, WorldUtils.WORLD_GRID];
+        private readonly IRegion[,] map = new IRegion[WorldUtils.WORLD_GRID, WorldUtils.WORLD_GRID];
 
-        private ITree[,] trees = new ITree[TREE_TYPES, TREE_TYPES];
+        private readonly ITree[,] trees = new ITree[TREE_TYPES, TREE_TYPES];
 
-        private double[] noiseF = new double[NOISE_BUFFER];
-        private int[] noiseI = new int[NOISE_BUFFER];
+        private readonly double[] noiseF = new double[NOISE_BUFFER];
+        private readonly int[] noiseI = new int[NOISE_BUFFER];
+
+        private readonly Coord[,] dithermap = new Coord[DITHER_SIZE, DITHER_SIZE];
 
         #endregion
 
@@ -78,9 +86,22 @@
             this.terraform = terraform;
         }
 
+        public void Init() {
+            //Fill in the dither table - a table of random offsets
+            for (var y = 0; y < DITHER_SIZE; y++) {
+                for (var x = 0; x < DITHER_SIZE; x++) {
+                    this.dithermap[x, y] = new Coord(
+                        this.random.Next() % DITHER_SIZE + this.random.Next() % DITHER_SIZE,
+                        this.random.Next() % DITHER_SIZE + this.random.Next() % DITHER_SIZE);
+                }
+            }
+        }
+
 
         public ITree GetTree(uint id) {
-            throw new NotImplementedException();
+            var m = id % TREE_TYPES;
+            var t = (id - m) / TREE_TYPES;
+            return this.trees[m, t];
         }
 
         public void Generate(uint seed) {
@@ -122,11 +143,105 @@
         }
 
         public Cell GetCell(int worldX, int worldY) {
-            throw new NotImplementedException();
+            float detail = Entropy(worldX, worldY);
+            var bias = GetBiasLevel(worldX, worldY);
+            var waterLevel = GetWaterLevel(worldX, worldY);
+            var origin = new Coord(
+                MathHelper.Clamp(worldX / WorldUtils.REGION_SIZE, 0, WorldUtils.WORLD_GRID - 1),
+                MathHelper.Clamp(worldY / WorldUtils.REGION_SIZE, 0, WorldUtils.WORLD_GRID - 1));
+            
+            //Get our offset from the region origin as a pair of scalars.
+            var blend = new Vector2(
+                (float) (worldX % BLEND_DISTANCE) / BLEND_DISTANCE,
+                (float) (worldY % BLEND_DISTANCE) / BLEND_DISTANCE);
+            var left = ((origin.X + origin.Y) % 2) == 0;
+            var offset = new Vector2(
+                (float) ((worldX) % WorldUtils.REGION_SIZE) / WorldUtils.REGION_SIZE,
+                (float) ((worldY) % WorldUtils.REGION_SIZE) / WorldUtils.REGION_SIZE);
+
+            var result = new Cell {
+                Detail = detail,
+                WaterLevel = waterLevel
+            };
+
+            var upperLeft = new Coord(origin);
+            var bottomRight = new Coord(
+                (worldX + BLEND_DISTANCE) / WorldUtils.REGION_SIZE,
+                (worldY + BLEND_DISTANCE) / WorldUtils.REGION_SIZE);
+
+            IRegion upperLeftRegion;
+            if (upperLeft == bottomRight) {
+                upperLeftRegion = GetRegion(upperLeft.X, upperLeft.Y);
+                result.Elevation = DoHeight(upperLeftRegion, offset, waterLevel, detail, bias);
+                result.Elevation = DoHeightNoBlend(result.Elevation, upperLeftRegion, offset, waterLevel);
+                return result;
+            }
+
+            upperLeftRegion = GetRegion(upperLeft.X, upperLeft.Y);
+            var upperRightRegion = GetRegion(bottomRight.X, upperLeft.Y);
+            var bottomLeftRegion = GetRegion(upperLeft.X, bottomRight.Y);
+            var bottomRightRegion = GetRegion(bottomRight.X, bottomRight.Y);
+
+            var upperLeftElevation = DoHeight(upperLeftRegion, offset, waterLevel, detail, bias);
+            var upperRightElevation = DoHeight(upperRightRegion, offset, waterLevel, detail, bias);
+            var bottomLeftElevation = DoHeight(bottomLeftRegion, offset, waterLevel, detail, bias);
+            var bottomRightElevation = DoHeight(bottomRightRegion, offset, waterLevel, detail, bias);
+            result.Elevation = MathUtils.InterpolateQuad(upperLeftElevation, upperRightElevation, bottomLeftElevation, bottomRightElevation, blend, left);
+            result.Elevation = DoHeightNoBlend(result.Elevation, upperLeftRegion, offset, waterLevel);
+            return result;
         }
 
         public Color3 GetColor(int worldX, int worldY, SurfaceColors c) {
-            throw new NotImplementedException();
+            return Color3.Cornsilk;
+            // TODO: convert
+            /*
+            Coord origin;
+            int x, y;
+            Vector2 offset;
+            GLrgba c0, c1, c2, c3, result;
+            IRegion r0, r1, r2, r3;
+
+            x = Math.Max(worldX % DITHER_SIZE, 0);
+            y = Math.Max(worldY % DITHER_SIZE, 0);
+            worldX += dithermap[x, y].X;
+            worldY += dithermap[x, y].Y;
+            offset.X = (float)(worldX % WorldUtils.REGION_SIZE) / WorldUtils.REGION_SIZE;
+            offset.Y = (float)(worldY % WorldUtils.REGION_SIZE) / WorldUtils.REGION_SIZE;
+            origin.X = worldX / WorldUtils.REGION_SIZE;
+            origin.Y = worldY / WorldUtils.REGION_SIZE;
+            r0 = GetRegion(origin.X, origin.Y);
+            r1 = GetRegion(origin.X + 1, origin.Y);
+            r2 = GetRegion(origin.X, origin.Y + 1);
+            r3 = GetRegion(origin.X + 1, origin.Y + 1);
+            switch (c)
+            {
+            case SURFACE_COLOR_DIRT:
+                c0 = r0.color_dirt;
+                c1 = r1.color_dirt;
+                c2 = r2.color_dirt;
+                c3 = r3.color_dirt;
+                break;
+            case SURFACE_COLOR_ROCK:
+                c0 = r0.color_rock;
+                c1 = r1.color_rock;
+                c2 = r2.color_rock;
+                c3 = r3.color_rock;
+                break;
+            case SURFACE_COLOR_SAND:
+                return GL.Rgba(0.98f, 0.82f, 0.42f);
+            default:
+            case SURFACE_COLOR_GRASS:
+                c0 = r0.color_grass;
+                c1 = r1.color_grass;
+                c2 = r2.color_grass;
+                c3 = r3.color_grass;
+                break;
+            }
+            result.red = MathUtils.InterpolateQuad(c0.red, c1.red, c2.red, c3.red, offset);
+            result.green = MathUtils.InterpolateQuad(c0.green, c1.green, c2.green, c3.green, offset);
+            result.blue = MathUtils.InterpolateQuad(c0.blue, c1.blue, c2.blue, c3.blue, offset);
+            return result;
+            */
         }
 
         public float GetWaterLevel(Vector2 coord) {
@@ -134,10 +249,6 @@
         }
 
         public float GetWaterLevel(float x, float y) {
-            throw new NotImplementedException();
-        }
-
-        public void Init() {
             throw new NotImplementedException();
         }
 
@@ -381,7 +492,7 @@
                     bool isCanopy;
                     if ((m == TREE_TYPES / 2) && (t == TREE_TYPES / 2)) {
                         isCanopy = true;
-                        this.canopy = m + t * TREE_TYPES;
+                        this.TreeCanopy = m + t * TREE_TYPES;
                     } else
                         isCanopy = false;
 
@@ -417,16 +528,61 @@
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, WorldUtils.WORLD_GRID, WorldUtils.WORLD_GRID, 0, PixelFormat.Rgb,
                 PixelType.UnsignedByte, buffer);
         }
+
+        private float GetBiasLevel(int worldX, int worldY) {
+            return 0;
+            //TODO: convert
+            /*
+            Coord origin;
+            Vector2 offset;
+            IRegion rul, rur, rbl, rbr; //Four corners: upper left, upper right, etc.
+
+            worldX += REGION_HALF;
+            worldY += REGION_HALF;
+            origin.X = worldX / WorldUtils.REGION_SIZE;
+            origin.Y = worldY / WorldUtils.REGION_SIZE;
+            origin.X = MathHelper.Clamp(origin.X, 0, WorldUtils.WORLD_GRID - 1);
+            origin.Y = MathHelper.Clamp(origin.Y, 0, WorldUtils.WORLD_GRID - 1);
+            offset.X = (float) ((worldX) % WorldUtils.REGION_SIZE) / WorldUtils.REGION_SIZE;
+            offset.Y = (float) ((worldY) % WorldUtils.REGION_SIZE) / WorldUtils.REGION_SIZE;
+            rul = GetRegion(origin.X, origin.Y);
+            rur = GetRegion(origin.X + 1, origin.Y);
+            rbl = GetRegion(origin.X, origin.Y + 1);
+            rbr = GetRegion(origin.X + 1, origin.Y + 1);
+            return MathUtils.InterpolateQuad(rul.geo_bias, rur.geo_bias, rbl.geo_bias, rbr.geo_bias, offset,
+                ((origin.X + origin.Y) % 2) == 0);
+            */
+        }
+
+        private float GetWaterLevel(int worldX, int worldY) {
+            return 0;
+            //TODO: convert
+            /*
+            Coord origin;
+            Vector2 offset;
+            IRegion rul, rur, rbl, rbr;//Four corners: upper left, upper right, etc.
+
+            worldX += REGION_HALF;
+            worldY += REGION_HALF;
+            origin.X = worldX / WorldUtils.REGION_SIZE;
+            origin.Y = worldY / WorldUtils.REGION_SIZE;
+            origin.X = MathHelper.Clamp(origin.X, 0, WorldUtils.WORLD_GRID - 1);
+            origin.Y = MathHelper.Clamp(origin.Y, 0, WorldUtils.WORLD_GRID - 1);
+            offset.X = (float)((worldX) % WorldUtils.REGION_SIZE) / WorldUtils.REGION_SIZE;
+            offset.Y = (float)((worldY) % WorldUtils.REGION_SIZE) / WorldUtils.REGION_SIZE;
+            rul = GetRegion(origin.X, origin.Y);
+            rur = GetRegion(origin.X + 1, origin.Y);
+            rbl = GetRegion(origin.X, origin.Y + 1);
+            rbr = GetRegion(origin.X + 1, origin.Y + 1);
+            return MathUtils.InterpolateQuad(rul.GeoWater, rur.GeoWater, rbl.GeoWater, rbr.GeoWater, offset, ((origin.X + origin.Y) % 2) == 0);
+            */
+        }
     }
 
     #endregion
 }
 
 /*
-//The dither map scatters surface data so that grass colorings end up in adjacent regions.
-#define DITHER_SIZE       (REGION_SIZE / 2)
-//How much space in a region is spent interpolating between itself and its neighbors.
-#define BLEND_DISTANCE    (REGION_SIZE / 4)
 
 #define FILE_VERSION      1
 
@@ -440,115 +596,6 @@ struct WHeader
     int map_bytes;
 };
 
-private GLcoord dithermap[DITHER_SIZE, DITHER_SIZE];
-
-
-
-
-float WorldWaterLevel(int world_x, int world_y)
-{
-
-    GLcoord origin;
-    Vector2 offset;
-    IRegion rul, rur, rbl, rbr;//Four corners: upper left, upper right, etc.
-
-    world_x += REGION_HALF;
-    world_y += REGION_HALF;
-    origin.X = world_x / REGION_SIZE;
-    origin.Y = world_y / REGION_SIZE;
-    origin.X = clamp(origin.X, 0, WorldUtils.WORLD_GRID - 1);
-    origin.Y = clamp(origin.Y, 0, WorldUtils.WORLD_GRID - 1);
-    offset.X = (float)((world_x) % REGION_SIZE) / REGION_SIZE;
-    offset.Y = (float)((world_y) % REGION_SIZE) / REGION_SIZE;
-    rul = WorldIRegionGet(origin.X, origin.Y);
-    rur = WorldIRegionGet(origin.X + 1, origin.Y);
-    rbl = WorldIRegionGet(origin.X, origin.Y + 1);
-    rbr = WorldIRegionGet(origin.X + 1, origin.Y + 1);
-    return MathInterpolateQuad(rul.GeoWater, rur.GeoWater, rbl.GeoWater, rbr.GeoWater, offset, ((origin.X + origin.Y) % 2) == 0);
-
-}
-
-float WorldBiasLevel(int world_x, int world_y)
-{
-
-    GLcoord origin;
-    Vector2 offset;
-    IRegion rul, rur, rbl, rbr;//Four corners: upper left, upper right, etc.
-
-    world_x += REGION_HALF;
-    world_y += REGION_HALF;
-    origin.X = world_x / REGION_SIZE;
-    origin.Y = world_y / REGION_SIZE;
-    origin.X = clamp(origin.X, 0, WorldUtils.WORLD_GRID - 1);
-    origin.Y = clamp(origin.Y, 0, WorldUtils.WORLD_GRID - 1);
-    offset.X = (float)((world_x) % REGION_SIZE) / REGION_SIZE;
-    offset.Y = (float)((world_y) % REGION_SIZE) / REGION_SIZE;
-    rul = WorldIRegionGet(origin.X, origin.Y);
-    rur = WorldIRegionGet(origin.X + 1, origin.Y);
-    rbl = WorldIRegionGet(origin.X, origin.Y + 1);
-    rbr = WorldIRegionGet(origin.X + 1, origin.Y + 1);
-    return MathInterpolateQuad(rul.geo_bias, rur.geo_bias, rbl.geo_bias, rbr.geo_bias, offset, ((origin.X + origin.Y) % 2) == 0);
-
-}
-
-Cell WorldCell(int world_x, int world_y)
-{
-
-    float detail;
-    float bias;
-    IRegion rul, rur, rbl, rbr;//Four corners: upper left, upper right, etc.
-    float eul, eur, ebl, ebr;
-    float water;
-    Vector2 offset;
-    GLcoord origin;
-    GLcoord ul, br; //Upper left and bottom-right corners
-    Vector2 blend;
-    bool left;
-    Cell result;
-
-    detail = Entropy(world_x, world_y);
-    bias = WorldBiasLevel(world_x, world_y);
-    water = WorldWaterLevel(world_x, world_y);
-    origin.X = world_x / REGION_SIZE;
-    origin.Y = world_y / REGION_SIZE;
-    origin.X = clamp(origin.X, 0, WorldUtils.WORLD_GRID - 1);
-    origin.Y = clamp(origin.Y, 0, WorldUtils.WORLD_GRID - 1);
-    //Get our offset from the region origin as a pair of scalars.
-    blend.X = (float)(world_x % BLEND_DISTANCE) / BLEND_DISTANCE;
-    blend.Y = (float)(world_y % BLEND_DISTANCE) / BLEND_DISTANCE;
-    left = ((origin.X + origin.Y) % 2) == 0;
-    offset.X = (float)((world_x) % REGION_SIZE) / REGION_SIZE;
-    offset.Y = (float)((world_y) % REGION_SIZE) / REGION_SIZE;
-    result.detail = detail;
-    result.water_level = water;
-
-    ul.X = origin.X;
-    ul.Y = origin.Y;
-    br.X = (world_x + BLEND_DISTANCE) / REGION_SIZE;
-    br.Y = (world_y + BLEND_DISTANCE) / REGION_SIZE;
-
-    if (ul == br)
-    {
-        rul = WorldIRegionGet(ul.X, ul.Y);
-        result.elevation = DoHeight(rul, offset, water, detail, bias);
-        result.elevation = DoHeightNoBlend(result.elevation, rul, offset, water);
-        return result;
-    }
-    rul = WorldIRegionGet(ul.X, ul.Y);
-    rur = WorldIRegionGet(br.X, ul.Y);
-    rbl = WorldIRegionGet(ul.X, br.Y);
-    rbr = WorldIRegionGet(br.X, br.Y);
-
-    eul = DoHeight(rul, offset, water, detail, bias);
-    eur = DoHeight(rur, offset, water, detail, bias);
-    ebl = DoHeight(rbl, offset, water, detail, bias);
-    ebr = DoHeight(rbr, offset, water, detail, bias);
-    result.elevation = MathInterpolateQuad(eul, eur, ebl, ebr, blend, left);
-    result.elevation = DoHeightNoBlend(result.elevation, rul, offset, water);
-    return result;
-
-}
-
 uint WorldTreeType(float moisture, float temperature)
 {
 
@@ -556,67 +603,39 @@ uint WorldTreeType(float moisture, float temperature)
 
     m = (int)(moisture * TREE_TYPES);
     t = (int)(temperature * TREE_TYPES);
-    m = clamp(m, 0, TREE_TYPES - 1);
-    t = clamp(t, 0, TREE_TYPES - 1);
+    m = MathHelper.Clamp(m, 0, TREE_TYPES - 1);
+    t = MathHelper.Clamp(t, 0, TREE_TYPES - 1);
     return m + t * TREE_TYPES;
 
 }
 
-CTree* WorldTree(uint id)
-{
-
-    uint m, t;
-
-    m = id % TREE_TYPES;
-    t = (id - m) / TREE_TYPES;
-    return &this.trees[m, t];
-
-}
-
-char* WorldLocationName(int world_x, int world_y)
+char* WorldLocationName(int worldX, int worldY)
 {
 
     static char result[20];
     char lat[20];
     char lng[20];
 
-    world_x /= REGION_SIZE;
-    world_y /= REGION_SIZE;
-    world_x -= WorldUtils.WORLD_GRID_CENTER;
-    world_y -= WorldUtils.WORLD_GRID_CENTER;
-    if (!world_x && !world_y)
+    worldX /= WorldUtils.REGION_SIZE;
+    worldY /= WorldUtils.REGION_SIZE;
+    worldX -= WorldUtils.WORLD_GRID_CENTER;
+    worldY -= WorldUtils.WORLD_GRID_CENTER;
+    if (!worldX && !worldY)
         return "Equatorial meridian";
-    if (world_x == 0)
+    if (worldX == 0)
         strcpy(lng, "meridian");
-    else if (world_x < 0)
-        sprintf(lng, "%d west", Math.Abs(world_x));
+    else if (worldX < 0)
+        sprintf(lng, "%d west", Math.Abs(worldX));
     else
-        sprintf(lng, "%d east", world_x);
-    if (world_y == 0)
+        sprintf(lng, "%d east", worldX);
+    if (worldY == 0)
         strcpy(lat, "Equator");
-    else if (world_y < 0)
-        sprintf(lat, "%d north", Math.Abs(world_y));
+    else if (worldY < 0)
+        sprintf(lat, "%d north", Math.Abs(worldY));
     else
-        sprintf(lat, "%d south", world_y);
+        sprintf(lat, "%d south", worldY);
     sprintf(result, "%s, %s", lat, lng);
     return result;
-
-}
-
-void WorldInit()
-{
-
-    int x, y;
-
-    //Fill in the dither table - a table of random offsets
-    for (y = 0; y < DITHER_SIZE; y++)
-    {
-        for (x = 0; x < DITHER_SIZE; x++)
-        {
-            dithermap[x, y].X = this.random.Next() % DITHER_SIZE + this.random.Next() % DITHER_SIZE;
-            dithermap[x, y].Y = this.random.Next() % DITHER_SIZE + this.random.Next() % DITHER_SIZE;
-        }
-    }
 
 }
 
@@ -636,98 +655,39 @@ uint WorldnoiseI(int index)
 
 }
 
-IRegion WorldIRegionGet(int index_x, int index_y)
+IRegion GetRegion(int index_x, int index_y)
 {
 
     return this.map[index_x, index_y];
 
 }
 
-void WorldIRegionSet(int index_x, int index_y, IRegion val)
+void WorldRegionSet(int index_x, int index_y, IRegion val)
 {
 
     this.map[index_x, index_y] = val;
 
 }
 
-IRegion WorldIRegionFromPosition(int world_x, int world_y)
+IRegion WorldRegionFromPosition(int worldX, int worldY)
 {
 
-    world_x = Math.Max(world_x, 0);
-    world_y = Math.Max(world_y, 0);
-    world_x += dithermap[world_x % DITHER_SIZE, world_y % DITHER_SIZE].X;
-    world_y += dithermap[world_x % DITHER_SIZE, world_y % DITHER_SIZE].Y;
-    world_x /= REGION_SIZE;
-    world_y /= REGION_SIZE;
-    if (world_x >= WorldUtils.WORLD_GRID || world_y >= WorldUtils.WORLD_GRID)
+    worldX = Math.Max(worldX, 0);
+    worldY = Math.Max(worldY, 0);
+    worldX += dithermap[worldX % DITHER_SIZE, worldY % DITHER_SIZE].X;
+    worldY += dithermap[worldX % DITHER_SIZE, worldY % DITHER_SIZE].Y;
+    worldX /= WorldUtils.REGION_SIZE;
+    worldY /= WorldUtils.REGION_SIZE;
+    if (worldX >= WorldUtils.WORLD_GRID || worldY >= WorldUtils.WORLD_GRID)
         return this.map[0, 0];
-    return this.map[world_x, world_y];
+    return this.map[worldX, worldY];
 
 }
 
-IRegion WorldIRegionFromPosition(float world_x, float world_y)
+IRegion WorldRegionFromPosition(float worldX, float worldY)
 {
 
-    return WorldIRegionFromPosition((int)world_x, (int)world_y);
-
-}
-
-GLrgba WorldColorGet(int world_x, int world_y, SurfaceColor c)
-{
-
-    GLcoord origin;
-    int x, y;
-    Vector2 offset;
-    GLrgba c0, c1, c2, c3, result;
-    IRegion r0, r1, r2, r3;
-
-    x = Math.Max(world_x % DITHER_SIZE, 0);
-    y = Math.Max(world_y % DITHER_SIZE, 0);
-    world_x += dithermap[x, y].X;
-    world_y += dithermap[x, y].Y;
-    offset.X = (float)(world_x % REGION_SIZE) / REGION_SIZE;
-    offset.Y = (float)(world_y % REGION_SIZE) / REGION_SIZE;
-    origin.X = world_x / REGION_SIZE;
-    origin.Y = world_y / REGION_SIZE;
-    r0 = WorldIRegionGet(origin.X, origin.Y);
-    r1 = WorldIRegionGet(origin.X + 1, origin.Y);
-    r2 = WorldIRegionGet(origin.X, origin.Y + 1);
-    r3 = WorldIRegionGet(origin.X + 1, origin.Y + 1);
-    switch (c)
-    {
-        case SURFACE_COLOR_DIRT:
-            c0 = r0.color_dirt;
-            c1 = r1.color_dirt;
-            c2 = r2.color_dirt;
-            c3 = r3.color_dirt;
-            break;
-        case SURFACE_COLOR_ROCK:
-            c0 = r0.color_rock;
-            c1 = r1.color_rock;
-            c2 = r2.color_rock;
-            c3 = r3.color_rock;
-            break;
-        case SURFACE_COLOR_SAND:
-            return GL.Rgba(0.98f, 0.82f, 0.42f);
-        default:
-        case SURFACE_COLOR_GRASS:
-            c0 = r0.color_grass;
-            c1 = r1.color_grass;
-            c2 = r2.color_grass;
-            c3 = r3.color_grass;
-            break;
-    }
-    result.red = MathInterpolateQuad(c0.red, c1.red, c2.red, c3.red, offset);
-    result.green = MathInterpolateQuad(c0.green, c1.green, c2.green, c3.green, offset);
-    result.blue = MathInterpolateQuad(c0.blue, c1.blue, c2.blue, c3.blue, offset);
-    return result;
-
-}
-
-uint WorldCanopyTree()
-{
-
-    return canopy;
+    return WorldRegionFromPosition((int)worldX, (int)worldY);
 
 }
 
@@ -761,27 +721,27 @@ void WorldTexturePurge()
 
 }
 
-char* WorldDirectionFromAnGL.e(float anGL.e)
+char* WorldDirectionFromAngle(float angle)
 {
 
     char* direction;
 
     direction = "North";
-    if (anGL.e < 22.5f)
+    if (angle < 22.5f)
         direction = "North";
-    else if (anGL.e < 67.5f)
+    else if (angle < 67.5f)
         direction = "Northwest";
-    else if (anGL.e < 112.5f)
+    else if (angle < 112.5f)
         direction = "West";
-    else if (anGL.e < 157.5f)
+    else if (angle < 157.5f)
         direction = "Southwest";
-    else if (anGL.e < 202.5f)
+    else if (angle < 202.5f)
         direction = "South";
-    else if (anGL.e < 247.5f)
+    else if (angle < 247.5f)
         direction = "Southeast";
-    else if (anGL.e < 292.5f)
+    else if (angle < 292.5f)
         direction = "East";
-    else if (anGL.e < 337.5f)
+    else if (angle < 337.5f)
         direction = "Northeast";
     return direction;
 

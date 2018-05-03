@@ -43,23 +43,23 @@
 
             float angle;
             if (Math.Abs(xDelta) < Math.Abs(zDelta)) {
-                angle = 90 - (float)Math.Atan(zDelta / xDelta) * RADIANS_TO_DEGREES;
+                angle = 90 - (float) Math.Atan(zDelta / xDelta) * RADIANS_TO_DEGREES;
                 if (xDelta < 0)
                     angle -= 180;
             } else {
-                angle = (float)Math.Atan(xDelta / zDelta) * RADIANS_TO_DEGREES;
+                angle = (float) Math.Atan(xDelta / zDelta) * RADIANS_TO_DEGREES;
                 if (zDelta < 0)
                     angle += 180;
             }
+
             if (angle < 0)
                 angle += 360;
-            return angle;
 
+            return angle;
         }
 
         /// <summary>Difference between two angles</summary>
         public static float AngleDifference(float a1, float a2) {
-
             var result = (a1 - a2) % 360;
             if (result > 180)
                 return result - 360;
@@ -67,7 +67,55 @@
                 return result + 360;
             return result;
         }
+
+        /// <summary>
+        ///     This forms a theoretical quad with the four elevation values.  Given the 
+        ///     offset from the upper-left corner, it determines what the elevation
+        ///     should be at that point in the center area.
+        /// 
+        ///                y0-----y1
+        ///                 |     |
+        ///                 |     |
+        ///                y2-----y3
+        /// 
+        /// </summary>
+        /// <param name="y0">Upper left corner</param>
+        /// <param name="y1">Upper right corner</param>
+        /// <param name="y2">Lower left corner</param>
+        /// <param name="y3">Lower right corner</param>
+        /// <param name="offset"></param>
+        /// <param name="left">Determines if the quad is cut from y2 to y1, or from y0 to y3</param>
+        /// <returns></returns>
+        public static float InterpolateQuad(float y0, float y1, float y2, float y3, Vector2 offset, bool left) {
+            float a, b, c;
+
+            if (left) {
+                if (offset.X + offset.Y < 1) {
+                    c = y2 - y0;
+                    b = y1 - y0;
+                    a = y0;
+                } else {
+                    c = y3 - y1;
+                    b = y3 - y2;
+                    a = y3 - (b + c);
+                }
+            } else {
+                //right
+                if (offset.X < offset.Y) {
+                    c = y2 - y0;
+                    b = y3 - y2;
+                    a = y0;
+                } else {
+                    c = y3 - y1;
+                    b = y1 - y0;
+                    a = y0;
+                }
+            }
+
+            return (a + b * offset.X + c * offset.Y);
+        }
     }
+
 }
 
 /*  
@@ -150,40 +198,5 @@ float MathScalar(float val, float low, float high) {
   //offset from the upper-left corner, it determines what the elevation
   //should be at that point in the center area.  left" determines if the 
   //quad is cut from y2 to y1, or from y0 to y3.
-
-  //y0-----y1
-  // |     |
-  // |     |
-  //y2-----y3
-float MathInterpolateQuad(float y0, float y1, float y2, float y3, GLvector2 offset, bool left) {
-
-    float a;
-    float b;
-    float c;
-
-    if (left) {
-        if (offset.X + offset.Y < 1) {
-            c = y2 - y0;
-            b = y1 - y0;
-            a = y0;
-        } else {
-            c = y3 - y1;
-            b = y3 - y2;
-            a = y3 - (b + c);
-        }
-    } else { //right
-        if (offset.X < offset.Y) {
-            c = y2 - y0;
-            b = y3 - y2;
-            a = y0;
-        } else {
-            c = y3 - y1;
-            b = y1 - y0;
-            a = y0;
-        }
-    }
-    return (a + b * offset.X + c * offset.Y);
-
-}
 
  */

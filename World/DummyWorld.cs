@@ -14,6 +14,7 @@
 
         public uint Seed { get; }
         public bool WindFromWest { get; set; }
+        public uint TreeCanopy { get; }
 
         public uint MapId => 0;
 

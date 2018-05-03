@@ -26,6 +26,7 @@
         uint MapId { get; }
         uint Seed { get; }
         bool WindFromWest { get; }
+        uint TreeCanopy { get; }
 
         // TODO: Look into using Array or ImmutableArray for this data
         float GetWaterLevel(Vector2 coord);
@@ -49,7 +50,6 @@
 char* WorldLocationName(int world_x, int world_y);
 float WorldWaterLevel(int world_x, int world_y);
 
-uint WorldCanopyTree();
 char* WorldDirectionFromAngle(float angle);
 //char*         WorldDirectory ();
 uint WorldMap();
