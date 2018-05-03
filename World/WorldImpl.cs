@@ -198,88 +198,94 @@
         /// for things that should not be mimicked by neighbors. (Like rivers.)
         /// </summary>
         private float DoHeightNoBlend(float elevationValue, IRegion region, Vector2 offset, float waterLevel) {
-            if (region.ShapeFlags.HasFlag(RegionFlag.RiverAny)) {
-                Vector2 cen;
-                Vector2 newOff;
+            if (!region.ShapeFlags.HasFlag(RegionFlag.RiverAny))
+                return elevationValue;
 
-                //if this river is strictly north / south
-                if (region.ShapeFlags.HasFlag(RegionFlag.RiverNS) && !region.ShapeFlags.HasFlag(RegionFlag.RiverW)) {
-                    //This makes the river bend side-to-side
-                    switch ((region.GridPosition.X + region.GridPosition.Y) % 6) {
-                    case 0:
-                    case 1:
-                        offset.X += (float) Math.Abs(Math.Sin(MathHelper.DegreesToRadians(offset.Y * 180))) * 0.25f;
-                        break;
-                    case 2:
-                    case 3:
-                        offset.X += (float) Math.Abs(Math.Sin(MathHelper.DegreesToRadians(offset.Y * 180))) * 0.1f;
-                        break;
-                    case 4:
-                    case 5:
-                        offset.X += (float) Math.Sin(offset.Y * 360 * MathUtils.DEGREES_TO_RADIANS) * 0.1f;
-                        break;
-                    }
-                }
-
-                //if this river is strictly east / west
-                if (region.ShapeFlags.HasFlag(RegionFlag.RiverW) && !region.ShapeFlags.HasFlag(RegionFlag.RiverNS)) {
-                    //This makes the river bend side-to-side
-                    switch ((region.GridPosition.X + region.GridPosition.Y) % 4) {
-                    case 0:
-                    case 1:
-                        offset.Y += (float) Math.Abs(Math.Sin(MathHelper.DegreesToRadians(offset.X * 180))) * 0.25f;
-                        break;
-                    case 2:
-                    case 3:
-                        offset.Y += (float) Math.Abs(Math.Sin(MathHelper.DegreesToRadians(offset.X * 180))) * 0.1f;
-                        break;
-                    }
-                }
-
-                //if this river curves around a bend
-                if (region.ShapeFlags.HasFlag(RegionFlag.RiverNW) && !region.ShapeFlags.HasFlag(RegionFlag.RiverSE))
-                    offset.X = offset.Y = offset.Length;
-
-                if (region.ShapeFlags.HasFlag(RegionFlag.RiverSE) && !region.ShapeFlags.HasFlag(RegionFlag.RiverNW)) {
-                    newOff.X = 1 - offset.X;
-                    newOff.Y = 1 - offset.Y;
-                    newOff.X = newOff.Y = newOff.Length;
-                    offset = newOff;
-                }
-
-                if (region.ShapeFlags.HasFlag(RegionFlag.RiverNE) && !region.ShapeFlags.HasFlag(RegionFlag.RiverSW)) {
-                    newOff.X = 1 - offset.X;
-                    newOff.Y = offset.Y;
-                    newOff.X = newOff.Y = newOff.Length;
-                    offset = newOff;
-                }
-
-                if (region.ShapeFlags.HasFlag(RegionFlag.RiverSW) && !region.ShapeFlags.HasFlag(RegionFlag.RiverNE)) {
-                    newOff.X = offset.X;
-                    newOff.Y = 1 - offset.Y;
-                    newOff.X = newOff.Y = newOff.Length;
-                    offset = newOff;
-                }
-
-                cen.X = Math.Abs((offset.X - 0.5f) * 2);
-                cen.Y = Math.Abs((offset.Y - 0.5f) * 2);
-                var strength = cen.Length;
-                if (region.ShapeFlags.HasFlag(RegionFlag.RiverN) && offset.Y < 0.5f)
-                    strength = Math.Min(strength, cen.X);
-                if (region.ShapeFlags.HasFlag(RegionFlag.RiverS) && offset.Y >= 0.5f)
-                    strength = Math.Min(strength, cen.X);
-                if (region.ShapeFlags.HasFlag(RegionFlag.RiverW) && offset.X < 0.5f)
-                    strength = Math.Min(strength, cen.Y);
-                if (region.ShapeFlags.HasFlag(RegionFlag.RiverE) && offset.X >= 0.5f)
-                    strength = Math.Min(strength, cen.Y);
-                if (strength < (region.RiverWidth / 2)) {
-                    strength *= 1 / (region.RiverWidth / 2);
-                    var delta = (elevationValue - waterLevel) + 4 * region.RiverWidth;
-                    elevationValue -= (delta) * (1 - strength);
+            //if this river is strictly north / south
+            if (region.ShapeFlags.HasFlag(RegionFlag.RiverNS) && !region.ShapeFlags.HasFlag(RegionFlag.RiverW)) {
+                //This makes the river bend side-to-side
+                switch ((region.GridPosition.X + region.GridPosition.Y) % 6) {
+                case 0:
+                case 1:
+                    offset.X += (float) Math.Abs(Math.Sin(MathHelper.DegreesToRadians(offset.Y * 180))) * 0.25f;
+                    break;
+                case 2:
+                case 3:
+                    offset.X += (float) Math.Abs(Math.Sin(MathHelper.DegreesToRadians(offset.Y * 180))) * 0.1f;
+                    break;
+                case 4:
+                case 5:
+                    offset.X += (float) Math.Sin(offset.Y * 360 * MathUtils.DEGREES_TO_RADIANS) * 0.1f;
+                    break;
                 }
             }
 
+            //if this river is strictly east / west
+            if (region.ShapeFlags.HasFlag(RegionFlag.RiverW) && !region.ShapeFlags.HasFlag(RegionFlag.RiverNS)) {
+                //This makes the river bend side-to-side
+                switch ((region.GridPosition.X + region.GridPosition.Y) % 4) {
+                case 0:
+                case 1:
+                    offset.Y += (float) Math.Abs(Math.Sin(MathHelper.DegreesToRadians(offset.X * 180))) * 0.25f;
+                    break;
+                case 2:
+                case 3:
+                    offset.Y += (float) Math.Abs(Math.Sin(MathHelper.DegreesToRadians(offset.X * 180))) * 0.1f;
+                    break;
+                }
+            }
+
+            //if this river curves around a bend
+            if (region.ShapeFlags.HasFlag(RegionFlag.RiverNW) && !region.ShapeFlags.HasFlag(RegionFlag.RiverSE))
+                offset.X = offset.Y = offset.Length;
+
+            offset = ComputeNewOffset(region, offset);
+
+            Vector2 cen;
+            cen.X = Math.Abs((offset.X - 0.5f) * 2);
+            cen.Y = Math.Abs((offset.Y - 0.5f) * 2);
+            var strength = cen.Length;
+            if (region.ShapeFlags.HasFlag(RegionFlag.RiverN) && offset.Y < 0.5f)
+                strength = Math.Min(strength, cen.X);
+            if (region.ShapeFlags.HasFlag(RegionFlag.RiverS) && offset.Y >= 0.5f)
+                strength = Math.Min(strength, cen.X);
+            if (region.ShapeFlags.HasFlag(RegionFlag.RiverW) && offset.X < 0.5f)
+                strength = Math.Min(strength, cen.Y);
+            if (region.ShapeFlags.HasFlag(RegionFlag.RiverE) && offset.X >= 0.5f)
+                strength = Math.Min(strength, cen.Y);
+            if (strength < (region.RiverWidth / 2)) {
+                strength *= 1 / (region.RiverWidth / 2);
+                var delta = (elevationValue - waterLevel) + 4 * region.RiverWidth;
+                elevationValue -= (delta) * (1 - strength);
+            }
+
             return elevationValue;
+        }
+
+        private static Vector2 ComputeNewOffset(IRegion region, Vector2 offset) {
+            Vector2 newOffset;
+            if (region.ShapeFlags.HasFlag(RegionFlag.RiverSE) && !region.ShapeFlags.HasFlag(RegionFlag.RiverNW)) {
+                newOffset.X = 1 - offset.X;
+                newOffset.Y = 1 - offset.Y;
+                newOffset.X = newOffset.Y = newOffset.Length;
+                offset = newOffset;
+            }
+
+            if (region.ShapeFlags.HasFlag(RegionFlag.RiverNE) && !region.ShapeFlags.HasFlag(RegionFlag.RiverSW)) {
+                newOffset.X = 1 - offset.X;
+                newOffset.Y = offset.Y;
+                newOffset.X = newOffset.Y = newOffset.Length;
+                offset = newOffset;
+            }
+
+            if (region.ShapeFlags.HasFlag(RegionFlag.RiverSW) && !region.ShapeFlags.HasFlag(RegionFlag.RiverNE)) {
+                newOffset.X = offset.X;
+                newOffset.Y = 1 - offset.Y;
+                newOffset.X = newOffset.Y = newOffset.Length;
+                offset = newOffset;
+            }
+
+            return offset;
         }
 
         /// <summary>
