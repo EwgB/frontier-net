@@ -363,21 +363,21 @@
                     c.Surface = SurfaceTypes.Grass;
                 else //Too cold or dry
                     c.Surface = SurfaceTypes.Rock;
-                if (region.Climate == ClimateTypes.Desert)
+                if (region.Climate == ClimateType.Desert)
                     c.Surface = SurfaceTypes.Sand;
                 //Sand is only for coastal regions
-                if (low <= 2 && (region.Climate == ClimateTypes.Coast))
+                if (low <= 2 && (region.Climate == ClimateType.Coast))
                     c.Surface = SurfaceTypes.Sand;
-                if (low <= 2 && (region.Climate == ClimateTypes.Ocean))
+                if (low <= 2 && (region.Climate == ClimateType.Ocean))
                     c.Surface = SurfaceTypes.Sand;
                 //Forests are for... forests?
-                if (c.Detail < 0.75f && c.Detail > 0.25f && (region.Climate == ClimateTypes.Forest))
+                if (c.Detail < 0.75f && c.Detail > 0.25f && (region.Climate == ClimateType.Forest))
                     c.Surface = SurfaceTypes.Forest;
                 if (delta >= region.Moisture * 6)
                     c.Surface = SurfaceTypes.Dirt;
-                if (low <= region.GeoWater && region.Climate != ClimateTypes.Swamp)
+                if (low <= region.GeoWater && region.Climate != ClimateType.Swamp)
                     c.Surface = SurfaceTypes.Dirt;
-                if (low <= region.GeoWater && region.Climate != ClimateTypes.Swamp)
+                if (low <= region.GeoWater && region.Climate != ClimateType.Swamp)
                     c.Surface = SurfaceTypes.DirtDark;
                 //The colder it is, the more surface becomes snow, beginning at the lowest points.
                 if (region.Temperature < WorldUtils.FREEZING) {
@@ -386,12 +386,12 @@
                         c.Surface = SurfaceTypes.Snow;
                 }
 
-                if (low <= 2.5f && (region.Climate == ClimateTypes.Ocean))
+                if (low <= 2.5f && (region.Climate == ClimateType.Ocean))
                     c.Surface = SurfaceTypes.Sand;
-                if (low <= 2.5f && (region.Climate == ClimateTypes.Coast))
+                if (low <= 2.5f && (region.Climate == ClimateType.Coast))
                     c.Surface = SurfaceTypes.Sand;
                 //dirt touched by water is dark
-                if (region.Climate != ClimateTypes.Swamp) {
+                if (region.Climate != ClimateType.Swamp) {
                     if (c.Surface == SurfaceTypes.Sand && low <= 0)
                         c.Surface = SurfaceTypes.SandDark;
                     if (low <= c.WaterLevel)
@@ -400,7 +400,7 @@
 
                 if (delta > 4 && region.Temperature > 0)
                     c.Surface = SurfaceTypes.Rock;
-                if ((region.Climate == ClimateTypes.Desert) && c.Surface != SurfaceTypes.Rock)
+                if ((region.Climate == ClimateType.Desert) && c.Surface != SurfaceTypes.Rock)
                     c.Surface = SurfaceTypes.Sand;
             } else {
                 if (c.Surface == SurfaceTypes.Grass && this.walk.X > 0 && this.walk.X < PAGE_SIZE - 1 && this.walk.Y > 0 &&

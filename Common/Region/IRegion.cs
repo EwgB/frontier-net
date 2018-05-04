@@ -15,7 +15,7 @@
         string Title { get; }
         ushort TreeType { get; }
         RegionFlag ShapeFlags { get; }
-        ClimateTypes Climate { get; }
+        ClimateType Climate { get; set; }
         Vector2 GridPosition { get; }
         int MountainHeight { get; }
         int RiverId { get; }

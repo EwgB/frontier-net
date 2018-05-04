@@ -74,7 +74,7 @@
     <Compile Include="IWater.cs" />
     <Compile Include="Particles\IEmitter.cs" />
     <Compile Include="Particles\ParticleTypes.cs" />
-    <Compile Include="Region\ClimateTypes.cs" />
+    <Compile Include="Region\ClimateType.cs" />
     <Compile Include="Region\IRegion.cs" />
     <Compile Include="ISky.cs" />
     <Compile Include="IText.cs" />

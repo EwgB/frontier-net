@@ -445,7 +445,7 @@
 
             //Apply the values!
             var val = waterLevel + detail * region.GeoDetail + bias;
-            if (region.Climate == ClimateTypes.Swamp) {
+            if (region.Climate == ClimateType.Swamp) {
                 val -= region.GeoDetail / 2;
                 val = Math.Max(val, region.GeoWater - 0.5f);
             }

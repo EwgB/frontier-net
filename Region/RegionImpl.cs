@@ -8,7 +8,7 @@
         public string Title { get; }
         public ushort TreeType { get; }
         public RegionFlag ShapeFlags { get; }
-        public ClimateTypes Climate { get; }
+        public ClimateType Climate { get; }
         public Vector2 GridPosition { get; }
         public int MountainHeight { get; }
         public int RiverId { get; }

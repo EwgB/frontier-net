@@ -273,7 +273,7 @@
             for (var x = start; x != end; x += step) {
                 var region = this.World.GetRegion(x, WorldUtils.WORLD_GRID_CENTER);
                 var regionNeighbor = this.World.GetRegion(x + step, WorldUtils.WORLD_GRID_CENTER);
-                if (region.Climate == ClimateTypes.Coast && regionNeighbor.Climate == ClimateTypes.Ocean) {
+                if (region.Climate == ClimateType.Coast && regionNeighbor.Climate == ClimateType.Ocean) {
                     regionX = x;
                     break;
                 }

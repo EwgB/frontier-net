@@ -145,7 +145,7 @@
             var humidFog = new Range<float>(
                 MathUtils.Interpolate(maxDistance * 0.85f, maxDistance * 0.25f, region.Moisture),
                 MathUtils.Interpolate(maxDistance, maxDistance * 0.75f, region.Moisture));
-            if (region.Climate == ClimateTypes.Swamp) {
+            if (region.Climate == ClimateType.Swamp) {
                 humidFog.Min /= 2.0f;
                 humidFog.Max /= 2.0f;
             }
