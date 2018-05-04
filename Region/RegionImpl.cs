@@ -7,7 +7,7 @@
     internal class RegionImpl : IRegion {
         public string Title { get; }
         public ushort TreeType { get; }
-        public RegionFlag ShapeFlags { get; }
+        public RegionFlags ShapeFlags { get; }
         public ClimateType Climate { get; }
         public Vector2 GridPosition { get; }
         public int MountainHeight { get; }

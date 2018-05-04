@@ -22,7 +22,7 @@
         public Color3[] ColorFlowers => new[] { Color3.Red, Color3.Green, Color3.Blue };
         public Color3 ColorGrass => Color3.Green;
         public Color3 ColorRock => Color3.DarkSlateGray;
-        public RegionFlag ShapeFlags => RegionFlag.Beach;
+        public RegionFlags ShapeFlags => RegionFlags.Beach;
         public uint[] FlowerShape => new uint[] { 1 };
         public bool HasFlowers => false;
         public float Moisture => 0;

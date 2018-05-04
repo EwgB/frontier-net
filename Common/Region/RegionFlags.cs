@@ -4,7 +4,7 @@
 
     [Flags]
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    public enum RegionFlag {
+    public enum RegionFlags {
         Test = 0x0001,
         Mesas = 0x0002,
         Crater = 0x0004,

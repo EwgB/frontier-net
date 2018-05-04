@@ -14,7 +14,7 @@
     public interface IRegion {
         string Title { get; }
         ushort TreeType { get; }
-        RegionFlag ShapeFlags { get; }
+        RegionFlags ShapeFlags { get; set; }
         ClimateType Climate { get; set; }
         Vector2 GridPosition { get; }
         int MountainHeight { get; }

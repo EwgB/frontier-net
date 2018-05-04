@@ -90,7 +90,7 @@
     <Compile Include="Avatar\IAvatar.cs" />
     <Compile Include="Environment\IEnvironment.cs" />
     <Compile Include="Particles\IParticles.cs" />
-    <Compile Include="Region\RegionFlag.cs" />
+    <Compile Include="Region\RegionFlags.cs" />
     <Compile Include="Scene\IScene.cs" />
     <Compile Include="Tree\ITree.cs" />
     <Compile Include="World\IWorld.cs" />
