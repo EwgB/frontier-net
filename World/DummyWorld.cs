@@ -18,6 +18,9 @@
 
         public uint MapId => 0;
 
+        public double GetWorldNoiseF(int index) => 0;
+        public int GetWorldNoiseI(int index) => 0;
+
         public DummyWorld(IRegion region) {
             this.region = region;
         }
@@ -29,7 +32,7 @@
         public void Load(uint seed) { /* Do nothing */ }
 
         public float GetWaterLevel(Vector2 coord) => 0;
-        public float GetWaterLevel(float x, float y) => 0;
+        public float GetWaterLevel(int x, int y) => 0;
 
         private readonly ITree tree;
         public ITree GetTree(uint id) => this.tree;

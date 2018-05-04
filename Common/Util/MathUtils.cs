@@ -86,7 +86,7 @@
         /// <param name="offset"></param>
         /// <param name="left">Determines if the quad is cut from y2 to y1, or from y0 to y3</param>
         /// <returns></returns>
-        public static float InterpolateQuad(float y0, float y1, float y2, float y3, Vector2 offset, bool left) {
+        public static float InterpolateQuad(float y0, float y1, float y2, float y3, Vector2 offset, bool left = false) {
             float a, b, c;
 
             if (left) {
