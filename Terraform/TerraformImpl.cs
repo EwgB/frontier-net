@@ -8,6 +8,7 @@
         public void Update() { /* Do nothing */ }
 
         public void Average() {
+            // TODO: convert
             /*
             int x, y, xx, yy, count;
             int radius;
@@ -84,6 +85,7 @@
         }
 
         public void Climate() {
+            // TODO: convert
             /*
             int x, y;
             float rainfall, rain_loss, temp;
@@ -156,6 +158,7 @@
         }
 
         public void Coast() {
+            // TODO: convert
             /*
             int x, y;
             Region r;
@@ -228,6 +231,7 @@
         }
 
         public void Colors() {
+            // TODO: convert
             /*
             int x, y;
             Region r;
@@ -314,6 +318,7 @@
         }
 
         public void Fill() {
+            // TODO: convert
             /*
             int x, y;
             Region r;
@@ -391,6 +396,7 @@
         }
 
         public void Flora() {
+            // TODO: convert
             /*
             Region r;
             GLcoord walk;
@@ -408,6 +414,7 @@
         }
 
         public void Lakes(int count) {
+            // TODO: convert
             /*
             int lakes;
             int cycles;
@@ -434,6 +441,7 @@
         }
 
         public void Oceans() {
+            // TODO: convert
             /*
             int x, y;
             Region r;
@@ -468,6 +476,7 @@
         }
 
         public void Prepare() {
+            // TODO: convert
             /*
             int x, y;
             Region r;
@@ -515,6 +524,7 @@
         }
 
         public void Rivers(int count) {
+            // TODO: convert
             /*
             int rivers;
             int cycles;
@@ -536,6 +546,7 @@
         }
 
         public void Zones() {
+            // TODO: convert
             /*
             int x, y;
             vector<Climate> climates;
@@ -617,6 +628,7 @@
 
         public Color3 ColorGenerate(SurfaceColors c, float moisture, float temperature, int seed) {
             return Color3.Azure;
+            // TODO: convert
             /*
             float fade;
 
