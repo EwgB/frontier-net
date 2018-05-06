@@ -203,7 +203,7 @@
             this.desiredCamDistance = MathHelper.Clamp(this.desiredCamDistance, CAM_MIN, CAM_MAX);
             this.camDistance = MathUtils.Interpolate(this.camDistance, this.desiredCamDistance, elapsed);
             var ground = this.Cache.GetElevation(this.position.X, this.position.Y);
-            var water = this.World.GetWaterLevel(this.position.X, this.position.Y);
+            var water = this.World.GetWaterLevel((int) this.position.X, (int) this.position.Y);
             this.avatarFacing.Y = MathUtils.Interpolate(this.avatarFacing.Y, leanAngle, elapsed);
             if (!this.AvatarProperties.Flying) {
                 this.velocity -= WorldUtils.GRAVITY * elapsed;

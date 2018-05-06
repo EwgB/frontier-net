@@ -73,10 +73,10 @@
         /// into 8 bits per channel, which means color information is lost.</remarks>
         public int ToArgb() {
             uint value =
-                (uint)(Byte.MaxValue) << 24 |       // Alpha is always 1
-                (uint)(this.R * Byte.MaxValue) << 16 |
-                (uint)(this.G * Byte.MaxValue) << 8 |
-                (uint)(this.B * Byte.MaxValue);
+                (uint)(byte.MaxValue) << 24 |       // Alpha is always 1
+                (uint)(this.R * byte.MaxValue) << 16 |
+                (uint)(this.G * byte.MaxValue) << 8 |
+                (uint)(this.B * byte.MaxValue);
 
             return unchecked((int)value);
         }
@@ -115,6 +115,13 @@
         /// <returns>A new Color3 with normalized RGB values</returns>
         public Color3 Normalize() {
             return this / Math.Min(Math.Max(this.R, Math.Max(this.G, this.B)), 1);
+        }
+
+        public Color3 Clamp() {
+            return new Color3(
+                MathHelper.Clamp(this.R, 0, 1),
+                MathHelper.Clamp(this.G, 0, 1),
+                MathHelper.Clamp(this.B, 0, 1));
         }
 
         #region Operators
@@ -161,9 +168,9 @@
         /// <returns>A new System.Drawing.Color structure containing the converted components.</returns>
         public static explicit operator Color(Color3 color) {
             return Color.FromArgb(
-                (int)(color.R * Byte.MaxValue),
-                (int)(color.G * Byte.MaxValue),
-                (int)(color.B * Byte.MaxValue));
+                (int)(color.R * byte.MaxValue),
+                (int)(color.G * byte.MaxValue),
+                (int)(color.B * byte.MaxValue));
         }
 
         #endregion
@@ -1399,14 +1406,6 @@ return result;
 
 }
 
-void Color3::Clamp() {
-
-R = clamp(R, 0.0f, 1.0f);
-G = clamp(G, 0.0f, 1.0f);
-B = clamp(B, 0.0f, 1.0f);
-alpha = clamp(alpha, 0.0f, 1.0f);
-
-}
 
 }
 

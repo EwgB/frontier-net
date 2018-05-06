@@ -6,30 +6,36 @@
     using Common.World;
 
     internal class DummyRegion : IRegion {
-        public string Title => "DUMMY_REGION";
-        public float GeoBias => 0;
-        public float GeoDetail => 0;
+        public string Title { get => "DUMMY_REGION"; set { } }
+        public float GeoBias { get; set; }
+        public float GeoDetail { get; set; }
         public int MountainHeight => 0;
         public Vector2 GridPosition => Vector2.Zero;
         public float TreeThreshold => 0.15f;
         public float GeoScale => 0;
-        public float GeoWater => 0;
-        public Color3 ColorAtmosphere => Color3.Blue;
-        public Color3 ColorMap => Color3.Black;
-        public ClimateType Climate => ClimateType.Invalid;
-        public float CliffThreshold => 0;
-        public Color3 ColorDirt => Color3.Brown;
-        public Color3[] ColorFlowers => new[] { Color3.Red, Color3.Green, Color3.Blue };
-        public Color3 ColorGrass => Color3.Green;
-        public Color3 ColorRock => Color3.DarkSlateGray;
-        public RegionFlags ShapeFlags => RegionFlags.Beach;
-        public uint[] FlowerShape => new uint[] { 1 };
-        public bool HasFlowers => false;
-        public float Moisture => 0;
+        public float GeoWater { get => 0; set { } }
+        public Color3 ColorAtmosphere { get => Color3.Blue; set { } }
+        public Color3 ColorMap { get => Color3.Black; set { } }
+        public ClimateType Climate { get => ClimateType.Invalid; set { } }
+        public float CliffThreshold { get => 0; set { } }
+        public Color3 ColorDirt { get => Color3.Brown; set { } }
+        public Color3 ColorGrass { get => Color3.Green; set { } }
+        public Color3 ColorRock { get => Color3.DarkSlateGray; set { } }
+        public RegionFlags ShapeFlags { get => RegionFlags.Beach; set { } }
+        public bool HasFlowers { get => false; set { } }
+        public float Moisture { get => 0; set { } }
         public int RiverId => 0;
         public int RiverSegment => 1;
         public float RiverWidth => 1;
-        public float Temperature => (this.GridPosition.Y - WorldUtils.WORLD_GRID / 4f) / WorldUtils.WORLD_GRID_CENTER;
+        public float Temperature {
+            get => (this.GridPosition.Y - WorldUtils.WORLD_GRID / 4f) / WorldUtils.WORLD_GRID_CENTER;
+            set { }
+        }
         public ushort TreeType => 3;
+        public Flower[] Flowers => new[] {
+            new Flower{ Color = Color3.Red, Shape = 1},
+            new Flower{ Color = Color3.Green, Shape = 1},
+            new Flower{ Color = Color3.Blue, Shape = 1}
+        };
     }
 }

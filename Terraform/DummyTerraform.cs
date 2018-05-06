@@ -9,7 +9,7 @@
         public void Average() { /* Do nothing */ }
         public void Coast() { /* Do nothing */ }
         public void Colors() { /* Do nothing */ }
-        public Color3 ColorGenerate(SurfaceColors c, float moisture, float temperature, int seed) => Color3.Magenta;
+        public Color3 GenerateColor(SurfaceColor color, float moisture, float temperature, int seed) => Color3.Magenta;
         public void Climate() { /* Do nothing */ }
         public void Fill() { /* Do nothing */ }
         public void Flora() { /* Do nothing */ }

@@ -15,14 +15,15 @@
         public uint Seed { get; }
         public bool WindFromWest { get; set; }
         public uint TreeCanopy { get; }
+        public bool NorthernHemisphere { get; }
 
         public uint MapId => 0;
 
-        public double GetWorldNoiseF(int index) => 0;
-        public int GetWorldNoiseI(int index) => 0;
+        public float GetNoiseF(int index) => 0;
+        public int GetNoiseI(int index) => 0;
 
         public DummyWorld(IRegion region) {
-            this.region = region;
+            this.dummyRegion = region;
         }
 
         public void Init() { /* Do nothing */ }
@@ -38,13 +39,14 @@
         public ITree GetTree(uint id) => this.tree;
 
 
-        private readonly IRegion region;
-        public IRegion GetRegion(int x, int y) => this.region;
-        public IRegion GetRegionFromPosition(int worldX, int worldY) => this.region;
+        private readonly IRegion dummyRegion;
+        public IRegion GetRegion(int x, int y) => this.dummyRegion;
+        public IRegion GetRegionFromPosition(int worldX, int worldY) => this.dummyRegion;
+        public void SetRegion(int x, int y, IRegion region) { /* Do nothing */ }
 
         private readonly Cell cell;
         public Cell GetCell(int worldX, int worldY) => this.cell;
 
-        public Color3 GetColor(int worldX, int worldY, SurfaceColors c) => Color3.Magenta;
+        public Color3 GetColor(int worldX, int worldY, SurfaceColor c) => Color3.Magenta;
     }
 }

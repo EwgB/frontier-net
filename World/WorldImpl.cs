@@ -34,16 +34,16 @@
 
         //The dither map scatters surface data so that grass colorings end up in adjacent regions.
         private const int DITHER_SIZE = (WorldUtils.REGION_SIZE / 2);
-        
+
         //How much space in a region is spent interpolating between itself and its neighbors.
         private const int BLEND_DISTANCE = (WorldUtils.REGION_SIZE / 4);
-        
+
         #endregion
 
 
         #region Modules
 
-        private readonly ITerraform terraform;
+        private ITerraform Terraform { get; }
 
         #endregion
 
@@ -58,86 +58,18 @@
         public uint Seed { get; private set; }
         public bool WindFromWest { get; private set; }
         public uint TreeCanopy { get; private set; }
+        public bool NorthernHemisphere { get; private set; }
 
-        private readonly double[] noiseF = new double[NOISE_BUFFER];
-        public double GetWorldNoiseF(int index) => this.noiseF[Math.Abs(index % NOISE_BUFFER)];
+        private readonly float[] noiseF = new float[NOISE_BUFFER];
+        public float GetNoiseF(int index) => this.noiseF[Math.Abs(index % NOISE_BUFFER)];
 
         private readonly int[] noiseI = new int[NOISE_BUFFER];
-        public int GetWorldNoiseI(int index) => this.noiseI[Math.Abs(index % NOISE_BUFFER)];
-
-        #endregion
+        public int GetNoiseI(int index) => this.noiseI[Math.Abs(index % NOISE_BUFFER)];
 
 
-        #region Private members
-
-        private Random random;
-
-        private bool northernHemisphere;
-        private int riverCount;
-        private int lakeCount;
-
-        private readonly IRegion[,] map = new IRegion[WorldUtils.WORLD_GRID, WorldUtils.WORLD_GRID];
-
-        private readonly ITree[,] trees = new ITree[TREE_TYPES, TREE_TYPES];
-
-        private readonly Coord[,] dithermap = new Coord[DITHER_SIZE, DITHER_SIZE];
-
-        #endregion
-
-
-        public WorldImpl(ITerraform terraform) {
-            this.terraform = terraform;
-        }
-
-        public void Init() {
-            //Fill in the dither table - a table of random offsets
-            for (var y = 0; y < DITHER_SIZE; y++) {
-                for (var x = 0; x < DITHER_SIZE; x++) {
-                    this.dithermap[x, y] = new Coord(
-                        this.random.Next() % DITHER_SIZE + this.random.Next() % DITHER_SIZE,
-                        this.random.Next() % DITHER_SIZE + this.random.Next() % DITHER_SIZE);
-                }
-            }
-        }
-
-
-        public ITree GetTree(uint id) {
-            var m = id % TREE_TYPES;
-            var t = (id - m) / TREE_TYPES;
-            return this.trees[m, t];
-        }
-
-        public void Generate(uint seed) {
-            this.random = Randoms.Create((int) seed);
-            this.Seed = seed;
-
-            for (var x = 0; x < NOISE_BUFFER; x++) {
-                this.noiseI[x] = this.random.Next();
-                this.noiseF[x] = this.random.NextDouble();
-            }
-
-            BuildTrees();
-            this.WindFromWest = (this.random.Next() % 2 == 0);
-            this.northernHemisphere = (this.random.Next() % 2 == 0);
-            this.riverCount = 4 + this.random.Next() % 4;
-            this.lakeCount = 1 + this.random.Next() % 4;
-            this.terraform.Prepare();
-            this.terraform.Oceans();
-            this.terraform.Coast();
-            this.terraform.Climate();
-            this.terraform.Rivers(this.riverCount);
-            this.terraform.Lakes(this.lakeCount);
-            this.terraform.Climate(); //Do climate a second time now that rivers are in
-            this.terraform.Zones();
-            this.terraform.Climate(); //Now again, since we have added climate-modifying features (Mountains, etc.)
-            this.terraform.Fill();
-            this.terraform.Average();
-            this.terraform.Flora();
-            this.terraform.Colors();
-            BuildMapTexture();
-        }
-
-        public IRegion GetRegion(int x, int y) => this.map[x, y];
+        private readonly IRegion[,] regions = new IRegion[WorldUtils.WORLD_GRID, WorldUtils.WORLD_GRID];
+        public IRegion GetRegion(int x, int y) => this.regions[x, y];
+        public void SetRegion(int x, int y, IRegion region) => this.regions[x, y] = region;
 
         public IRegion GetRegionFromPosition(int worldX, int worldY) {
             worldX = Math.Max(worldX, 0);
@@ -147,9 +79,43 @@
             worldX /= WorldUtils.REGION_SIZE;
             worldY /= WorldUtils.REGION_SIZE;
             if (worldX >= WorldUtils.WORLD_GRID || worldY >= WorldUtils.WORLD_GRID)
-                return this.map[0, 0];
-            return this.map[worldX, worldY];
+                return this.regions[0, 0];
+            return this.regions[worldX, worldY];
         }
+
+
+        #endregion
+
+
+        #region Private members
+
+        private Random Random { get; set; }
+
+        private int riverCount;
+        private int lakeCount;
+
+        private readonly ITree[,] trees = new ITree[TREE_TYPES, TREE_TYPES];
+
+        private readonly Coord[,] dithermap = new Coord[DITHER_SIZE, DITHER_SIZE];
+
+        #endregion
+
+
+        public WorldImpl(ITerraform terraform) {
+            this.Terraform = terraform;
+        }
+
+        public void Init() {
+            //Fill in the dither table - a table of random offsets
+            for (var y = 0; y < DITHER_SIZE; y++) {
+                for (var x = 0; x < DITHER_SIZE; x++) {
+                    this.dithermap[x, y] = new Coord(
+                        this.Random.Next() % DITHER_SIZE + this.Random.Next() % DITHER_SIZE,
+                        this.Random.Next() % DITHER_SIZE + this.Random.Next() % DITHER_SIZE);
+                }
+            }
+        }
+
 
         public Cell GetCell(int worldX, int worldY) {
             float detail = Entropy(worldX, worldY);
@@ -158,7 +124,7 @@
             var origin = new Coord(
                 MathHelper.Clamp(worldX / WorldUtils.REGION_SIZE, 0, WorldUtils.WORLD_GRID - 1),
                 MathHelper.Clamp(worldY / WorldUtils.REGION_SIZE, 0, WorldUtils.WORLD_GRID - 1));
-            
+
             //Get our offset from the region origin as a pair of scalars.
             var blend = new Vector2(
                 (float) (worldX % BLEND_DISTANCE) / BLEND_DISTANCE,
@@ -195,12 +161,13 @@
             var upperRightElevation = DoHeight(upperRightRegion, offset, waterLevel, detail, bias);
             var bottomLeftElevation = DoHeight(bottomLeftRegion, offset, waterLevel, detail, bias);
             var bottomRightElevation = DoHeight(bottomRightRegion, offset, waterLevel, detail, bias);
-            result.Elevation = MathUtils.InterpolateQuad(upperLeftElevation, upperRightElevation, bottomLeftElevation, bottomRightElevation, blend, left);
+            result.Elevation = MathUtils.InterpolateQuad(upperLeftElevation, upperRightElevation, bottomLeftElevation,
+                bottomRightElevation, blend, left);
             result.Elevation = DoHeightNoBlend(result.Elevation, upperLeftRegion, offset, waterLevel);
             return result;
         }
 
-        public Color3 GetColor(int worldX, int worldY, SurfaceColors c) {
+        public Color3 GetColor(int worldX, int worldY, SurfaceColor c) {
             Vector2 offset;
             Color3 c0, c1, c2, c3, result;
 
@@ -219,21 +186,21 @@
             var r3 = GetRegion(origin.X + 1, origin.Y + 1);
 
             switch (c) {
-            case SurfaceColors.Dirt:
+            case SurfaceColor.Dirt:
                 c0 = r0.ColorDirt;
                 c1 = r1.ColorDirt;
                 c2 = r2.ColorDirt;
                 c3 = r3.ColorDirt;
                 break;
-            case SurfaceColors.Rock:
+            case SurfaceColor.Rock:
                 c0 = r0.ColorRock;
                 c1 = r1.ColorRock;
                 c2 = r2.ColorRock;
                 c3 = r3.ColorRock;
                 break;
-            case SurfaceColors.Sand:
+            case SurfaceColor.Sand:
                 return new Color3(0.98f, 0.82f, 0.42f);
-            case SurfaceColors.Grass:
+            case SurfaceColor.Grass:
             default:
                 c0 = r0.ColorGrass;
                 c1 = r1.ColorGrass;
@@ -247,6 +214,42 @@
                 MathUtils.InterpolateQuad(c0.G, c1.G, c2.G, c3.G, offset),
                 MathUtils.InterpolateQuad(c0.B, c1.B, c2.B, c3.B, offset));
             return result;
+        }
+
+        public ITree GetTree(uint id) {
+            var m = id % TREE_TYPES;
+            var t = (id - m) / TREE_TYPES;
+            return this.trees[m, t];
+        }
+
+        public void Generate(uint seed) {
+            this.Random = Randoms.Create((int) seed);
+            this.Seed = seed;
+
+            for (var x = 0; x < NOISE_BUFFER; x++) {
+                this.noiseI[x] = this.Random.Next();
+                this.noiseF[x] = (float) this.Random.NextDouble();
+            }
+
+            BuildTrees();
+            this.WindFromWest = (this.Random.Next() % 2 == 0);
+            this.NorthernHemisphere = (this.Random.Next() % 2 == 0);
+            this.riverCount = 4 + this.Random.Next() % 4;
+            this.lakeCount = 1 + this.Random.Next() % 4;
+            this.Terraform.Prepare();
+            this.Terraform.Oceans();
+            this.Terraform.Coast();
+            this.Terraform.Climate();
+            this.Terraform.Rivers(this.riverCount);
+            this.Terraform.Lakes(this.lakeCount);
+            this.Terraform.Climate(); //Do climate a second time now that rivers are in
+            this.Terraform.Zones();
+            this.Terraform.Climate(); //Now again, since we have added climate-modifying features (Mountains, etc.)
+            this.Terraform.Fill();
+            this.Terraform.Average();
+            this.Terraform.Flora();
+            this.Terraform.Colors();
+            BuildMapTexture();
         }
 
         public void Load(uint seed) {
@@ -296,9 +299,7 @@
             //ConsoleLog("WorldSave: '%s' saved.", filename);
         }
 
-        public void Update() {
-            /* Do nothing */
-        }
+        public void Update() { /* Do nothing */ }
 
 
         #region Functions that are used when generating elevation data
@@ -507,8 +508,10 @@
             }
 
             GL.BindTexture(TextureTarget.Texture2D, this.MapId);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (float) TextureMinFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (float) TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
+                (float) TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,
+                (float) TextureMagFilter.Nearest);
 
             var buffer = new byte[WorldUtils.WORLD_GRID * WorldUtils.WORLD_GRID * 3];
 
@@ -516,7 +519,7 @@
                 for (var y = 0; y < WorldUtils.WORLD_GRID; y++) {
                     //Flip it vertically, because the OpenGL texture coord system is retarded.
                     var yy = (WorldUtils.WORLD_GRID - 1) - y;
-                    var r = this.map[x, yy];
+                    var r = this.regions[x, yy];
                     var bufferIndex = (x + y * WorldUtils.WORLD_GRID) * 3;
                     buffer[bufferIndex] = (byte) (r.ColorMap.R * 255);
                     buffer[bufferIndex + 1] = (byte) (r.ColorMap.G * 255);
@@ -524,7 +527,8 @@
                 }
             }
 
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, WorldUtils.WORLD_GRID, WorldUtils.WORLD_GRID, 0, PixelFormat.Rgb,
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, WorldUtils.WORLD_GRID,
+                WorldUtils.WORLD_GRID, 0, PixelFormat.Rgb,
                 PixelType.UnsignedByte, buffer);
         }
 
@@ -541,7 +545,8 @@
             var upperRight = GetRegion(origin.X + 1, origin.Y);
             var bottomLeft = GetRegion(origin.X, origin.Y + 1);
             var bottomRight = GetRegion(origin.X + 1, origin.Y + 1);
-            return MathUtils.InterpolateQuad(upperLeft.GeoBias, upperRight.GeoBias, bottomLeft.GeoBias, bottomRight.GeoBias, offset,
+            return MathUtils.InterpolateQuad(upperLeft.GeoBias, upperRight.GeoBias, bottomLeft.GeoBias,
+                bottomRight.GeoBias, offset,
                 ((origin.X + origin.Y) % 2) == 0);
         }
 
@@ -552,13 +557,14 @@
                 MathHelper.Clamp(worldX / WorldUtils.REGION_SIZE, 0, WorldUtils.WORLD_GRID - 1),
                 MathHelper.Clamp(worldY / WorldUtils.REGION_SIZE, 0, WorldUtils.WORLD_GRID - 1));
             var offset = new Vector2(
-                (float)((worldX) % WorldUtils.REGION_SIZE) / WorldUtils.REGION_SIZE,
-                (float)((worldY) % WorldUtils.REGION_SIZE) / WorldUtils.REGION_SIZE);
+                (float) ((worldX) % WorldUtils.REGION_SIZE) / WorldUtils.REGION_SIZE,
+                (float) ((worldY) % WorldUtils.REGION_SIZE) / WorldUtils.REGION_SIZE);
             var upperLeft = GetRegion(origin.X, origin.Y);
             var upperRight = GetRegion(origin.X + 1, origin.Y);
             var bottomLeft = GetRegion(origin.X, origin.Y + 1);
             var bottomRight = GetRegion(origin.X + 1, origin.Y + 1);
-            return MathUtils.InterpolateQuad(upperLeft.GeoWater, upperRight.GeoWater, bottomLeft.GeoWater, bottomRight.GeoWater, offset,
+            return MathUtils.InterpolateQuad(upperLeft.GeoWater, upperRight.GeoWater, bottomLeft.GeoWater,
+                bottomRight.GeoWater, offset,
                 ((origin.X + origin.Y) % 2) == 0);
         }
 

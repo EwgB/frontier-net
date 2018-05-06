@@ -27,9 +27,10 @@
         uint Seed { get; }
         bool WindFromWest { get; }
         uint TreeCanopy { get; }
+        bool NorthernHemisphere { get; }
 
-        double GetWorldNoiseF(int index);
-        int GetWorldNoiseI(int index);
+        float GetNoiseF(int index);
+        int GetNoiseI(int index);
 
         // TODO: Look into using Array or ImmutableArray for this data
         float GetWaterLevel(Vector2 coord);
@@ -38,9 +39,10 @@
         // TODO: Look into using ImmutableArray for this data
         IRegion GetRegion(int x, int y);
         IRegion GetRegionFromPosition(int worldX, int worldY);
+        void SetRegion(int x, int y, IRegion region);
 
         Cell GetCell(int worldX, int worldY);
-        Color3 GetColor(int worldX, int worldY, SurfaceColors c);
+        Color3 GetColor(int worldX, int worldY, SurfaceColor c);
         ITree GetTree(uint id);
 
         void Generate(uint seed);
@@ -56,7 +58,6 @@ float WorldWaterLevel(int world_x, int world_y);
 char* WorldDirectionFromAngle(float angle);
 //char*         WorldDirectory ();
 World* WorldPtr();
-void WorldRegionSet(int index_x, int index_y, Region val);
 uint WorldTreeType(float moisture, float temperature);
 void WorldTexturePurge();
 */

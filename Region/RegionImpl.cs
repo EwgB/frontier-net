@@ -5,10 +5,10 @@
     using Common.Util;
 
     internal class RegionImpl : IRegion {
-        public string Title { get; }
+        public string Title { get; set; }
         public ushort TreeType { get; }
-        public RegionFlags ShapeFlags { get; }
-        public ClimateType Climate { get; }
+        public RegionFlags ShapeFlags { get; set; }
+        public ClimateType Climate { get; set; }
         public Vector2 GridPosition { get; }
         public int MountainHeight { get; }
         public int RiverId { get; }
@@ -16,20 +16,19 @@
         public float TreeThreshold { get; }
         public float RiverWidth { get; }
         public float GeoScale { get; }
-        public float GeoWater { get; }
-        public float GeoDetail { get; }
-        public float GeoBias { get; }
-        public float Temperature { get; }
-        public float Moisture { get; }
-        public float CliffThreshold { get; }
-        public Color3 ColorMap { get; }
-        public Color3 ColorRock { get; }
-        public Color3 ColorDirt { get; }
-        public Color3 ColorGrass { get; }
-        public Color3 ColorAtmosphere { get; }
-        public Color3[] ColorFlowers { get; }
-        public uint[] FlowerShape { get; }
-        public bool HasFlowers { get; }
+        public float GeoWater { get; set; }
+        public float GeoDetail { get; set; }
+        public float GeoBias { get; set; }
+        public float Temperature { get; set; }
+        public float Moisture { get; set; }
+        public float CliffThreshold { get; set; }
+        public Color3 ColorMap { get; set; }
+        public Color3 ColorRock { get; set; }
+        public Color3 ColorDirt { get; set; }
+        public Color3 ColorGrass { get; set; }
+        public Color3 ColorAtmosphere { get; set; }
+        public Flower[] Flowers { get; set; }
+        public bool HasFlowers { get; set; }
     }
 }
 

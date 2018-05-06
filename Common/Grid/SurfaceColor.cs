@@ -1,5 +1,5 @@
 ﻿namespace FrontierSharp.Common.Grid {
-    public enum SurfaceColors {
+    public enum SurfaceColor {
         Black,
         Sand,
         Dirt,

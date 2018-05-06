@@ -1,5 +1,6 @@
 ﻿namespace FrontierSharp.Common.Util {
     using System;
+
     using OpenTK;
 
     ///<summary>Various useful math functions</summary>
@@ -69,7 +70,7 @@
         }
 
         /// <summary>
-        ///     This forms a theoretical quad with the four elevation values.  Given the 
+        ///     This forms a theoretical quad with the four elevation values. Given the 
         ///     offset from the upper-left corner, it determines what the elevation
         ///     should be at that point in the center area.
         /// 
@@ -113,6 +114,13 @@
             }
 
             return (a + b * offset.X + c * offset.Y);
+        }
+
+        /// <summary> This will take values between low and high and return a value from 0 to 1. </summary>
+        public static float Scalar(float val, float low, float high) {
+            val = Math.Max(val, low);
+            val = Math.Min(val, high);
+            return (val - low) / (high - low);
         }
     }
 
@@ -184,19 +192,5 @@ float MathScalarCurve(float val) {
     return val;
 
 }
-
-//This will take values between low and high and return a value from 0 to 1.
-float MathScalar(float val, float low, float high) {
-
-    val = max(val, low);
-    val = min(val, high);
-    return (val - low) / (high - low);
-
-}
-
-  //This forms a theoretical quad with the four elevation values.  Given the 
-  //offset from the upper-left corner, it determines what the elevation
-  //should be at that point in the center area.  left" determines if the 
-  //quad is cut from y2 to y1, or from y0 to y3.
 
  */

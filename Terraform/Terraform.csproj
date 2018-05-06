@@ -31,8 +31,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MersenneTwister, Version=1.0.6146.4688, Culture=neutral, PublicKeyToken=9c84633ec57842f3, processorArchitecture=MSIL">
+      <HintPath>..\packages\MersenneTwister.1.0.5\lib\portable-net45+netcore45+win8+wp8\MersenneTwister.dll</HintPath>
+    </Reference>
     <Reference Include="Ninject, Version=3.3.4.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
       <HintPath>..\packages\Ninject.3.3.4\lib\net45\Ninject.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK, Version=2.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenTK.2.0.0\lib\net20\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -50,6 +56,7 @@
     <Compile Include="TerraformModule.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -57,6 +64,9 @@
       <Project>{889072ad-5c8d-47d9-8fec-05a9ec728be8}</Project>
       <Name>Common</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="LICENSES-MersenneTwister.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

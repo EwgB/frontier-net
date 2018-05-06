@@ -3,6 +3,11 @@
 
     using Util;
 
+    public struct Flower {
+        public Color3 Color { get; set; }
+        public uint Shape { get; set; }
+    }
+
     /// <summary>
     /// Holds the region grid, which is the main table of information from
     /// which ALL OTHER GEOGRAPHICAL DATA is generated or derived.  Note that
@@ -12,7 +17,7 @@
     /// This output data is stored and managed elsewhere. (See IPage.cs) TODO
     /// </summary>
     public interface IRegion {
-        string Title { get; }
+        string Title { get; set; }
         ushort TreeType { get; }
         RegionFlags ShapeFlags { get; set; }
         ClimateType Climate { get; set; }
@@ -24,19 +29,18 @@
         float RiverWidth { get; }
         /// <summary>Number from -1 to 1, lowest to highest elevation. 0 is sea level.</summary>
         float GeoScale { get; }
-        float GeoWater { get; }
-        float GeoDetail { get; }
-        float GeoBias { get; }
-        float Temperature { get; }
-        float Moisture { get; }
-        float CliffThreshold { get; }
-        Color3 ColorMap { get; }
-        Color3 ColorRock { get; }
-        Color3 ColorDirt { get; }
-        Color3 ColorGrass { get; }
-        Color3 ColorAtmosphere { get; }
-        Color3[] ColorFlowers { get; }
-        uint[] FlowerShape { get; }
-        bool HasFlowers { get; }
+        float GeoWater { get; set; }
+        float GeoDetail { get; set; }
+        float GeoBias { get; set; }
+        float Temperature { get; set; }
+        float Moisture { get; set; }
+        float CliffThreshold { get; set; }
+        Color3 ColorMap { get; set; }
+        Color3 ColorRock { get; set; }
+        Color3 ColorDirt { get; set; }
+        Color3 ColorGrass { get; set; }
+        Color3 ColorAtmosphere { get; set; }
+        Flower[] Flowers { get; }
+        bool HasFlowers { get; set; }
     }
 }

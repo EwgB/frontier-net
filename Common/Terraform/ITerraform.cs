@@ -49,6 +49,6 @@
         /// <summary> Create zones of different climates. </summary>
         void Zones();
 
-        Color3 ColorGenerate(SurfaceColors c, float moisture, float temperature, int seed);
+        Color3 GenerateColor(SurfaceColor color, float moisture, float temperature, int seed);
     }
 }

@@ -243,17 +243,17 @@
             var worldY = (this.origin.Y * PAGE_SIZE + this.walk.Y);
             var cell = this.data.Cells[this.walk.X, this.walk.Y];
             if (cell.Surface == SurfaceTypes.Grass || cell.Surface == SurfaceTypes.GrassEdge)
-                cell.Color = this.World.GetColor(worldX, worldY, SurfaceColors.Grass);
+                cell.Color = this.World.GetColor(worldX, worldY, SurfaceColor.Grass);
             else if (cell.Surface == SurfaceTypes.Dirt ||
                      cell.Surface == SurfaceTypes.DirtDark ||
                      cell.Surface == SurfaceTypes.Forest)
-                cell.Color = this.World.GetColor(worldX, worldY, SurfaceColors.Dirt);
+                cell.Color = this.World.GetColor(worldX, worldY, SurfaceColor.Dirt);
             else if (cell.Surface == SurfaceTypes.Sand || cell.Surface == SurfaceTypes.SandDark)
-                cell.Color = this.World.GetColor(worldX, worldY, SurfaceColors.Sand);
+                cell.Color = this.World.GetColor(worldX, worldY, SurfaceColor.Sand);
             else if (cell.Surface == SurfaceTypes.Snow)
                 cell.Color = Color3.White;
             else
-                cell.Color = this.World.GetColor(worldX, worldY, SurfaceColors.Rock);
+                cell.Color = this.World.GetColor(worldX, worldY, SurfaceColor.Rock);
 
             this.walk = this.walk.Walk(PAGE_SIZE, out var rolledOver);
             if (rolledOver)
