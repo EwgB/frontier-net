@@ -20,12 +20,12 @@
         public Vector3 Spin;
         public ParticleBlend Blend;
         public ParticleType PanelType;
-        public uint FadeIn;
-        public uint FadeOut;
-        public uint Lifespan;
-        public uint EmitInterval;
-        public uint EmitCount;
-        public uint EmitterLifespan;
+        public int FadeIn;
+        public int FadeOut;
+        public int Lifespan;
+        public int EmitInterval;
+        public int EmitCount;
+        public int EmitterLifespan;
         public bool Gravity;
         public bool Wind;
         public bool Interpolate;

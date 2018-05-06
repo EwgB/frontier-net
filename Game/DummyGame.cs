@@ -19,8 +19,8 @@
         public void Quit() { this.IsRunning = false; }
 
         public void Update() { /* Do nothing */ }
-        public void New(uint seedIn) { /* Do nothing */ }
-        public void Load(uint seedIn) { /* Do nothing */ }
+        public void New(int seedIn) { /* Do nothing */ }
+        public void Load(int seedIn) { /* Do nothing */ }
         public void Save() { /* Do nothing */ }
         public void Dispose() { /* Do nothing */ }
     }

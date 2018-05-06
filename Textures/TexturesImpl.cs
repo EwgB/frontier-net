@@ -15,7 +15,7 @@
         // a generic linked list implementation, or store them in a hash map
         private Texture headTexture;
 
-        public uint TextureIdFromName(string name) {
+        public int TextureIdFromName(string name) {
             var t = TextureFromName(name);
             return t?.Id ?? 0;
         }
@@ -30,7 +30,7 @@
         }
 
         private Texture LoadTexture(string name) {
-            uint id;
+            int id;
             GL.GenTextures(1, out id);
 
             GL.BindTexture(TextureTarget.Texture2D, id);

@@ -5,6 +5,6 @@
 
     public interface IGameProperties : IProperties {
         TimeSpan GameTime { get; set; }
-        uint LastPlayed { get; set; }
+        int LastPlayed { get; set; }
     }
 }

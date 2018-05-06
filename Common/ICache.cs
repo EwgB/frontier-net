@@ -27,6 +27,6 @@
         Vector3 GetPosition(int worldX, int worldY);
         SurfaceTypes GetSurface(int worldX, int worldY);
         Color3 GetSurfaceColor(int worldX, int worldY);
-        uint GetTree(int worldX, int worldY);
+        int GetTree(int worldX, int worldY);
     }
 }

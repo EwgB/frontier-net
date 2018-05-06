@@ -6,6 +6,6 @@
         public void Update() { /*Do nothing*/ }
         public void Dispose() { /*Do nothing*/ }
 
-        public uint TextureIdFromName(string name) => 0;
+        public int TextureIdFromName(string name) => 0;
     }
 }

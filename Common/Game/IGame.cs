@@ -9,8 +9,8 @@
         bool IsRunning { get; }
         string GameDirectory { get; }
         
-        void New(uint seedIn);
-        void Load(uint seedIn);
+        void New(int seedIn);
+        void Load(int seedIn);
         void Save();
         void Quit();
 

@@ -14,7 +14,7 @@
         public Vector3 GetPosition(int worldX, int worldY) => Vector3.Zero;
         public SurfaceTypes GetSurface(int worldX, int worldY) => SurfaceTypes.Grass;
         public Color3 GetSurfaceColor(int worldX, int worldY) => Color3.Aquamarine;
-        public uint GetTree(int worldX, int worldY) => 0;
+        public int GetTree(int worldX, int worldY) => 0;
 
         public void Purge() { /* Do nothing */ }
         public void RenderDebug() { /* Do nothing */ }

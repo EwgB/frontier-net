@@ -9,13 +9,13 @@
 
         ParticleSet LoadParticles(string filename);
         void SaveParticles(string filename, ParticleSet particleSet);
-        uint AddParticles (ParticleSet particleSet, Vector3 position);
+        int AddParticles (ParticleSet particleSet, Vector3 position);
     }
 }
 
 /* From Particle.h
 
 bool ParticleCmd (vector<string> *args);
-void ParticleDestroy (UINT id);
-void ParticleRetire (UINT id);
+void ParticleDestroy (int id);
+void ParticleRetire (int id);
 */

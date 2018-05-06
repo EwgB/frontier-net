@@ -80,7 +80,7 @@
         // Logger
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        private uint seed;
+        private int seed;
         private bool loadedPrevious;
 
         #endregion
@@ -134,7 +134,7 @@
             this.Text.Print("Day {0}: {1}:{2}", days + 1, hours, minutes);
         }
 
-        public void New(uint seedIn) {
+        public void New(int seedIn) {
             // TODO: This might take some time, move to worker thread
             if (seedIn == 0) {
                 Quit();
@@ -199,7 +199,7 @@
             Precache();
         }
 
-        public void Load(uint seedIn) {
+        public void Load(int seedIn) {
             if (seedIn == 0) {
                 Log.Error("Load: Can't load a game without a valid seed.");
                 return;
@@ -311,7 +311,7 @@
 /* From Game.cpp
 
 bool GameCmd(vector<string>* args) {
-    uint new_seed;
+    int new_seed;
 
     if (args.empty()) {
         ConsoleLog(CVarUtils::GetHelp("game").data());

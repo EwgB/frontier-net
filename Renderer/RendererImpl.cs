@@ -172,7 +172,7 @@
 
         private int r;
 
-        private void RenderTexture(uint id) {
+        private void RenderTexture(int id) {
             GL.MatrixMode(MatrixMode.Projection);
             GL.PushMatrix();
             GL.LoadIdentity();

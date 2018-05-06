@@ -254,7 +254,7 @@ void SceneTexturePurge() {
 
 CTerrain* SceneTerrainGet(int x, int y) {
 
-    uint i;
+    int i;
     Coord gp;
 
     for (i = 0; i < ilTerrain.size(); i++) {

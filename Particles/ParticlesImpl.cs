@@ -19,7 +19,7 @@
 
         public void Update() {
             // TODO
-            //  uint    i;
+            //  int    i;
 
             //  for (i = 0; i < EmitterList.size (); i++) 
             //    EmitterList[i].Update (SdlElapsedSeconds ());
@@ -44,7 +44,7 @@
             }
         }
 
-        public uint AddParticles(ParticleSet particleSet, Vector3 position) {
+        public int AddParticles(ParticleSet particleSet, Vector3 position) {
             return 0;
             // TODO
             //CEmitter* e;
@@ -152,10 +152,10 @@
 
         //}
 
-        //void ParticleDestroy (UINT id)
+        //void ParticleDestroy (int id)
         //{
 
-        //  uint    i;
+        //  int    i;
 
         //  for (i = 0; i < EmitterList.size (); i++) {
         //    if (EmitterList[i].Id () == id) {
@@ -169,10 +169,10 @@
         //}
 
 
-        //void ParticleRetire (UINT id)
+        //void ParticleRetire (int id)
         //{
 
-        //  uint    i;
+        //  int    i;
 
         //  for (i = 0; i < EmitterList.size (); i++) {
         //    if (EmitterList[i].Id () == id) {

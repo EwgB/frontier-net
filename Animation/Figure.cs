@@ -36,8 +36,8 @@
         public void RenderSkeleton() {
             // TODO
             /*
-            uint i;
-            uint parent;
+            int i;
+            int parent;
 
             glLineWidth(12.0f);
             glPushMatrix();
@@ -69,8 +69,8 @@
 
         public void Update() {
             // TODO
-            //uint i;
-            //uint c;
+            //int i;
+            //int c;
             //GLmatrix m;
             //Bone* b;
             //vector<Bone>::reverse_iterator rit;
@@ -105,7 +105,7 @@
 
 struct BWeight
 {
-  uint          _index;
+  int          _index;
   float             _weight;
 };
 
@@ -124,21 +124,21 @@ struct Bone
   Vector3          _position;
   Vector3          _rotation;
   GLrgba            _color;
-  vector<uint>  _children;
+  vector<int>  _children;
   vector<BWeight>   _vertex_weights;
   GLmatrix          _matrix;
 };
 
 class CFigure
 {
-  void              RotateHierarchy (uint id, Vector3 offset, GLmatrix m);
-  void              RotatePoints (uint id, Vector3 offset, GLmatrix m);
+  void              RotateHierarchy (int id, Vector3 offset, GLmatrix m);
+  void              RotatePoints (int id, Vector3 offset, GLmatrix m);
 public:
   vector<Bone>      _bone;
   Vector3          _position;
   Vector3          _rotation;
-  uint          _bone_index[BONE_COUNT];
-  uint          _unknown_count;
+  int          _bone_index[BONE_COUNT];
+  int          _unknown_count;
   GLmesh            _skin_static;//The original, "read only"
   GLmesh            _skin_deform;//Altered
   GLmesh            _skin_render;//Updated every frame
@@ -151,8 +151,8 @@ public:
   void              PositionSet (Vector3 pos) { _position = pos; };
   void              RotationSet (Vector3 rot);
   void              RotateBone (BoneId id, Vector3 angle);
-  void              PushBone (BoneId id, uint parent, Vector3 pos);
-  void              PushWeight (uint id, uint index, float weight);
+  void              PushBone (BoneId id, int parent, Vector3 pos);
+  void              PushWeight (int id, int index, float weight);
   void              Prepare ();
   void              BoneInflate (BoneId id, float distance, bool do_children);
 
@@ -166,7 +166,7 @@ public:
 
 static void clean_chars(char* target, char* chars) {
 
-    uint i;
+    int i;
     char* c;
 
     for (i = 0; i < strlen(chars); i++) {
@@ -185,7 +185,7 @@ CFigure::CFigure ()
 
 void CFigure::Clear() {
 
-    uint i;
+    int i;
 
     for (i = 0; i < BONE_COUNT; i++)
         _bone_index[i] = BONE_INVALID;
@@ -221,11 +221,11 @@ void CFigure::RotateBone(BoneId id, Vector3 angle) {
 
 }
 
-void CFigure::RotatePoints(uint id, Vector3 offset, GLmatrix m) {
+void CFigure::RotatePoints(int id, Vector3 offset, GLmatrix m) {
 
     Bone* b;
-    uint i;
-    uint index;
+    int i;
+    int index;
 
 
     b = &_bone[_bone_index[id]];
@@ -240,10 +240,10 @@ void CFigure::RotatePoints(uint id, Vector3 offset, GLmatrix m) {
 
 }
 
-void CFigure::RotateHierarchy(uint id, Vector3 offset, GLmatrix m) {
+void CFigure::RotateHierarchy(int id, Vector3 offset, GLmatrix m) {
 
     Bone* b;
-    uint i;
+    int i;
 
     b = &_bone[_bone_index[id]];
     b._position = glMatrixTransformPoint(m, b._position - offset) + offset;
@@ -255,7 +255,7 @@ void CFigure::RotateHierarchy(uint id, Vector3 offset, GLmatrix m) {
 
 }
 
-void CFigure::PushWeight(uint id, uint index, float weight) {
+void CFigure::PushWeight(int id, int index, float weight) {
 
     BWeight bw;
 
@@ -265,7 +265,7 @@ void CFigure::PushWeight(uint id, uint index, float weight) {
 
 }
 
-void CFigure::PushBone(BoneId id, uint parent, Vector3 pos) {
+void CFigure::PushBone(BoneId id, int parent, Vector3 pos) {
 
     Bone b;
 
@@ -285,9 +285,9 @@ void CFigure::PushBone(BoneId id, uint parent, Vector3 pos) {
 void CFigure::BoneInflate(BoneId id, float distance, bool do_children) {
 
     Bone* b;
-    uint i;
-    uint c;
-    uint index;
+    int i;
+    int c;
+    int index;
 
     b = &_bone[_bone_index[id]];
     for (i = 0; i < b._vertex_weights.size(); i++) {

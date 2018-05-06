@@ -135,7 +135,7 @@
             return p?.GetSurface(worldX % CachePage.PAGE_SIZE, worldY % CachePage.PAGE_SIZE) ?? SurfaceTypes.Null;
         }
 
-        public uint GetTree(int worldX, int worldY) {
+        public int GetTree(int worldX, int worldY) {
             var p = LookupPage(worldX, worldY);
             return p?.GetTree(worldX % CachePage.PAGE_SIZE, worldY % CachePage.PAGE_SIZE) ?? 0;
         }

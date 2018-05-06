@@ -30,7 +30,7 @@
         /// in the world is the square of this value, Math.Minus one. ("this.trees zero" is actually
         /// "no this.treess at all".)
         /// </summary>
-        private const uint TREE_TYPES = 6;
+        private const int TREE_TYPES = 6;
 
         //The dither map scatters surface data so that grass colorings end up in adjacent regions.
         private const int DITHER_SIZE = (WorldUtils.REGION_SIZE / 2);
@@ -54,10 +54,10 @@
             get { throw new NotImplementedException(); }
         }
 
-        public uint MapId { get; private set; }
-        public uint Seed { get; private set; }
+        public int MapId { get; private set; }
+        public int Seed { get; private set; }
         public bool WindFromWest { get; private set; }
-        public uint TreeCanopy { get; private set; }
+        public int TreeCanopy { get; private set; }
         public bool NorthernHemisphere { get; private set; }
 
         private readonly float[] noiseF = new float[NOISE_BUFFER];
@@ -216,13 +216,13 @@
             return result;
         }
 
-        public ITree GetTree(uint id) {
+        public ITree GetTree(int id) {
             var m = id % TREE_TYPES;
             var t = (id - m) / TREE_TYPES;
             return this.trees[m, t];
         }
 
-        public void Generate(uint seed) {
+        public void Generate(int seed) {
             this.Random = Randoms.Create((int) seed);
             this.Seed = seed;
 
@@ -252,7 +252,7 @@
             BuildMapTexture();
         }
 
-        public void Load(uint seed) {
+        public void Load(int seed) {
             // TODO: convert
             //FILE* f;
             //char filename[256];
@@ -486,8 +486,8 @@
 
         private void BuildTrees() {
             var rotator = 0;
-            for (uint m = 0; m < TREE_TYPES; m++) {
-                uint t;
+            for (int m = 0; m < TREE_TYPES; m++) {
+                int t;
                 for (t = 0; t < TREE_TYPES; t++) {
                     bool isCanopy;
                     if ((m == TREE_TYPES / 2) && (t == TREE_TYPES / 2)) {
@@ -503,7 +503,7 @@
 
         private void BuildMapTexture() {
             if (this.MapId == 0) {
-                GL.GenTextures(1, out uint mapId);
+                GL.GenTextures(1, out int mapId);
                 this.MapId = mapId;
             }
 
@@ -569,6 +569,16 @@
         }
 
         public float GetWaterLevel(Vector2 coord) => GetWaterLevel((int) coord.X, (int) coord.Y);
+
+        public int GetTreeType(float moisture, float temperature) {
+            var m = (int) (moisture * TREE_TYPES);
+            var t = (int) (temperature * TREE_TYPES);
+            m = MathHelper.Clamp(m, 0, TREE_TYPES - 1);
+            t = MathHelper.Clamp(t, 0, TREE_TYPES - 1);
+            return m + t * TREE_TYPES;
+
+        }
+
     }
 
     #endregion
@@ -581,25 +591,12 @@
 struct WHeader
 {
     int version;
-    uint seed;
+    int seed;
     int WorldUtils.WORLD_GRID;
     int noise_buffer;
     int this.trees_types;
     int map_bytes;
 };
-
-uint WorldTreeType(float moisture, float temperature)
-{
-
-    int m, t;
-
-    m = (int)(moisture * TREE_TYPES);
-    t = (int)(temperature * TREE_TYPES);
-    m = MathHelper.Clamp(m, 0, TREE_TYPES - 1);
-    t = MathHelper.Clamp(t, 0, TREE_TYPES - 1);
-    return m + t * TREE_TYPES;
-
-}
 
 string WorldLocationName(int worldX, int worldY)
 {

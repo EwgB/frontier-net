@@ -5,7 +5,7 @@
 
     public struct Flower {
         public Color3 Color { get; set; }
-        public uint Shape { get; set; }
+        public int Shape { get; set; }
     }
 
     /// <summary>
@@ -18,7 +18,7 @@
     /// </summary>
     public interface IRegion {
         string Title { get; set; }
-        ushort TreeType { get; }
+        int TreeType { get; set; }
         RegionFlags ShapeFlags { get; set; }
         ClimateType Climate { get; set; }
         Vector2 GridPosition { get; }

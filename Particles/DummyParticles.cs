@@ -12,7 +12,7 @@
         public void Update() { /* Do nothing */ }
         public void Render() { /* Do nothing */ }
 
-        public uint AddParticles(ParticleSet particleSet, Vector3 position) => 0;
+        public int AddParticles(ParticleSet particleSet, Vector3 position) => 0;
 
         public ParticleSet LoadParticles(string filename) => new ParticleSet();
 

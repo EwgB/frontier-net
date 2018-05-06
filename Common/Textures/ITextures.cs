@@ -3,6 +3,6 @@
 
     /// <summary>Loads in textures.</summary>
     public interface ITextures : IModule, IDisposable {
-        uint TextureIdFromName(string name);
+        int TextureIdFromName(string name);
     }
 }

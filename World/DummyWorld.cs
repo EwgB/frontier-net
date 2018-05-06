@@ -12,12 +12,12 @@
     internal class DummyWorld : IWorld {
         public IProperties Properties { get; }
 
-        public uint Seed { get; }
+        public int Seed { get; }
         public bool WindFromWest { get; set; }
-        public uint TreeCanopy { get; }
+        public int TreeCanopy { get; }
         public bool NorthernHemisphere { get; }
 
-        public uint MapId => 0;
+        public int MapId => 0;
 
         public float GetNoiseF(int index) => 0;
         public int GetNoiseI(int index) => 0;
@@ -28,16 +28,17 @@
 
         public void Init() { /* Do nothing */ }
         public void Update() { /* Do nothing */ }
-        public void Generate(uint seed) { /* Do nothing */ }
+
+        public void Generate(int seed) { /* Do nothing */ }
         public void Save() { /* Do nothing */ }
-        public void Load(uint seed) { /* Do nothing */ }
+        public void Load(int seed) { /* Do nothing */ }
 
         public float GetWaterLevel(Vector2 coord) => 0;
         public float GetWaterLevel(int x, int y) => 0;
 
         private readonly ITree tree;
-        public ITree GetTree(uint id) => this.tree;
-
+        public ITree GetTree(int id) => this.tree;
+        public int GetTreeType(float moisture, float temperature) => 1;
 
         private readonly IRegion dummyRegion;
         public IRegion GetRegion(int x, int y) => this.dummyRegion;

@@ -180,7 +180,7 @@
         }
 
         public void Coast() {
-            const uint cliffGrid = WorldUtils.WORLD_GRID / 8;
+            const int cliffGrid = WorldUtils.WORLD_GRID / 8;
 
             var queue = new List<Coord>();
             //now define the coast 
@@ -301,7 +301,7 @@
                     if (region.GeoScale >= 0)
                         region.ColorMap *= (region.GeoScale * 0.5f + 0.5f);
                     //if (r.GeoScale >= 0)
-                    //r.ColorMap = glRgbaUnique (r.tree_type);
+                    //r.ColorMap = glRgbaUnique (r.TreeType);
                     //r.ColorMap = r.ColorAtmosphere;
                     this.World.SetRegion(x, y, region);
                 }
@@ -324,13 +324,13 @@
                     var rand = this.Random.Next() % 8;
                     if (region.Moisture > 0.3f && region.Temperature > 0.5f) {
                         region.HasFlowers = this.Random.Next() % 4 == 0;
-                        var shape = (uint) this.Random.Next();
+                        var shape = (int) this.Random.Next();
                         var color = FlowerPalette[this.Random.Next() % FlowerPalette.Length];
                         for (var i = 0; i < region.Flowers.Length; i++) {
                             region.Flowers[i].Color = color;
                             region.Flowers[i].Shape = shape;
                             if ((this.Random.Next() % 15) == 0) {
-                                shape = (uint) this.Random.Next();
+                                shape = (int) this.Random.Next();
                                 color = FlowerPalette[this.Random.Next() % FlowerPalette.Length];
                             }
                         }
@@ -375,21 +375,16 @@
         }
 
         public void Flora() {
-            // TODO: convert
-            /*
-            IRegion r;
-            Coord walk;
-
-            walk.Clear();
-            do
-            {
-                r = World.GetRegion(walk.X, walk.Y);
-                r.tree_type = WorldTreeType(r.Moisture, r.Temperature);
-                if (r.Climate == ClimateType.Forest)
-                    r.tree_type = this.IWorld.TreeCanopy;
-                this.World.SetRegion(walk.X, walk.Y, r);
-            } while (!walk.Walk(WorldUtils.WORLD_GRID));
-            */
+            var walk = new Coord();
+            bool rolledOver;
+            do {
+                var region = this.World.GetRegion(walk.X, walk.Y);
+                region.TreeType = this.World.GetTreeType(region.Moisture, region.Temperature);
+                if (region.Climate == ClimateType.Forest)
+                    region.TreeType = this.World.TreeCanopy;
+                this.World.SetRegion(walk.X, walk.Y, region);
+                walk = walk.Walk(WorldUtils.WORLD_GRID, out rolledOver);
+            } while (!rolledOver);
         }
 
         public void Lakes(int count) {
@@ -533,7 +528,7 @@
             int radius;
             Climate c;
             Coord walk;
-            UINT spinner;
+            int spinner;
 
             walk.Clear();
             spinner = 0;
@@ -809,7 +804,7 @@ static bool find_plot(int radius, Coord* result)
 }
 
 //Gives a 1 in 'odds' chance of adding flowers to the given region
-void add_flowers(IRegion* r, uint odds)
+void add_flowers(IRegion* r, int odds)
 {
 
     Color3 c;
@@ -1111,7 +1106,7 @@ static bool try_river(int start_x, int start_y, int id)
     Coord to_coast;
     int x, y;
     int xx, yy;
-    uint d;
+    int d;
     float lowest;
     float water_level;
     float water_strength;

@@ -15,19 +15,19 @@
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         public TimeSpan GameTime {
-            get { return GetProperty<TimeSpan>(GAME_TIME).Value; }
-            set { GetProperty<TimeSpan>(GAME_TIME).Value = value; }
+            get => GetProperty<TimeSpan>(GAME_TIME).Value;
+            set => GetProperty<TimeSpan>(GAME_TIME).Value = value;
         }
 
-        public uint LastPlayed {
-            get { return GetProperty<uint>(LAST_PLAYED).Value; }
-            set { GetProperty<uint>(LAST_PLAYED).Value = value; }
+        public int LastPlayed {
+            get => GetProperty<int>(LAST_PLAYED).Value;
+            set => GetProperty<int>(LAST_PLAYED).Value = value;
         }
 
         public GameProperties() {
             try {
                 AddProperty(new Property<TimeSpan>(GAME_TIME, TimeSpan.Zero, "The in-game time of day."));
-                AddProperty(new Property<uint>(LAST_PLAYED, 0));
+                AddProperty(new Property<int>(LAST_PLAYED, 0));
             } catch (PropertyException e) {
                 Log.Error(e.Message);
             }

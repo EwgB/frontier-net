@@ -23,10 +23,10 @@
     /// </summary>
     public interface IWorld : IHasProperties, IModule {
 
-        uint MapId { get; }
-        uint Seed { get; }
+        int MapId { get; }
+        int Seed { get; }
         bool WindFromWest { get; }
-        uint TreeCanopy { get; }
+        int TreeCanopy { get; }
         bool NorthernHemisphere { get; }
 
         float GetNoiseF(int index);
@@ -43,10 +43,11 @@
 
         Cell GetCell(int worldX, int worldY);
         Color3 GetColor(int worldX, int worldY, SurfaceColor c);
-        ITree GetTree(uint id);
+        ITree GetTree(int id);
+        int GetTreeType(float moisture, float temperature);
 
-        void Generate(uint seed);
-        void Load(uint seed);
+        void Generate(int seed);
+        void Load(int seed);
         void Save();
     }
 }
@@ -58,6 +59,5 @@ float WorldWaterLevel(int world_x, int world_y);
 char* WorldDirectionFromAngle(float angle);
 //char*         WorldDirectory ();
 World* WorldPtr();
-uint WorldTreeType(float moisture, float temperature);
 void WorldTexturePurge();
 */
