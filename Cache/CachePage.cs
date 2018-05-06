@@ -42,7 +42,7 @@
             public float Detail;
             public Color3 Color;
             public Vector3 Normal;
-            public ushort TreeId;
+            public int TreeId;
         }
 
         [Serializable]
@@ -110,7 +110,7 @@
             return GetPageCell(x, y).Detail;
         }
 
-        public ushort GetTree(int x, int y) {
+        public int GetTree(int x, int y) {
             this.lastTouched = this.Game.GameProperties.GameTime;
             return GetPageCell(x, y).TreeId;
         }

@@ -9,10 +9,10 @@
         public string Title { get => "DUMMY_REGION"; set { } }
         public float GeoBias { get; set; }
         public float GeoDetail { get; set; }
-        public int MountainHeight => 0;
-        public Vector2 GridPosition => Vector2.Zero;
-        public float TreeThreshold => 0.15f;
-        public float GeoScale => 0;
+        public int MountainHeight { get => 0; set { } }
+        public Vector2 GridPosition { get => Vector2.Zero; set { } }
+        public float TreeThreshold { get => 0.15f; set { } }
+        public float GeoScale { get => 0; set { } }
         public float GeoWater { get => 0; set { } }
         public Color3 ColorAtmosphere { get => Color3.Blue; set { } }
         public Color3 ColorMap { get => Color3.Black; set { } }
@@ -31,7 +31,7 @@
             get => (this.GridPosition.Y - WorldUtils.WORLD_GRID / 4f) / WorldUtils.WORLD_GRID_CENTER;
             set { }
         }
-        public ushort TreeType => 3;
+        public int TreeType { get => 3; set { } }
         public Flower[] Flowers => new[] {
             new Flower{ Color = Color3.Red, Shape = 1},
             new Flower{ Color = Color3.Green, Shape = 1},

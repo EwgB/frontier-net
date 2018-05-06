@@ -6,16 +6,16 @@
 
     internal class RegionImpl : IRegion {
         public string Title { get; set; }
-        public ushort TreeType { get; }
+        public int TreeType { get; set; }
         public RegionFlags ShapeFlags { get; set; }
         public ClimateType Climate { get; set; }
-        public Vector2 GridPosition { get; }
-        public int MountainHeight { get; }
+        public Vector2 GridPosition { get; set; }
+        public int MountainHeight { get; set; }
         public int RiverId { get; }
         public int RiverSegment { get; }
-        public float TreeThreshold { get; }
+        public float TreeThreshold { get; set; }
         public float RiverWidth { get; }
-        public float GeoScale { get; }
+        public float GeoScale { get; set; }
         public float GeoWater { get; set; }
         public float GeoDetail { get; set; }
         public float GeoBias { get; set; }

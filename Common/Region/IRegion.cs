@@ -21,14 +21,14 @@
         int TreeType { get; set; }
         RegionFlags ShapeFlags { get; set; }
         ClimateType Climate { get; set; }
-        Vector2 GridPosition { get; }
-        int MountainHeight { get; }
+        Vector2 GridPosition { get; set; }
+        int MountainHeight { get; set; }
         int RiverId { get; }
         int RiverSegment { get; }
-        float TreeThreshold { get; }
+        float TreeThreshold { get; set; }
         float RiverWidth { get; }
         /// <summary>Number from -1 to 1, lowest to highest elevation. 0 is sea level.</summary>
-        float GeoScale { get; }
+        float GeoScale { get; set; }
         float GeoWater { get; set; }
         float GeoDetail { get; set; }
         float GeoBias { get; set; }
