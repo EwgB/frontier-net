@@ -1,20 +1,18 @@
 ﻿namespace FrontierSharp.World {
     using System;
 
-    using Common.Grid;
+    using MersenneTwister;
 
     using OpenTK;
+    using OpenTK.Graphics.OpenGL;
 
+    using Common.Grid;
     using Common.Property;
     using Common.Region;
     using Common.Terraform;
     using Common.Tree;
     using Common.Util;
     using Common.World;
-
-    using MersenneTwister;
-
-    using OpenTK.Graphics.OpenGL;
 
     internal class WorldImpl : IWorld {
 
@@ -519,11 +517,11 @@
                 for (var y = 0; y < WorldUtils.WORLD_GRID; y++) {
                     //Flip it vertically, because the OpenGL texture coord system is retarded.
                     var yy = (WorldUtils.WORLD_GRID - 1) - y;
-                    var r = this.regions[x, yy];
+                    var region = this.regions[x, yy];
                     var bufferIndex = (x + y * WorldUtils.WORLD_GRID) * 3;
-                    buffer[bufferIndex] = (byte) (r.ColorMap.R * 255);
-                    buffer[bufferIndex + 1] = (byte) (r.ColorMap.G * 255);
-                    buffer[bufferIndex + 2] = (byte) (r.ColorMap.B * 255);
+                    buffer[bufferIndex] = (byte) (region.ColorMap.R * 255);
+                    buffer[bufferIndex + 1] = (byte) (region.ColorMap.G * 255);
+                    buffer[bufferIndex + 2] = (byte) (region.ColorMap.B * 255);
                 }
             }
 
