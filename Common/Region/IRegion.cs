@@ -23,10 +23,10 @@
         ClimateType Climate { get; set; }
         Vector2 GridPosition { get; set; }
         int MountainHeight { get; set; }
-        int RiverId { get; }
-        int RiverSegment { get; }
+        int RiverId { get; set; }
+        int RiverSegment { get; set; }
         float TreeThreshold { get; set; }
-        float RiverWidth { get; }
+        float RiverWidth { get; set; }
         /// <summary>Number from -1 to 1, lowest to highest elevation. 0 is sea level.</summary>
         float GeoScale { get; set; }
         float GeoWater { get; set; }

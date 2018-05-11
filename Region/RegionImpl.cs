@@ -11,10 +11,10 @@
         public ClimateType Climate { get; set; }
         public Vector2 GridPosition { get; set; }
         public int MountainHeight { get; set; }
-        public int RiverId { get; }
-        public int RiverSegment { get; }
+        public int RiverId { get; set; }
+        public int RiverSegment { get; set; }
         public float TreeThreshold { get; set; }
-        public float RiverWidth { get; }
+        public float RiverWidth { get; set; }
         public float GeoScale { get; set; }
         public float GeoWater { get; set; }
         public float GeoDetail { get; set; }

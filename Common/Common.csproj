@@ -79,6 +79,7 @@
     <Compile Include="Region\IRegion.cs" />
     <Compile Include="ISky.cs" />
     <Compile Include="IText.cs" />
+    <Compile Include="Region\IRegionFactory.cs" />
     <Compile Include="Shaders\ShaderTypes.cs" />
     <Compile Include="Terraform\ITerraform.cs" />
     <Compile Include="Textures\ITextures.cs" />

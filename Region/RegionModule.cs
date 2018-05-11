@@ -1,5 +1,6 @@
 ﻿namespace FrontierSharp.Region {
     using Ninject.Modules;
+    using Ninject.Extensions.Factory;
 
     using Common.Region;
 
@@ -16,6 +17,8 @@
             } else {
                 Bind<IRegion>().To<RegionImpl>().InSingletonScope();
             }
+
+            Bind<IRegionFactory>().ToFactory();
         }
     }
 }
