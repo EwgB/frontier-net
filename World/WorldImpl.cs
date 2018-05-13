@@ -1,6 +1,8 @@
 ﻿namespace FrontierSharp.World {
     using System;
 
+    using Common;
+
     using MersenneTwister;
 
     using OpenTK;
@@ -41,6 +43,7 @@
 
         #region Modules
 
+        private IEntropy Entropy { get; }
         private ITerraform Terraform { get; }
 
         #endregion
@@ -99,7 +102,8 @@
         #endregion
 
 
-        public WorldImpl(ITerraform terraform) {
+        public WorldImpl(IEntropy entropy, ITerraform terraform) {
+            this.Entropy = entropy;
             this.Terraform = terraform;
         }
 
@@ -116,7 +120,7 @@
 
 
         public Cell GetCell(int worldX, int worldY) {
-            float detail = Entropy(worldX, worldY);
+            var detail = this.Entropy.GetEntropy(worldX, worldY);
             var bias = GetBiasLevel(worldX, worldY);
             var waterLevel = GetWaterLevel(worldX, worldY);
             var origin = new Coord(
@@ -484,7 +488,7 @@
 
         private void BuildTrees() {
             var rotator = 0;
-            for (int m = 0; m < TREE_TYPES; m++) {
+            for (var m = 0; m < TREE_TYPES; m++) {
                 int t;
                 for (t = 0; t < TREE_TYPES; t++) {
                     bool isCanopy;

@@ -2,6 +2,8 @@
     using System;
     using System.Collections.Generic;
 
+    using Common;
+
     using MersenneTwister;
 
     using OpenTK;
@@ -25,11 +27,11 @@
         /// <summary> The number of regions around the edge which should be ocean. </summary>
         private const float OCEAN_BUFFER = WorldUtils.WORLD_GRID / 10f;
 
-        private static readonly Coord NORTH = new Coord(0, -1);
-        private static readonly Coord SOUTH = new Coord(0, 1);
-        private static readonly Coord EAST = new Coord(1, 0);
-        private static readonly Coord WEST = new Coord(-1, 0);
-        private static readonly Coord[] DIRECTIONS = {NORTH, SOUTH, EAST, WEST};
+        private static readonly Coord North = new Coord(0, -1);
+        private static readonly Coord South = new Coord(0, 1);
+        private static readonly Coord East = new Coord(1, 0);
+        private static readonly Coord West = new Coord(-1, 0);
+        private static readonly Coord[] Directions = {North, South, East, West};
 
         private const string DIR_NAME_NORTH = "Northern";
         private const string DIR_NAME_SOUTH = "Southern";
@@ -55,6 +57,7 @@
 
         #region Modules
 
+        private IEntropy Entropy { get; }
         private Random Random { get; }
         private IRegionFactory RegionFactory { get; }
         private IWorld World { get; }
@@ -62,7 +65,8 @@
         #endregion
 
 
-        public TerraformImpl(IRegionFactory regionFactory, IWorld world) {
+        public TerraformImpl(IEntropy entropy, IRegionFactory regionFactory, IWorld world) {
+            this.Entropy = entropy;
             this.Random = Randoms.Create();
             this.RegionFactory = regionFactory;
             this.World = world;
@@ -226,7 +230,7 @@
                     region.Title = GetDirectionName(current.X, current.Y) + ((pass == 0) ? " beach" : "coast");
 
                     //beaches are low and partially submerged
-                    region.GeoDetail = 5 + Entropy(current.X, current.Y) * 10;
+                    region.GeoDetail = 5 + this.Entropy.GetEntropy(current.X, current.Y) * 10;
                     if (pass == 0) {
                         region.GeoBias = -region.GeoDetail * 0.5f;
                         if (isCliff)
@@ -341,13 +345,13 @@
                     var rand = this.Random.Next() % 8;
                     if (region.Moisture > 0.3f && region.Temperature > 0.5f) {
                         region.HasFlowers = this.Random.Next() % 4 == 0;
-                        var shape = (int) this.Random.Next();
+                        var shape = this.Random.Next();
                         var color = FlowerPalette[this.Random.Next() % FlowerPalette.Length];
                         for (var i = 0; i < region.Flowers.Length; i++) {
                             region.Flowers[i].Color = color;
                             region.Flowers[i].Shape = shape;
                             if ((this.Random.Next() % 15) == 0) {
-                                shape = (int) this.Random.Next();
+                                shape = this.Random.Next();
                                 color = FlowerPalette[this.Random.Next() % FlowerPalette.Length];
                             }
                         }
@@ -466,8 +470,8 @@
                     if (region.GeoScale > 1)
                         region.GeoScale = 1 + (region.GeoScale - 1) * 4;
                     region.GeoScale = 1 - region.GeoScale;
-                    region.GeoScale += (Entropy((x + offset.X), (y + offset.Y)) - 0.5f);
-                    region.GeoScale += (Entropy((x + offset.X) * FREQUENCY, (y + offset.Y) * FREQUENCY) - 0.2f);
+                    region.GeoScale += (this.Entropy.GetEntropy((x + offset.X), (y + offset.Y)) - 0.5f);
+                    region.GeoScale += (this.Entropy.GetEntropy((x + offset.X) * FREQUENCY, (y + offset.Y) * FREQUENCY) - 0.2f);
                     region.GeoScale = MathHelper.Clamp(region.GeoScale, -1, 1);
                     if (region.GeoScale > 0)
                         region.GeoWater = 1 + region.GeoScale * 16;
@@ -499,7 +503,7 @@
             var walk = new Coord();
             var spinner = 0;
 
-            var rolledOver = false;
+            bool rolledOver;
             do {
                 var x = walk.X;
                 var y = walk.Y;
@@ -658,7 +662,7 @@
         private void DoCanyon(int x, int y, int radius) {
             for (var yy = -radius; yy <= radius; yy++) {
                 var region = this.World.GetRegion(x, yy + y);
-                var step = (float) Math.Abs(yy) / (float) radius;
+                var step = Math.Abs(yy) / (float) radius;
                 step = 1 - step;
                 region.Title = "Canyon";
                 region.Climate = ClimateType.Canyon;
@@ -733,7 +737,7 @@
 
                     region.MountainHeight = 1 + (size - step);
                     region.GeoDetail = 13 + region.MountainHeight * 7;
-                    region.GeoBias = (this.World.GetNoiseF(xx + yy) * 0.5f + (float) region.MountainHeight) * WorldUtils.REGION_SIZE / 2;
+                    region.GeoBias = (this.World.GetNoiseF(xx + yy) * 0.5f + region.MountainHeight) * WorldUtils.REGION_SIZE / 2;
                     region.ShapeFlags = RegionFlags.NoBlend;
                     region.Climate = ClimateType.Mountain;
                     this.World.SetRegion(xx + x, yy + y, region);
@@ -822,9 +826,9 @@
                 for (var yy = -size; yy <= size; yy++) {
                     var toCenter = new Vector2(xx, yy);
                     var depth = toCenter.Length;
-                    if (depth >= (float) size)
+                    if (depth >= size)
                         continue;
-                    depth = (float) size - depth;
+                    depth = size - depth;
                     var region = this.World.GetRegion(xx + tryX, yy + tryY);
                     region.Title = $"Lake{id}";
                     region.GeoWater = waterLevel;
@@ -865,7 +869,7 @@
                 var toCoast = GetMapSide(x, y);
                 //lowest = 999.9f;
                 var selected = new Coord();
-                foreach (var direction in DIRECTIONS) {
+                foreach (var direction in Directions) {
                     var neighbor = this.World.GetRegion(x + direction.X, y + direction.Y);
                     //Don't reverse course into ourselves
                     if (lastMove == (direction * -1))
@@ -1014,8 +1018,8 @@
                 Math.Abs(x - WorldUtils.WORLD_GRID_CENTER),
                 Math.Abs(y - WorldUtils.WORLD_GRID_CENTER));
             return fromCenter.X < fromCenter.Y
-                ? (y < WorldUtils.WORLD_GRID_CENTER ? NORTH : SOUTH)
-                : (x < WorldUtils.WORLD_GRID_CENTER ? WEST : EAST);
+                ? (y < WorldUtils.WORLD_GRID_CENTER ? North : South)
+                : (x < WorldUtils.WORLD_GRID_CENTER ? West : East);
         }
 
         ///<summary> Check the regions around the given one, see if they are unused. </summary>

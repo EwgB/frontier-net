@@ -51,6 +51,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Water", "Water\Water.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Terraform", "Terraform\Terraform.csproj", "{CBF2E277-3264-4B0A-964A-03930767AA3D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entropy", "Entropy\Entropy.csproj", "{AC88CB91-B6B1-436C-9E87-7DC482C09633}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -147,6 +149,10 @@ Global
 		{CBF2E277-3264-4B0A-964A-03930767AA3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CBF2E277-3264-4B0A-964A-03930767AA3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CBF2E277-3264-4B0A-964A-03930767AA3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC88CB91-B6B1-436C-9E87-7DC482C09633}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC88CB91-B6B1-436C-9E87-7DC482C09633}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC88CB91-B6B1-436C-9E87-7DC482C09633}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC88CB91-B6B1-436C-9E87-7DC482C09633}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -174,6 +180,7 @@ Global
 		{BCE07ACC-EBD2-4F04-A0AC-8D0E29338F82} = {54C77D01-626C-4E5D-ABDE-D5C235E8C051}
 		{D1F12656-4A28-4126-B389-A9F7007B9A13} = {54C77D01-626C-4E5D-ABDE-D5C235E8C051}
 		{CBF2E277-3264-4B0A-964A-03930767AA3D} = {54C77D01-626C-4E5D-ABDE-D5C235E8C051}
+		{AC88CB91-B6B1-436C-9E87-7DC482C09633} = {54C77D01-626C-4E5D-ABDE-D5C235E8C051}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {08808509-49B1-43FB-BA2C-A64408BB2996}

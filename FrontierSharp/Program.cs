@@ -6,6 +6,7 @@
     using Avatar;
     using Cache;
     using Console;
+    using Entropy;
     using Environment;
     using Game;
     using Input;
@@ -27,6 +28,7 @@
                 new AvatarModule(false),
                 new CacheModule(false),
                 new ConsoleModule(),
+                new EntropyModule(),
                 new EnvironmentModule(false), 
                 new GameModule(false),
                 new InputModule(),
