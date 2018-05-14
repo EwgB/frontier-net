@@ -2,12 +2,10 @@
     using System;
     using System.Collections.Generic;
 
-    using Common;
-
     using MersenneTwister;
-
     using OpenTK;
 
+    using Common;
     using Common.Grid;
     using Common.Region;
     using Common.Terraform;

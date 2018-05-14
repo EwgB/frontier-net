@@ -1,13 +1,14 @@
 ﻿namespace FrontierSharp.World {
     using System;
-
-    using Common;
+    using System.IO;
 
     using MersenneTwister;
-
+    using NLog;
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
 
+    using Common;
+    using Common.Game;
     using Common.Grid;
     using Common.Property;
     using Common.Region;
@@ -17,6 +18,15 @@
     using Common.World;
 
     internal class WorldImpl : IWorld {
+
+        private struct WorldHeader {
+            public int Version;
+            public int Seed;
+            public int WorldGrid;
+            public int NoiseBuffer;
+            public int TreesTypes;
+            public int MapBytes;
+        }
 
         #region Constants
 
@@ -40,10 +50,12 @@
 
         #endregion
 
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         #region Modules
 
         private IEntropy Entropy { get; }
+        private IGame Game { get; }
         private ITerraform Terraform { get; }
 
         #endregion
@@ -61,10 +73,10 @@
         public int TreeCanopy { get; private set; }
         public bool NorthernHemisphere { get; private set; }
 
-        private readonly float[] noiseF = new float[NOISE_BUFFER];
+        private float[] noiseF = new float[NOISE_BUFFER];
         public float GetNoiseF(int index) => this.noiseF[Math.Abs(index % NOISE_BUFFER)];
 
-        private readonly int[] noiseI = new int[NOISE_BUFFER];
+        private int[] noiseI = new int[NOISE_BUFFER];
         public int GetNoiseI(int index) => this.noiseI[Math.Abs(index % NOISE_BUFFER)];
 
 
@@ -92,8 +104,8 @@
 
         private Random Random { get; set; }
 
-        private int riverCount;
-        private int lakeCount;
+        private int RiverCount { get; set; }
+        private int LakeCount { get; set; }
 
         private readonly ITree[,] trees = new ITree[TREE_TYPES, TREE_TYPES];
 
@@ -102,7 +114,8 @@
         #endregion
 
 
-        public WorldImpl(IEntropy entropy, ITerraform terraform) {
+        public WorldImpl(IGame game, IEntropy entropy, ITerraform terraform) {
+            this.Game = game;
             this.Entropy = entropy;
             this.Terraform = terraform;
         }
@@ -225,7 +238,7 @@
         }
 
         public void Generate(int seed) {
-            this.Random = Randoms.Create((int) seed);
+            this.Random = Randoms.Create(seed);
             this.Seed = seed;
 
             for (var x = 0; x < NOISE_BUFFER; x++) {
@@ -236,14 +249,14 @@
             BuildTrees();
             this.WindFromWest = (this.Random.Next() % 2 == 0);
             this.NorthernHemisphere = (this.Random.Next() % 2 == 0);
-            this.riverCount = 4 + this.Random.Next() % 4;
-            this.lakeCount = 1 + this.Random.Next() % 4;
+            this.RiverCount = 4 + this.Random.Next() % 4;
+            this.LakeCount = 1 + this.Random.Next() % 4;
             this.Terraform.Prepare();
             this.Terraform.Oceans();
             this.Terraform.Coast();
             this.Terraform.Climate();
-            this.Terraform.Rivers(this.riverCount);
-            this.Terraform.Lakes(this.lakeCount);
+            this.Terraform.Rivers(this.RiverCount);
+            this.Terraform.Lakes(this.LakeCount);
             this.Terraform.Climate(); //Do climate a second time now that rivers are in
             this.Terraform.Zones();
             this.Terraform.Climate(); //Now again, since we have added climate-modifying features (Mountains, etc.)
@@ -255,32 +268,68 @@
         }
 
         public void Load(int seed) {
-            // TODO: convert
-            //FILE* f;
-            //char filename[256];
-            //WHeader header;
+            var filename = Path.Combine(this.Game.GameDirectory, "world.sav");
+
+            try {
+                using (var reader = new BinaryReader(File.OpenRead(filename))) {
+                    // Skip the header
+                    var _ = ReadWorldHeader(reader);
+
+                    ReadWorldData(reader);
+                }
+            } catch(FileNotFoundException) {
+                Log.Debug("[Load]: Could not open file {0}", filename);
+                Generate(seed);
+                return;
+            }
 
 
-            //sprintf(filename, "%sworld.sav", GameDirectory());
-            //if (!(f = fopen(filename, "rb")))
-            //{
-            //    ConsoleLog("WorldLoad: Could not open file %s", filename);
-            //    WorldGenerate(seed_in);
-            //    return;
-            //}
-            //fread(&header, sizeof(header), 1, f);
-            //fread(&planet, sizeof(planet), 1, f);
-            //fclose(f);
-            //ConsoleLog("WorldLoad: '%s' loaded.", filename);
-            //BuildTrees();
-            //BuildMapTexture();
+            Log.Debug("[World]: File '{0}' loaded.", filename);
+
+            BuildTrees();
+            BuildMapTexture();
+        }
+
+        private static WorldHeader ReadWorldHeader(BinaryReader reader) {
+            WorldHeader header;
+            header.Version = reader.ReadInt32();
+            header.Seed = reader.ReadInt32();
+            header.WorldGrid = reader.ReadInt32();
+            header.NoiseBuffer = reader.ReadInt32();
+            header.TreesTypes = reader.ReadInt32();
+            header.MapBytes = reader.ReadInt32();
+            return header;
+        }
+
+        private void ReadWorldData(BinaryReader reader) {
+            this.Seed = reader.ReadInt32();
+            this.WindFromWest = reader.ReadBoolean();
+            this.NorthernHemisphere = reader.ReadBoolean();
+            this.RiverCount = reader.ReadInt32();
+            this.LakeCount = reader.ReadInt32();
+
+            // Convert to float array
+            var bytes = reader.ReadBytes(NOISE_BUFFER * sizeof(float));
+            this.noiseF = new float[bytes.Length / sizeof(float)];
+            Buffer.BlockCopy(this.noiseF, 0, bytes, 0, bytes.Length);
+
+            // Convert to int array
+            bytes = reader.ReadBytes(NOISE_BUFFER * sizeof(int));
+            this.noiseI = new int[bytes.Length / sizeof(int)];
+            Buffer.BlockCopy(this.noiseI, 0, bytes, 0, bytes.Length);
+
+            for (var i = 0; i < WorldUtils.WORLD_GRID * WorldUtils.WORLD_GRID; i++) {
+                // TODO: Read regions
+                //IRegion map[WORLD_GRID][WORLD_GRID];
+                //fread(&planet, sizeof(planet), 1, f);
+            }
         }
 
         public void Save() {
             // TODO: convert
             //FILE* f;
             //char filename[256];
-            //WHeader header;
+            //WorldHeader header;
 
             //return;
             //sprintf(filename, "%sworld.sav", GameDirectory());
@@ -590,15 +639,6 @@
 
 #define FILE_VERSION      1
 
-struct WHeader
-{
-    int version;
-    int seed;
-    int WorldUtils.WORLD_GRID;
-    int noise_buffer;
-    int this.trees_types;
-    int map_bytes;
-};
 
 string WorldLocationName(int worldX, int worldY)
 {

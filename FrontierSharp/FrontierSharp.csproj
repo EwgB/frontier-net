@@ -127,6 +127,10 @@
       <Project>{6bac02d6-267c-454f-9486-9ff79d302f48}</Project>
       <Name>Console</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Entropy\Entropy.csproj">
+      <Project>{ac88cb91-b6b1-436c-9e87-7dc482c09633}</Project>
+      <Name>Entropy</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Environment\Environment.csproj">
       <Project>{e7e8aca7-7647-4cdb-8167-7f88951e0d1f}</Project>
       <Name>Environment</Name>

@@ -64,8 +64,7 @@
 
                     // Convert to float array
                     var bytes = reader.ReadBytes(sizeX * sizeY * sizeof(float));
-
-                    this.emap = new float[this.emap.Length / sizeof(float)];
+                    this.emap = new float[bytes.Length / sizeof(float)];
                     Buffer.BlockCopy(this.emap, 0, bytes, 0, bytes.Length);
 
                     this.loaded = true;
@@ -83,7 +82,7 @@
             try {
                 bitmap = FileUtils.FileImageLoad(filename, out this.size);
             } catch (FileNotFoundException) {
-                Log.Debug($"[CreateEntropy] file {filename} not found. This is not an error.");
+                Log.Debug("[CreateEntropy] file {0} not found. This is not an error.", filename);
             }
             
             BitmapData bitmapData = null;
@@ -130,7 +129,7 @@
                     writer.Write(bytes);
                 }
             } catch (Exception e) {
-                Log.Debug($"[CreateEntropy] Error creating file {ENTROPY_FILE}: {e.Message}");
+                Log.Debug("[CreateEntropy] Error creating file {0}: {1}", ENTROPY_FILE, e.Message);
             }
 
             this.loaded = true;
