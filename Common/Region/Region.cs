@@ -1,6 +1,4 @@
 ﻿namespace FrontierSharp.Common.Region {
-    using OpenTK;
-
     using Util;
 
     public struct Flower {
@@ -17,11 +15,13 @@
     /// This output data is stored and managed elsewhere. (See IPage.cs) TODO
     /// </summary>
     public struct Region {
+        public const int FLOWERS = 3;
+
         public string Title { get; set; }
         public int TreeType { get; set; }
         public RegionFlags ShapeFlags { get; set; }
         public ClimateType Climate { get; set; }
-        public Vector2 GridPosition { get; set; }
+        public Coord GridPosition { get; set; }
         public int MountainHeight { get; set; }
         public int RiverId { get; set; }
         public int RiverSegment { get; set; }

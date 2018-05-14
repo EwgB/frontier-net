@@ -308,21 +308,61 @@
             this.RiverCount = reader.ReadInt32();
             this.LakeCount = reader.ReadInt32();
 
-            // Convert to float array
+            // Read float noise. Convert bytes to float array.
             var bytes = reader.ReadBytes(NOISE_BUFFER * sizeof(float));
             this.noiseF = new float[bytes.Length / sizeof(float)];
             Buffer.BlockCopy(this.noiseF, 0, bytes, 0, bytes.Length);
 
-            // Convert to int array
+            // Read int noise. Convert bytes to int array.
             bytes = reader.ReadBytes(NOISE_BUFFER * sizeof(int));
             this.noiseI = new int[bytes.Length / sizeof(int)];
             Buffer.BlockCopy(this.noiseI, 0, bytes, 0, bytes.Length);
 
-            for (var i = 0; i < WorldUtils.WORLD_GRID * WorldUtils.WORLD_GRID; i++) {
-                // TODO: Read regions
-                //IRegion map[WORLD_GRID][WORLD_GRID];
-                //fread(&planet, sizeof(planet), 1, f);
+            // Read region data.
+            for (var x = 0; x < WorldUtils.WORLD_GRID ; x++) {
+                for (var y = 0; y < WorldUtils.WORLD_GRID ; y++) {
+                    var region = ReadRegion(reader);
+                    this.regions[x, y] = region;
+                }
             }
+        }
+
+        private static Region ReadRegion(BinaryReader reader) {
+            var region = new Region {
+                Title = reader.ReadString(),
+                TreeType = reader.ReadInt32(),
+                ShapeFlags = (RegionFlags) reader.ReadInt32(),
+                Climate = (ClimateType) reader.ReadInt32(),
+                GridPosition = new Coord(reader.ReadInt32(), reader.ReadInt32()),
+                MountainHeight = reader.ReadInt32(),
+                RiverId = reader.ReadInt32(),
+                RiverSegment = reader.ReadInt32(),
+                TreeThreshold = reader.ReadSingle(),
+                RiverWidth = reader.ReadSingle(),
+                GeoScale = reader.ReadSingle(),
+                GeoWater = reader.ReadSingle(),
+                GeoDetail = reader.ReadSingle(),
+                GeoBias = reader.ReadSingle(),
+                Temperature = reader.ReadSingle(),
+                Moisture = reader.ReadSingle(),
+                CliffThreshold = reader.ReadSingle(),
+                ColorMap = new Color3(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32()),
+                ColorRock = new Color3(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32()),
+                ColorDirt = new Color3(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32()),
+                ColorGrass = new Color3(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32()),
+                ColorAtmosphere = new Color3(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32()),
+                HasFlowers = reader.ReadBoolean()
+            };
+
+            for (var i = 0; i < Region.FLOWERS; i++) {
+                var flower = new Flower {
+                    Color = new Color3(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32()),
+                    Shape = reader.ReadInt32()
+                };
+                region.Flowers[i] = flower;
+            }
+
+            return region;
         }
 
         public void Save() {
