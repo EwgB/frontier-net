@@ -14,14 +14,14 @@
 
         public Vector3 CameraAngle => Vector3.UnitX;
 
-        public IRegion Region { get; }
+        public Region Region { get; }
 
         public Vector3 Position { get; set; }
 
         public AnimTypes AnimationType => AnimTypes.Idle;
 
-        public DummyAvatar(IRegion region) {
-            this.Region = region;
+        public DummyAvatar() {
+            this.Region = new Region();
         }
 
         public void Init() { /* Do nothing */ }

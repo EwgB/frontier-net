@@ -57,16 +57,14 @@
 
         private IEntropy Entropy { get; }
         private Random Random { get; }
-        private IRegionFactory RegionFactory { get; }
         private IWorld World { get; }
 
         #endregion
 
 
-        public TerraformImpl(IEntropy entropy, IRegionFactory regionFactory, IWorld world) {
+        public TerraformImpl(IEntropy entropy, IWorld world) {
             this.Entropy = entropy;
             this.Random = Randoms.Create();
-            this.RegionFactory = regionFactory;
             this.World = world;
         }
 
@@ -205,7 +203,7 @@
             //now define the coast 
             for (var pass = 0; pass < 2; pass++) {
                 queue.Clear();
-                IRegion region;
+                Region region;
                 for (var x = 0; x < WorldUtils.WORLD_GRID; x++) {
                     for (var y = 0; y < WorldUtils.WORLD_GRID; y++) {
                         region = this.World.GetRegion(x, y);
@@ -450,34 +448,36 @@
             var offset = new Coord(this.Random.Next() % 1024, this.Random.Next() % 1024);
             for (var x = 0; x < WorldUtils.WORLD_GRID; x++) {
                 for (var y = 0; y < WorldUtils.WORLD_GRID; y++) {
-                    var region = this.RegionFactory.GetRegion();
-                    region.Title = "NOTHING";
-                    region.GeoBias = region.GeoDetail = 0;
-                    region.MountainHeight = 0;
-                    region.GridPosition = new Vector2(x, y);
-                    region.TreeThreshold = 0.15f;
                     var fromCenter = new Coord(
                         Math.Abs(x - WorldUtils.WORLD_GRID_CENTER),
                         Math.Abs(y - WorldUtils.WORLD_GRID_CENTER));
 
                     //Geo scale is a number from -1 to 1. -1 is lowest ocean. 0 is sea level. 
                     //+1 is highest elevation on the island. This is used to guide other derived numbers.
-                    region.GeoScale = new Vector2(fromCenter.X, fromCenter.Y).Length;
-                    region.GeoScale /= (WorldUtils.WORLD_GRID_CENTER - OCEAN_BUFFER);
+                    var geoScale = new Vector2(fromCenter.X, fromCenter.Y).Length
+                                   / (WorldUtils.WORLD_GRID_CENTER - OCEAN_BUFFER);
                     //Create a steep drop around the edge of the World
-                    if (region.GeoScale > 1)
-                        region.GeoScale = 1 + (region.GeoScale - 1) * 4;
-                    region.GeoScale = 1 - region.GeoScale;
-                    region.GeoScale += (this.Entropy.GetEntropy((x + offset.X), (y + offset.Y)) - 0.5f);
-                    region.GeoScale += (this.Entropy.GetEntropy((x + offset.X) * FREQUENCY, (y + offset.Y) * FREQUENCY) - 0.2f);
-                    region.GeoScale = MathHelper.Clamp(region.GeoScale, -1, 1);
-                    if (region.GeoScale > 0)
-                        region.GeoWater = 1 + region.GeoScale * 16;
-                    region.ColorAtmosphere = new Color3(0, 0, 0);
-                    region.GeoBias = 0;
-                    region.GeoDetail = 0;
-                    region.ColorMap = Color3.Black;
-                    region.Climate = ClimateType.Invalid;
+                    if (geoScale > 1)
+                        geoScale = 1 + (geoScale - 1) * 4;
+                    geoScale = 1 - geoScale;
+                    geoScale += (this.Entropy.GetEntropy((x + offset.X), (y + offset.Y)) - 0.5f);
+                    geoScale += (this.Entropy.GetEntropy((x + offset.X) * FREQUENCY, (y + offset.Y) * FREQUENCY) - 0.2f);
+                    geoScale = MathHelper.Clamp(geoScale, -1, 1);
+
+                    var region = new Region {
+                        Title = "NOTHING",
+                        GeoBias = 0,
+                        GeoDetail = 0,
+                        GeoScale = geoScale,
+                        GeoWater = (geoScale > 0) ? 1 + geoScale * 16 : 0,
+                        MountainHeight = 0,
+                        GridPosition = new Vector2(x, y),
+                        TreeThreshold = 0.15f,
+                        ColorAtmosphere = new Color3(0, 0, 0),
+                        ColorMap = Color3.Black,
+                        Climate = ClimateType.Invalid
+                    };
+
                     this.World.SetRegion(x, y, region);
                 }
             }
@@ -930,7 +930,7 @@
                 waterLevel = Math.Min(region.GeoWater, waterLevel);
                 //We need to flatten out this space, as well as all of its neighbors.
                 region.GeoWater = waterLevel;
-                IRegion neighbor;
+                Region neighbor;
                 for (var xx = x - 1; xx <= x + 1; xx++) {
                     for (var yy = y - 1; yy <= y + 1; yy++) {
                         neighbor = this.World.GetRegion(xx, yy);
@@ -1038,7 +1038,7 @@
         }
 
         ///<summary> Gives a 1 in 'odds' chance of adding flowers to the given region. </summary>
-        private void AddFlowers(IRegion region, int odds) {
+        private void AddFlowers(Region region, int odds) {
             region.HasFlowers = this.Random.Next() % odds == 0;
             var shape = this.Random.Next();
             var c = FlowerPalette[this.Random.Next() % FlowerPalette.Length];

@@ -80,11 +80,11 @@
         public int GetNoiseI(int index) => this.noiseI[Math.Abs(index % NOISE_BUFFER)];
 
 
-        private readonly IRegion[,] regions = new IRegion[WorldUtils.WORLD_GRID, WorldUtils.WORLD_GRID];
-        public IRegion GetRegion(int x, int y) => this.regions[x, y];
-        public void SetRegion(int x, int y, IRegion region) => this.regions[x, y] = region;
+        private readonly Region[,] regions = new Region[WorldUtils.WORLD_GRID, WorldUtils.WORLD_GRID];
+        public Region GetRegion(int x, int y) => this.regions[x, y];
+        public void SetRegion(int x, int y, Region region) => this.regions[x, y] = region;
 
-        public IRegion GetRegionFromPosition(int worldX, int worldY) {
+        public Region GetRegionFromPosition(int worldX, int worldY) {
             worldX = Math.Max(worldX, 0);
             worldY = Math.Max(worldY, 0);
             worldX += this.dithermap[worldX % DITHER_SIZE, worldY % DITHER_SIZE].X;
@@ -159,7 +159,7 @@
                 (worldX + BLEND_DISTANCE) / WorldUtils.REGION_SIZE,
                 (worldY + BLEND_DISTANCE) / WorldUtils.REGION_SIZE);
 
-            IRegion upperLeftRegion;
+            Region upperLeftRegion;
             if (upperLeft == bottomRight) {
                 upperLeftRegion = GetRegion(upperLeft.X, upperLeft.Y);
                 result.Elevation = DoHeight(upperLeftRegion, offset, waterLevel, detail, bias);
@@ -359,7 +359,7 @@
         /// This modifies the passed elevation value AFTER region cross-fading is complete,
         /// for things that should not be mimicked by neighbors. (Like rivers.)
         /// </summary>
-        private static float DoHeightNoBlend(float elevationValue, IRegion region, Vector2 offset, float waterLevel) {
+        private static float DoHeightNoBlend(float elevationValue, Region region, Vector2 offset, float waterLevel) {
             if (!region.ShapeFlags.HasFlag(RegionFlags.RiverAny))
                 return elevationValue;
 
@@ -424,7 +424,7 @@
             return elevationValue;
         }
 
-        private static Vector2 ComputeNewOffset(IRegion region, Vector2 offset) {
+        private static Vector2 ComputeNewOffset(Region region, Vector2 offset) {
             Vector2 newOffset;
             if (region.ShapeFlags.HasFlag(RegionFlags.RiverSE) && !region.ShapeFlags.HasFlag(RegionFlags.RiverNW)) {
                 newOffset.X = 1 - offset.X;
@@ -460,7 +460,7 @@
         /// <param name="detail">the height of the rolling hills</param>
         /// <param name="bias">direct height added on to detail</param>
         /// <returns></returns>
-        private static float DoHeight(IRegion region, Vector2 offset, float waterLevel, float detail, float bias) {
+        private static float DoHeight(Region region, Vector2 offset, float waterLevel, float detail, float bias) {
             //Modify the detail values before they are applied
 
             if (region.ShapeFlags.HasFlag(RegionFlags.Crater)) {

@@ -79,7 +79,7 @@
             }
         }
 
-        public IRegion Region { get; private set; }
+        public Region Region { get; private set; }
         public Vector3 CameraAngle { get; private set; }
         public Vector3 CameraPosition { get; private set; }
         public AnimTypes AnimationType { get; private set; }

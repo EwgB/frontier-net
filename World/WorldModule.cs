@@ -1,12 +1,8 @@
 ﻿namespace FrontierSharp.World {
-    using Ninject;
     using Ninject.Modules;
     using NLog;
 
-    using Common.Region;
     using Common.World;
-
-    using Region;
 
     public class WorldModule : NinjectModule {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
@@ -22,13 +18,7 @@
             if (kernel == null) {
                 Log.Error("Kernel should not be null.");
             } else if (this.useDummy) {
-                if (!kernel.HasModule(typeof(RegionModule).FullName)) {
-                    kernel.Load(new RegionModule(true));
-                }
-                var region = kernel.Get<IRegion>();
-                Bind<IWorld>().To<DummyWorld>()
-                    .InSingletonScope()
-                    .WithConstructorArgument(region);
+                Bind<IWorld>().To<DummyWorld>().InSingletonScope();
             } else {
                 Bind<IWorld>().To<WorldImpl>().InSingletonScope();
             }

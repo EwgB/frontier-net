@@ -155,10 +155,6 @@
       <Project>{0d73456a-0969-4ff6-96a2-9435074b9eb8}</Project>
       <Name>Properties</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Region\Region.csproj">
-      <Project>{f111ec33-2056-4692-a51b-75a6d61036bb}</Project>
-      <Name>Region</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Renderer\Renderer.csproj">
       <Project>{f340b706-735d-42a1-8725-77c9d3ecddd0}</Project>
       <Name>Renderer</Name>

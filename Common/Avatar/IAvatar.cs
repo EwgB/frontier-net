@@ -9,7 +9,7 @@
     public interface IAvatar : IModule, IHasProperties, IRenderable {
         IAvatarProperties AvatarProperties { get; }
 
-        IRegion Region { get; }
+        Region Region { get; }
         Vector3 Position { get; set; }
         AnimTypes AnimationType { get; }
         Vector3 CameraAngle { get; }

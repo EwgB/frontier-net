@@ -75,10 +75,6 @@
       <Project>{0d73456a-0969-4ff6-96a2-9435074b9eb8}</Project>
       <Name>Properties</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Region\Region.csproj">
-      <Project>{F111EC33-2056-4692-A51B-75A6D61036BB}</Project>
-      <Name>Region</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -77,10 +77,9 @@
     <Compile Include="Particles\IEmitter.cs" />
     <Compile Include="Particles\ParticleTypes.cs" />
     <Compile Include="Region\ClimateType.cs" />
-    <Compile Include="Region\IRegion.cs" />
+    <Compile Include="Region\Region.cs" />
     <Compile Include="ISky.cs" />
     <Compile Include="IText.cs" />
-    <Compile Include="Region\IRegionFactory.cs" />
     <Compile Include="Shaders\ShaderTypes.cs" />
     <Compile Include="Terraform\ITerraform.cs" />
     <Compile Include="Textures\ITextures.cs" />

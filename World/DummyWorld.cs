@@ -22,8 +22,8 @@
         public float GetNoiseF(int index) => 0;
         public int GetNoiseI(int index) => 0;
 
-        public DummyWorld(IRegion region) {
-            this.dummyRegion = region;
+        public DummyWorld() {
+            this.dummyRegion = new Region();
         }
 
         public void Init() { /* Do nothing */ }
@@ -40,10 +40,10 @@
         public ITree GetTree(int id) => this.tree;
         public int GetTreeType(float moisture, float temperature) => 1;
 
-        private readonly IRegion dummyRegion;
-        public IRegion GetRegion(int x, int y) => this.dummyRegion;
-        public IRegion GetRegionFromPosition(int worldX, int worldY) => this.dummyRegion;
-        public void SetRegion(int x, int y, IRegion region) { /* Do nothing */ }
+        private readonly Region dummyRegion;
+        public Region GetRegion(int x, int y) => this.dummyRegion;
+        public Region GetRegionFromPosition(int worldX, int worldY) => this.dummyRegion;
+        public void SetRegion(int x, int y, Region region) { /* Do nothing */ }
 
         private readonly Cell cell;
         public Cell GetCell(int worldX, int worldY) => this.cell;

@@ -37,9 +37,9 @@
         float GetWaterLevel(int x, int y);
 
         // TODO: Look into using ImmutableArray for this data
-        IRegion GetRegion(int x, int y);
-        IRegion GetRegionFromPosition(int worldX, int worldY);
-        void SetRegion(int x, int y, IRegion region);
+        Region GetRegion(int x, int y);
+        Region GetRegionFromPosition(int worldX, int worldY);
+        void SetRegion(int x, int y, Region region);
 
         Cell GetCell(int worldX, int worldY);
         Color3 GetColor(int worldX, int worldY, SurfaceColor c);

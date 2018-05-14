@@ -127,7 +127,7 @@
             internal float DecimalTime;
             internal float MaxDistance;
             internal float NightFog;
-            internal IRegion Region;
+            internal Region Region;
         }
 
         private struct CycleOutParameters {

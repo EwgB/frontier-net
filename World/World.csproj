@@ -69,10 +69,6 @@
       <Project>{889072AD-5C8D-47D9-8FEC-05A9EC728BE8}</Project>
       <Name>Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Region\Region.csproj">
-      <Project>{f111ec33-2056-4692-a51b-75a6d61036bb}</Project>
-      <Name>Region</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="LICENSES-MersenneTwister.txt" />
