@@ -72,13 +72,13 @@
         /// <remarks>This method is intended only for compatibility with System.Drawing. It compresses the color
         /// into 8 bits per channel, which means color information is lost.</remarks>
         public int ToArgb() {
-            int value =
-                (int)(byte.MaxValue) << 24 |       // Alpha is always 1
+            var value =
+                byte.MaxValue << 24 |       // Alpha is always 1
                 (int)(this.R * byte.MaxValue) << 16 |
                 (int)(this.G * byte.MaxValue) << 8 |
                 (int)(this.B * byte.MaxValue);
 
-            return unchecked((int)value);
+            return value;
         }
 
         /// <summary>

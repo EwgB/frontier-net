@@ -19,9 +19,8 @@
 
         public void Update() {
             // TODO
-            //  int    i;
 
-            //  for (i = 0; i < EmitterList.size (); i++) 
+            //  for (var i = 0; i < EmitterList.size (); i++) 
             //    EmitterList[i].Update (SdlElapsedSeconds ());
             //  for (i = 0; i < EmitterList.size (); i++) {
             //    if (EmitterList[i].Dead ()) {
@@ -39,8 +38,8 @@
             GL.Enable(EnableCap.Texture2D);
             GL.Disable(EnableCap.Lighting);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-            for (var i = 0; i < this.emitterList.Count; i++) {
-                this.emitterList[i].Render();
+            foreach (var emitter in this.emitterList) {
+                emitter.Render();
             }
         }
 

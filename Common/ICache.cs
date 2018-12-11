@@ -1,6 +1,4 @@
 ﻿namespace FrontierSharp.Common {
-    using System.Collections.Generic;
-
     using OpenTK;
 
     using Grid;

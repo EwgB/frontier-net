@@ -251,11 +251,11 @@
                 for (var y = 0; y < WorldUtils.WORLD_GRID; y++) {
                     var region = this.World.GetRegion(x, y);
                     region.ColorGrass = GenerateColor(SurfaceColor.Grass, region.Moisture, region.Temperature,
-                        (int) (region.GridPosition.X + region.GridPosition.Y * WorldUtils.WORLD_GRID));
+                         region.GridPosition.X + region.GridPosition.Y * WorldUtils.WORLD_GRID);
                     region.ColorDirt = GenerateColor(SurfaceColor.Dirt, region.Moisture, region.Temperature,
-                        (int) (region.GridPosition.X + region.GridPosition.Y * WorldUtils.WORLD_GRID));
+                        region.GridPosition.X + region.GridPosition.Y * WorldUtils.WORLD_GRID);
                     region.ColorRock = GenerateColor(SurfaceColor.Rock, region.Moisture, region.Temperature,
-                        (int) (region.GridPosition.X + region.GridPosition.Y * WorldUtils.WORLD_GRID));
+                        region.GridPosition.X + region.GridPosition.Y * WorldUtils.WORLD_GRID);
 
                     //"atmosphere" is the overall color of the lighting & fog. 
                     var warmAir = new Color3(0, 0.2f, 1);
@@ -268,7 +268,7 @@
                     //Color the map
                     switch (region.Climate) {
                     case ClimateType.Mountain:
-                        var val = 0.2f + region.MountainHeight / 4;
+                        var val = 0.2f + region.MountainHeight / 4f;
                         region.ColorMap = new Color3(val, val, val).Normalize();
                         break;
                     case ClimateType.Desert:
@@ -471,7 +471,7 @@
                         GeoScale = geoScale,
                         GeoWater = (geoScale > 0) ? 1 + geoScale * 16 : 0,
                         MountainHeight = 0,
-                        GridPosition = new Vector2(x, y),
+                        GridPosition = new Coord(x, y),
                         TreeThreshold = 0.15f,
                         ColorAtmosphere = new Color3(0, 0, 0),
                         ColorMap = Color3.Black,

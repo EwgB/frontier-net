@@ -278,13 +278,13 @@
                     ReadWorldData(reader);
                 }
             } catch(FileNotFoundException) {
-                Log.Debug("[Load]: Could not open file {0}", filename);
+                Log.Debug("[Load] Could not open file {0}", filename);
                 Generate(seed);
                 return;
             }
 
 
-            Log.Debug("[World]: File '{0}' loaded.", filename);
+            Log.Debug("[Load] File '{0}' loaded.", filename);
 
             BuildTrees();
             BuildMapTexture();
@@ -366,16 +366,16 @@
         }
 
         public void Save() {
-            // TODO: convert
-            //FILE* f;
-            //char filename[256];
             //WorldHeader header;
 
-            //return;
-            //sprintf(filename, "%sworld.sav", GameDirectory());
+            return;
+            // TODO: Why was this all non-functional?
+            var filename = $"{this.Game.GameDirectory}world.sav";
+            try { } catch (FileNotFoundException e) {
+                Log.Debug("[Save] Could not open file {0}", filename);
+            }
             //if (!(f = fopen(filename, "wb")))
             //{
-            //    ConsoleLog("WorldSave: Could not open file %s", filename);
             //    return;
             //}
             //header.version = FILE_VERSION;
@@ -387,7 +387,7 @@
             //fwrite(&header, sizeof(header), 1, f);
             //fwrite(&planet, sizeof(planet), 1, f);
             //fclose(f);
-            //ConsoleLog("WorldSave: '%s' saved.", filename);
+            Log.Debug("[Save] File '{0}' saved.", filename);
         }
 
         public void Update() { /* Do nothing */ }
