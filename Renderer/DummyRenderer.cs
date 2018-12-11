@@ -8,7 +8,7 @@
     using Common.Renderer;
 
     internal class DummyRenderer : IRenderer {
-        public IProperties Properties => this.RendererProperties;
+        public IProperties Properties => RendererProperties;
         public IRendererProperties RendererProperties { get; }
 
         public void Init() {

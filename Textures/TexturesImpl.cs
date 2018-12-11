@@ -21,7 +21,7 @@
         }
 
         private Texture TextureFromName(string name) {
-            for (var t = this.headTexture; null != t; t = t.Next) {
+            for (var t = headTexture; null != t; t = t.Next) {
                 if (string.Equals(name, t.Name, StringComparison.OrdinalIgnoreCase)) {
                     return t;
                 }
@@ -58,11 +58,11 @@
             var t = new Texture {
                 Name = name,
                 Id = id,
-                Next = this.headTexture,
+                Next = headTexture,
                 Width = size.X,
                 Height = size.Y
             };
-            this.headTexture = t;
+            headTexture = t;
 
             return t;
         }
@@ -73,10 +73,10 @@
         #region Dispose pattern
 
         private void ReleaseUnmanagedResources() {
-            while (null != this.headTexture) {
-                var t = this.headTexture;
+            while (null != headTexture) {
+                var t = headTexture;
                 GL.DeleteTextures(1, new[] { t.Id });
-                this.headTexture = t.Next;
+                headTexture = t.Next;
             }
         }
 

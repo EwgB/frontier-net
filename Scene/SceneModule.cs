@@ -11,7 +11,7 @@
         }
 
         public override void Load() {
-            if (this.useDummy) {
+            if (useDummy) {
                 Bind<IScene>().To<DummyScene>().InSingletonScope();
             } else {
                 Bind<IScene>().To<SceneImpl>().InSingletonScope();

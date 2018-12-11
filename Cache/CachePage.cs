@@ -83,16 +83,16 @@
         private TimeSpan saveCooldown = new TimeSpan(0);
         private BoundingBox boundingBox = new BoundingBox();
 
-        public bool IsExpired => (this.lastTouched + ExpireInterval) < this.Game.GameProperties.GameTime;
-        private string GetPageFileName(Coord p) => Path.Combine(this.Game.GameDirectory, $"cache{p.X}-{p.Y}.pag");
+        public bool IsExpired => (lastTouched + ExpireInterval) < Game.GameProperties.GameTime;
+        private string GetPageFileName(Coord p) => Path.Combine(Game.GameDirectory, $"cache{p.X}-{p.Y}.pag");
 
         #endregion
 
 
         public CachePage(IGame game, IProperties properties, IWorld world) {
-            this.Game = game;
-            this.Properties = properties;
-            this.World = world;
+            Game = game;
+            Properties = properties;
+            World = world;
         }
 
         //    bool Ready();
@@ -101,46 +101,46 @@
         #region Getters
 
         public float GetElevation(int x, int y) {
-            this.lastTouched = this.Game.GameProperties.GameTime;
+            lastTouched = Game.GameProperties.GameTime;
             return GetPageCell(x, y).Elevation;
         }
 
         public float GetDetail(int x, int y) {
-            this.lastTouched = this.Game.GameProperties.GameTime;
+            lastTouched = Game.GameProperties.GameTime;
             return GetPageCell(x, y).Detail;
         }
 
         public int GetTree(int x, int y) {
-            this.lastTouched = this.Game.GameProperties.GameTime;
+            lastTouched = Game.GameProperties.GameTime;
             return GetPageCell(x, y).TreeId;
         }
 
         public Vector3 GetPosition(int x, int y) {
-            this.lastTouched = this.Game.GameProperties.GameTime;
+            lastTouched = Game.GameProperties.GameTime;
             return new Vector3(
-                x + this.origin.X * PAGE_SIZE,
-                y + this.origin.Y * PAGE_SIZE,
+                x + origin.X * PAGE_SIZE,
+                y + origin.Y * PAGE_SIZE,
                 GetPageCell(x, y).Elevation);
         }
 
         public Vector3 GetNormal(int x, int y) {
-            this.lastTouched = this.Game.GameProperties.GameTime;
+            lastTouched = Game.GameProperties.GameTime;
             return GetPageCell(x, y).Normal;
         }
 
         public Color3 GetColor(int x, int y) {
-            this.lastTouched = this.Game.GameProperties.GameTime;
+            lastTouched = Game.GameProperties.GameTime;
             return GetPageCell(x, y).Color;
         }
 
         public SurfaceTypes GetSurface(int x, int y) {
-            this.lastTouched = this.Game.GameProperties.GameTime;
+            lastTouched = Game.GameProperties.GameTime;
             return GetPageCell(x, y).Surface;
         }
 
         public bool IsReady() {
-            this.lastTouched = this.Game.GameProperties.GameTime;
-            return this.stage == Stages.Done;
+            lastTouched = Game.GameProperties.GameTime;
+            return stage == Stages.Done;
         }
 
         #endregion
@@ -151,17 +151,17 @@
         public void Render() {
             GL.Disable(EnableCap.Texture2D);
             GL.Disable(EnableCap.Lighting);
-            var elapsed = this.Game.GameProperties.GameTime - this.lastTouched;
+            var elapsed = Game.GameProperties.GameTime - lastTouched;
             var n = MathHelper.Clamp(elapsed.TotalMilliseconds / ExpireInterval.TotalMilliseconds, 0, 1);
             GL.Color3(n, 1 - n, 0);
-            this.boundingBox.Render();
+            boundingBox.Render();
         }
 
         public void Build(double stopAt) {
-            while (this.stage != Stages.Done && this.Game.GameProperties.GameTime.TotalMilliseconds < stopAt) {
-                switch (this.stage) {
+            while (stage != Stages.Done && Game.GameProperties.GameTime.TotalMilliseconds < stopAt) {
+                switch (stage) {
                 case Stages.Begin:
-                    this.stage++;
+                    stage++;
                     break;
                 case Stages.Position:
                     DoPosition();
@@ -187,34 +187,34 @@
         }
 
         public void Save() {
-            if (!this.Properties.GetProperty<bool>("cache.active").Value) {
-                this.stage++;
+            if (!Properties.GetProperty<bool>("cache.active").Value) {
+                stage++;
                 return;
             }
 
-            var now = this.Game.GameProperties.GameTime;
-            if (now < this.saveCooldown || this.stage < Stages.Save)
+            var now = Game.GameProperties.GameTime;
+            if (now < saveCooldown || stage < Stages.Save)
                 return;
-            if (this.stage == Stages.Save)
-                this.stage++;
-            using (var stream = File.Open(GetPageFileName(this.origin), FileMode.Create))
-                Formatter.Serialize(stream, this.data);
-            this.saveCooldown = now + SaveInterval;
+            if (stage == Stages.Save)
+                stage++;
+            using (var stream = File.Open(GetPageFileName(origin), FileMode.Create))
+                Formatter.Serialize(stream, data);
+            saveCooldown = now + SaveInterval;
         }
 
         public void Load(int originX, int originY) {
-            this.origin = new Coord(originX, originY);
-            this.stage = Stages.Begin;
-            this.boundingBox.Clear();
+            origin = new Coord(originX, originY);
+            stage = Stages.Begin;
+            boundingBox.Clear();
 
-            var path = GetPageFileName(this.origin);
+            var path = GetPageFileName(origin);
             if (File.Exists(path))
                 using (var stream = File.Open(path, FileMode.Open)) {
-                    this.data = (CachePageData) Formatter.Deserialize(stream);
+                    data = (CachePageData) Formatter.Deserialize(stream);
                 }
 
-            this.walk = new Coord();
-            this.lastTouched = this.Game.GameProperties.GameTime;
+            walk = new Coord();
+            lastTouched = Game.GameProperties.GameTime;
         }
 
         #endregion
@@ -222,85 +222,85 @@
 
         #region Private methods
 
-        private PageCell GetPageCell(int x, int y) => this.data.Cells[x % PAGE_SIZE, y % PAGE_SIZE];
+        private PageCell GetPageCell(int x, int y) => data.Cells[x % PAGE_SIZE, y % PAGE_SIZE];
 
         private void DoPosition() {
-            var worldX = (this.origin.X * PAGE_SIZE + this.walk.X);
-            var worldY = (this.origin.Y * PAGE_SIZE + this.walk.Y);
-            var c = this.World.GetCell(worldX, worldY);
-            this.data.Cells[this.walk.X, this.walk.Y].Elevation = c.Elevation;
-            this.data.Cells[this.walk.X, this.walk.Y].Detail = c.Detail;
-            this.data.Cells[this.walk.X, this.walk.Y].WaterLevel = c.WaterLevel;
-            this.data.Cells[this.walk.X, this.walk.Y].TreeId = 0;
-            this.boundingBox.ContainPoint(GetPosition(worldX, worldY));
-            this.walk = this.walk.Walk(PAGE_SIZE, out var rolledOver);
+            var worldX = (origin.X * PAGE_SIZE + walk.X);
+            var worldY = (origin.Y * PAGE_SIZE + walk.Y);
+            var c = World.GetCell(worldX, worldY);
+            data.Cells[walk.X, walk.Y].Elevation = c.Elevation;
+            data.Cells[walk.X, walk.Y].Detail = c.Detail;
+            data.Cells[walk.X, walk.Y].WaterLevel = c.WaterLevel;
+            data.Cells[walk.X, walk.Y].TreeId = 0;
+            boundingBox.ContainPoint(GetPosition(worldX, worldY));
+            walk = walk.Walk(PAGE_SIZE, out var rolledOver);
             if (rolledOver)
-                this.stage++;
+                stage++;
         }
 
         private void DoColor() {
-            var worldX = (this.origin.X * PAGE_SIZE + this.walk.X);
-            var worldY = (this.origin.Y * PAGE_SIZE + this.walk.Y);
-            var cell = this.data.Cells[this.walk.X, this.walk.Y];
+            var worldX = (origin.X * PAGE_SIZE + walk.X);
+            var worldY = (origin.Y * PAGE_SIZE + walk.Y);
+            var cell = data.Cells[walk.X, walk.Y];
             if (cell.Surface == SurfaceTypes.Grass || cell.Surface == SurfaceTypes.GrassEdge)
-                cell.Color = this.World.GetColor(worldX, worldY, SurfaceColor.Grass);
+                cell.Color = World.GetColor(worldX, worldY, SurfaceColor.Grass);
             else if (cell.Surface == SurfaceTypes.Dirt ||
                      cell.Surface == SurfaceTypes.DirtDark ||
                      cell.Surface == SurfaceTypes.Forest)
-                cell.Color = this.World.GetColor(worldX, worldY, SurfaceColor.Dirt);
+                cell.Color = World.GetColor(worldX, worldY, SurfaceColor.Dirt);
             else if (cell.Surface == SurfaceTypes.Sand || cell.Surface == SurfaceTypes.SandDark)
-                cell.Color = this.World.GetColor(worldX, worldY, SurfaceColor.Sand);
+                cell.Color = World.GetColor(worldX, worldY, SurfaceColor.Sand);
             else if (cell.Surface == SurfaceTypes.Snow)
                 cell.Color = Color3.White;
             else
-                cell.Color = this.World.GetColor(worldX, worldY, SurfaceColor.Rock);
+                cell.Color = World.GetColor(worldX, worldY, SurfaceColor.Rock);
 
-            this.walk = this.walk.Walk(PAGE_SIZE, out var rolledOver);
+            walk = walk.Walk(PAGE_SIZE, out var rolledOver);
             if (rolledOver)
-                this.stage++;
+                stage++;
         }
 
         private void DoNormal() {
-            var worldX = (float) (this.origin.X + this.walk.X);
-            var worldY = (float) (this.origin.Y + this.walk.Y);
+            var worldX = (float) (origin.X + walk.X);
+            var worldY = (float) (origin.Y + walk.Y);
 
             Vector3 normalX;
-            if (this.walk.X < 1 || this.walk.X >= PAGE_SIZE - 1)
+            if (walk.X < 1 || walk.X >= PAGE_SIZE - 1)
                 normalX = new Vector3(-1, 0, 0);
             else
-                normalX = new Vector3(worldX - 1, worldY, this.data.Cells[this.walk.X - 1, this.walk.Y].Elevation) -
-                          new Vector3(worldX + 1, worldY, this.data.Cells[this.walk.X + 1, this.walk.Y].Elevation);
+                normalX = new Vector3(worldX - 1, worldY, data.Cells[walk.X - 1, walk.Y].Elevation) -
+                          new Vector3(worldX + 1, worldY, data.Cells[walk.X + 1, walk.Y].Elevation);
 
             Vector3 normalY;
-            if (this.walk.Y < 1 || this.walk.Y >= PAGE_SIZE - 1)
+            if (walk.Y < 1 || walk.Y >= PAGE_SIZE - 1)
                 normalY = new Vector3(0, -1, 0);
             else
-                normalY = new Vector3(worldX, worldY - 1, this.data.Cells[this.walk.X, this.walk.Y - 1].Elevation) -
-                          new Vector3(worldX, worldY, this.data.Cells[this.walk.X, this.walk.Y + 1].Elevation);
+                normalY = new Vector3(worldX, worldY - 1, data.Cells[walk.X, walk.Y - 1].Elevation) -
+                          new Vector3(worldX, worldY, data.Cells[walk.X, walk.Y + 1].Elevation);
 
             var normal = Vector3.Cross(normalX, normalY);
             normal.Z *= WorldUtils.NORMAL_SCALING;
             normal.Normalize();
-            this.data.Cells[this.walk.X, this.walk.Y].Normal = normal;
+            data.Cells[walk.X, walk.Y].Normal = normal;
 
-            this.walk = this.walk.Walk(PAGE_SIZE, out var rolledOver);
+            walk = walk.Walk(PAGE_SIZE, out var rolledOver);
             if (rolledOver)
-                this.stage++;
+                stage++;
         }
 
         private void DoTrees() {
-            var region = this.World.GetRegionFromPosition(
-                this.origin.X * PAGE_SIZE + this.walk.X,
-                this.origin.Y * PAGE_SIZE + this.walk.Y);
+            var region = World.GetRegionFromPosition(
+                origin.X * PAGE_SIZE + walk.X,
+                origin.Y * PAGE_SIZE + walk.Y);
 
-            var tree = this.World.GetTree(region.TreeType);
+            var tree = World.GetTree(region.TreeType);
             var best = tree.GrowsHigh ? -99999.9f : 99999.9f;
 
             var plant = new Coord();
             var valid = false;
             for (var x = 0; x < TREE_SPACING - 2; x++) {
                 for (var y = 0; y < TREE_SPACING - 2; y++) {
-                    var cell = this.data.Cells[this.walk.X * TREE_SPACING + x, this.walk.Y * TREE_SPACING + y];
+                    var cell = data.Cells[walk.X * TREE_SPACING + x, walk.Y * TREE_SPACING + y];
                     if (cell.Surface != SurfaceTypes.Grass && cell.Surface != SurfaceTypes.Snow && cell.Surface != SurfaceTypes.Forest)
                         continue;
                     //Don't spawn trees that might touch water. Looks odd.
@@ -308,16 +308,16 @@
                         continue;
                     if (tree.GrowsHigh && (cell.Detail + region.TreeThreshold) > 1 && cell.Elevation > best) {
                         plant = new Coord(
-                            this.walk.X * TREE_SPACING + x,
-                            this.walk.Y * TREE_SPACING + y);
+                            walk.X * TREE_SPACING + x,
+                            walk.Y * TREE_SPACING + y);
                         best = cell.Elevation;
                         valid = true;
                     }
 
                     if (!tree.GrowsHigh && (cell.Detail - region.TreeThreshold) < 0 && cell.Elevation < best) {
                         plant = new Coord(
-                            this.walk.X * TREE_SPACING + x,
-                            this.walk.Y * TREE_SPACING + y);
+                            walk.X * TREE_SPACING + x,
+                            walk.Y * TREE_SPACING + y);
                         best = cell.Elevation;
                         valid = true;
                     }
@@ -325,35 +325,35 @@
             }
 
             if (valid) {
-                this.data.Cells[plant.X, plant.Y].TreeId = region.TreeType;
+                data.Cells[plant.X, plant.Y].TreeId = region.TreeType;
             }
 
-            this.walk = this.walk.Walk(TREE_MAP, out var rolledOver);
+            walk = walk.Walk(TREE_MAP, out var rolledOver);
             if (rolledOver)
-                this.stage++;
+                stage++;
         }
 
         private void DoSurface() {
             var worldpos = new Coord(
-                this.origin.X * PAGE_SIZE + this.walk.X,
-                this.origin.Y * PAGE_SIZE + this.walk.Y);
-            var region = this.World.GetRegionFromPosition(worldpos.X, worldpos.Y);
-            PageCell c = this.data.Cells[this.walk.X, this.walk.Y];
+                origin.X * PAGE_SIZE + walk.X,
+                origin.Y * PAGE_SIZE + walk.Y);
+            var region = World.GetRegionFromPosition(worldpos.X, worldpos.Y);
+            PageCell c = data.Cells[walk.X, walk.Y];
 
-            if (this.stage == Stages.Surface1) {
+            if (stage == Stages.Surface1) {
                 //Get the elevation of our neighbors
                 float low;
                 var high = low = c.Elevation;
                 for (var xx = -2; xx <= 2; xx++) {
-                    var neighborX = this.walk.X + xx;
+                    var neighborX = walk.X + xx;
                     if (neighborX < 0 || neighborX >= PAGE_SIZE)
                         continue;
                     for (var yy = -2; yy <= 2; yy++) {
-                        var neighborY = this.walk.Y + yy;
+                        var neighborY = walk.Y + yy;
                         if (neighborY < 0 || neighborY >= PAGE_SIZE)
                             continue;
-                        high = Math.Max(high, this.data.Cells[neighborX, neighborY].Elevation);
-                        low = Math.Min(low, this.data.Cells[neighborX, neighborY].Elevation);
+                        high = Math.Max(high, data.Cells[neighborX, neighborY].Elevation);
+                        low = Math.Min(low, data.Cells[neighborX, neighborY].Elevation);
                     }
                 }
 
@@ -403,15 +403,15 @@
                 if ((region.Climate == ClimateType.Desert) && c.Surface != SurfaceTypes.Rock)
                     c.Surface = SurfaceTypes.Sand;
             } else {
-                if (c.Surface == SurfaceTypes.Grass && this.walk.X > 0 && this.walk.X < PAGE_SIZE - 1 && this.walk.Y > 0 &&
-                    this.walk.Y < PAGE_SIZE - 1) {
+                if (c.Surface == SurfaceTypes.Grass && walk.X > 0 && walk.X < PAGE_SIZE - 1 && walk.Y > 0 &&
+                    walk.Y < PAGE_SIZE - 1) {
                     var allGrass = true;
                     for (var xx = -1; xx <= 1; xx++) {
                         if (!allGrass)
                             break;
                         for (var yy = -1; yy <= 1; yy++) {
-                            if (this.data.Cells[this.walk.X + xx, this.walk.Y + yy].Surface != SurfaceTypes.Grass &&
-                                this.data.Cells[this.walk.X + xx, this.walk.Y + yy].Surface != SurfaceTypes.GrassEdge) {
+                            if (data.Cells[walk.X + xx, walk.Y + yy].Surface != SurfaceTypes.Grass &&
+                                data.Cells[walk.X + xx, walk.Y + yy].Surface != SurfaceTypes.GrassEdge) {
                                 allGrass = false;
                                 break;
                             }
@@ -423,9 +423,9 @@
                 }
             }
 
-            this.walk = this.walk.Walk(PAGE_SIZE, out var rolledOver);
+            walk = walk.Walk(PAGE_SIZE, out var rolledOver);
             if (rolledOver)
-                this.stage++;
+                stage++;
         }
 
         #endregion

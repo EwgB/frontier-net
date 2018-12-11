@@ -38,9 +38,9 @@
         /// <param name="g">The G component of the new Color3 structure.</param>
         /// <param name="b">The B component of the new Color3 structure.</param>
         public Color3(float r, float g, float b) {
-            this.R = r;
-            this.G = g;
-            this.B = b;
+            R = r;
+            G = g;
+            B = b;
         }
 
         /// <summary>
@@ -74,9 +74,9 @@
         public int ToArgb() {
             var value =
                 byte.MaxValue << 24 |       // Alpha is always 1
-                (int)(this.R * byte.MaxValue) << 16 |
-                (int)(this.G * byte.MaxValue) << 8 |
-                (int)(this.B * byte.MaxValue);
+                (int)(R * byte.MaxValue) << 16 |
+                (int)(G * byte.MaxValue) << 8 |
+                (int)(B * byte.MaxValue);
 
             return value;
         }
@@ -106,7 +106,7 @@
         /// </summary>
         /// <returns>A System.String that describes this Color3 structure.</returns>
         public override string ToString() {
-            return $"{{(R, G, B) = ({this.R}, {this.G}, {this.B})}}";
+            return $"{{(R, G, B) = ({R}, {G}, {B})}}";
         }
 
         /// <summary>
@@ -114,14 +114,14 @@
         /// </summary>
         /// <returns>A new Color3 with normalized RGB values</returns>
         public Color3 Normalize() {
-            return this / Math.Min(Math.Max(this.R, Math.Max(this.G, this.B)), 1);
+            return this / Math.Min(Math.Max(R, Math.Max(G, B)), 1);
         }
 
         public Color3 Clamp() {
             return new Color3(
-                MathHelper.Clamp(this.R, 0, 1),
-                MathHelper.Clamp(this.G, 0, 1),
-                MathHelper.Clamp(this.B, 0, 1));
+                MathHelper.Clamp(R, 0, 1),
+                MathHelper.Clamp(G, 0, 1),
+                MathHelper.Clamp(B, 0, 1));
         }
 
         #region Operators
@@ -1377,7 +1377,7 @@
         /// <param name="other">The Color3 structure to compare to.</param>
         /// <returns>True if both Color3 structures contain the same components; false otherwise.</returns>
         public bool Equals(Color3 other) {
-            return this.R == other.R && this.G == other.G && this.B == other.B;
+            return R == other.R && G == other.G && B == other.B;
         }
 
         #endregion

@@ -13,7 +13,7 @@
 
         public void Init() {
             Log.Trace("Init");
-            this.IsOpen = false;
+            IsOpen = false;
         }
 
         public void ProcessKey(KeyboardKeyEventArgs e) {
@@ -23,12 +23,12 @@
         public void ToggleConsole() {
             Log.Trace("ToggleConsole");
 
-            if (this.IsOpen) {
+            if (IsOpen) {
                 Log.Info("Console closed");
-                this.IsOpen = false;
+                IsOpen = false;
             } else {
                 Log.Info("Console opened");
-                this.IsOpen = true;
+                IsOpen = true;
             }
         }
 

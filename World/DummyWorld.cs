@@ -23,7 +23,7 @@
         public int GetNoiseI(int index) => 0;
 
         public DummyWorld() {
-            this.dummyRegion = new Region();
+            dummyRegion = new Region();
         }
 
         public void Init() { /* Do nothing */ }
@@ -37,16 +37,16 @@
         public float GetWaterLevel(int x, int y) => 0;
 
         private readonly ITree tree;
-        public ITree GetTree(int id) => this.tree;
+        public ITree GetTree(int id) => tree;
         public int GetTreeType(float moisture, float temperature) => 1;
 
         private readonly Region dummyRegion;
-        public Region GetRegion(int x, int y) => this.dummyRegion;
-        public Region GetRegionFromPosition(int worldX, int worldY) => this.dummyRegion;
+        public Region GetRegion(int x, int y) => dummyRegion;
+        public Region GetRegionFromPosition(int worldX, int worldY) => dummyRegion;
         public void SetRegion(int x, int y, Region region) { /* Do nothing */ }
 
         private readonly Cell cell;
-        public Cell GetCell(int worldX, int worldY) => this.cell;
+        public Cell GetCell(int worldX, int worldY) => cell;
 
         public Color3 GetColor(int worldX, int worldY, SurfaceColor c) => Color3.Magenta;
     }

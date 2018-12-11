@@ -11,7 +11,7 @@
         }
 
         public override void Load() {
-            if (this.useDummy) {
+            if (useDummy) {
                 Bind<IEnvironment>().To<DummyEnvironment>().InSingletonScope();
             } else {
                 Bind<IEnvironment>().To<EnvironmentImpl>().InSingletonScope();

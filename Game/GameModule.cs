@@ -11,7 +11,7 @@
         }
 
         public override void Load() {
-            if (this.useDummy) {
+            if (useDummy) {
                 Bind<IGame>().To<DummyGame>().InSingletonScope();
             } else {
                 Bind<IGame>().To<GameImpl>().InSingletonScope();

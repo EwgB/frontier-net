@@ -8,7 +8,7 @@
     using Common.Property;
 
     internal class DummyScene : IScene {
-        public IProperties Properties => this.SceneProperties;
+        public IProperties Properties => SceneProperties;
         public ISceneProperties SceneProperties { get; }
 
         public float VisibleRange => 576;

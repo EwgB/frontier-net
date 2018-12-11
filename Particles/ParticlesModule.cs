@@ -11,7 +11,7 @@
         }
 
         public override void Load() {
-            if (this.useDummy) {
+            if (useDummy) {
                 Bind<IParticles>().To<DummyParticles>().InSingletonScope();
             } else {
                 Bind<IParticles>().To<ParticlesImpl>().InSingletonScope();

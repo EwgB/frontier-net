@@ -9,18 +9,18 @@
 
         public void AddProperty(IProperty property) {
             try {
-                this.properties.Add(property.Name, property);
+                properties.Add(property.Name, property);
             } catch (ArgumentException e) {
                 throw new PropertyAddException(property, e);
             }
         }
 
         public IProperty<T> GetProperty<T>(string name) {
-            if (this.properties.ContainsKey(name)) {
-                if (this.properties[name] is IProperty<T> property) {
+            if (properties.ContainsKey(name)) {
+                if (properties[name] is IProperty<T> property) {
                     return property;
                 } else {
-                    throw new PropertyTypeException(this.properties[name].GetType(), typeof(T));
+                    throw new PropertyTypeException(properties[name].GetType(), typeof(T));
                 }
             } else {
                 throw new PropertyNotFoundException(name);

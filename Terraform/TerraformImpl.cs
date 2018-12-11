@@ -63,9 +63,9 @@
 
 
         public TerraformImpl(IEntropy entropy, IWorld world) {
-            this.Entropy = entropy;
-            this.Random = Randoms.Create();
-            this.World = world;
+            Entropy = entropy;
+            Random = Randoms.Create();
+            World = world;
         }
 
         public void Init() { /* Do nothing */ }
@@ -93,7 +93,7 @@
                         var count = 0;
                         for (var xx = -radius; xx <= radius; xx++) {
                             for (var yy = -radius; yy <= radius; yy++) {
-                                var region = this.World.GetRegion(x + xx, y + yy);
+                                var region = World.GetRegion(x + xx, y + yy);
                                 temp[x, y] += region.Temperature;
                                 moist[x, y] += region.Moisture;
                                 elev[x, y] += region.GeoWater;
@@ -114,7 +114,7 @@
                 //Put the blurred values back into our table
                 for (var x = radius; x < WorldUtils.WORLD_GRID - radius; x++) {
                     for (var y = radius; y < WorldUtils.WORLD_GRID - radius; y++) {
-                        var region = this.World.GetRegion(x, y);
+                        var region = World.GetRegion(x, y);
                         //Rivers can get wetter through this process, but not drier.
                         if (region.Climate == ClimateType.River)
                             region.Moisture = Math.Max(region.Moisture, moist[x, y]);
@@ -125,7 +125,7 @@
                             region.GeoBias = bias[x, y];
                         }
 
-                        this.World.SetRegion(x, y, region);
+                        World.SetRegion(x, y, region);
                     }
                 }
             }
@@ -137,15 +137,15 @@
             bool rolledOver;
             do {
                 //Wind (and thus rainfall) come from west.
-                var x = (this.World.WindFromWest) ? walk.X : (WorldUtils.WORLD_GRID - 1) - walk.X;
+                var x = (World.WindFromWest) ? walk.X : (WorldUtils.WORLD_GRID - 1) - walk.X;
                 var y = walk.Y;
-                var region = this.World.GetRegion(x, y);
+                var region = World.GetRegion(x, y);
 
                 //============   TEMPERATURE ===================//
                 //The north 25% is max cold.  The south 25% is all tropical
                 //On a southern hemisphere map, this is reversed.
                 float temp;
-                if (this.World.NorthernHemisphere)
+                if (World.NorthernHemisphere)
                     temp = (y - ((float) WorldUtils.WORLD_GRID / 4)) / WorldUtils.WORLD_GRID_CENTER;
                 else
                     temp = ((WorldUtils.WORLD_GRID - y) - ((float) WorldUtils.WORLD_GRID / 4)) /
@@ -191,7 +191,7 @@
                 region.Temperature = temp;
                 //r.Moisture = Math.Min (1, r.Moisture + this.World.GetNoiseF (walk.X + walk.Y * WorldUtils.WORLD_GRID) * 0.1f);
                 //r.Temperature = Math.Min (1, r.Temperature + this.World.GetNoiseF (walk.X + walk.Y * WorldUtils.WORLD_GRID) * 0.1f);
-                this.World.SetRegion(x, y, region);
+                World.SetRegion(x, y, region);
                 walk = walk.Walk(WorldUtils.WORLD_GRID, out rolledOver);
             } while (!rolledOver);
         }
@@ -206,7 +206,7 @@
                 Region region;
                 for (var x = 0; x < WorldUtils.WORLD_GRID; x++) {
                     for (var y = 0; y < WorldUtils.WORLD_GRID; y++) {
-                        region = this.World.GetRegion(x, y);
+                        region = World.GetRegion(x, y);
                         //Skip already assigned places
                         if (region.Climate != ClimateType.Invalid)
                             continue;
@@ -221,12 +221,12 @@
 
                 //Now we're done scanning the map. Run through our list and make the new regions.
                 foreach (var current in queue) {
-                    region = this.World.GetRegion(current.X, current.Y);
+                    region = World.GetRegion(current.X, current.Y);
                     var isCliff = (((current.X / cliffGrid) + (current.Y / cliffGrid)) % 2) != 0;
                     region.Title = GetDirectionName(current.X, current.Y) + ((pass == 0) ? " beach" : "coast");
 
                     //beaches are low and partially submerged
-                    region.GeoDetail = 5 + this.Entropy.GetEntropy(current.X, current.Y) * 10;
+                    region.GeoDetail = 5 + Entropy.GetEntropy(current.X, current.Y) * 10;
                     if (pass == 0) {
                         region.GeoBias = -region.GeoDetail * 0.5f;
                         if (isCliff)
@@ -241,7 +241,7 @@
                     region.GeoWater = 0;
                     region.ShapeFlags |= RegionFlags.NoBlend;
                     region.Climate = ClimateType.Coast;
-                    this.World.SetRegion(current.X, current.Y, region);
+                    World.SetRegion(current.X, current.Y, region);
                 }
             }
         }
@@ -249,7 +249,7 @@
         public void Colors() {
             for (var x = 0; x < WorldUtils.WORLD_GRID; x++) {
                 for (var y = 0; y < WorldUtils.WORLD_GRID; y++) {
-                    var region = this.World.GetRegion(x, y);
+                    var region = World.GetRegion(x, y);
                     region.ColorGrass = GenerateColor(SurfaceColor.Grass, region.Moisture, region.Temperature,
                          region.GridPosition.X + region.GridPosition.Y * WorldUtils.WORLD_GRID);
                     region.ColorDirt = GenerateColor(SurfaceColor.Dirt, region.Moisture, region.Temperature,
@@ -320,7 +320,7 @@
                     //if (r.GeoScale >= 0)
                     //r.ColorMap = glRgbaUnique (r.TreeType);
                     //r.ColorMap = r.ColorAtmosphere;
-                    this.World.SetRegion(x, y, region);
+                    World.SetRegion(x, y, region);
                 }
             }
         }
@@ -328,7 +328,7 @@
         public void Fill() {
             for (var x = 0; x < WorldUtils.WORLD_GRID; x++) {
                 for (var y = 0; y < WorldUtils.WORLD_GRID; y++) {
-                    var region = this.World.GetRegion(x, y);
+                    var region = World.GetRegion(x, y);
 
                     //See if this is already ocean
                     if (region.Climate != ClimateType.Invalid)
@@ -338,17 +338,17 @@
                     region.GeoDetail = 20;
 
                     //Have them trend more hilly in dry areas
-                    var rand = this.Random.Next() % 8;
+                    var rand = Random.Next() % 8;
                     if (region.Moisture > 0.3f && region.Temperature > 0.5f) {
-                        region.HasFlowers = this.Random.Next() % 4 == 0;
-                        var shape = this.Random.Next();
-                        var color = FlowerPalette[this.Random.Next() % FlowerPalette.Length];
+                        region.HasFlowers = Random.Next() % 4 == 0;
+                        var shape = Random.Next();
+                        var color = FlowerPalette[Random.Next() % FlowerPalette.Length];
                         for (var i = 0; i < region.Flowers.Length; i++) {
                             region.Flowers[i].Color = color;
                             region.Flowers[i].Shape = shape;
-                            if ((this.Random.Next() % 15) == 0) {
-                                shape = this.Random.Next();
-                                color = FlowerPalette[this.Random.Next() % FlowerPalette.Length];
+                            if ((Random.Next() % 15) == 0) {
+                                shape = Random.Next();
+                                color = FlowerPalette[Random.Next() % FlowerPalette.Length];
                             }
                         }
                     }
@@ -386,7 +386,7 @@
                         break;
                     }
 
-                    this.World.SetRegion(x, y, region);
+                    World.SetRegion(x, y, region);
                 }
             }
         }
@@ -395,11 +395,11 @@
             var walk = new Coord();
             bool rolledOver;
             do {
-                var region = this.World.GetRegion(walk.X, walk.Y);
-                region.TreeType = this.World.GetTreeType(region.Moisture, region.Temperature);
+                var region = World.GetRegion(walk.X, walk.Y);
+                region.TreeType = World.GetTreeType(region.Moisture, region.Temperature);
                 if (region.Climate == ClimateType.Forest)
-                    region.TreeType = this.World.TreeCanopy;
-                this.World.SetRegion(walk.X, walk.Y, region);
+                    region.TreeType = World.TreeCanopy;
+                World.SetRegion(walk.X, walk.Y, region);
                 walk = walk.Walk(WorldUtils.WORLD_GRID, out rolledOver);
             } while (!rolledOver);
         }
@@ -410,8 +410,8 @@
             const int range = WorldUtils.WORLD_GRID_CENTER / 4;
             while (lakes < count && cycles < 100) {
                 //Pick a random spot in the middle of the map
-                var x = WorldUtils.WORLD_GRID_CENTER + (this.World.GetNoiseI(cycles) % range) - range / 2;
-                var y = WorldUtils.WORLD_GRID_CENTER + (this.World.GetNoiseI(cycles * 2) % range) - range / 2;
+                var x = WorldUtils.WORLD_GRID_CENTER + (World.GetNoiseI(cycles) % range) - range / 2;
+                var y = WorldUtils.WORLD_GRID_CENTER + (World.GetNoiseI(cycles * 2) % range) - range / 2;
                 //Now push that point away from the middle
                 var shove = GetMapSide(x, y) * range;
                 if (TryLake(x + shove.X, y + shove.Y, lakes))
@@ -424,7 +424,7 @@
             //define the oceans at the edge of the World
             for (var x = 0; x < WorldUtils.WORLD_GRID; x++) {
                 for (var y = 0; y < WorldUtils.WORLD_GRID; y++) {
-                    var region = this.World.GetRegion(x, y);
+                    var region = World.GetRegion(x, y);
                     var isOcean = (region.GeoScale <= 0);
                     if (x == 0 || y == 0 || x == WorldUtils.WORLD_GRID - 1 || y == WorldUtils.WORLD_GRID - 1)
                         isOcean = true;
@@ -437,7 +437,7 @@
                         region.ColorAtmosphere = new Color3(0.7f, 0.7f, 1);
                         region.Climate = ClimateType.Ocean;
                         region.Title = $"{GetDirectionName(x, y)} Ocean";
-                        this.World.SetRegion(x, y, region);
+                        World.SetRegion(x, y, region);
                     }
                 }
             }
@@ -445,7 +445,7 @@
 
         public void Prepare() {
             //Set some defaults
-            var offset = new Coord(this.Random.Next() % 1024, this.Random.Next() % 1024);
+            var offset = new Coord(Random.Next() % 1024, Random.Next() % 1024);
             for (var x = 0; x < WorldUtils.WORLD_GRID; x++) {
                 for (var y = 0; y < WorldUtils.WORLD_GRID; y++) {
                     var fromCenter = new Coord(
@@ -460,8 +460,8 @@
                     if (geoScale > 1)
                         geoScale = 1 + (geoScale - 1) * 4;
                     geoScale = 1 - geoScale;
-                    geoScale += (this.Entropy.GetEntropy((x + offset.X), (y + offset.Y)) - 0.5f);
-                    geoScale += (this.Entropy.GetEntropy((x + offset.X) * FREQUENCY, (y + offset.Y) * FREQUENCY) - 0.2f);
+                    geoScale += (Entropy.GetEntropy((x + offset.X), (y + offset.Y)) - 0.5f);
+                    geoScale += (Entropy.GetEntropy((x + offset.X) * FREQUENCY, (y + offset.Y) * FREQUENCY) - 0.2f);
                     geoScale = MathHelper.Clamp(geoScale, -1, 1);
 
                     var region = new Region {
@@ -478,7 +478,7 @@
                         Climate = ClimateType.Invalid
                     };
 
-                    this.World.SetRegion(x, y, region);
+                    World.SetRegion(x, y, region);
                 }
             }
         }
@@ -488,8 +488,8 @@
             var cycles = 0;
             const int range = WorldUtils.WORLD_GRID_CENTER / 3;
             while (rivers < count && cycles < 100) {
-                var x = WorldUtils.WORLD_GRID_CENTER + (this.Random.Next() % range) - range / 2;
-                var y = WorldUtils.WORLD_GRID_CENTER + (this.Random.Next() % range) - range / 2;
+                var x = WorldUtils.WORLD_GRID_CENTER + (Random.Next() % range) - range / 2;
+                var y = WorldUtils.WORLD_GRID_CENTER + (Random.Next() % range) - range / 2;
                 if (TryRiver(x, y, rivers))
                     rivers++;
                 cycles++;
@@ -505,9 +505,9 @@
             do {
                 var x = walk.X;
                 var y = walk.Y;
-                var radius = 2 + this.World.GetNoiseI(10 + walk.X + walk.Y * WorldUtils.WORLD_GRID) % 9;
+                var radius = 2 + World.GetNoiseI(10 + walk.X + walk.Y * WorldUtils.WORLD_GRID) % 9;
                 if (IsFree(x, y, radius)) {
-                    var region = this.World.GetRegion(x, y);
+                    var region = World.GetRegion(x, y);
                     climates.Clear();
                     //swamps only appear in wet areas that aren't cold.
                     if (region.Moisture > 0.8f && region.Temperature > 0.5f)
@@ -528,7 +528,7 @@
                     //Rocky wastelands favor cold areas
                     if (region.Temperature < TEMP_TEMPERATE)
                         climates.Add(ClimateType.Rocky);
-                    if (radius > 1 && this.World.GetNoiseI(spinner++) % 10 == 0)
+                    if (radius > 1 && World.GetNoiseI(spinner++) % 10 == 0)
                         climates.Add(ClimateType.Canyon);
                     if (region.Temperature > TEMP_TEMPERATE && region.Temperature < TEMP_HOT && region.Moisture > 0.5f)
                         climates.Add(ClimateType.Forest);
@@ -537,7 +537,7 @@
                         continue;
                     }
 
-                    var climateType = climates[this.Random.Next() % climates.Count];
+                    var climateType = climates[Random.Next() % climates.Count];
                     switch (climateType) {
                     case ClimateType.Rocky:
                         DoRocky(x, y, radius);
@@ -581,11 +581,11 @@
                 var fade = MathUtils.Scalar(temperature, WorldUtils.FREEZING, 1);
 
                 //Warm rock is red
-                var warmRock = new Color3(1, 1 - (float) this.Random.NextDouble() * 0.6f,
-                    1 - (float) this.Random.NextDouble() * 0.6f);
+                var warmRock = new Color3(1, 1 - (float) Random.NextDouble() * 0.6f,
+                    1 - (float) Random.NextDouble() * 0.6f);
 
                 //Cold rock is white or blue
-                var val = 1 - (float) this.Random.NextDouble() * 0.4f;
+                var val = 1 - (float) Random.NextDouble() * 0.4f;
                 var coldRock = new Color3(1, val, val);
                 return ColorUtils.Interpolate(coldRock, warmRock, fade);
             }
@@ -596,18 +596,18 @@
 
         private Color3 GenerateGrassColor(float moisture, float temperature, int seed) {
             var wetGrass = new Color3(
-                this.World.GetNoiseF(seed++) * 0.3f,
-                0.4f + this.World.GetNoiseF(seed++) * 0.6f,
-                this.World.GetNoiseF(seed++) * 0.3f);
+                World.GetNoiseF(seed++) * 0.3f,
+                0.4f + World.GetNoiseF(seed++) * 0.6f,
+                World.GetNoiseF(seed++) * 0.3f);
 
             //Dry grass is mostly reds and oranges
             var dryGrass = new Color3(
-                0.7f + this.World.GetNoiseF(seed++) * 0.3f,
-                0.5f + this.World.GetNoiseF(seed++) * 0.5f,
-                0 + this.World.GetNoiseF(seed++) * 0.3f);
+                0.7f + World.GetNoiseF(seed++) * 0.3f,
+                0.5f + World.GetNoiseF(seed++) * 0.5f,
+                0 + World.GetNoiseF(seed++) * 0.3f);
 
             //Dead grass is pale beige
-            var deadGrass = new Color3(0.7f, 0.6f, 0.5f) * (0.7f + this.World.GetNoiseF(seed++) * 0.3f);
+            var deadGrass = new Color3(0.7f, 0.6f, 0.5f) * (0.7f + World.GetNoiseF(seed++) * 0.3f);
             Color3 warmGrass;
             float fade;
             if (moisture < 0.5f) {
@@ -620,9 +620,9 @@
 
             //cold grass is pale and a little blue
             var coldGrass = new Color3(
-                0.5f + this.World.GetNoiseF(seed++) * 0.2f,
-                0.8f + this.World.GetNoiseF(seed++) * 0.2f,
-                0.7f + this.World.GetNoiseF(seed) * 0.2f);
+                0.5f + World.GetNoiseF(seed++) * 0.2f,
+                0.8f + World.GetNoiseF(seed++) * 0.2f,
+                0.7f + World.GetNoiseF(seed) * 0.2f);
 
             return (temperature < TEMP_COLD)
                 ? ColorUtils.Interpolate(coldGrass, warmGrass, temperature / TEMP_COLD)
@@ -632,17 +632,17 @@
         private Color3 GenerateDirtColor(float moisture, float temperature, int seed) {
             //Devise a random but plausible dirt color
             //Dry dirts are mostly reds, oranges, and browns
-            var red = 0.4f + this.World.GetNoiseF(seed++) * 0.6f;
+            var red = 0.4f + World.GetNoiseF(seed++) * 0.6f;
             //var green = Math.Min(0.4f + this.World.GetNoiseF(seed++) * 0.6f, red);
-            var green = 0.1f + this.World.GetNoiseF(seed++) * 0.5f;
-            var blue = Math.Min(0.2f + this.World.GetNoiseF(seed++) * 0.4f, green);
+            var green = 0.1f + World.GetNoiseF(seed++) * 0.5f;
+            var blue = Math.Min(0.2f + World.GetNoiseF(seed++) * 0.4f, green);
             var dryDirt = new Color3(red, green, blue);
 
             //wet dirt is various browns
-            var fade = this.World.GetNoiseF(seed++) * 0.6f;
+            var fade = World.GetNoiseF(seed++) * 0.6f;
             var wetDirt = new Color3(
                 0.2f + fade,
-                0.1f + fade + this.World.GetNoiseF(seed) * 0.1f,
+                0.1f + fade + World.GetNoiseF(seed) * 0.1f,
                 fade / 2);
 
             //cold dirt is pale
@@ -659,7 +659,7 @@
         ///<summary> Place a canyon </summary>
         private void DoCanyon(int x, int y, int radius) {
             for (var yy = -radius; yy <= radius; yy++) {
-                var region = this.World.GetRegion(x, yy + y);
+                var region = World.GetRegion(x, yy + y);
                 var step = Math.Abs(yy) / (float) radius;
                 step = 1 - step;
                 region.Title = "Canyon";
@@ -667,7 +667,7 @@
                 region.GeoDetail = 5 + step * 25;
                 //r.GeoDetail = 1;
                 region.ShapeFlags |= RegionFlags.CanyonNS | RegionFlags.NoBlend;
-                this.World.SetRegion(x, y + yy, region);
+                World.SetRegion(x, y + yy, region);
             }
         }
 
@@ -675,14 +675,14 @@
         private void DoDesert(int x, int y, int size) {
             for (var xx = -size; xx <= size; xx++) {
                 for (var yy = -size; yy <= size; yy++) {
-                    var region = this.World.GetRegion(xx + x, yy + y);
+                    var region = World.GetRegion(xx + x, yy + y);
                     region.Title = "Desert";
                     region.Climate = ClimateType.Desert;
                     region.ColorAtmosphere = new Color3(0.6f, 0.3f, 0.1f);
                     region.GeoDetail = 8;
                     region.GeoBias = 4;
                     region.TreeThreshold = 0;
-                    this.World.SetRegion(x + xx, y + yy, region);
+                    World.SetRegion(x + xx, y + yy, region);
                 }
             }
         }
@@ -691,14 +691,14 @@
         private void DoField(int x, int y, int size) {
             for (var xx = -size; xx <= size; xx++) {
                 for (var yy = -size; yy <= size; yy++) {
-                    var region = this.World.GetRegion(xx + x, yy + y);
+                    var region = World.GetRegion(xx + x, yy + y);
                     region.Title = "Field";
                     region.Climate = ClimateType.Field;
                     AddFlowers(region, 4);
                     region.ColorAtmosphere = new Color3(0.8f, 0.7f, 0.2f);
                     region.GeoDetail = 8;
                     region.ShapeFlags |= RegionFlags.NoBlend;
-                    this.World.SetRegion(x + xx, y + yy, region);
+                    World.SetRegion(x + xx, y + yy, region);
                 }
             }
         }
@@ -707,14 +707,14 @@
         private void DoForest(int x, int y, int size) {
             for (var xx = -size; xx <= size; xx++) {
                 for (var yy = -size; yy <= size; yy++) {
-                    var region = this.World.GetRegion(xx + x, yy + y);
+                    var region = World.GetRegion(xx + x, yy + y);
                     region.Title = "Forest";
                     region.Climate = ClimateType.Forest;
                     region.ColorAtmosphere = new Color3(0, 0, 0.5f);
                     region.GeoDetail = 8;
                     region.TreeThreshold = 0.66f;
                     //r.ShapeFlags |= RegionFlags.NoBlend;
-                    this.World.SetRegion(x + xx, y + yy, region);
+                    World.SetRegion(x + xx, y + yy, region);
                 }
             }
         }
@@ -723,7 +723,7 @@
         private void DoMountain(int x, int y, int size) {
             for (var xx = -size; xx <= size; xx++) {
                 for (var yy = -size; yy <= size; yy++) {
-                    var region = this.World.GetRegion(xx + x, yy + y);
+                    var region = World.GetRegion(xx + x, yy + y);
                     var step = (Math.Max(Math.Abs(xx), Math.Abs(yy)));
                     if (step == 0) {
                         region.Title = "Mountain Summit";
@@ -735,32 +735,32 @@
 
                     region.MountainHeight = 1 + (size - step);
                     region.GeoDetail = 13 + region.MountainHeight * 7;
-                    region.GeoBias = (this.World.GetNoiseF(xx + yy) * 0.5f + region.MountainHeight) * WorldUtils.REGION_SIZE / 2;
+                    region.GeoBias = (World.GetNoiseF(xx + yy) * 0.5f + region.MountainHeight) * WorldUtils.REGION_SIZE / 2;
                     region.ShapeFlags = RegionFlags.NoBlend;
                     region.Climate = ClimateType.Mountain;
-                    this.World.SetRegion(xx + x, yy + y, region);
+                    World.SetRegion(xx + x, yy + y, region);
                 }
             }
         }
 
         ///<summary> Place some plains </summary>
         private void DoPlains(int x, int y, int size) {
-            var region = this.World.GetRegion(x, y);
+            var region = World.GetRegion(x, y);
             var water = region.GeoWater;
             for (var xx = -size; xx <= size; xx++) {
                 for (var yy = -size; yy <= size; yy++) {
-                    region = this.World.GetRegion(xx + x, yy + y);
+                    region = World.GetRegion(xx + x, yy + y);
                     region.Title = "Plains";
                     region.Climate = ClimateType.Plains;
                     region.ColorAtmosphere = new Color3(0.9f, 0.9f, 0.6f);
                     region.GeoWater = water;
                     region.GeoBias = 8;
                     region.Moisture = 1;
-                    region.TreeThreshold = 0.1f + this.World.GetNoiseF(x + xx + (y + yy) * WorldUtils.WORLD_GRID) * 0.2f;
-                    region.GeoDetail = 1.5f + this.World.GetNoiseF(x + xx + (y + yy) * WorldUtils.WORLD_GRID) * 2;
+                    region.TreeThreshold = 0.1f + World.GetNoiseF(x + xx + (y + yy) * WorldUtils.WORLD_GRID) * 0.2f;
+                    region.GeoDetail = 1.5f + World.GetNoiseF(x + xx + (y + yy) * WorldUtils.WORLD_GRID) * 2;
                     AddFlowers(region, 8);
                     region.ShapeFlags |= RegionFlags.NoBlend;
-                    this.World.SetRegion(x + xx, y + yy, region);
+                    World.SetRegion(x + xx, y + yy, region);
                 }
             }
         }
@@ -769,23 +769,23 @@
         private void DoRocky(int x, int y, int size) {
             for (var xx = -size; xx <= size; xx++) {
                 for (var yy = -size; yy <= size; yy++) {
-                    var region = this.World.GetRegion(xx + x, yy + y);
+                    var region = World.GetRegion(xx + x, yy + y);
                     region.Title = "Rocky Wasteland";
                     region.GeoDetail = 40;
                     //r.ShapeFlags = RegionFlags.NoBlend;
                     region.Climate = ClimateType.Rocky;
-                    this.World.SetRegion(x + xx, y + yy, region);
+                    World.SetRegion(x + xx, y + yy, region);
                 }
             }
         }
 
         ///<summary> Place a swamp </summary>
         private void DoSwamp(int x, int y, int size) {
-            var region = this.World.GetRegion(x, y);
+            var region = World.GetRegion(x, y);
             var water = region.GeoWater;
             for (var xx = -size; xx <= size; xx++) {
                 for (var yy = -size; yy <= size; yy++) {
-                    region = this.World.GetRegion(xx + x, yy + y);
+                    region = World.GetRegion(xx + x, yy + y);
                     region.Title = "Swamp";
                     region.Climate = ClimateType.Swamp;
                     region.ColorAtmosphere = new Color3(0.4f, 1, 0.6f);
@@ -794,7 +794,7 @@
                     region.GeoDetail = 8;
                     region.HasFlowers = false;
                     region.ShapeFlags |= RegionFlags.NoBlend;
-                    this.World.SetRegion(x + xx, y + yy, region);
+                    World.SetRegion(x + xx, y + yy, region);
                 }
             }
         }
@@ -810,7 +810,7 @@
             var waterLevel = 9999.9f;
             for (var xx = -size; xx <= size; xx++) {
                 for (var yy = -size; yy <= size; yy++) {
-                    var region = this.World.GetRegion(xx + tryX, yy + tryY);
+                    var region = World.GetRegion(xx + tryX, yy + tryY);
                     if (region.Climate != ClimateType.Invalid && region.Climate != ClimateType.River &&
                         region.Climate != ClimateType.RiverBank)
                         return false;
@@ -827,14 +827,14 @@
                     if (depth >= size)
                         continue;
                     depth = size - depth;
-                    var region = this.World.GetRegion(xx + tryX, yy + tryY);
+                    var region = World.GetRegion(xx + tryX, yy + tryY);
                     region.Title = $"Lake{id}";
                     region.GeoWater = waterLevel;
                     region.GeoDetail = 2;
                     region.GeoBias = -4 * depth;
                     region.Climate = ClimateType.Lake;
                     region.ShapeFlags |= RegionFlags.NoBlend;
-                    this.World.SetRegion(xx + tryX, yy + tryY, region);
+                    World.SetRegion(xx + tryX, yy + tryY, region);
                 }
             }
 
@@ -849,7 +849,7 @@
             var y = startY;
             var lastMove = new Coord();
             while (true) {
-                var region = this.World.GetRegion(x, y);
+                var region = World.GetRegion(x, y);
                 //If we run into the ocean, then we're done.
                 if (region.Climate == ClimateType.Ocean)
                     break;
@@ -868,7 +868,7 @@
                 //lowest = 999.9f;
                 var selected = new Coord();
                 foreach (var direction in Directions) {
-                    var neighbor = this.World.GetRegion(x + direction.X, y + direction.Y);
+                    var neighbor = World.GetRegion(x + direction.X, y + direction.Y);
                     //Don't reverse course into ourselves
                     if (lastMove == (direction * -1))
                         continue;
@@ -906,9 +906,9 @@
             x = startX;
             y = startY;
             var waterStrength = 0.03f;
-            var waterLevel = this.World.GetRegion(x, y).GeoWater;
+            var waterLevel = World.GetRegion(x, y).GeoWater;
             for (var d = 0; d < path.Count; d++) {
-                var region = this.World.GetRegion(x, y);
+                var region = World.GetRegion(x, y);
                 if (d == 0)
                     region.Title = $"River{id}-Source";
                 else if (d == path.Count - 1)
@@ -933,7 +933,7 @@
                 Region neighbor;
                 for (var xx = x - 1; xx <= x + 1; xx++) {
                     for (var yy = y - 1; yy <= y + 1; yy++) {
-                        neighbor = this.World.GetRegion(xx, yy);
+                        neighbor = World.GetRegion(xx, yy);
                         if (neighbor.Climate != ClimateType.Invalid)
                             continue;
                         if (xx == 0 && yy == 0)
@@ -944,13 +944,13 @@
                         neighbor.Climate = ClimateType.RiverBank;
                         neighbor.ShapeFlags |= RegionFlags.NoBlend;
                         neighbor.Title = $"River{id}-Banks";
-                        this.World.SetRegion(xx, yy, neighbor);
+                        World.SetRegion(xx, yy, neighbor);
                     }
                 }
 
                 var selected = path[d];
                 //neighbor = &continent[x + selected.X, y + selected.Y];
-                neighbor = this.World.GetRegion(x + selected.X, y + selected.Y);
+                neighbor = World.GetRegion(x + selected.X, y + selected.Y);
                 if (selected.Y == -1) {
                     //we're moving north
                     neighbor.ShapeFlags |= RegionFlags.RiverS;
@@ -971,8 +971,8 @@
                     region.ShapeFlags |= RegionFlags.RiverE;
                 }
 
-                this.World.SetRegion(x, y, region);
-                this.World.SetRegion(x + selected.X, y + selected.Y, neighbor);
+                World.SetRegion(x, y, region);
+                World.SetRegion(x + selected.X, y + selected.Y, neighbor);
                 x += selected.X;
                 y += selected.Y;
             }
@@ -993,7 +993,7 @@
 
             for (var xx = start.X; xx <= end.X; xx++)
                 for (var yy = start.Y; yy <= end.Y; yy++)
-                    if (this.World.GetRegion(xx, yy).Climate == climate)
+                    if (World.GetRegion(xx, yy).Climate == climate)
                         return true;
 
             return false;
@@ -1028,7 +1028,7 @@
                         return false;
                     if (y + yy < 0 || y + yy >= WorldUtils.WORLD_GRID)
                         return false;
-                    var region = this.World.GetRegion(x + xx, y + yy);
+                    var region = World.GetRegion(x + xx, y + yy);
                     if (region.Climate != ClimateType.Invalid)
                         return false;
                 }
@@ -1039,15 +1039,15 @@
 
         ///<summary> Gives a 1 in 'odds' chance of adding flowers to the given region. </summary>
         private void AddFlowers(Region region, int odds) {
-            region.HasFlowers = this.Random.Next() % odds == 0;
-            var shape = this.Random.Next();
-            var c = FlowerPalette[this.Random.Next() % FlowerPalette.Length];
+            region.HasFlowers = Random.Next() % odds == 0;
+            var shape = Random.Next();
+            var c = FlowerPalette[Random.Next() % FlowerPalette.Length];
             for (var i = 0; i < region.Flowers.Length; i++) {
                 region.Flowers[i].Color = c;
                 region.Flowers[i].Shape = shape;
-                if ((this.Random.Next() % 15) == 0) {
-                    shape = this.Random.Next();
-                    c = FlowerPalette[this.Random.Next() % FlowerPalette.Length];
+                if ((Random.Next() % 15) == 0) {
+                    shape = Random.Next();
+                    c = FlowerPalette[Random.Next() % FlowerPalette.Length];
                 }
             }
         }

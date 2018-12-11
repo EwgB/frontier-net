@@ -74,26 +74,26 @@
         public bool NorthernHemisphere { get; private set; }
 
         private float[] noiseF = new float[NOISE_BUFFER];
-        public float GetNoiseF(int index) => this.noiseF[Math.Abs(index % NOISE_BUFFER)];
+        public float GetNoiseF(int index) => noiseF[Math.Abs(index % NOISE_BUFFER)];
 
         private int[] noiseI = new int[NOISE_BUFFER];
-        public int GetNoiseI(int index) => this.noiseI[Math.Abs(index % NOISE_BUFFER)];
+        public int GetNoiseI(int index) => noiseI[Math.Abs(index % NOISE_BUFFER)];
 
 
         private readonly Region[,] regions = new Region[WorldUtils.WORLD_GRID, WorldUtils.WORLD_GRID];
-        public Region GetRegion(int x, int y) => this.regions[x, y];
-        public void SetRegion(int x, int y, Region region) => this.regions[x, y] = region;
+        public Region GetRegion(int x, int y) => regions[x, y];
+        public void SetRegion(int x, int y, Region region) => regions[x, y] = region;
 
         public Region GetRegionFromPosition(int worldX, int worldY) {
             worldX = Math.Max(worldX, 0);
             worldY = Math.Max(worldY, 0);
-            worldX += this.dithermap[worldX % DITHER_SIZE, worldY % DITHER_SIZE].X;
-            worldY += this.dithermap[worldX % DITHER_SIZE, worldY % DITHER_SIZE].Y;
+            worldX += dithermap[worldX % DITHER_SIZE, worldY % DITHER_SIZE].X;
+            worldY += dithermap[worldX % DITHER_SIZE, worldY % DITHER_SIZE].Y;
             worldX /= WorldUtils.REGION_SIZE;
             worldY /= WorldUtils.REGION_SIZE;
             if (worldX >= WorldUtils.WORLD_GRID || worldY >= WorldUtils.WORLD_GRID)
-                return this.regions[0, 0];
-            return this.regions[worldX, worldY];
+                return regions[0, 0];
+            return regions[worldX, worldY];
         }
 
 
@@ -115,25 +115,25 @@
 
 
         public WorldImpl(IGame game, IEntropy entropy, ITerraform terraform) {
-            this.Game = game;
-            this.Entropy = entropy;
-            this.Terraform = terraform;
+            Game = game;
+            Entropy = entropy;
+            Terraform = terraform;
         }
 
         public void Init() {
             //Fill in the dither table - a table of random offsets
             for (var y = 0; y < DITHER_SIZE; y++) {
                 for (var x = 0; x < DITHER_SIZE; x++) {
-                    this.dithermap[x, y] = new Coord(
-                        this.Random.Next() % DITHER_SIZE + this.Random.Next() % DITHER_SIZE,
-                        this.Random.Next() % DITHER_SIZE + this.Random.Next() % DITHER_SIZE);
+                    dithermap[x, y] = new Coord(
+                        Random.Next() % DITHER_SIZE + Random.Next() % DITHER_SIZE,
+                        Random.Next() % DITHER_SIZE + Random.Next() % DITHER_SIZE);
                 }
             }
         }
 
 
         public Cell GetCell(int worldX, int worldY) {
-            var detail = this.Entropy.GetEntropy(worldX, worldY);
+            var detail = Entropy.GetEntropy(worldX, worldY);
             var bias = GetBiasLevel(worldX, worldY);
             var waterLevel = GetWaterLevel(worldX, worldY);
             var origin = new Coord(
@@ -188,8 +188,8 @@
 
             var x = Math.Max(worldX % DITHER_SIZE, 0);
             var y = Math.Max(worldY % DITHER_SIZE, 0);
-            worldX += this.dithermap[x, y].X;
-            worldY += this.dithermap[x, y].Y;
+            worldX += dithermap[x, y].X;
+            worldY += dithermap[x, y].Y;
             offset.X = (float) (worldX % WorldUtils.REGION_SIZE) / WorldUtils.REGION_SIZE;
             offset.Y = (float) (worldY % WorldUtils.REGION_SIZE) / WorldUtils.REGION_SIZE;
             var origin = new Coord(
@@ -234,41 +234,41 @@
         public ITree GetTree(int id) {
             var m = id % TREE_TYPES;
             var t = (id - m) / TREE_TYPES;
-            return this.trees[m, t];
+            return trees[m, t];
         }
 
         public void Generate(int seed) {
-            this.Random = Randoms.Create(seed);
-            this.Seed = seed;
+            Random = Randoms.Create(seed);
+            Seed = seed;
 
             for (var x = 0; x < NOISE_BUFFER; x++) {
-                this.noiseI[x] = this.Random.Next();
-                this.noiseF[x] = (float) this.Random.NextDouble();
+                noiseI[x] = Random.Next();
+                noiseF[x] = (float) Random.NextDouble();
             }
 
             BuildTrees();
-            this.WindFromWest = (this.Random.Next() % 2 == 0);
-            this.NorthernHemisphere = (this.Random.Next() % 2 == 0);
-            this.RiverCount = 4 + this.Random.Next() % 4;
-            this.LakeCount = 1 + this.Random.Next() % 4;
-            this.Terraform.Prepare();
-            this.Terraform.Oceans();
-            this.Terraform.Coast();
-            this.Terraform.Climate();
-            this.Terraform.Rivers(this.RiverCount);
-            this.Terraform.Lakes(this.LakeCount);
-            this.Terraform.Climate(); //Do climate a second time now that rivers are in
-            this.Terraform.Zones();
-            this.Terraform.Climate(); //Now again, since we have added climate-modifying features (Mountains, etc.)
-            this.Terraform.Fill();
-            this.Terraform.Average();
-            this.Terraform.Flora();
-            this.Terraform.Colors();
+            WindFromWest = (Random.Next() % 2 == 0);
+            NorthernHemisphere = (Random.Next() % 2 == 0);
+            RiverCount = 4 + Random.Next() % 4;
+            LakeCount = 1 + Random.Next() % 4;
+            Terraform.Prepare();
+            Terraform.Oceans();
+            Terraform.Coast();
+            Terraform.Climate();
+            Terraform.Rivers(RiverCount);
+            Terraform.Lakes(LakeCount);
+            Terraform.Climate(); //Do climate a second time now that rivers are in
+            Terraform.Zones();
+            Terraform.Climate(); //Now again, since we have added climate-modifying features (Mountains, etc.)
+            Terraform.Fill();
+            Terraform.Average();
+            Terraform.Flora();
+            Terraform.Colors();
             BuildMapTexture();
         }
 
         public void Load(int seed) {
-            var filename = Path.Combine(this.Game.GameDirectory, "world.sav");
+            var filename = Path.Combine(Game.GameDirectory, "world.sav");
 
             try {
                 using (var reader = new BinaryReader(File.OpenRead(filename))) {
@@ -302,27 +302,27 @@
         }
 
         private void ReadWorldData(BinaryReader reader) {
-            this.Seed = reader.ReadInt32();
-            this.WindFromWest = reader.ReadBoolean();
-            this.NorthernHemisphere = reader.ReadBoolean();
-            this.RiverCount = reader.ReadInt32();
-            this.LakeCount = reader.ReadInt32();
+            Seed = reader.ReadInt32();
+            WindFromWest = reader.ReadBoolean();
+            NorthernHemisphere = reader.ReadBoolean();
+            RiverCount = reader.ReadInt32();
+            LakeCount = reader.ReadInt32();
 
             // Read float noise. Convert bytes to float array.
             var bytes = reader.ReadBytes(NOISE_BUFFER * sizeof(float));
-            this.noiseF = new float[bytes.Length / sizeof(float)];
-            Buffer.BlockCopy(this.noiseF, 0, bytes, 0, bytes.Length);
+            noiseF = new float[bytes.Length / sizeof(float)];
+            Buffer.BlockCopy(noiseF, 0, bytes, 0, bytes.Length);
 
             // Read int noise. Convert bytes to int array.
             bytes = reader.ReadBytes(NOISE_BUFFER * sizeof(int));
-            this.noiseI = new int[bytes.Length / sizeof(int)];
-            Buffer.BlockCopy(this.noiseI, 0, bytes, 0, bytes.Length);
+            noiseI = new int[bytes.Length / sizeof(int)];
+            Buffer.BlockCopy(noiseI, 0, bytes, 0, bytes.Length);
 
             // Read region data.
             for (var x = 0; x < WorldUtils.WORLD_GRID ; x++) {
                 for (var y = 0; y < WorldUtils.WORLD_GRID ; y++) {
                     var region = ReadRegion(reader);
-                    this.regions[x, y] = region;
+                    regions[x, y] = region;
                 }
             }
         }
@@ -370,7 +370,7 @@
 
             return;
             // TODO: Why was this all non-functional?
-            var filename = $"{this.Game.GameDirectory}world.sav";
+            var filename = $"{Game.GameDirectory}world.sav";
             try { } catch (FileNotFoundException e) {
                 Log.Debug("[Save] Could not open file {0}", filename);
             }
@@ -583,22 +583,22 @@
                     bool isCanopy;
                     if ((m == TREE_TYPES / 2) && (t == TREE_TYPES / 2)) {
                         isCanopy = true;
-                        this.TreeCanopy = m + t * TREE_TYPES;
+                        TreeCanopy = m + t * TREE_TYPES;
                     } else
                         isCanopy = false;
 
-                    this.trees[m, t].Create(isCanopy, (float) m / TREE_TYPES, (float) t / TREE_TYPES, rotator++);
+                    trees[m, t].Create(isCanopy, (float) m / TREE_TYPES, (float) t / TREE_TYPES, rotator++);
                 }
             }
         }
 
         private void BuildMapTexture() {
-            if (this.MapId == 0) {
+            if (MapId == 0) {
                 GL.GenTextures(1, out int mapId);
-                this.MapId = mapId;
+                MapId = mapId;
             }
 
-            GL.BindTexture(TextureTarget.Texture2D, this.MapId);
+            GL.BindTexture(TextureTarget.Texture2D, MapId);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
                 (float) TextureMinFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,
@@ -610,7 +610,7 @@
                 for (var y = 0; y < WorldUtils.WORLD_GRID; y++) {
                     //Flip it vertically, because the OpenGL texture coord system is retarded.
                     var yy = (WorldUtils.WORLD_GRID - 1) - y;
-                    var region = this.regions[x, yy];
+                    var region = regions[x, yy];
                     var bufferIndex = (x + y * WorldUtils.WORLD_GRID) * 3;
                     buffer[bufferIndex] = (byte) (region.ColorMap.R * 255);
                     buffer[bufferIndex + 1] = (byte) (region.ColorMap.G * 255);

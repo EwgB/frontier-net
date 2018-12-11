@@ -39,28 +39,28 @@
         private readonly IKernel kernel;
 
         private ICache cache;
-        private ICache Cache => this.cache ?? (this.cache = this.kernel.Get<ICache>());
+        private ICache Cache => cache ?? (cache = kernel.Get<ICache>());
 
         private GameWindow gameWindow;
-        private GameWindow GameWindow => this.gameWindow ?? (this.gameWindow = this.kernel.Get<GameWindow>());
+        private GameWindow GameWindow => gameWindow ?? (gameWindow = kernel.Get<GameWindow>());
 
         private IInput input;
-        private IInput Input => this.input ?? (this.input = this.kernel.Get<IInput>());
+        private IInput Input => input ?? (input = kernel.Get<IInput>());
 
         private IParticles particles;
-        private IParticles Particles => this.particles ?? (this.particles = this.kernel.Get<IParticles>());
+        private IParticles Particles => particles ?? (particles = kernel.Get<IParticles>());
 
         private IText text;
-        private IText Text => this.text ?? (this.text = this.kernel.Get<IText>());
+        private IText Text => text ?? (text = kernel.Get<IText>());
 
         private ITextures textures;
-        private ITextures Textures => this.textures ?? (this.textures = this.kernel.Get<ITextures>());
+        private ITextures Textures => textures ?? (textures = kernel.Get<ITextures>());
 
         private IWorld world;
-        private IWorld World => this.world ?? (this.world = this.kernel.Get<IWorld>());
+        private IWorld World => world ?? (world = kernel.Get<IWorld>());
 
         private IFigure figure;
-        private IFigure Figure => this.figure ?? (this.figure = this.kernel.Get<IFigure>());
+        private IFigure Figure => figure ?? (figure = kernel.Get<IFigure>());
 
         #endregion
 
@@ -68,13 +68,13 @@
 
         private Vector3 position;
         public Vector3 Position {
-            get => this.position;
+            get => position;
             set {
-                this.position.Z = MathHelper.Clamp(value.Z, -25, 2048);
-                this.position.X = MathHelper.Clamp(value.X, 0, WorldUtils.REGION_SIZE * WorldUtils.WORLD_GRID);
-                this.position.Y = MathHelper.Clamp(value.Y, 0, WorldUtils.REGION_SIZE * WorldUtils.WORLD_GRID);
-                this.CameraPosition = this.position;
-                this.angle = this.CameraAngle = new Vector3(90, 0, 0);
+                position.Z = MathHelper.Clamp(value.Z, -25, 2048);
+                position.X = MathHelper.Clamp(value.X, 0, WorldUtils.REGION_SIZE * WorldUtils.WORLD_GRID);
+                position.Y = MathHelper.Clamp(value.Y, 0, WorldUtils.REGION_SIZE * WorldUtils.WORLD_GRID);
+                CameraPosition = position;
+                angle = CameraAngle = new Vector3(90, 0, 0);
                 DoModel();
             }
         }
@@ -85,7 +85,7 @@
         public AnimTypes AnimationType { get; private set; }
 
         public IAvatarProperties AvatarProperties { get; } = new AvatarProperties();
-        public IProperties Properties => this.AvatarProperties;
+        public IProperties Properties => AvatarProperties;
 
         #endregion
 
@@ -115,7 +115,7 @@
             this.kernel = kernel;
 
             // TODO: Is this the desired behaviour? Where should this be initialised?
-            this.Region = this.World.GetRegion(0, 0);
+            Region = World.GetRegion(0, 0);
         }
 
         public void Init() {
@@ -128,165 +128,165 @@
                     IniStringSet("Animations", AnimTypes.names[i], IniString("Animations", AnimTypes.names[i]));
                 */
             }
-            this.dustParticle = this.Particles.LoadParticles("step");
+            dustParticle = Particles.LoadParticles("step");
         }
 
         public void Update() {
-            if (this.Input.KeyState(Key.ControlLeft))
+            if (Input.KeyState(Key.ControlLeft))
                 Look(0, 1);
 
-            var elapsed = (float)Math.Min(this.GameWindow.UpdateTime, 0.25f);
-            this.desiredMovement = Vector2.Zero;
-            if (this.Input.KeyPressed(Key.Space) && this.onGround) {
-                this.velocity = JUMP_SPEED;
-                this.onGround = false;
+            var elapsed = (float)Math.Min(GameWindow.UpdateTime, 0.25f);
+            desiredMovement = Vector2.Zero;
+            if (Input.KeyPressed(Key.Space) && onGround) {
+                velocity = JUMP_SPEED;
+                onGround = false;
             }
-            if (this.Input.KeyPressed(Key.F2))
-                this.AvatarProperties.Flying ^= true; // Invert Flying
+            if (Input.KeyPressed(Key.F2))
+                AvatarProperties.Flying ^= true; // Invert Flying
             //Joystick movement
-            Look((int)(this.Input.Joystick[3] * 5.0f), (int)(this.Input.Joystick[4] * -5.0f));
-            DoMove(new Vector3(this.Input.Joystick[0], this.Input.Joystick[1], 0));
-            if (this.Input.Mouselook) {
-                if (this.Input.MouseWheelUp)
-                    this.desiredCamDistance -= 1;
-                if (this.Input.MouseWheelDown)
-                    this.desiredCamDistance += 1;
-                if (this.Input.KeyState(Key.W))
+            Look((int)(Input.Joystick[3] * 5.0f), (int)(Input.Joystick[4] * -5.0f));
+            DoMove(new Vector3(Input.Joystick[0], Input.Joystick[1], 0));
+            if (Input.Mouselook) {
+                if (Input.MouseWheelUp)
+                    desiredCamDistance -= 1;
+                if (Input.MouseWheelDown)
+                    desiredCamDistance += 1;
+                if (Input.KeyState(Key.W))
                     DoMove(-Vector3.UnitY);
-                if (this.Input.KeyState(Key.S))
+                if (Input.KeyState(Key.S))
                     DoMove(Vector3.UnitY);
-                if (this.Input.KeyState(Key.A))
+                if (Input.KeyState(Key.A))
                     DoMove(-Vector3.UnitX);
-                if (this.Input.KeyState(Key.D))
+                if (Input.KeyState(Key.D))
                     DoMove(Vector3.UnitX);
-                DoMove(new Vector3(this.Input.Joystick[0], this.Input.Joystick[1], 0));
+                DoMove(new Vector3(Input.Joystick[0], Input.Joystick[1], 0));
             }
             //Figure out our   speed
             var maxSpeed = MOVE_SPEED;
             float minSpeed = 0;
-            var moving = this.desiredMovement.Length > 0;//"moving" means, "trying to move". (Pressing buttons.)
+            var moving = desiredMovement.Length > 0;//"moving" means, "trying to move". (Pressing buttons.)
             if (moving)
                 minSpeed = MOVE_SPEED * 0.33f;
-            if (this.Input.KeyState(Key.ShiftLeft)) {
-                this.sprinting = true;
+            if (Input.KeyState(Key.ShiftLeft)) {
+                sprinting = true;
                 maxSpeed = SPRINT_SPEED;
             } else {
-                this.sprinting = false;
+                sprinting = false;
             }
-            var desiredAngle = this.currentAngle;
+            var desiredAngle = currentAngle;
             if (moving) {//We're trying to accelerate
-                desiredAngle = MathUtils.Angle(0, 0, this.desiredMovement.X, this.desiredMovement.Y);
-                this.currentSpeed += elapsed * MOVE_SPEED * ACCEL;
+                desiredAngle = MathUtils.Angle(0, 0, desiredMovement.X, desiredMovement.Y);
+                currentSpeed += elapsed * MOVE_SPEED * ACCEL;
             } else //We've stopped pushing forward
-                this.currentSpeed -= elapsed * MOVE_SPEED * DECEL;
-            this.currentSpeed = MathHelper.Clamp(this.currentSpeed, minSpeed, maxSpeed);
+                currentSpeed -= elapsed * MOVE_SPEED * DECEL;
+            currentSpeed = MathHelper.Clamp(currentSpeed, minSpeed, maxSpeed);
             //Now figure out the angle of movement
-            var angleAdjust = MathUtils.AngleDifference(this.currentAngle, desiredAngle);
+            var angleAdjust = MathUtils.AngleDifference(currentAngle, desiredAngle);
             //if we're trying to reverse direction, don't do a huge, arcing turn.  Just slow and double back
             float leanAngle = 0;
             if (Math.Abs(angleAdjust) > 135)
-                this.currentSpeed = SLOW_SPEED;
-            if (Math.Abs(angleAdjust) < 1 || this.currentSpeed <= SLOW_SPEED) {
-                this.currentAngle = desiredAngle;
+                currentSpeed = SLOW_SPEED;
+            if (Math.Abs(angleAdjust) < 1 || currentSpeed <= SLOW_SPEED) {
+                currentAngle = desiredAngle;
             } else {
                 if (Math.Abs(angleAdjust) < 135) {
-                    this.currentAngle -= angleAdjust * elapsed * 2.0f;
+                    currentAngle -= angleAdjust * elapsed * 2.0f;
                     leanAngle = MathHelper.Clamp(angleAdjust / 4.0f, -15, 15);
                 }
             }
-            this.currentMovement.X = (float)-Math.Sin(this.currentAngle * MathUtils.DEGREES_TO_RADIANS);
-            this.currentMovement.Y = (float)-Math.Cos(this.currentAngle * MathUtils.DEGREES_TO_RADIANS);
+            currentMovement.X = (float)-Math.Sin(currentAngle * MathUtils.DEGREES_TO_RADIANS);
+            currentMovement.Y = (float)-Math.Cos(currentAngle * MathUtils.DEGREES_TO_RADIANS);
             //Apply the movement
-            this.currentMovement *= this.currentSpeed * elapsed;
-            this.position.X += this.currentMovement.X;
-            this.position.Y += this.currentMovement.Y;
-            this.desiredCamDistance = MathHelper.Clamp(this.desiredCamDistance, CAM_MIN, CAM_MAX);
-            this.camDistance = MathUtils.Interpolate(this.camDistance, this.desiredCamDistance, elapsed);
-            var ground = this.Cache.GetElevation(this.position.X, this.position.Y);
-            var water = this.World.GetWaterLevel((int) this.position.X, (int) this.position.Y);
-            this.avatarFacing.Y = MathUtils.Interpolate(this.avatarFacing.Y, leanAngle, elapsed);
-            if (!this.AvatarProperties.Flying) {
-                this.velocity -= WorldUtils.GRAVITY * elapsed;
-                this.position.Z += this.velocity * elapsed;
-                if (this.position.Z <= ground) {
-                    this.onGround = true;
-                    this.swimming = false;
-                    this.position.Z = ground;
-                    this.velocity = 0;
-                } else if (this.position.Z > ground + WorldUtils.GRAVITY * 0.1f)
-                    this.onGround = false;
-                if (this.position.Z + SWIM_DEPTH < water) {
-                    this.swimming = true;
-                    this.velocity = 0;
+            currentMovement *= currentSpeed * elapsed;
+            position.X += currentMovement.X;
+            position.Y += currentMovement.Y;
+            desiredCamDistance = MathHelper.Clamp(desiredCamDistance, CAM_MIN, CAM_MAX);
+            camDistance = MathUtils.Interpolate(camDistance, desiredCamDistance, elapsed);
+            var ground = Cache.GetElevation(position.X, position.Y);
+            var water = World.GetWaterLevel((int) position.X, (int) position.Y);
+            avatarFacing.Y = MathUtils.Interpolate(avatarFacing.Y, leanAngle, elapsed);
+            if (!AvatarProperties.Flying) {
+                velocity -= WorldUtils.GRAVITY * elapsed;
+                position.Z += velocity * elapsed;
+                if (position.Z <= ground) {
+                    onGround = true;
+                    swimming = false;
+                    position.Z = ground;
+                    velocity = 0;
+                } else if (position.Z > ground + WorldUtils.GRAVITY * 0.1f)
+                    onGround = false;
+                if (position.Z + SWIM_DEPTH < water) {
+                    swimming = true;
+                    velocity = 0;
                 }
             }
-            var movementAnimation = this.distanceWalked / 4.0f;
-            if (this.onGround)
-                this.distanceWalked += this.currentSpeed * elapsed;
-            if (this.currentMovement.X != 0 && this.currentMovement.Y != 0)
-                this.avatarFacing.Z = -MathUtils.Angle(0, 0, this.currentMovement.X, this.currentMovement.Y);
-            if (this.AvatarProperties.Flying)
-                this.animType = AnimTypes.Flying;
-            else if (this.swimming) {
-                this.animType = this.currentSpeed == 0 ? AnimTypes.Float : AnimTypes.Swim;
-            } else if (!this.onGround) {
-                this.animType = this.velocity > 0 ? AnimTypes.Jump : AnimTypes.Fall;
+            var movementAnimation = distanceWalked / 4.0f;
+            if (onGround)
+                distanceWalked += currentSpeed * elapsed;
+            if (currentMovement.X != 0 && currentMovement.Y != 0)
+                avatarFacing.Z = -MathUtils.Angle(0, 0, currentMovement.X, currentMovement.Y);
+            if (AvatarProperties.Flying)
+                animType = AnimTypes.Flying;
+            else if (swimming) {
+                animType = currentSpeed == 0 ? AnimTypes.Float : AnimTypes.Swim;
+            } else if (!onGround) {
+                animType = velocity > 0 ? AnimTypes.Jump : AnimTypes.Fall;
             }
-            else if (this.currentSpeed == 0)
-                this.animType = AnimTypes.Idle;
-            else if (this.sprinting)
-                this.animType = AnimTypes.Sprint;
+            else if (currentSpeed == 0)
+                animType = AnimTypes.Idle;
+            else if (sprinting)
+                animType = AnimTypes.Sprint;
             else
-                this.animType = AnimTypes.Run;
-            this.Figure.Animate(this.anim[this.animType], movementAnimation);
-            this.Figure.Position = this.position;
-            this.Figure.Rotation = this.avatarFacing;
-            this.Figure.Update();
+                animType = AnimTypes.Run;
+            Figure.Animate(anim[animType], movementAnimation);
+            Figure.Position = position;
+            Figure.Rotation = avatarFacing;
+            Figure.Update();
             var stepTracking = movementAnimation % 1;
-            if (this.animType == AnimTypes.Run || this.animType == AnimTypes.Sprint) {
-                if (stepTracking < this.lastStepTracking || (stepTracking > 0.5f && this.lastStepTracking < 0.5f)) {
-                    this.dustParticle.Colors.Clear();
-                    if (this.position.Z < 0)
-                        this.dustParticle.Colors.Add(new Color3(0.4f, 0.7f, 1));
+            if (animType == AnimTypes.Run || animType == AnimTypes.Sprint) {
+                if (stepTracking < lastStepTracking || (stepTracking > 0.5f && lastStepTracking < 0.5f)) {
+                    dustParticle.Colors.Clear();
+                    if (position.Z < 0)
+                        dustParticle.Colors.Add(new Color3(0.4f, 0.7f, 1));
                     else
-                        this.dustParticle.Colors.Add(this.Cache.GetSurfaceColor((int) this.position.X, (int) this.position.Y));
-                    this.Particles.AddParticles(this.dustParticle, this.position);
+                        dustParticle.Colors.Add(Cache.GetSurfaceColor((int) position.X, (int) position.Y));
+                    Particles.AddParticles(dustParticle, position);
                 }
             }
-            this.lastStepTracking = stepTracking;
-            this.Text.Print("{0} elapsed: {1}", this.animType.ToString(), elapsed);
-            this.Region = this.World.GetRegion(
-                (int)(this.position.X + WorldUtils.REGION_HALF) / WorldUtils.REGION_SIZE,
-                (int)(this.position.Y + WorldUtils.REGION_HALF) / WorldUtils.REGION_SIZE);
+            lastStepTracking = stepTracking;
+            Text.Print("{0} elapsed: {1}", animType.ToString(), elapsed);
+            Region = World.GetRegion(
+                (int)(position.X + WorldUtils.REGION_HALF) / WorldUtils.REGION_SIZE,
+                (int)(position.Y + WorldUtils.REGION_HALF) / WorldUtils.REGION_SIZE);
             DoCamera();
             DoLocation();
         }
 
         public void Render() {
-            GL.BindTexture(TextureTarget.Texture2D, this.Textures.TextureIdFromName("avatar.png"));
+            GL.BindTexture(TextureTarget.Texture2D, Textures.TextureIdFromName("avatar.png"));
             GL.BindTexture(TextureTarget.Texture2D, 0);
-            this.Figure.Render();
-            if (this.AvatarProperties.ShowSkeleton) {
-                this.Figure.RenderSkeleton();
+            Figure.Render();
+            if (AvatarProperties.ShowSkeleton) {
+                Figure.RenderSkeleton();
             }
         }
 
         public void Look(int x, int y) {
-            if (this.AvatarProperties.InvertMouse)
+            if (AvatarProperties.InvertMouse)
                 x = -x;
-            var mouseSensitivity = this.AvatarProperties.MouseSensitivity;
-            this.angle.X -= MathHelper.Clamp(x * mouseSensitivity, 0, 180);
-            this.angle.Z += y * mouseSensitivity;
-            this.angle.Z %= 360;
-            if (this.angle.Z < 0)
-                this.angle.Z += 360;
+            var mouseSensitivity = AvatarProperties.MouseSensitivity;
+            angle.X -= MathHelper.Clamp(x * mouseSensitivity, 0, 180);
+            angle.Z += y * mouseSensitivity;
+            angle.Z %= 360;
+            if (angle.Z < 0)
+                angle.Z += 360;
 
         }
 
         private void DoModel() {
             // TODO
             //this.Figure.LoadX("models//male.X");
-            if (this.AvatarProperties.ExpandAvatar) {
+            if (AvatarProperties.ExpandAvatar) {
                 //    this.Figure.BoneInflate(BONE_PELVIS, 0.02f, true);
                 //    this.Figure.BoneInflate(BONE_HEAD, 0.025f, true);
                 //    this.Figure.BoneInflate(BONE_LWRIST, 0.03f, true);
@@ -334,16 +334,16 @@
         }
 
         private void DoMove(Vector3 delta) {
-            if (this.AvatarProperties.Flying) {
-                var forward = Math.Sin(this.angle.X * MathUtils.DEGREES_TO_RADIANS);
+            if (AvatarProperties.Flying) {
+                var forward = Math.Sin(angle.X * MathUtils.DEGREES_TO_RADIANS);
                 var movement = new Vector3(
-                    (float)(Math.Cos(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.X + Math.Sin(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.Y * forward),
-                    (float)(-Math.Sin(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.X + Math.Cos(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.Y * forward),
-                    (float)Math.Cos(this.angle.X * MathUtils.DEGREES_TO_RADIANS) * delta.Y);
-                this.position += movement;
+                    (float)(Math.Cos(angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.X + Math.Sin(angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.Y * forward),
+                    (float)(-Math.Sin(angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.X + Math.Cos(angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.Y * forward),
+                    (float)Math.Cos(angle.X * MathUtils.DEGREES_TO_RADIANS) * delta.Y);
+                position += movement;
             } else {
-                this.desiredMovement.X += (float)(Math.Cos(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.X + Math.Sin(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.Y);
-                this.desiredMovement.Y += (float)(-Math.Sin(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.X + Math.Cos(this.angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.Y);
+                desiredMovement.X += (float)(Math.Cos(angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.X + Math.Sin(angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.Y);
+                desiredMovement.Y += (float)(-Math.Sin(angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.X + Math.Cos(angle.Z * MathUtils.DEGREES_TO_RADIANS) * delta.Y);
             }
         }
     }

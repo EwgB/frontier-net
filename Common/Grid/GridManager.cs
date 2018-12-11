@@ -21,7 +21,7 @@
 
         private readonly IAvatar avatar;
 
-        public int ItemsReadyCount => this.listPos;
+        public int ItemsReadyCount => listPos;
         
         /// <summary>How many items in the table are within the viewable circle?</summary>
         public int ItemsViewableCount { get; private set; }
@@ -53,22 +53,22 @@
         }
 
         public void Init(List<IGridData> newItems, int newGridSize, int newItemSize) {
-            if (!this.listReady)
+            if (!listReady)
                 DoList();
 
-            this.items = newItems;
-            this.gridSize = newGridSize;
-            this.gridHalf = this.gridSize / 2;
-            this.itemSize = newItemSize;
-            Debug.Assert(this.items.Count == this.gridSize * this.gridSize);
-            this.lastViewer = GetViewPosition(this.avatar.Position);
-            this.listPos = 0;
+            items = newItems;
+            gridSize = newGridSize;
+            gridHalf = gridSize / 2;
+            itemSize = newItemSize;
+            Debug.Assert(items.Count == gridSize * gridSize);
+            lastViewer = GetViewPosition(avatar.Position);
+            listPos = 0;
 
             var walk = new Coord();
-            this.ItemsViewableCount = 0;
-            for (var i = 0; i < this.distanceList.Count; i++) {
-                if (this.distanceList[i].DistanceInt <= this.gridHalf)
-                    this.ItemsViewableCount++;
+            ItemsViewableCount = 0;
+            for (var i = 0; i < distanceList.Count; i++) {
+                if (distanceList[i].DistanceInt <= gridHalf)
+                    ItemsViewableCount++;
                 else
                     break;
             }
@@ -80,95 +80,95 @@
                 //gd.Set (0, 0, 0);
                 //gd.Set ( this.lastViewer.X + walk.X - this.gridHalf,  this.lastViewer.Y + walk.Y - this.gridHalf, 0);
                 //gd.Set (viewer.X + walk.X - this.gridHalf, viewer.Y + walk.Y - this.gridHalf, 0);
-                walk = walk.Walk(this.gridSize, out rollover);
+                walk = walk.Walk(gridSize, out rollover);
             } while (!rollover);
         }
 
         public void Clear() {
-            this.items = null;
-            this.gridSize = 0;
-            this.gridHalf = 0;
-            this.itemSize = 0;
-            this.lastViewer = new Coord();
-            this.listPos = 0;
+            items = null;
+            gridSize = 0;
+            gridHalf = 0;
+            itemSize = 0;
+            lastViewer = new Coord();
+            listPos = 0;
         }
 
         public void RestartProgress() {
-            this.listPos = 0;
+            listPos = 0;
         }
 
         public void Update(double stopAt) {
-            if (null == this.items)
+            if (null == items)
                 return;
-            var viewer = GetViewPosition(this.avatar.Position);
+            var viewer = GetViewPosition(avatar.Position);
             // If the player has moved to a new spot on the grid, restart our outward walk.
-            if (viewer != this.lastViewer) {
-                this.lastViewer = viewer;
-                this.listPos = 0;
+            if (viewer != lastViewer) {
+                lastViewer = viewer;
+                listPos = 0;
             }
 
             // Figure out where the player is in our rolling grid.
             var gridPos = new Coord(
-                this.gridHalf + viewer.X % this.gridSize,
-                this.gridHalf + viewer.Y % this.gridSize);
+                gridHalf + viewer.X % gridSize,
+                gridHalf + viewer.Y % gridSize);
             // Now offset that with the position being updated.
-            gridPos += this.distanceList[this.listPos].Offset;
+            gridPos += distanceList[listPos].Offset;
             // Bring it back into bounds.
             gridPos = new Coord(
-                gridPos.X + this.gridSize % this.gridSize,
-                gridPos.Y + this.gridSize % this.gridSize);
+                gridPos.X + gridSize % gridSize,
+                gridPos.Y + gridSize % gridSize);
 
             var item = GetItem(gridPos);
             var pos = item.GridPosition;
 
             var x = pos.X;
-            if (viewer.X - pos.X > this.gridHalf)
-                x += this.gridSize;
-            else if (pos.X - viewer.X > this.gridHalf)
-                x -= this.gridSize;
+            if (viewer.X - pos.X > gridHalf)
+                x += gridSize;
+            else if (pos.X - viewer.X > gridHalf)
+                x -= gridSize;
 
             var y = pos.Y;
-            if (viewer.Y - pos.Y > this.gridHalf)
-                y += this.gridSize;
-            else if (pos.Y - viewer.Y > this.gridHalf)
-                y -= this.gridSize;
+            if (viewer.Y - pos.Y > gridHalf)
+                y += gridSize;
+            else if (pos.Y - viewer.Y > gridHalf)
+                y -= gridSize;
 
-            pos = new Coord(x, y) + viewer + this.distanceList[this.listPos].Offset;
+            pos = new Coord(x, y) + viewer + distanceList[listPos].Offset;
             var dist = Math.Max(Math.Abs(pos.X - viewer.X), Math.Abs(pos.Y - viewer.Y));
             item.Set(pos, dist);
             item.Update(stopAt);
 
             if (item.IsReady) {
-                this.listPos++;
+                listPos++;
                 // If we reach the outer ring, move back to the center and begin again.
-                if (this.distanceList[this.listPos].DistanceInt > this.gridHalf)
-                    this.listPos = 0;
+                if (distanceList[listPos].DistanceInt > gridHalf)
+                    listPos = 0;
             }
         }
 
         public void Render() {
-            this.items.ForEach(item => item.Render());
+            items.ForEach(item => item.Render());
         }
 
         private IGridData GetItem(Coord c) {
             //No more dicey pointer arithmetic. C# is a more awesome language than C++!
-            return this.items[(c.X % this.gridSize) + (c.Y % this.gridSize) * this.gridSize];
+            return items[(c.X % gridSize) + (c.Y % gridSize) * gridSize];
         }
 
         private Coord GetViewPosition(Vector3 eye) {
             return new Coord(
-                (int) (eye.X / this.itemSize),
-                (int) (eye.Y / this.itemSize));
+                (int) (eye.X / itemSize),
+                (int) (eye.Y / itemSize));
         }
 
         private void DoList() {
-            this.listReady = true;
-            this.distanceList.Capacity = GridUtils.TABLE_SIZE * GridUtils.TABLE_SIZE;
+            listReady = true;
+            distanceList.Capacity = GridUtils.TABLE_SIZE * GridUtils.TABLE_SIZE;
             //  foo2.resize (GridUtils.TABLE_SIZE *  GridUtils.TABLE_SIZE);
             var i = 0;
             for (var x = 0; x < GridUtils.TABLE_SIZE; x++) {
                 for (var y = 0; y < GridUtils.TABLE_SIZE; y++) {
-                    var d = this.distanceList[i];
+                    var d = distanceList[i];
                     d.Offset = new Coord(
                         x - GridUtils.TABLE_HALF,
                         y - GridUtils.TABLE_HALF);
@@ -178,7 +178,7 @@
                     i++;
                 }
             }
-            this.distanceList.Sort((left, right) => left.DistanceFloat.CompareTo(right.DistanceFloat));
+            distanceList.Sort((left, right) => left.DistanceFloat.CompareTo(right.DistanceFloat));
         }
     }
 }

@@ -12,7 +12,7 @@
         }
 
         public override void Load() {
-            if (this.useDummy) {
+            if (useDummy) {
                 Bind<ICache>().To<DummyCache>().InSingletonScope();
             }
             else {

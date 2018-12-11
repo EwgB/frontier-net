@@ -11,7 +11,7 @@
         }
 
         public override void Load() {
-            if (this.useDummy) {
+            if (useDummy) {
                 Bind<IFigure>().To<DummyFigure>();
             } else {
                 Bind<IFigure>().To<Figure>();

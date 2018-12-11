@@ -5,8 +5,8 @@
         public int Y { get; }
 
         public Coord(int x = 0, int y = 0) {
-            this.X = x;
-            this.Y = y;
+            X = x;
+            Y = y;
         }
 
         public Coord(Coord other) : this(other.X, other.Y) { }
@@ -21,8 +21,8 @@
         public Coord Walk(int size, out bool rolledOver) {
             // TODO: Alternative implementation? (Unit test)
             // Make this method of grid, not of Coord
-            var x = this.X + 1;
-            var y = this.Y;
+            var x = X + 1;
+            var y = Y;
             if (x >= size) {
                 x = 0;
                 y++;
@@ -41,11 +41,11 @@
         }
 
         private bool Equals(Coord other) {
-            return this.X == other.X && this.Y == other.Y;
+            return X == other.X && Y == other.Y;
         }
 
         public override int GetHashCode() {
-            return this.X.GetHashCode() ^ this.Y.GetHashCode();
+            return X.GetHashCode() ^ Y.GetHashCode();
         }
 
         #region Operators

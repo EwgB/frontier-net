@@ -10,7 +10,7 @@
     ///<summary>Manages the list of active particle emitters.</summary>
     internal class ParticlesImpl : IParticles {
 
-        public IProperties Properties => this.ParticlesProperties;
+        public IProperties Properties => ParticlesProperties;
         public IParticlesProperties ParticlesProperties { get; } = new ParticlesProperties();
 
         private readonly List<IEmitter> emitterList = new List<IEmitter>();
@@ -38,7 +38,7 @@
             GL.Enable(EnableCap.Texture2D);
             GL.Disable(EnableCap.Lighting);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-            foreach (var emitter in this.emitterList) {
+            foreach (var emitter in emitterList) {
                 emitter.Render();
             }
         }

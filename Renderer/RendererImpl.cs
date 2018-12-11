@@ -28,34 +28,34 @@
         private readonly IKernel kernel;
 
         private IAvatar avatar;
-        private IAvatar Avatar => this.avatar ?? (this.avatar = this.kernel.Get<IAvatar>());
+        private IAvatar Avatar => avatar ?? (avatar = kernel.Get<IAvatar>());
 
         private ICache cache;
-        private ICache Cache => this.cache ?? (this.cache = this.kernel.Get<ICache>());
+        private ICache Cache => cache ?? (cache = kernel.Get<ICache>());
 
         private IConsole console;
-        private IConsole Console => this.console ?? (this.console = this.kernel.Get<IConsole>());
+        private IConsole Console => console ?? (console = kernel.Get<IConsole>());
 
         private IEnvironment environment;
-        private IEnvironment Environment => this.environment ?? (this.environment = this.kernel.Get<IEnvironment>());
+        private IEnvironment Environment => environment ?? (environment = kernel.Get<IEnvironment>());
 
         private IScene scene;
-        private IScene Scene => this.scene ?? (this.scene = this.kernel.Get<IScene>());
+        private IScene Scene => scene ?? (scene = kernel.Get<IScene>());
 
         private IShaders shaders;
-        private IShaders Shaders => this.shaders ?? (this.shaders = this.kernel.Get<IShaders>());
+        private IShaders Shaders => shaders ?? (shaders = kernel.Get<IShaders>());
 
         private IText text;
-        private IText Text => this.text ?? (this.text = this.kernel.Get<IText>());
+        private IText Text => text ?? (text = kernel.Get<IText>());
 
         private IWorld world;
-        private IWorld World => this.world ?? (this.world = this.kernel.Get<IWorld>());
+        private IWorld World => world ?? (world = kernel.Get<IWorld>());
 
         #endregion
 
         #region Public properties
 
-        public IProperties Properties => this.RendererProperties;
+        public IProperties Properties => RendererProperties;
         public IRendererProperties RendererProperties { get; } = new RendererProperties();
 
         #endregion
@@ -77,15 +77,15 @@
         }
 
         public void Render() {
-            if (this.renderLoadingScreen) {
+            if (renderLoadingScreen) {
                 RenderLoadingScreen();
-                this.renderLoadingScreen = false;
+                renderLoadingScreen = false;
             }
             else {
 
-                var envData = this.Environment.Current;
-                var pos = this.Avatar.CameraPosition;
-                var waterLevel = Math.Max(this.World.GetWaterLevel(new Vector2(pos.X, pos.Y)), 0);
+                var envData = Environment.Current;
+                var pos = Avatar.CameraPosition;
+                var waterLevel = Math.Max(World.GetWaterLevel(new Vector2(pos.X, pos.Y)), 0);
 
                 if (pos.Z >= waterLevel) {
                     //currentFog = (currentDiffuse + Color3.Blue) / 2;
@@ -145,7 +145,7 @@
                 //Move into our unique coordanate system
                 GL.LoadIdentity();
                 GL.Scale(1, -1, 1);
-                var angle = this.Avatar.CameraAngle;
+                var angle = Avatar.CameraAngle;
                 GL.Rotate(angle.X, Vector3.UnitX);
                 GL.Rotate(angle.Y, Vector3.UnitY);
                 GL.Rotate(angle.Z, Vector3.UnitZ);
@@ -153,20 +153,20 @@
 
                 GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
-                if (this.RendererProperties.RenderShaders)
-                    this.Shaders.Update();
-                this.Scene.Render();
-                this.Shaders.SelectShader(VShaderTypes.None);
-                if (this.RendererProperties.RenderWireframe) {
-                    this.Scene.RenderDebug();
+                if (RendererProperties.RenderShaders)
+                    Shaders.Update();
+                Scene.Render();
+                Shaders.SelectShader(VShaderTypes.None);
+                if (RendererProperties.RenderWireframe) {
+                    Scene.RenderDebug();
                 }
-                if (this.RendererProperties.ShowPages)
-                    this.Cache.RenderDebug();
-                this.Text.Render();
-                if (this.showMap) {
-                    RenderTexture(this.World.MapId);
+                if (RendererProperties.ShowPages)
+                    Cache.RenderDebug();
+                Text.Render();
+                if (showMap) {
+                    RenderTexture(World.MapId);
                 }
-                this.Console.Render();
+                Console.Render();
             }
         }
 
@@ -176,7 +176,7 @@
             GL.MatrixMode(MatrixMode.Projection);
             GL.PushMatrix();
             GL.LoadIdentity();
-            GL.Ortho(0, this.viewWidth, this.viewHeight, 0, 0.1f, 2048);
+            GL.Ortho(0, viewWidth, viewHeight, 0, 0.1f, 2048);
             GL.MatrixMode(MatrixMode.Modelview);
             GL.PushMatrix();
             GL.LoadIdentity();
@@ -202,27 +202,27 @@
             GL.Begin(PrimitiveType.Quads);
 
             GL.TexCoord2(0, 0);
-            GL.Vertex3(0, this.viewHeight, 0);
+            GL.Vertex3(0, viewHeight, 0);
 
             GL.TexCoord2(0, 1);
-            GL.Vertex3(0, this.viewHeight - MAP_SIZE, 0);
+            GL.Vertex3(0, viewHeight - MAP_SIZE, 0);
 
             GL.TexCoord2(1, 1);
-            GL.Vertex3(MAP_SIZE, this.viewHeight - MAP_SIZE, 0);
+            GL.Vertex3(MAP_SIZE, viewHeight - MAP_SIZE, 0);
 
             GL.TexCoord2(1, 0);
-            GL.Vertex3(MAP_SIZE, this.viewHeight, 0);
+            GL.Vertex3(MAP_SIZE, viewHeight, 0);
             GL.End();
 
             {
-                this.r++;
-                var c = ColorUtils.UniqueColor(this.r);
+                r++;
+                var c = ColorUtils.UniqueColor(r);
                 GL.BindTexture(TextureTarget.Texture2D, 0);
-                var pos = this.Avatar.CameraPosition;
+                var pos = Avatar.CameraPosition;
                 pos /= (WorldUtils.WORLD_GRID * WorldUtils.REGION_SIZE);
                 //pos.Y /= (WorldUtil.WORLD_GRID * WorldUtil.REGION_SIZE);
                 pos *= MAP_SIZE;
-                pos.Y += this.viewHeight - MAP_SIZE;
+                pos.Y += viewHeight - MAP_SIZE;
                 GL.Color3((Color) c);
                 GL.Begin(PrimitiveType.Quads);
                 GL.Vertex3(pos.X, pos.Y, 0);
@@ -241,21 +241,21 @@
         public void Update() { /* Do nothing */ }
 
         public void ToggleShowMap() {
-            this.showMap = !this.showMap;
+            showMap = !showMap;
         }
 
         private bool renderLoadingScreen;
         private float loadingScreenProgress;
 
         public void RequestLoadingScreen(float progress) {
-            this.renderLoadingScreen = true;
-            this.loadingScreenProgress = progress;
+            renderLoadingScreen = true;
+            loadingScreenProgress = progress;
         }
 
         private void RenderLoadingScreen() {
             GL.ClearColor(Color.Black);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            GL.Color3(1 - this.loadingScreenProgress, this.loadingScreenProgress, 0);
+            GL.Color3(1 - loadingScreenProgress, loadingScreenProgress, 0);
             GL.LineWidth(10.0f);
             GL.Disable(EnableCap.Lighting);
             GL.Disable(EnableCap.Texture2D);
@@ -264,11 +264,11 @@
             CanvasBegin(-20, 120, 0, 100, 0);
             GL.Begin(PrimitiveType.Lines);
             GL.Vertex2(0, 50);
-            GL.Vertex2(this.loadingScreenProgress * 100, 50);
+            GL.Vertex2(loadingScreenProgress * 100, 50);
             GL.End();
             CanvasEnd();
-            this.Text.Render();
-            this.Console.Render();
+            Text.Render();
+            Console.Render();
         }
 
         private void CanvasBegin(int left, int right, int bottom, int top, int size) {
@@ -283,7 +283,7 @@
             if (size != 0) {
                 GL.Viewport(0, 0, size, size);
             } else {
-                GL.Viewport(0, 0, this.viewWidth, this.viewHeight);
+                GL.Viewport(0, 0, viewWidth, viewHeight);
             }
             GL.MatrixMode(MatrixMode.Projection);
             GL.PushMatrix();

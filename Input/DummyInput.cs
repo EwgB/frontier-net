@@ -12,7 +12,7 @@
         private readonly IDictionary<int, float> joystick = new Dictionary<int, float> {
             { 0, 0 }, { 1, 0 }, { 2, 0 }, { 3, 0 }, { 4, 0 }, { 5, 0 }
         };
-        public IReadOnlyDictionary<int, float> Joystick => new ReadOnlyDictionary<int, float>(this.joystick);
+        public IReadOnlyDictionary<int, float> Joystick => new ReadOnlyDictionary<int, float>(joystick);
 
         public bool Mouselook { get; set; }
         public bool MouseWheelDown { get; set; }

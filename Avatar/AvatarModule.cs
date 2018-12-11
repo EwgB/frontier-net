@@ -12,7 +12,7 @@
         }
 
         public override void Load() {
-            if (this.useDummy) {
+            if (useDummy) {
                 Bind<IAvatar>().To<DummyAvatar>().InSingletonScope();
             } else {
                 Bind<IAvatar>().To<AvatarImpl>().InSingletonScope();

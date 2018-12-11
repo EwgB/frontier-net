@@ -11,7 +11,7 @@
         }
 
         public override void Load() {
-            if (this.useDummy) {
+            if (useDummy) {
                 Bind<IRenderer>().To<DummyRenderer>().InSingletonScope();
             } else {
                 Bind<IRenderer>().To<RendererImpl>().InSingletonScope();

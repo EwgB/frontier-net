@@ -14,10 +14,10 @@
         }
 
         public override void Load() {
-            var kernel = this.Kernel;
+            var kernel = Kernel;
             if (kernel == null) {
                 Log.Error("Kernel should not be null.");
-            } else if (this.useDummy) {
+            } else if (useDummy) {
                 Bind<IWorld>().To<DummyWorld>().InSingletonScope();
             } else {
                 Bind<IWorld>().To<WorldImpl>().InSingletonScope();

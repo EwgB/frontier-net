@@ -6,7 +6,7 @@
 
     class DummyParticles : IParticles {
         public IParticlesProperties ParticlesProperties { get; }
-        public IProperties Properties => this.ParticlesProperties;
+        public IProperties Properties => ParticlesProperties;
 
         public void Init() { /* Do nothing */ }
         public void Update() { /* Do nothing */ }

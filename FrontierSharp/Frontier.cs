@@ -91,16 +91,16 @@
         protected override void OnDisposed(EventArgs e) {
             base.OnDisposed(e);
 
-            this.game.Dispose();
-            this.texture.Dispose();
+            game.Dispose();
+            texture.Dispose();
         }
 
         protected override void OnResize(EventArgs e) {
             base.OnResize(e);
             Log.Trace("OnResize");
 
-            GL.Viewport(this.ClientRectangle.X, this.ClientRectangle.Y, this.ClientRectangle.Width, this.ClientRectangle.Height);
-            var projection = Matrix4.CreatePerspectiveFieldOfView((float) Math.PI / 4, this.Width / (float) this.Height, 1.0f, 64.0f);
+            GL.Viewport(ClientRectangle.X, ClientRectangle.Y, ClientRectangle.Width, ClientRectangle.Height);
+            var projection = Matrix4.CreatePerspectiveFieldOfView((float) Math.PI / 4, Width / (float) Height, 1.0f, 64.0f);
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadMatrix(ref projection);
         }
@@ -109,7 +109,7 @@
             base.OnRenderFrame(e);
             Log.Trace("OnRenderFrame");
 
-            this.renderer.Render();
+            renderer.Render();
 
             SwapBuffers();
         }
@@ -118,18 +118,18 @@
             base.OnUpdateFrame(e);
             Log.Trace("OnUpdateFrame");
 
-            this.console.Update();
+            console.Update();
             Update();
-            this.game.Update();
-            if (this.game.IsRunning) {
-                this.avatar.Update();
-                this.player.Update();
-                this.environment.Update();
-                this.sky.Update();
-                this.scene.Update(UPDATE_INTERVAL);
-                this.cache.Update(UPDATE_INTERVAL);
-                this.particles.Update();
-                this.renderer.Update();
+            game.Update();
+            if (game.IsRunning) {
+                avatar.Update();
+                player.Update();
+                environment.Update();
+                sky.Update();
+                scene.Update(UPDATE_INTERVAL);
+                cache.Update(UPDATE_INTERVAL);
+                particles.Update();
+                renderer.Update();
             }
         }
 
@@ -142,16 +142,16 @@
             // Process the key to toggle the console first, so that, if the console is open,
             // we can pass all other input to it
             if (Key.Grave == e.Key) {
-                this.console.ToggleConsole();
-            } else if (this.console.IsOpen) {
-                this.console.ProcessKey(e);
+                console.ToggleConsole();
+            } else if (console.IsOpen) {
+                console.ProcessKey(e);
             } else {
                 switch (e.Key) {
                     case Key.Escape:
                         Close();
                         break;
                     case Key.Tab:
-                        this.renderer.ToggleShowMap();
+                        renderer.ToggleShowMap();
                         break;
                 }
             }
@@ -160,25 +160,25 @@
         public void Init() {
             Log.Info("Init start...");
 
-            this.Title = "Frontier";
+            Title = "Frontier";
             //Icon = new Icon("Resources/icon.bmp");
-            this.Size = new Size(1400, 800);
+            Size = new Size(1400, 800);
 
-            this.Keyboard.KeyRepeat = true;
+            Keyboard.KeyRepeat = true;
 
-            this.console.Init();
-            this.particles.Init();
-            this.environment.Init();
-            this.renderer.Init();
-            this.shaders.Init();
-            this.game.Init();
-            this.player.Init();
-            this.avatar.Init();
-            this.texture.Init();
-            this.world.Init();
-            this.scene.Init();
-            this.sky.Init();
-            this.text.Init();
+            console.Init();
+            particles.Init();
+            environment.Init();
+            renderer.Init();
+            shaders.Init();
+            game.Init();
+            player.Init();
+            avatar.Init();
+            texture.Init();
+            world.Init();
+            scene.Init();
+            sky.Init();
+            text.Init();
 
             Log.Info("Init done.");
         }

@@ -11,7 +11,7 @@
         }
 
         public override void Load() {
-            if (this.useDummy) {
+            if (useDummy) {
                 Bind<ITerraform>().To<DummyTerraform>().InSingletonScope();
             } else {
                 Bind<ITerraform>().To<TerraformImpl>().InSingletonScope();

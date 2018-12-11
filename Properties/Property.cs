@@ -7,9 +7,9 @@
         public string Description { get; }
 
         public Property(string name, T initialValue, string description = "") {
-            this.Name = name;
-            this.Description = description;
-            this.Value = initialValue;
+            Name = name;
+            Description = description;
+            Value = initialValue;
         }
     }
 }

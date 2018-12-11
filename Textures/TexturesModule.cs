@@ -11,7 +11,7 @@
         }
 
         public override void Load() {
-            if (this.useDummy) {
+            if (useDummy) {
                 Bind<ITextures>().To<DummyTextures>().InSingletonScope();
             } else {
                 Bind<ITextures>().To<TexturesImpl>().InSingletonScope();

@@ -44,8 +44,8 @@
 
 
         public CacheImpl(IGame game, ICachePageFactory cachePageFactory) {
-            this.Game = game;
-            this.CachePageFactory = cachePageFactory;
+            Game = game;
+            CachePageFactory = cachePageFactory;
         }
 
 
@@ -58,7 +58,7 @@
             var pageY = PageFromPos(worldY);
             if (pageX < 0 || pageX >= PAGE_GRID || pageY < 0 || pageY >= PAGE_GRID)
                 return null;
-            return this.cachePages[pageX, pageY];
+            return cachePages[pageX, pageY];
         }
 
         private static int PageFromPos(int cell) => cell / CachePage.PAGE_SIZE;
@@ -113,12 +113,12 @@
             if (pageX < 0 || pageX >= PAGE_GRID || pageY < 0 || pageY >= PAGE_GRID)
                 return false;
 
-            var page = this.cachePages[pageX, pageY];
+            var page = cachePages[pageX, pageY];
             if (page == null) {
-                page = this.CachePageFactory.CreateCachePage();
+                page = CachePageFactory.CreateCachePage();
                 page.Load(pageX, pageY);
-                this.cachePages[pageX, pageY] = page;
-                this.pageCount++;
+                cachePages[pageX, pageY] = page;
+                pageCount++;
             }
 
             return page.IsReady();
@@ -148,7 +148,7 @@
 
         public void PrintSize() {
             var files = Directory
-                .EnumerateFiles(this.Game.GameDirectory, "*.pag", SearchOption.TopDirectoryOnly)
+                .EnumerateFiles(Game.GameDirectory, "*.pag", SearchOption.TopDirectoryOnly)
                 .Select(file => new FileInfo(file))
                 .Select(fileInfo => fileInfo.Length)
                 .ToList();
@@ -162,10 +162,10 @@
         public void Purge() {
             for (var y = 0; y < PAGE_GRID; y++) {
                 for (var x = 0; x < PAGE_GRID; x++) {
-                    if (this.cachePages[x, y] != null) {
-                        this.pageCount--;
-                        this.cachePages[x, y].Save();
-                        this.cachePages[x, y] = null;
+                    if (cachePages[x, y] != null) {
+                        pageCount--;
+                        cachePages[x, y].Save();
+                        cachePages[x, y] = null;
                     }
                 }
             }
@@ -175,7 +175,7 @@
             Purge();
 
             Directory
-                .EnumerateFiles(this.Game.GameDirectory, "*.pag", SearchOption.TopDirectoryOnly)
+                .EnumerateFiles(Game.GameDirectory, "*.pag", SearchOption.TopDirectoryOnly)
                 .Select(file => new FileInfo(file))
                 .Map(file => {
                     Log.Info("Deleting file {0}...", file.Name);
@@ -186,25 +186,25 @@
         public void RenderDebug() {
             for (var y = 0; y < PAGE_GRID; y++) {
                 for (var x = 0; x < PAGE_GRID; x++) {
-                    this.cachePages[x, y]?.Render();
+                    cachePages[x, y]?.Render();
                 }
             }
         }
 
         public void Update(double stopAt) {
-            Log.Debug("{0} cachePages.", this.pageCount);
+            Log.Debug("{0} cachePages.", pageCount);
             var count = 0;
             //Pass over the table a bit at a time and do garbage collection
-            while (count < (PAGE_GRID / 4) && this.Game.GameProperties.GameTime.TotalMilliseconds < stopAt) {
-                var page = this.cachePages[this.walk.X, this.walk.Y];
+            while (count < (PAGE_GRID / 4) && Game.GameProperties.GameTime.TotalMilliseconds < stopAt) {
+                var page = cachePages[walk.X, walk.Y];
                 if (page != null && page.IsExpired) {
                     page.Save();
-                    this.cachePages[this.walk.X, this.walk.Y] = null;
-                    this.pageCount--;
+                    cachePages[walk.X, walk.Y] = null;
+                    pageCount--;
                 }
 
                 count++;
-                this.walk = this.walk.Walk(PAGE_GRID, out var _);
+                walk = walk.Walk(PAGE_GRID, out var _);
             }
         }
 

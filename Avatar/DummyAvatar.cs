@@ -7,7 +7,7 @@
     using Common.Region;
 
     internal class DummyAvatar : IAvatar {
-        public IProperties Properties => this.AvatarProperties;
+        public IProperties Properties => AvatarProperties;
         public IAvatarProperties AvatarProperties { get; }
 
         public Vector3 CameraPosition => new Vector3(1, 1, 0);
@@ -21,7 +21,7 @@
         public AnimTypes AnimationType => AnimTypes.Idle;
 
         public DummyAvatar() {
-            this.Region = new Region();
+            Region = new Region();
         }
 
         public void Init() { /* Do nothing */ }

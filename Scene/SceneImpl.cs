@@ -32,31 +32,31 @@
         private readonly IAvatar avatar;
 
         private IGame game;
-        private IGame Game => this.game ?? (this.game = this.kernel.Get<IGame>());
+        private IGame Game => game ?? (game = kernel.Get<IGame>());
 
         private IParticles particles;
-        private IParticles Particles => this.particles ?? (this.particles = this.kernel.Get<IParticles>());
+        private IParticles Particles => particles ?? (particles = kernel.Get<IParticles>());
 
         private IShaders shaders;
-        private IShaders Shaders => this.shaders ?? (this.shaders = this.kernel.Get<IShaders>());
+        private IShaders Shaders => shaders ?? (shaders = kernel.Get<IShaders>());
 
         private ISky sky;
-        private ISky Sky => this.sky ?? (this.sky = this.kernel.Get<ISky>());
+        private ISky Sky => sky ?? (sky = kernel.Get<ISky>());
 
         private IText text;
-        private IText Text => this.text ?? (this.text = this.kernel.Get<IText>());
+        private IText Text => text ?? (text = kernel.Get<IText>());
 
         private ITextures textures;
-        private ITextures Textures => this.textures ?? (this.textures = this.kernel.Get<ITextures>());
+        private ITextures Textures => textures ?? (textures = kernel.Get<ITextures>());
 
         private IWater water;
-        private IWater Water => this.water ?? (this.water = this.kernel.Get<IWater>());
+        private IWater Water => water ?? (water = kernel.Get<IWater>());
 
         #endregion
 
         #region Public properties
 
-        public IProperties Properties => this.SceneProperties;
+        public IProperties Properties => SceneProperties;
         public ISceneProperties SceneProperties { get; } = new SceneProperties();
 
         public float VisibleRange => (TERRAIN_GRID / 2f) * GridUtils.TERRAIN_SIZE;
@@ -82,50 +82,50 @@
             this.avatar = avatar;
             this.kernel = kernel;
 
-            this.gmTerrain = new GridManager(avatar);
-            this.gmForest = new GridManager(avatar);
-            this.gmGrass = new GridManager(avatar);
-            this.gmBrush = new GridManager(avatar);
-            this.gmParticle = new GridManager(avatar);
+            gmTerrain = new GridManager(avatar);
+            gmForest = new GridManager(avatar);
+            gmGrass = new GridManager(avatar);
+            gmBrush = new GridManager(avatar);
+            gmParticle = new GridManager(avatar);
         }
 
         public void Init() { /* Do nothing */ }
 
         public void Render() {
-            if (!this.Game.IsRunning)
+            if (!Game.IsRunning)
                 return;
-            if (!this.SceneProperties.RenderTextured)
+            if (!SceneProperties.RenderTextured)
                 GL.Disable(EnableCap.Texture2D);
             else
                 GL.Enable(EnableCap.Texture2D);
-            this.Sky.Render();
+            Sky.Render();
             GL.Disable(EnableCap.CullFace);
-            this.Shaders.SelectShader(VShaderTypes.Trees);
-            this.Shaders.SelectShader(FShaderTypes.Green);
+            Shaders.SelectShader(VShaderTypes.Trees);
+            Shaders.SelectShader(FShaderTypes.Green);
             GL.Color3(1, 1, 1);
             GL.Disable(EnableCap.Texture2D);
-            this.gmForest.Render();
+            gmForest.Render();
             GL.Enable(EnableCap.CullFace);
-            this.Shaders.SelectShader(VShaderTypes.Normal);
+            Shaders.SelectShader(VShaderTypes.Normal);
             GL.Color3(1, 1, 1);
-            this.gmTerrain.Render();
-            this.Water.Render();
-            GL.BindTexture(TextureTarget.Texture2D, this.Textures.TextureIdFromName("grass3.png"));
-            this.Shaders.SelectShader(VShaderTypes.Grass);
+            gmTerrain.Render();
+            Water.Render();
+            GL.BindTexture(TextureTarget.Texture2D, Textures.TextureIdFromName("grass3.png"));
+            Shaders.SelectShader(VShaderTypes.Grass);
             GL.ColorMask(false, false, false, false);
-            this.gmGrass.Render();
-            this.gmBrush.Render();
+            gmGrass.Render();
+            gmBrush.Render();
             GL.ColorMask(true, true, true, true);
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-            this.gmGrass.Render();
-            this.gmBrush.Render();
-            this.Shaders.SelectShader(VShaderTypes.Normal);
-            this.avatar.Render();
-            this.Shaders.SelectShader(FShaderTypes.None);
-            this.Shaders.SelectShader(VShaderTypes.None);
-            this.Particles.Render();
-            this.gmParticle.Render();
+            gmGrass.Render();
+            gmBrush.Render();
+            Shaders.SelectShader(VShaderTypes.Normal);
+            avatar.Render();
+            Shaders.SelectShader(FShaderTypes.None);
+            Shaders.SelectShader(VShaderTypes.None);
+            Particles.Render();
+            gmParticle.Render();
         }
 
         public void RenderDebug() {
@@ -135,85 +135,85 @@
             GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.One);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
             GL.Color3(1, 1, 1);
-            this.gmForest.Render();
-            this.gmTerrain.Render();
-            this.gmGrass.Render();
-            this.gmBrush.Render();
+            gmForest.Render();
+            gmTerrain.Render();
+            gmGrass.Render();
+            gmBrush.Render();
             GL.Color3(1, 1, 1);
-            this.avatar.Render();
-            this.Water.Render();
+            avatar.Render();
+            Water.Render();
         }
 
         private byte updateType;
         public void Update(double stopAt) {
-            if (!this.Game.IsRunning)
+            if (!Game.IsRunning)
                 return;
             // We don't want any grid to starve the others, so we rotate the order of priority.
-            this.updateType = (byte)((this.updateType + 1) % 4);
-            switch (this.updateType) {
+            updateType = (byte)((updateType + 1) % 4);
+            switch (updateType) {
                 case 0:
-                    this.gmTerrain.Update(stopAt);
+                    gmTerrain.Update(stopAt);
                     break;
                 case 1:
-                    this.gmGrass.Update(stopAt);
+                    gmGrass.Update(stopAt);
                     break;
                 case 2:
-                    this.gmForest.Update(stopAt);
+                    gmForest.Update(stopAt);
                     break;
                 case 3:
-                    this.gmBrush.Update(stopAt);
+                    gmBrush.Update(stopAt);
                     break;
             }
             //any time left over goes to the losers...
-            this.gmParticle.Update(stopAt);
-            this.gmTerrain.Update(stopAt);
-            this.gmGrass.Update(stopAt);
-            this.gmForest.Update(stopAt);
-            this.gmBrush.Update(stopAt);
-            this.Text.Print($"Scene: {this.gmTerrain.ItemsReadyCount} of {this.gmTerrain.ItemsViewableCount} terrains ready");
+            gmParticle.Update(stopAt);
+            gmTerrain.Update(stopAt);
+            gmGrass.Update(stopAt);
+            gmForest.Update(stopAt);
+            gmBrush.Update(stopAt);
+            Text.Print($"Scene: {gmTerrain.ItemsReadyCount} of {gmTerrain.ItemsViewableCount} terrains ready");
         }
 
         public void Clear() {
-            this.ilGrass.Clear();
-            this.ilBrush.Clear();
-            this.ilForest.Clear();
-            this.ilTerrain.Clear();
-            this.gmGrass.Clear();
-            this.gmBrush.Clear();
-            this.gmForest.Clear();
-            this.gmTerrain.Clear();
+            ilGrass.Clear();
+            ilBrush.Clear();
+            ilForest.Clear();
+            ilTerrain.Clear();
+            gmGrass.Clear();
+            gmBrush.Clear();
+            gmForest.Clear();
+            gmTerrain.Clear();
         }
 
         public void Generate() {
             Clear();
-            this.Water.Build();
+            Water.Build();
             //var camera = this.avatar.Position;
             //var current = new Coord((int)(camera.X / GridUtils.GRASS_SIZE), 0);
 
-            this.ilGrass.Clear();
-            this.ilGrass.Capacity = GRASS_GRID * GRASS_GRID;
-            this.gmGrass.Init(this.ilGrass, GRASS_GRID, GridUtils.GRASS_SIZE);
+            ilGrass.Clear();
+            ilGrass.Capacity = GRASS_GRID * GRASS_GRID;
+            gmGrass.Init(ilGrass, GRASS_GRID, GridUtils.GRASS_SIZE);
 
-            this.ilForest.Clear();
-            this.ilForest.Capacity = FOREST_GRID * FOREST_GRID;
-            this.gmForest.Init(this.ilForest, FOREST_GRID, GridUtils.FOREST_SIZE);
+            ilForest.Clear();
+            ilForest.Capacity = FOREST_GRID * FOREST_GRID;
+            gmForest.Init(ilForest, FOREST_GRID, GridUtils.FOREST_SIZE);
 
-            this.ilTerrain.Clear();
-            this.ilTerrain.Capacity = TERRAIN_GRID * TERRAIN_GRID;
-            this.gmTerrain.Init(this.ilTerrain, TERRAIN_GRID, GridUtils.TERRAIN_SIZE);
+            ilTerrain.Clear();
+            ilTerrain.Capacity = TERRAIN_GRID * TERRAIN_GRID;
+            gmTerrain.Init(ilTerrain, TERRAIN_GRID, GridUtils.TERRAIN_SIZE);
 
-            this.ilBrush.Clear();
-            this.ilBrush.Capacity = BRUSH_GRID * BRUSH_GRID;
-            this.gmBrush.Init(this.ilBrush, BRUSH_GRID, GridUtils.BRUSH_SIZE);
+            ilBrush.Clear();
+            ilBrush.Capacity = BRUSH_GRID * BRUSH_GRID;
+            gmBrush.Init(ilBrush, BRUSH_GRID, GridUtils.BRUSH_SIZE);
         }
 
         public void Progress(out int ready, out int total) {
-            ready = this.gmTerrain.ItemsReadyCount;
-            total = Math.Min(this.gmTerrain.ItemsViewableCount, 3);
+            ready = gmTerrain.ItemsReadyCount;
+            total = Math.Min(gmTerrain.ItemsViewableCount, 3);
         }
 
         public void RestartProgress() {
-            this.gmTerrain.RestartProgress();
+            gmTerrain.RestartProgress();
         }
     }
 }
