@@ -95,6 +95,7 @@
     <Compile Include="Region\RegionFlags.cs" />
     <Compile Include="Scene\IScene.cs" />
     <Compile Include="Tree\ITree.cs" />
+    <Compile Include="Util\Mesh.cs" />
     <Compile Include="World\IWorld.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Property\IProperties.cs" />
