@@ -13,7 +13,7 @@
     /// Used for storing groups of verts and polygons.
     /// </summary>
     public class Mesh {
-        public BoundingBox BoundingBox { get; set; }
+        public BoundingBox BoundingBox { get; }
         public IList<int> Indices { get; }
         public IList<Vector3> Vertices { get; }
         public IList<Vector3> Normals { get; private set; }

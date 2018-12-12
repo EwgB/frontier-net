@@ -43,6 +43,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -53,6 +54,9 @@
   <ItemGroup>
     <Compile Include="Anim.cs" />
     <Compile Include="AnimationModule.cs" />
+    <Compile Include="Bone.cs" />
+    <Compile Include="BoneId.cs" />
+    <Compile Include="BWeight.cs" />
     <Compile Include="DummyFigure.cs" />
     <Compile Include="Figure.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
