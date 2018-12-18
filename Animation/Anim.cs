@@ -1,5 +1,133 @@
 ﻿namespace FrontierSharp.Animation {
-    public class Anim {
+    using System;
+    using System.Collections.Generic;
+
+    using Common.Animation;
+
+    public class Anim : IAnimation {
+        private IList<AnimFrame> frames;
+
+        public IList<AnimJoint> GetFrame(float delta) {
+            throw new NotImplementedException();
+        }
+
+        public int JointCount() {
+           return frames[0].joint.size();
+        }
+
+        public BoneId BoneFromString(string name) {
+            if (name.Contains("ROOT"))
+                return BoneId.Root;
+            if (name.Contains("PELVIS"))
+                return BoneId.Pelvis;
+            if (name.Contains("HIP")) {
+                // If not left or right, then probably actually the pelvis.
+                return name.Contains("L") ? BoneId.LeftHip : (name.Contains("R") ? BoneId.RightHip : BoneId.Pelvis);
+            }
+
+            if (name.Contains("THIGH")) {
+                return name.Contains("L") ? BoneId.LeftHip : (name.Contains("R") ? BoneId.RightHip : BoneId.Invalid);
+            }
+
+            if (name.Contains("SHIN")) {
+                return name.Substring(4).Contains("L")
+                    ? BoneId.LeftKnee
+                    : (name.Substring(4).Contains("R") ? BoneId.RightKnee : BoneId.Invalid);
+            }
+            //if (strstr (name, "KNEE")) {
+            //  if (strchr (name + 4, 'L'))
+            //    return BoneId.LeftKnee;
+            //  if (strchr (name + 4, 'R'))
+            //    return BoneId.RightKnee;
+            //  //Not left or right.  
+            //  return BoneId.Invalid;
+            //}
+
+            if (name.Contains("FOOT")) {
+                return name.Substring(4).Contains("L")
+                    ? BoneId.LeftAnkle
+                    : (name.Substring(4).Contains("R") ? BoneId.RightAnkle : BoneId.Invalid);
+            }
+
+            //if (strstr (name, "ANKLE")) {
+            //  if (strchr (name + 5, 'L'))
+            //    return BoneId.LeftAnkle;
+            //  if (strchr (name + 5, 'R'))
+            //    return BoneId.RightAnkle;
+            //  //Not left or right.  
+            //  return BoneId.Invalid;
+            //}
+
+            if (name.Contains("BACK") || name.Contains("SPINE"))
+                return BoneId.Spine1;
+            if (name.Contains("NECK"))
+                return BoneId.Neck;
+            if (name.Contains("HEAD"))
+                return BoneId.Head;
+            if (name.Contains("SHOULDER")) {
+                return name.Substring(8).Contains("L")
+                    ? BoneId.LeftShoulder
+                    : (name.Substring(8).Contains("R") ? BoneId.RightShoulder : BoneId.Invalid);
+            }
+
+            if (name.Contains("FOREARM")) {
+                return name.Substring(7).Contains("L")
+                    ? BoneId.LeftElbow
+                    : (name.Substring(7).Contains("R") ? BoneId.RightElbow : BoneId.Invalid);
+            }
+
+            int pos;
+            if ((pos = name.IndexOf("UPPERARM", StringComparison.Ordinal)) > 0) {
+                var test = name.Substring(pos + 8);
+                return test.Contains("L") ? BoneId.LeftArm : (test.Contains("R") ? BoneId.RightArm : BoneId.Invalid);
+            }
+
+            //if (strstr (name, "ELBOW")) {
+            //  if (strchr (name + 7, 'L'))
+            //    return BoneId.LeftELBOW;
+            //  if (strchr (name + 7, 'R'))
+            //    return BoneId.RightELBOW;
+            //  //Not left or right? That can't be right.
+            //  return BoneId.Invalid;
+            //}
+
+            if (name.Contains("TOE")) {
+                return name.Contains("L") ? BoneId.LeftToe : (name.Contains("R") ? BoneId.RightToe : BoneId.Invalid);
+            }
+
+            if (name.Contains("HAND")) {
+                return name.Contains("L")
+                    ? BoneId.LeftWrist
+                    : (name.Contains("R") ? BoneId.RightWrist : BoneId.Invalid);
+            }
+
+            if (name.Contains("FINGERS1")) {
+                return name.Substring(7).Contains("L")
+                    ? BoneId.LeftFingers1
+                    : (name.Substring(7).Contains("R") ? BoneId.RightFingers1 : BoneId.Invalid);
+            }
+
+            if (name.Contains("FINGERS2")) {
+                return name.Substring(7).Contains("L")
+                    ? BoneId.LeftFingers2
+                    : (name.Substring(7).Contains("R") ? BoneId.RightFingers2 : BoneId.Invalid);
+            }
+
+            if (name.Contains("THUMB1")) {
+                return name.Contains("L")
+                    ? BoneId.LeftThumb1
+                    : (name.Contains("R") ? BoneId.RightThumb1 : BoneId.Invalid);
+            }
+
+            if (name.Contains("THUMB2")) {
+                return name.Contains("L")
+                    ? BoneId.LeftThumb2
+                    : (name.Contains("R") ? BoneId.RightThumb2 : BoneId.Invalid);
+            }
+
+            return BoneId.Invalid;
+
+        }
     }
 }
 
@@ -21,17 +149,13 @@ class CAnim
 {
 
 public:
-  vector<AnimFrame> _frame;
   AnimFrame         _current;
-  AnimJoint*        GetFrame (float frame);  
   void              SetDefaultAnimation ();
   unsigned          Frames () { return _frame.size (); };
-  unsigned          Joints () { return _frame[0].joint.size (); };
   unsigned          Id (unsigned frame, unsigned index) { return _frame[frame].joint[index].id; };
   GLvector          Rotation (unsigned frame, unsigned index) { return _frame[frame].joint[index].rotation; };
-  bool              LoadBvh (char* filename);
-  static BoneId     BoneFromString (char* string);
-  static char*      NameFromBone (BoneId id);
+  bool              LoadBvh (string filename);
+  static string      NameFromBone (BoneId id);
   
 };
  */
@@ -50,7 +174,7 @@ public:
 #define NEWLINE     "\n"
 
 
-char* CAnim::NameFromBone(BoneId id) {
+string NameFromBone(BoneId id) {
     switch (id) {
         case BONE_ROOT:
             return "Root";
@@ -98,7 +222,7 @@ char* CAnim::NameFromBone(BoneId id) {
             return "Head";
         case BONE_FACE:
         case BONE_CROWN:
-        case BONE_INVALID:
+        case BONE_Invalid:
             return "Bone Invalid";
     }
     return "Unknown";
@@ -106,158 +230,9 @@ char* CAnim::NameFromBone(BoneId id) {
 }
 
 
-BoneId CAnim::BoneFromString(char* name) {
-
-    char* test;
-
-    if (strstr(name, "ROOT"))
-        return BONE_ROOT;
-    if (strstr(name, "PELVIS"))
-        return BONE_PELVIS;
-    if (strstr(name, "HIP")) {
-        if (strchr(name, 'L'))
-            return BONE_LHIP;
-        if (strchr(name, 'R'))
-            return BONE_RHIP;
-        //Not left or right.  Probably actually the pelvis.
-        return BONE_PELVIS;
-    }
-    if (strstr(name, "THIGH")) {
-        if (strchr(name, 'L'))
-            return BONE_LHIP;
-        if (strchr(name, 'R'))
-            return BONE_RHIP;
-        //Not left or right.  
-        return BONE_INVALID;
-    }
-    if (strstr(name, "SHIN")) {
-        if (strchr(name + 4, 'L'))
-            return BONE_LKNEE;
-        if (strchr(name + 4, 'R'))
-            return BONE_RKNEE;
-        //Not left or right.  
-        return BONE_INVALID;
-    }
-    //if (strstr (name, "KNEE")) {
-    //  if (strchr (name + 4, 'L'))
-    //    return BONE_LKNEE;
-    //  if (strchr (name + 4, 'R'))
-    //    return BONE_RKNEE;
-    //  //Not left or right.  
-    //  return BONE_INVALID;
-    //}
-
-    if (strstr(name, "FOOT")) {
-        if (strchr(name + 4, 'L'))
-            return BONE_LANKLE;
-        if (strchr(name + 4, 'R'))
-            return BONE_RANKLE;
-        //Not left or right.  
-        return BONE_INVALID;
-    }
-
-    //if (strstr (name, "ANKLE")) {
-    //  if (strchr (name + 5, 'L'))
-    //    return BONE_LANKLE;
-    //  if (strchr (name + 5, 'R'))
-    //    return BONE_RANKLE;
-    //  //Not left or right.  
-    //  return BONE_INVALID;
-    //}
-    if (strstr(name, "BACK"))
-        return BONE_SPINE1;
-    if (strstr(name, "SPINE"))
-        return BONE_SPINE1;
-    if (strstr(name, "NECK"))
-        return BONE_NECK;
-    if (strstr(name, "HEAD"))
-        return BONE_HEAD;
-    if (strstr(name, "SHOULDER")) {
-        if (strchr(name + 8, 'L'))
-            return BONE_LSHOULDER;
-        if (strchr(name + 8, 'R'))
-            return BONE_RSHOULDER;
-        //Not left or right? That can't be right.
-        return BONE_INVALID;
-    }
-    if (strstr(name, "FOREARM")) {
-        if (strchr(name + 7, 'L'))
-            return BONE_LELBOW;
-        if (strchr(name + 7, 'R'))
-            return BONE_RELBOW;
-        //Not left or right? That can't be right.
-        return BONE_INVALID;
-    }
-    if (test = strstr(name, "UPPERARM")) {
-        if (strchr(test + 8, 'L'))
-            return BONE_LARM;
-        if (strchr(test + 8, 'R'))
-            return BONE_RARM;
-        //Not left or right? That can't be right.
-        return BONE_INVALID;
-    }
-    //if (strstr (name, "ELBOW")) {
-    //  if (strchr (name + 7, 'L'))
-    //    return BONE_LELBOW;
-    //  if (strchr (name + 7, 'R'))
-    //    return BONE_RELBOW;
-    //  //Not left or right? That can't be right.
-    //  return BONE_INVALID;
-    //}
-    if (strstr(name, "TOE")) {
-        if (strchr(name, 'L'))
-            return BONE_LTOE;
-        if (strchr(name, 'R'))
-            return BONE_RTOE;
-        //Not left or right? That can't be right.
-        return BONE_INVALID;
-    }
-    if (strstr(name, "HAND")) {
-        if (strchr(name, 'L'))
-            return BONE_LWRIST;
-        if (strchr(name, 'R'))
-            return BONE_RWRIST;
-        //Not left or right? That can't be right.
-        return BONE_INVALID;
-    }
-    if (strstr(name, "FINGERS1")) {
-        if (strchr(name + 7, 'L'))
-            return BONE_LFINGERS1;
-        if (strchr(name + 7, 'R'))
-            return BONE_RFINGERS1;
-        //Not left or right? That can't be right.
-        return BONE_INVALID;
-    }
-    if (strstr(name, "FINGERS2")) {
-        if (strchr(name + 7, 'L'))
-            return BONE_LFINGERS2;
-        if (strchr(name + 7, 'R'))
-            return BONE_RFINGERS2;
-        //Not left or right? That can't be right.
-        return BONE_INVALID;
-    }
-    if (strstr(name, "THUMB1")) {
-        if (strchr(name, 'L'))
-            return BONE_LTHUMB1;
-        if (strchr(name, 'R'))
-            return BONE_RTHUMB1;
-        //Not left or right? That can't be right.
-        return BONE_INVALID;
-    }
-    if (strstr(name, "THUMB2")) {
-        if (strchr(name, 'L'))
-            return BONE_LTHUMB2;
-        if (strchr(name, 'R'))
-            return BONE_RTHUMB2;
-        //Not left or right? That can't be right.
-        return BONE_INVALID;
-    }
-    return BONE_INVALID;
-
-}
 
 //This makes a one-frame do-nothing animating, so we don't crash when an animating if missing.
-void CAnim::SetDefaultAnimation() {
+void SetDefaultAnimation() {
 
     AnimJoint joint;
 
@@ -269,13 +244,13 @@ void CAnim::SetDefaultAnimation() {
 
 }
 
-bool CAnim::LoadBvh(char* filename) {
+bool LoadBvh(string filename) {
 
     bool done;
     long size;
-    char* buffer;
-    char* token;
-    char* find;
+    string buffer;
+    string token;
+    string find;
     vector<BoneId> dem_bones;
     int channels;
     unsigned frames;
@@ -289,23 +264,23 @@ bool CAnim::LoadBvh(char* filename) {
     path.append(filename);
     if (!strchr(filename, '.'))
         path.append(".bvh");
-    buffer = FileLoad((char*)path.c_str(), &size);
+    buffer = FileLoad((string)path.c_str(), &size);
     if (!buffer) {
-        ConsoleLog("CAnim::LoadBvh: Can't find %s", (char*)path.c_str());
+        ConsoleLog("LoadBvh: Can't find %s", (string)path.c_str());
         SetDefaultAnimation();
         return false;
     }
     _strupr(buffer);
     done = false;
     channels = 3;
-    current_id = BONE_INVALID;
+    current_id = BONE_Invalid;
     token = strtok(buffer, NEWLINE);
     while (!done) {
         if (find = strstr(token, "CHANNEL")) {
             channels = atoi(find + 8);
             //Six channels means first 3 are position.  Ignore.
             if (channels == 6)
-                dem_bones.push_back(BONE_INVALID);
+                dem_bones.push_back(BONE_Invalid);
             dem_bones.push_back(current_id);
         }
         if (find = strstr(token, "JOINT")) {
@@ -331,7 +306,7 @@ bool CAnim::LoadBvh(char* filename) {
                     find = strchr(find, 32) + 1;
                     joint.rotation.z = -(float)atof(find);
                     find = strchr(find, 32) + 1;
-                    if (joint.id != BONE_INVALID) {
+                    if (joint.id != BONE_Invalid) {
                         _frame[frame].joint.push_back(joint);
                     }
                 }
@@ -345,7 +320,7 @@ bool CAnim::LoadBvh(char* filename) {
 
 }
 
-AnimJoint* CAnim::GetFrame(float delta) {
+AnimJoint* GetFrame(float delta) {
 
     unsigned i;
     unsigned frame;

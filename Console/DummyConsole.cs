@@ -7,21 +7,25 @@
 
     internal class DummyConsole : IConsole {
         // Logger
-        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public bool IsOpen { get; private set; }
 
         public void Init() {
-            Log.Trace("Init");
+            Logger.Trace("Init");
             IsOpen = false;
         }
 
         public void ProcessKey(KeyboardKeyEventArgs e) {
-            Log.Info("Key {0} sent to console.", e.Key);
+            Logger.Info("Key {0} sent to console.", e.Key);
+        }
+
+        public void Log(string msg) {
+            Logger.Info(msg);
         }
 
         public void ToggleConsole() {
-            Log.Trace("ToggleConsole");
+            Logger.Trace("ToggleConsole");
 
             if (IsOpen) {
                 Log.Info("Console closed");

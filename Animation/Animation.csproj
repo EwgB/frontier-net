@@ -55,7 +55,6 @@
     <Compile Include="Anim.cs" />
     <Compile Include="AnimationModule.cs" />
     <Compile Include="Bone.cs" />
-    <Compile Include="BoneId.cs" />
     <Compile Include="BWeight.cs" />
     <Compile Include="DummyFigure.cs" />
     <Compile Include="Figure.cs" />

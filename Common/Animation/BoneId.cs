@@ -1,4 +1,4 @@
-﻿namespace FrontierSharp.Animation {
+﻿namespace FrontierSharp.Common.Animation {
     public enum BoneId {
         Root,
         Pelvis,

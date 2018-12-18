@@ -49,6 +49,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Animation\AnimJoint.cs" />
+    <Compile Include="Animation\BoneId.cs" />
     <Compile Include="Animation\IAnimation.cs" />
     <Compile Include="Animation\IFigure.cs" />
     <Compile Include="Animation\AnimTypes.cs" />
@@ -95,6 +97,7 @@
     <Compile Include="Region\RegionFlags.cs" />
     <Compile Include="Scene\IScene.cs" />
     <Compile Include="Tree\ITree.cs" />
+    <Compile Include="Util\DictUtils.cs" />
     <Compile Include="Util\Mesh.cs" />
     <Compile Include="World\IWorld.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
