@@ -1,324 +1,506 @@
 ﻿namespace FrontierSharp.Animation {
+    using System.Collections.Generic;
+    using System.Drawing;
+    using System.IO;
+    using System.Linq;
+
+    using Common;
+
     using OpenTK;
+    using OpenTK.Graphics.OpenGL;
 
     using Common.Animation;
+    using Common.Util;
+
+    using Ninject.Infrastructure.Language;
 
     internal class Figure : IFigure {
+        private readonly IDictionary<BoneId, Bone> bones = new Dictionary<BoneId, Bone>();
+        private readonly Mesh skinStatic = new Mesh(); //The original, "read only"
+        private Mesh skinDeform = new Mesh(); //Altered
+        private Mesh skinRender; //Updated every frame
+        private int unknownCount;
+
+        private static readonly char[] Delimiters = {'\n', '\r', '\t', ' ', ';', ',', '\"'};
+
         public Vector3 Position { get; set; }
         public Vector3 Rotation { get; set; }
+        public Mesh Skin => skinStatic;
+
+
+        #region Dependecies
+
+        private IAnimation Animation { get; }
+        private IConsole Console { get; }
+
+        #endregion
+
+
+        public Figure(IAnimation animation, IConsole console) {
+            Animation = animation;
+            Console = console;
+        }
 
         public void Render() {
             // TODO
-            /*
-            glColor3f(1, 1, 1);
-            glPushMatrix();
-            CgSetOffset(_position);
-            glTranslatef(_position.x, _position.y, _position.z);
-            CgUpdateMatrix();
-            _skin_render.Render();
-            CgSetOffset(Vector3(0, 0, 0));
-            glPopMatrix();
-            CgUpdateMatrix();
-            */
+            GL.Color3(1, 1, 1);
+            GL.PushMatrix();
+            //CgSetOffset(Position);
+            GL.Translate(Position);
+            //CgUpdateMatrix();
+            //skinRender.Render();
+            //CgSetOffset(Vector3.Zero);
+            GL.PopMatrix();
+            //CgUpdateMatrix();
         }
 
         public void Animate(IAnimation animation, float delta) {
             // TODO
-            //AnimJoint aj;
+            if (delta > 1)
+                delta -= (int) delta;
+            var aj = animation.GetFrame(delta);
+            for (var i = 0; i < animation.Joints(); i++)
+                RotateBone(aj[i].Id, aj[i].Rotation);
+        }
 
-            //if (delta > 1.0f)
-            //    delta -= (float)((int)delta);
-            //aj = animation.GetFrame(delta);
-            //for (var i = 0; i < animation.Joints(); i++)
-            //    RotateBone(aj[i].id, aj[i].rotation);
+        private void RotateBone(BoneId id, Vector3 angle) {
+            if (bones.ContainsKey(id)) {
+                var bone = bones[id];
+                bone.Rotation = angle;
+                bones[id] = bone;
+            }
         }
 
         public void RenderSkeleton() {
             // TODO
-            /*
-            int i;
-            int parent;
+            GL.LineWidth(12);
+            GL.PushMatrix();
+            GL.Translate(Position);
+            //CgUpdateMatrix();
+            GL.Disable(EnableCap.DepthTest);
+            GL.Disable(EnableCap.Texture2D);
+            GL.Disable(EnableCap.Lighting);
 
-            glLineWidth(12.0f);
-            glPushMatrix();
-            glTranslatef(_position.x, _position.y, _position.z);
-            CgUpdateMatrix();
-            glDisable(GL_DEPTH_TEST);
-            glDisable(GL_TEXTURE_2D);
-            glDisable(GL_LIGHTING);
-            for (i = 0; i < _bone.size(); i++) {
-                parent = _bone_index[_bone[i]._id_parent];
-                if (!parent)
-                    continue;
-                glColor3fv(&_bone[i]._color.red);
-                glBegin(GL_LINES);
-                Vector3 p = _bone[i]._position;
-                glVertex3fv(&_bone[i]._position.x);
-                glVertex3fv(&_bone[parent]._position.x);
-                glEnd();
+            foreach (var bone in bones.Values) {
+                if (bones.TryGetValue(bone.IdParent, out var parent)) {
+                    GL.Color3((Color) bone.Color);
+                    GL.Begin(PrimitiveType.Lines);
+                    GL.Vertex3(bone.Position);
+                    GL.Vertex3(parent.Position);
+                    GL.End();
+                }
             }
-            glLineWidth(1.0f);
-            glEnable(GL_LIGHTING);
-            glEnable(GL_TEXTURE_2D);
-            glEnable(GL_DEPTH_TEST);
-            glPopMatrix();
-            CgUpdateMatrix();
 
-        */
+            GL.LineWidth(1);
+            GL.Enable(EnableCap.Lighting);
+            GL.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.DepthTest);
+            GL.PopMatrix();
+            //CgUpdateMatrix();
         }
 
         public void Update() {
-            // TODO
-            //int i;
-            //int c;
-            //GLmatrix m;
-            //Bone* b;
-            //vector<Bone>::reverse_iterator rit;
+            skinRender = skinDeform;
+            foreach (var (boneId, bone) in bones) {
+                var newBone = bone;
+                newBone.Position = newBone.Origin;
+                bones[boneId] = newBone;
+            }
 
-            //_skin_render = _skin_deform;
-            //for (i = 1; i < _bone.size(); i++)
-            //    _bone[i]._position = _bone[i]._origin;
-            //for (rit = _bone.rbegin(); rit < _bone.rend(); ++rit) {
-            //    b = &(*rit);
-            //    if (b._rotation == Vector3(0.0f, 0.0f, 0.0f))
-            //        continue;
-            //    m.Identity();
-            //    m.Rotate(b._rotation.x, 1.0f, 0.0f, 0.0f);
-            //    m.Rotate(b._rotation.z, 0.0f, 0.0f, 1.0f);
-            //    m.Rotate(b._rotation.y, 0.0f, 1.0f, 0.0f);
-            //    RotatePoints(b._id, b._position, m);
-            //    for (c = 0; c < b._children.size(); c++) {
-            //        //Root is self-parent, but shouldn't rotate self!
-            //        if (b._children[c])
-            //            RotateHierarchy(b._children[c], b._position, m);
-            //    }
-            //}
+            foreach (var bone in bones.Values) {
+                if (bone.Rotation.Equals(Vector3.Zero))
+                    continue;
+                var rotationMatrix = Matrix3.CreateRotationX(bone.Rotation.X) *
+                                     Matrix3.CreateRotationY(bone.Rotation.Y) *
+                                     Matrix3.CreateRotationZ(bone.Rotation.Z);
+                RotatePoints(bone.Id, bone.Position, rotationMatrix);
+                foreach (var childBone in bone.Children) {
+                    //Root is self-parent, but shouldn't rotate self!
+                    if (childBone != BoneId.Root) {
+                        RotateHierarchy(childBone, bone.Position, rotationMatrix);
+                    }
+                }
+            }
         }
+
+        private void Clear() {
+            unknownCount = 0;
+            skinStatic.Clear();
+            skinDeform.Clear();
+            skinRender.Clear();
+            bones.Clear();
+        }
+
+        private void Prepare() {
+            skinDeform = skinStatic;
+        }
+
+        private void RotatePoints(BoneId id, Vector3 offset, Matrix3 m) {
+            var bone = bones[id];
+            foreach (var weight in bone.VertexWeights) {
+                var index = weight.Index;
+                skinRender.Vertices[index] = m * (skinRender.Vertices[index] - offset) + offset;
+                //from = skinRender.Vertices[index] - offset;
+                //to = GL.MatrixTransformPoint (m, from);
+                //movement = movement - skinStatic.Vertices[index]; 
+                //skinRender.Vertices[index] = Vector3Interpolate (from, to, b.VertexWeights[i]._weight) + offset;
+            }
+        }
+
+        private void RotateHierarchy(BoneId id, Vector3 offset, Matrix3 m) {
+            var bone = bones[id];
+            bone.Position = m * (bone.Position - offset) + offset;
+            RotatePoints(id, offset, m);
+            foreach (var childBone in bone.Children) {
+                if (childBone != BoneId.Root) {
+                    RotateHierarchy(childBone, offset, m);
+                }
+            }
+        }
+
+        private void SetRotation(Vector3 rotation) {
+            if (!bones.TryGetValue(BoneId.Root, out var bone)) {
+                bone = new Bone();
+            }
+
+            bone.Rotation = rotation;
+            bones[BoneId.Root] = bone;
+        }
+
+        private void AddWeight(BoneId id, int index, float weight) =>
+            bones[id].VertexWeights.Add(new BWeight {Index = index, Weight = weight});
+
+        private void AddBone(BoneId id, BoneId parent, Vector3 pos) {
+            var bone = new Bone {
+                Id = id,
+                IdParent = parent,
+                Position = pos,
+                Origin = pos,
+                Rotation = Vector3.Zero,
+                Children = new List<BoneId>(),
+                Color = ColorUtils.UniqueColor((int) id + 1)
+            };
+            bones.Add(id, bone);
+            bones[parent].Children.Add(id);
+        }
+
+        private void InflateBone(BoneId id, float distance, bool doChildren) {
+            var bone = bones[id];
+            foreach (var weight in bone.VertexWeights) {
+                skinDeform.Vertices[weight.Index] =
+                    skinStatic.Vertices[weight.Index] + skinStatic.Normals[weight.Index] * distance;
+            }
+
+            if (doChildren)
+                foreach (var childBone in bone.Children) {
+                    BoneInflate(childBone, distance, doChildren: true);
+                }
+        }
+
+        /// <summary>
+        /// Takes a string and turn it into a BoneId, using unknowns as needed
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        private BoneId IdentifyBone(string name) {
+            var bid = Animation.BoneFromString(name);
+            //If CAnim couldn't make sense of the name, or if that id is already in use...
+            if (bid == BoneId.Invalid || bones.ContainsKey(bid)) {
+                Console.Log($"Couldn't id Bone '{name}'.");
+                bid = (BoneId) ((int) BoneId.Unknown0 + unknownCount);
+                unknownCount++;
+            }
+
+            return bid;
+        }
+
+        private bool LoadFromFile(string filename) {
+            Clear();
+            var tokens = File
+                .ReadAllText(filename)
+                .ToUpperInvariant()
+                .Split(Delimiters);
+
+            ParseFrames(tokens, this);
+            ParseMesh(tokens, this);
+            ParseNormals(tokens, this);
+            ParseUVs(tokens, this);
+            ParseWeights(tokens, this);
+
+            Prepare();
+            return true;
+        }
+
+
+        #region Utility functions for reading figure data from a file
+
+        private static void ParseFrames(string[] tokens, Figure fig) {
+            string token;
+            string find;
+            bool done;
+            GLmatrix matrix;
+            GLvector pos;
+            vector<GLmatrix> matrix_stack;
+            vector<BoneId> bone_stack;
+            BoneId queued_bone;
+            BoneId queued_parent;
+            unsigned i;
+            unsigned depth;
+
+            depth = 0;
+            done = false;
+            matrix.Identity();
+            matrix_stack.push_back(matrix);
+            token = strtok(NULL, DELIMIT);
+            while (strcmp(token, "FRAME"))
+                token = strtok(NULL, DELIMIT);
+            while (!done) {
+                if (find = strstr(token, "}")) {
+                    depth--;
+                    bone_stack.pop_back();
+                    matrix_stack.pop_back();
+                    if (depth < 2)
+                        done = true;
+                }
+
+                if (find = strstr(token, "FRAMETRANSFORMMATRIX")) {
+                    //eat the opening brace
+                    token = strtok(NULL, DELIMIT);
+                    matrix.Identity();
+                    for (int x = 0; x < 4; x++) {
+                        for (int y = 0; y < 4; y++) {
+                            token = strtok(NULL, DELIMIT);
+                            matrix.elements[x][y] = (float) atof(token);
+                        }
+                    }
+
+                    matrix_stack.push_back(matrix);
+                    matrix.Identity();
+                    for (i = 0; i < matrix_stack.size(); i++)
+                        matrix = glMatrixMultiply(matrix, matrix_stack[i]);
+                    pos = glMatrixTransformPoint(matrix, glVector(0.0f, 0.0f, 0.0f));
+                    pos.x = -pos.x;
+                    fig->PushBone(queued_bone, queued_parent, pos);
+                    //Now plow through until we find the closing brace
+                    while (!(find = strstr(token, "}")))
+                        token = strtok(NULL, DELIMIT);
+                }
+
+                if (find = strstr(token, "FRAME")) {
+                    //Grab the name
+                    token = strtok(NULL, DELIMIT);
+                    queued_bone = fig->IdentifyBone(token);
+                    //eat the open brace
+                    token = strtok(NULL, DELIMIT);
+                    depth++;
+                    bone_stack.push_back(queued_bone);
+                    matrix.Identity();
+                    for (i = 0; i < matrix_stack.size(); i++)
+                        matrix = glMatrixMultiply(matrix, matrix_stack[i]);
+                    pos = glMatrixTransformPoint(matrix, glVector(0.0f, 0.0f, 0.0f));
+                    //Find the last valid bone in the chain.
+                    vector<BoneId>::reverse_iterator rit;
+                    queued_parent = BONE_ROOT;
+                    for (rit = bone_stack.rbegin(); rit < bone_stack.rend(); ++rit) {
+                        if (*rit != BONE_INVALID && *rit != queued_bone) {
+                            queued_parent = *rit;
+                            break;
+                        }
+                    }
+                }
+
+                token = strtok(NULL, DELIMIT);
+            }
+
+
+        }
+
+        private static void ParseMesh(string[] tokens, Figure fig) {
+            string token;
+            int count;
+            int poly;
+            int i;
+            GLvector pos;
+            int i1, i2, i3, i4;
+
+            token = strtok(NULL, DELIMIT);
+            while (strcmp(token, "MESH"))
+                token = strtok(NULL, DELIMIT);
+            //eat the open brace
+            token = strtok(NULL, DELIMIT);
+            //get the vert count
+            token = strtok(NULL, DELIMIT);
+            count = atoi(token);
+            //We begin reading the vertex positions
+            for (i = 0; i < count; i++) {
+                token = strtok(NULL, DELIMIT);
+                pos.x = -(float) atof(token);
+                token = strtok(NULL, DELIMIT);
+                pos.y = (float) atof(token);
+                token = strtok(NULL, DELIMIT);
+                pos.z = (float) atof(token);
+                fig->_skin_static.PushVertex(pos, glVector(0.0f, 0.0f, 0.0f), glVector(0.0f, 0.0f));
+            }
+
+            //Directly after the verts are the polys
+            token = strtok(NULL, DELIMIT);
+            count = atoi(token);
+            for (i = 0; i < count; i++) {
+                token = strtok(NULL, DELIMIT);
+                poly = atoi(token);
+                if (poly == 3) {
+                    i1 = atoi(strtok(NULL, DELIMIT));
+                    i2 = atoi(strtok(NULL, DELIMIT));
+                    i3 = atoi(strtok(NULL, DELIMIT));
+                    fig->_skin_static.PushTriangle(i1, i2, i3);
+                } else if (poly == 4) {
+                    i1 = atoi(strtok(NULL, DELIMIT));
+                    i2 = atoi(strtok(NULL, DELIMIT));
+                    i3 = atoi(strtok(NULL, DELIMIT));
+                    i4 = atoi(strtok(NULL, DELIMIT));
+                    fig->_skin_static.PushQuad(i1, i2, i3, i4);
+                }
+            }
+
+        }
+
+        private static void ParseNormals(string[] tokens, Figure fig) {
+            string token;
+            int count;
+            int i;
+            GLvector pos;
+
+            token = strtok(NULL, DELIMIT);
+            while (strcmp(token, "MESHNORMALS"))
+                token = strtok(NULL, DELIMIT);
+            //eat the open brace
+            token = strtok(NULL, DELIMIT);
+            //get the vert count
+            token = strtok(NULL, DELIMIT);
+            count = atoi(token);
+            //We begin reading the normals
+            for (i = 0; i < count; i++) {
+                token = strtok(NULL, DELIMIT);
+                pos.x = -(float) atof(token);
+                token = strtok(NULL, DELIMIT);
+                pos.y = (float) atof(token);
+                token = strtok(NULL, DELIMIT);
+                pos.z = (float) atof(token);
+                fig->_skin_static._normal[i] = pos;
+            }
+        }
+
+        private static void ParseUVs(string[] tokens, Figure fig) {
+            string token;
+            int count;
+            int i;
+            GLvector2 pos;
+
+            token = strtok(NULL, DELIMIT);
+            while (strcmp(token, "MESHTEXTURECOORDS"))
+                token = strtok(NULL, DELIMIT);
+            //eat the open brace
+            token = strtok(NULL, DELIMIT);
+            //get the vert count
+            token = strtok(NULL, DELIMIT);
+            count = atoi(token);
+            //We begin reading the normals
+            for (i = 0; i < count; i++) {
+                token = strtok(NULL, DELIMIT);
+                pos.x = (float) atof(token);
+                token = strtok(NULL, DELIMIT);
+                pos.y = -(float) atof(token);
+                fig->_skin_static._uv[i] = pos;
+            }
+        }
+
+        private static void ParseWeights(string[] tokens, Figure fig) {
+            string token;
+            unsigned index;
+            int count;
+            int i;
+            BoneId bid;
+            vector<BWeight> bw_list;
+            BWeight bw;
+            vector<PWeight> weights;
+
+            weights.resize(fig->_skin_static._vertex.size());
+            for (i = 0; i < (int) weights.size(); i++) {
+                PWeight pw;
+                pw._bone = BONE_ROOT;
+                pw._weight = 0.0f;
+                weights[i] = pw;
+            }
+
+            while (true) {
+                token = strtok(NULL, DELIMIT);
+                while (strcmp(token, "SKINWEIGHTS")) {
+                    token = strtok(NULL, DELIMIT);
+                    if (token == NULL)
+                        break;
+                }
+
+                if (token == NULL)
+                    break;
+                //eat the open brace
+                token = strtok(NULL, DELIMIT);
+                //get the name of this bone
+                token = strtok(NULL, DELIMIT);
+                bid = CAnim::BoneFromString(token);
+                if (bid == BONE_INVALID)
+                    continue;
+                //get the vert count
+                token = strtok(NULL, DELIMIT);
+                count = atoi(token);
+                bw_list.clear();
+                //get the indicies
+                for (i = 0; i < count; i++) {
+                    token = strtok(NULL, DELIMIT);
+                    bw._index = atoi(token);
+                    bw_list.push_back(bw);
+                }
+
+                //get the weights
+                for (i = 0; i < count; i++) {
+                    token = strtok(NULL, DELIMIT);
+                    bw_list[i]._weight = (float) atof(token);
+                }
+
+                /*    
+              //Store them
+              for (i = 0; i < count; i++) {
+                //if (bw_list[i]._weight < 0.9f)
+                  //continue;
+
+                //if (bw_list[i]._weight < 0.001f)
+                  //continue;
+                //fig->_bone[fig->_bone_index[bid]]._vertex_weights.push_back (bw_list[i]);
+                if (bw_list[i]._weight < 0.5f)
+                  continue;
+                bw_list[i]._weight = 1.0f;
+                fig->_bone[fig->_bone_index[bid]]._vertex_weights.push_back (bw_list[i]);
+              }
+              */
+                //Now we have a list of all weights for this joint. Find the highest values for each point.
+                for (i = 0; i < count; i++) {
+                    index = bw_list[i]._index;
+                    if (bw_list[i]._weight > weights[index]._weight) {
+                        weights[index]._weight = bw_list[i]._weight;
+                        weights[index]._bone = bid;
+                    }
+                }
+            }
+
+            //Now we have a list which links each vert to its joint of strongest influence
+            for (i = 0; i < (int) weights.size(); i++) {
+                bid = weights[i]._bone;
+                bw._index = i;
+                bw._weight = 1.0f;
+                fig->_bone[fig->_bone_index[bid]]._vertex_weights.push_back(bw);
+            }
+
+        }
+
+        #endregion
     }
 }
-
-/*From CFigure.h
- * 
- * #ifndef CANIM_H
-#include "canim.h"
-#endif
-
-struct BWeight
-{
-  int          _index;
-  float             _weight;
-};
-
-
-struct PWeight
-{
-  BoneId            _bone;
-  float             _weight;
-};
-
-struct Bone
-{
-  BoneId            _id;
-  BoneId            _id_parent;
-  Vector3          _origin;
-  Vector3          _position;
-  Vector3          _rotation;
-  GLrgba            _color;
-  vector<int>  _children;
-  vector<BWeight>   _vertex_weights;
-  GLmatrix          _matrix;
-};
-
-class CFigure
-{
-  void              RotateHierarchy (int id, Vector3 offset, GLmatrix m);
-  void              RotatePoints (int id, Vector3 offset, GLmatrix m);
-public:
-  vector<Bone>      _bone;
-  Vector3          _position;
-  Vector3          _rotation;
-  int          _bone_index[BONE_COUNT];
-  int          _unknown_count;
-  GLmesh            _skin_static;//The original, "read only"
-  GLmesh            _skin_deform;//Altered
-  GLmesh            _skin_render;//Updated every frame
-  
-
-  CFigure ();
-  void              Clear ();
-  bool              LoadX (char* filename);
-  BoneId            IdentifyBone (char* name);
-  void              PositionSet (Vector3 pos) { _position = pos; };
-  void              RotationSet (Vector3 rot);
-  void              RotateBone (BoneId id, Vector3 angle);
-  void              PushBone (BoneId id, int parent, Vector3 pos);
-  void              PushWeight (int id, int index, float weight);
-  void              Prepare ();
-  void              BoneInflate (BoneId id, float distance, bool do_children);
-
-  GLmesh*           Skin () { return &_skin_static; };
-};
-*/
-
-/* From CFigure.cpp
-
-#define NEWLINE   "\n"
-
-static void clean_chars(char* target, char* chars) {
-
-    int i;
-    char* c;
-
-    for (i = 0; i < strlen(chars); i++) {
-        while (c = strchr(target, chars[i]))
-            *c = ' ';
-    }
-
-}
-
-CFigure::CFigure ()
-{
-
-  Clear();
-
-}
-
-void CFigure::Clear() {
-
-    int i;
-
-    for (i = 0; i < BONE_COUNT; i++)
-        _bone_index[i] = BONE_INVALID;
-    _unknown_count = 0;
-    _skin_static.Clear();
-    _skin_deform.Clear();
-    _skin_render.Clear();
-    _bone.clear();
-
-
-}
-
-//We take a string and turn it into a BoneId, using unknowns as needed
-BoneId CFigure::IdentifyBone(char* name) {
-
-    BoneId bid;
-
-    bid = CAnim::BoneFromString(name);
-    //If CAnim couldn't make sense of the name, or if that id is already in use...
-    if (bid == BONE_INVALID || _bone_index[bid] != BONE_INVALID) {
-        ConsoleLog("Couldn't id Bone '%s'.", name);
-        bid = (BoneId)(BONE_UNKNOWN0 + _unknown_count);
-        _unknown_count++;
-    }
-    return bid;
-
-}
-
-void CFigure::RotateBone(BoneId id, Vector3 angle) {
-
-    if (_bone_index[id] != BONE_INVALID)
-        _bone[_bone_index[id]]._rotation = angle;
-
-}
-
-void CFigure::RotatePoints(int id, Vector3 offset, GLmatrix m) {
-
-    Bone* b;
-    int i;
-    int index;
-
-
-    b = &_bone[_bone_index[id]];
-    for (i = 0; i < b._vertex_weights.size(); i++) {
-        index = b._vertex_weights[i]._index;
-        _skin_render._vertex[index] = glMatrixTransformPoint(m, _skin_render._vertex[index] - offset) + offset;
-        //from = _skin_render._vertex[index] - offset;
-        //to = glMatrixTransformPoint (m, from);
-        //movement = movement - _skin_static._vertex[index]; 
-        //_skin_render._vertex[index] = Vector3Interpolate (from, to, b._vertex_weights[i]._weight) + offset;
-    }
-
-}
-
-void CFigure::RotateHierarchy(int id, Vector3 offset, GLmatrix m) {
-
-    Bone* b;
-    int i;
-
-    b = &_bone[_bone_index[id]];
-    b._position = glMatrixTransformPoint(m, b._position - offset) + offset;
-    RotatePoints(id, offset, m);
-    for (i = 0; i < b._children.size(); i++) {
-        if (b._children[i])
-            RotateHierarchy(b._children[i], offset, m);
-    }
-
-}
-
-void CFigure::PushWeight(int id, int index, float weight) {
-
-    BWeight bw;
-
-    bw._index = index;
-    bw._weight = weight;
-    _bone[_bone_index[id]]._vertex_weights.push_back(bw);
-
-}
-
-void CFigure::PushBone(BoneId id, int parent, Vector3 pos) {
-
-    Bone b;
-
-    _bone_index[id] = _bone.size();
-    b._id = (BoneId)id;
-    b._id_parent = (BoneId)parent;
-    b._position = pos;
-    b._origin = pos;
-    b._rotation = Vector3(0.0f, 0.0f, 0.0f);
-    b._children.clear();
-    b._color = glRgbaUnique(id + 1);
-    _bone.push_back(b);
-    _bone[_bone_index[parent]]._children.push_back(id);
-
-}
-
-void CFigure::BoneInflate(BoneId id, float distance, bool do_children) {
-
-    Bone* b;
-    int i;
-    int c;
-    int index;
-
-    b = &_bone[_bone_index[id]];
-    for (i = 0; i < b._vertex_weights.size(); i++) {
-        index = b._vertex_weights[i]._index;
-        _skin_deform._vertex[index] = _skin_static._vertex[index] + _skin_static._normal[index] * distance;
-    }
-    if (!do_children)
-        return;
-    for (c = 0; c < b._children.size(); c++)
-        BoneInflate((BoneId)b._children[c], distance, do_children);
-
-
-}
-
-void CFigure::RotationSet(Vector3 rot) {
-
-    _bone[_bone_index[BONE_ROOT]]._rotation = rot;
-
-}
-
-void CFigure::Prepare() {
-
-    _skin_deform = _skin_static;
-
-}
-
-bool CFigure::LoadX(char* filename) {
-
-    FileXLoad(filename, this);
-    Prepare();
-    return true;
-
-}
-*/
