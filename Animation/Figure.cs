@@ -373,26 +373,22 @@
         }
 
         private static void ParseUVs(IEnumerator<string> tokens, Figure fig) {
-            string token;
-            int count;
-            int i;
-            GLvector2 pos;
-
-            token = strtok(NULL, DELIMIT);
-            while (strcmp(token, "MESHTEXTURECOORDS"))
-                token = strtok(NULL, DELIMIT);
-            //eat the open brace
-            token = strtok(NULL, DELIMIT);
-            //get the vert count
-            token = strtok(NULL, DELIMIT);
-            count = atoi(token);
-            //We begin reading the normals
-            for (i = 0; i < count; i++) {
-                token = strtok(NULL, DELIMIT);
-                pos.x = (float) atof(token);
-                token = strtok(NULL, DELIMIT);
-                pos.y = -(float) atof(token);
-                fig->_skin_static._uv[i] = pos;
+            var token = NextToken(tokens);
+            while (!token.Equals("MESHTEXTURECOORDS"))
+                token = NextToken(tokens);
+            // Eat the open brace
+            NextToken(tokens);
+            
+            // Get the vert count
+            token = NextToken(tokens);
+            var count = int.Parse(token);
+            
+            // We begin reading the UVs
+            for (var i = 0; i < count; i++) {
+                Vector2 pos;
+                pos.X = float.Parse(NextToken(tokens));
+                pos.Y = -float.Parse(NextToken(tokens));
+                fig.skinStatic.UVs[i] = pos;
             }
         }
 
