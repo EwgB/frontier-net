@@ -12,8 +12,6 @@
     using Common.Animation;
     using Common.Util;
 
-    using Ninject.Infrastructure.Language;
-
     internal class Figure : IFigure {
         private readonly IDictionary<BoneId, Bone> bones = new Dictionary<BoneId, Bone>();
         private readonly Mesh skinStatic = new Mesh(); //The original, "read only"
@@ -193,7 +191,7 @@
 
             if (doChildren)
                 foreach (var childBone in bone.Children) {
-                    BoneInflate(childBone, distance, doChildren: true);
+                    InflateBone(childBone, distance, doChildren: true);
                 }
         }
 
@@ -219,7 +217,9 @@
             var tokens = File
                 .ReadAllText(filename)
                 .ToUpperInvariant()
-                .Split(Delimiters);
+                .Split(Delimiters)
+                .AsEnumerable()
+                .GetEnumerator();
 
             ParseFrames(tokens, this);
             ParseMesh(tokens, this);
@@ -234,88 +234,85 @@
 
         #region Utility functions for reading figure data from a file
 
-        private static void ParseFrames(string[] tokens, Figure fig) {
-            string token;
-            string find;
-            bool done;
-            GLmatrix matrix;
-            GLvector pos;
-            vector<GLmatrix> matrix_stack;
-            vector<BoneId> bone_stack;
-            BoneId queued_bone;
-            BoneId queued_parent;
-            unsigned i;
-            unsigned depth;
+        private static string NextToken(IEnumerator<string> tokens) {
+            tokens.MoveNext();
+            return tokens.Current;
+        }
 
-            depth = 0;
-            done = false;
-            matrix.Identity();
-            matrix_stack.push_back(matrix);
-            token = strtok(NULL, DELIMIT);
-            while (strcmp(token, "FRAME"))
-                token = strtok(NULL, DELIMIT);
+        private static void ParseFrames(IEnumerator<string> tokens, Figure fig) {
+            // Find first occurence of FRAME
+            string token;
+            do {
+                if (!tokens.MoveNext())
+                    return;
+                token = tokens.Current;
+            } while (token != "FRAME");
+
+
+            var matrixStack = new Stack<Matrix4>();
+            matrixStack.Push(Matrix4.Identity);
+
+            var boneStack = new Stack<BoneId>();
+
+            var depth = 0;
+            var done = false;
+            BoneId
+                queuedBone = BoneId.Invalid,
+                queuedParent = BoneId.Invalid;
             while (!done) {
-                if (find = strstr(token, "}")) {
+                if (token.Contains("}")) {
                     depth--;
-                    bone_stack.pop_back();
-                    matrix_stack.pop_back();
+                    boneStack.Pop();
+                    matrixStack.Pop();
                     if (depth < 2)
                         done = true;
                 }
 
-                if (find = strstr(token, "FRAMETRANSFORMMATRIX")) {
-                    //eat the opening brace
-                    token = strtok(NULL, DELIMIT);
-                    matrix.Identity();
-                    for (int x = 0; x < 4; x++) {
-                        for (int y = 0; y < 4; y++) {
-                            token = strtok(NULL, DELIMIT);
-                            matrix.elements[x][y] = (float) atof(token);
+                if (token.Contains("FRAMETRANSFORMMATRIX")) {
+                    // Eat the opening brace
+                    NextToken(tokens);
+                    var matrix = new Matrix4();
+                    for (var x = 0; x < 4; x++) {
+                        for (var y = 0; y < 4; y++) {
+                            token = NextToken(tokens);
+                            matrix[x, y] = float.Parse(token);
                         }
                     }
+                    matrixStack.Push(matrix);
 
-                    matrix_stack.push_back(matrix);
-                    matrix.Identity();
-                    for (i = 0; i < matrix_stack.size(); i++)
-                        matrix = glMatrixMultiply(matrix, matrix_stack[i]);
-                    pos = glMatrixTransformPoint(matrix, glVector(0.0f, 0.0f, 0.0f));
-                    pos.x = -pos.x;
-                    fig->PushBone(queued_bone, queued_parent, pos);
-                    //Now plow through until we find the closing brace
-                    while (!(find = strstr(token, "}")))
-                        token = strtok(NULL, DELIMIT);
+                    matrix = matrixStack
+                        .Aggregate(Matrix4.Identity, (left, right) => left * right);
+                    var pos = new Vector3(matrix.Column3);
+                    pos.X = -pos.X;
+                    fig.AddBone(queuedBone, queuedParent, pos);
+                    // Now plow through until we find the closing brace
+                    while (!token.Contains("}"))
+                        token = NextToken(tokens);
                 }
 
-                if (find = strstr(token, "FRAME")) {
-                    //Grab the name
-                    token = strtok(NULL, DELIMIT);
-                    queued_bone = fig->IdentifyBone(token);
+                if (token.Contains("FRAME")) {
+                    // Grab the name
+                    token = NextToken(tokens);
+                    queuedBone = fig.IdentifyBone(token);
                     //eat the open brace
-                    token = strtok(NULL, DELIMIT);
+                    NextToken(tokens);
                     depth++;
-                    bone_stack.push_back(queued_bone);
-                    matrix.Identity();
-                    for (i = 0; i < matrix_stack.size(); i++)
-                        matrix = glMatrixMultiply(matrix, matrix_stack[i]);
-                    pos = glMatrixTransformPoint(matrix, glVector(0.0f, 0.0f, 0.0f));
+                    boneStack.Push(queuedBone);
+
                     //Find the last valid bone in the chain.
-                    vector<BoneId>::reverse_iterator rit;
-                    queued_parent = BONE_ROOT;
-                    for (rit = bone_stack.rbegin(); rit < bone_stack.rend(); ++rit) {
-                        if (*rit != BONE_INVALID && *rit != queued_bone) {
-                            queued_parent = *rit;
-                            break;
-                        }
-                    }
+                    queuedParent = boneStack
+                        .Where(bone => bone != BoneId.Invalid && bone != queuedBone)
+                        .DefaultIfEmpty(BoneId.Root)
+                        .Last();
                 }
 
-                token = strtok(NULL, DELIMIT);
+                token = NextToken(tokens);
             }
 
 
         }
 
-        private static void ParseMesh(string[] tokens, Figure fig) {
+        private static void ParseMesh(IEnumerator<string> tokens, Figure fig) {
             string token;
             int count;
             int poly;
@@ -364,7 +361,7 @@
 
         }
 
-        private static void ParseNormals(string[] tokens, Figure fig) {
+        private static void ParseNormals(IEnumerator<string> tokens, Figure fig) {
             string token;
             int count;
             int i;
@@ -390,7 +387,7 @@
             }
         }
 
-        private static void ParseUVs(string[] tokens, Figure fig) {
+        private static void ParseUVs(IEnumerator<string> tokens, Figure fig) {
             string token;
             int count;
             int i;
@@ -414,7 +411,7 @@
             }
         }
 
-        private static void ParseWeights(string[] tokens, Figure fig) {
+        private static void ParseWeights(IEnumerator<string> tokens, Figure fig) {
             string token;
             unsigned index;
             int count;
