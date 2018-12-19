@@ -241,13 +241,9 @@
 
         private static void ParseFrames(IEnumerator<string> tokens, Figure fig) {
             // Find first occurence of FRAME
-            string token;
-            do {
-                if (!tokens.MoveNext())
-                    return;
-                token = tokens.Current;
-            } while (token != "FRAME");
-
+            var token = tokens.Current;
+            while (token != "FRAME")
+                token = NextToken(tokens);
 
             var matrixStack = new Stack<Matrix4>();
             matrixStack.Push(Matrix4.Identity);
@@ -355,28 +351,24 @@
         }
 
         private static void ParseNormals(IEnumerator<string> tokens, Figure fig) {
-            string token;
-            int count;
-            int i;
-            GLvector pos;
-
-            token = strtok(NULL, DELIMIT);
-            while (strcmp(token, "MESHNORMALS"))
-                token = strtok(NULL, DELIMIT);
-            //eat the open brace
-            token = strtok(NULL, DELIMIT);
-            //get the vert count
-            token = strtok(NULL, DELIMIT);
-            count = atoi(token);
-            //We begin reading the normals
-            for (i = 0; i < count; i++) {
-                token = strtok(NULL, DELIMIT);
-                pos.x = -(float) atof(token);
-                token = strtok(NULL, DELIMIT);
-                pos.y = (float) atof(token);
-                token = strtok(NULL, DELIMIT);
-                pos.z = (float) atof(token);
-                fig->_skin_static._normal[i] = pos;
+            var token = tokens.Current;
+            while (token != "MESHNORMALS")
+                token = NextToken(tokens);
+            
+            // Eat the open brace
+            NextToken(tokens);
+            
+            // Get the vert count
+            token = NextToken(tokens);
+            var count = int.Parse(token);
+            
+            // We begin reading the normals
+            for (var i = 0; i < count; i++) {
+                Vector3 pos;
+                pos.X = -float.Parse(NextToken(tokens));
+                pos.Y = float.Parse(NextToken(tokens));
+                pos.Z = float.Parse(NextToken(tokens));
+                fig.skinStatic.Normals[i] = pos;
             }
         }
 
