@@ -28,10 +28,10 @@
             Logger.Trace("ToggleConsole");
 
             if (IsOpen) {
-                Log.Info("Console closed");
+                Logger.Info("Console closed");
                 IsOpen = false;
             } else {
-                Log.Info("Console opened");
+                Logger.Info("Console opened");
                 IsOpen = true;
             }
         }

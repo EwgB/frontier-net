@@ -57,7 +57,7 @@
             if (delta > 1)
                 delta -= (int) delta;
             var aj = animation.GetFrame(delta);
-            for (var i = 0; i < animation.Joints(); i++)
+            for (var i = 0; i < animation.JointCount; i++)
                 RotateBone(aj[i].Id, aj[i].Rotation);
         }
 

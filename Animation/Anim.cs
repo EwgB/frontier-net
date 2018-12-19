@@ -11,9 +11,7 @@
             throw new NotImplementedException();
         }
 
-        public int JointCount() {
-           return frames[0].joint.size();
-        }
+        public int JointCount => frames[0].joint.size();
 
         public BoneId BoneFromString(string name) {
             if (name.Contains("ROOT"))
