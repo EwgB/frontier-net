@@ -313,52 +313,45 @@
         }
 
         private static void ParseMesh(IEnumerator<string> tokens, Figure fig) {
-            string token;
-            int count;
-            int poly;
-            int i;
-            GLvector pos;
-            int i1, i2, i3, i4;
+            var token = tokens.Current;
+            while (token != "MESH")
+                token = NextToken(tokens);
 
-            token = strtok(NULL, DELIMIT);
-            while (strcmp(token, "MESH"))
-                token = strtok(NULL, DELIMIT);
-            //eat the open brace
-            token = strtok(NULL, DELIMIT);
-            //get the vert count
-            token = strtok(NULL, DELIMIT);
-            count = atoi(token);
-            //We begin reading the vertex positions
-            for (i = 0; i < count; i++) {
-                token = strtok(NULL, DELIMIT);
-                pos.x = -(float) atof(token);
-                token = strtok(NULL, DELIMIT);
-                pos.y = (float) atof(token);
-                token = strtok(NULL, DELIMIT);
-                pos.z = (float) atof(token);
-                fig->_skin_static.PushVertex(pos, glVector(0.0f, 0.0f, 0.0f), glVector(0.0f, 0.0f));
+            // Eat the open brace
+            NextToken(tokens);
+
+            // Get the vert count
+            token = NextToken(tokens);
+            var count = int.Parse(token);
+            // We begin reading the vertex positions
+            for (var i = 0; i < count; i++) {
+                Vector3 pos;
+                pos.X = -float.Parse(NextToken(tokens));
+                pos.Y = float.Parse(NextToken(tokens));
+                pos.Z = float.Parse(NextToken(tokens));
+                fig.skinStatic.PushVertex(pos, Vector3.Zero, Vector2.Zero);
             }
 
-            //Directly after the verts are the polys
-            token = strtok(NULL, DELIMIT);
-            count = atoi(token);
-            for (i = 0; i < count; i++) {
-                token = strtok(NULL, DELIMIT);
-                poly = atoi(token);
+            // Directly after the verts are the polys
+            token = NextToken(tokens);
+            count = int.Parse(token);
+            for (var i = 0; i < count; i++) {
+                token = NextToken(tokens);
+                var poly = int.Parse(token);
+
                 if (poly == 3) {
-                    i1 = atoi(strtok(NULL, DELIMIT));
-                    i2 = atoi(strtok(NULL, DELIMIT));
-                    i3 = atoi(strtok(NULL, DELIMIT));
-                    fig->_skin_static.PushTriangle(i1, i2, i3);
+                    var i1 = int.Parse(NextToken(tokens));
+                    var i2 = int.Parse(NextToken(tokens));
+                    var i3 = int.Parse(NextToken(tokens));
+                    fig.skinStatic.PushTriangle(i1, i2, i3);
                 } else if (poly == 4) {
-                    i1 = atoi(strtok(NULL, DELIMIT));
-                    i2 = atoi(strtok(NULL, DELIMIT));
-                    i3 = atoi(strtok(NULL, DELIMIT));
-                    i4 = atoi(strtok(NULL, DELIMIT));
-                    fig->_skin_static.PushQuad(i1, i2, i3, i4);
+                    var i1 = int.Parse(NextToken(tokens));
+                    var i2 = int.Parse(NextToken(tokens));
+                    var i3 = int.Parse(NextToken(tokens));
+                    var i4 = int.Parse(NextToken(tokens));
+                    fig.skinStatic.PushQuad(i1, i2, i3, i4);
                 }
             }
-
         }
 
         private static void ParseNormals(IEnumerator<string> tokens, Figure fig) {
