@@ -141,7 +141,7 @@
                 //from = skinRender.Vertices[index] - offset;
                 //to = GL.MatrixTransformPoint (m, from);
                 //movement = movement - skinStatic.Vertices[index]; 
-                //skinRender.Vertices[index] = Vector3Interpolate (from, to, b.VertexWeights[i]._weight) + offset;
+                //skinRender.Vertices[index] = Vector3Interpolate (from, to, b.VertexWeights[i].Weight) + offset;
             }
         }
 
@@ -235,13 +235,12 @@
         #region Utility functions for reading figure data from a file
 
         private static string NextToken(IEnumerator<string> tokens) {
-            tokens.MoveNext();
-            return tokens.Current;
+            return tokens.MoveNext() ? tokens.Current : null;
         }
 
         private static void ParseFrames(IEnumerator<string> tokens, Figure fig) {
             // Find first occurence of FRAME
-            var token = tokens.Current;
+            var token = NextToken(tokens);
             while (token != "FRAME")
                 token = NextToken(tokens);
 
@@ -309,7 +308,7 @@
         }
 
         private static void ParseMesh(IEnumerator<string> tokens, Figure fig) {
-            var token = tokens.Current;
+            var token = NextToken(tokens);
             while (token != "MESH")
                 token = NextToken(tokens);
 
@@ -351,7 +350,7 @@
         }
 
         private static void ParseNormals(IEnumerator<string> tokens, Figure fig) {
-            var token = tokens.Current;
+            var token = NextToken(tokens);
             while (token != "MESHNORMALS")
                 token = NextToken(tokens);
             
@@ -393,90 +392,76 @@
         }
 
         private static void ParseWeights(IEnumerator<string> tokens, Figure fig) {
-            string token;
-            unsigned index;
-            int count;
-            int i;
-            BoneId bid;
-            vector<BWeight> bw_list;
-            BWeight bw;
-            vector<PWeight> weights;
-
-            weights.resize(fig->_skin_static._vertex.size());
-            for (i = 0; i < (int) weights.size(); i++) {
-                PWeight pw;
-                pw._bone = BONE_ROOT;
-                pw._weight = 0.0f;
+            var weights = new List<PWeight>(fig.skinStatic.Vertices.Count);
+            for (var i = 0; i < weights.Count; i++) {
+                var pw = new PWeight {Bone = BoneId.Root, Weight = 0};
                 weights[i] = pw;
             }
 
             while (true) {
-                token = strtok(NULL, DELIMIT);
-                while (strcmp(token, "SKINWEIGHTS")) {
-                    token = strtok(NULL, DELIMIT);
-                    if (token == NULL)
+                var token = NextToken(tokens);
+                while (!token.Equals("SKINWEIGHTS")) {
+                    token = NextToken(tokens);
+                    if (token == null)
                         break;
                 }
 
-                if (token == NULL)
+                if (token == null)
                     break;
-                //eat the open brace
-                token = strtok(NULL, DELIMIT);
-                //get the name of this bone
-                token = strtok(NULL, DELIMIT);
-                bid = CAnim::BoneFromString(token);
-                if (bid == BONE_INVALID)
+                
+                // Eat the open brace
+                NextToken(tokens);
+                
+                // Get the name of this bone
+                token = NextToken(tokens);
+                var bone = fig.Animation.BoneFromString(token);
+                if (bone == BoneId.Invalid)
                     continue;
-                //get the vert count
-                token = strtok(NULL, DELIMIT);
-                count = atoi(token);
-                bw_list.clear();
-                //get the indicies
-                for (i = 0; i < count; i++) {
-                    token = strtok(NULL, DELIMIT);
-                    bw._index = atoi(token);
-                    bw_list.push_back(bw);
+                
+                // Get the vert count
+                var count = int.Parse(NextToken(tokens));
+                var boneWeightList = new List<BWeight>();
+                
+                // Get the indicies
+                for (var i = 0; i < count; i++) {
+                    boneWeightList.Add(new BWeight { Index = int.Parse(NextToken(tokens)) });
                 }
 
-                //get the weights
-                for (i = 0; i < count; i++) {
-                    token = strtok(NULL, DELIMIT);
-                    bw_list[i]._weight = (float) atof(token);
+                // Get the weights
+                for (var i = 0; i < count; i++) {
+                    var boneWeight = boneWeightList[i];
+                    boneWeight.Weight = float.Parse(NextToken(tokens));
+                    boneWeightList[i] = boneWeight;
                 }
 
-                /*    
-              //Store them
-              for (i = 0; i < count; i++) {
-                //if (bw_list[i]._weight < 0.9f)
-                  //continue;
+                // Store them
+                //for (var i = 0; i < count; i++) {
+                //    //if (bw_list[i].Weight < 0.9f)
+                //    //continue;
 
-                //if (bw_list[i]._weight < 0.001f)
-                  //continue;
-                //fig->_bone[fig->_bone_index[bid]]._vertex_weights.push_back (bw_list[i]);
-                if (bw_list[i]._weight < 0.5f)
-                  continue;
-                bw_list[i]._weight = 1.0f;
-                fig->_bone[fig->_bone_index[bid]]._vertex_weights.push_back (bw_list[i]);
-              }
-              */
-                //Now we have a list of all weights for this joint. Find the highest values for each point.
-                for (i = 0; i < count; i++) {
-                    index = bw_list[i]._index;
-                    if (bw_list[i]._weight > weights[index]._weight) {
-                        weights[index]._weight = bw_list[i]._weight;
-                        weights[index]._bone = bid;
+                //    //if (bw_list[i].Weight < 0.001f)
+                //    //continue;
+                //    //fig.bones[fig.bonesIndex[bid]].VerticesWeights.Add (bw_list[i]);
+                //    if (bw_list[i].Weight < 0.5f)
+                //        continue;
+                //    bw_list[i].Weight = 1.0f;
+                //    fig.bones[fig.bonesIndex[bid]].VerticesWeights.Add(bw_list[i]);
+                //}
+
+                // Now we have a list of all weights for this joint.
+                // Find the highest values for each point.
+                for (var i = 0; i < count; i++) {
+                    var index = boneWeightList[i].Index;
+                    if (boneWeightList[i].Weight > weights[index].Weight) {
+                        weights[index] = new PWeight {Bone = bone, Weight = boneWeightList[i].Weight};
                     }
                 }
             }
 
-            //Now we have a list which links each vert to its joint of strongest influence
-            for (i = 0; i < (int) weights.size(); i++) {
-                bid = weights[i]._bone;
-                bw._index = i;
-                bw._weight = 1.0f;
-                fig->_bone[fig->_bone_index[bid]]._vertex_weights.push_back(bw);
+            // Now we have a list which links each vert to its joint of strongest influence
+            for(var i = 0; i < weights.Count; i++) {
+                fig.bones[weights[i].Bone].VertexWeights.Add(new BWeight {Index = i, Weight = 1});
             }
-
         }
 
         #endregion
